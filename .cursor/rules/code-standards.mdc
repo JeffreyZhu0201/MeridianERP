@@ -1,0 +1,74 @@
+---
+description: TypeScript code standards for MeridianERP monorepo
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Code Standards
+
+## TypeScript
+
+- `strict: true` in all tsconfig files
+- No `any` — use `unknown` + type guards
+- Prefer `interface` for object shapes, `type` for unions/intersections
+- Export types from `packages/shared`, never duplicate
+
+## Naming
+
+| Kind | Convention | Example |
+|------|------------|---------|
+| Files | kebab-case | `merchant-profile.service.ts` |
+| Classes | PascalCase | `MerchantProfileService` |
+| Functions | camelCase | `claimBinding` |
+| Constants | SCREAMING_SNAKE | `MAX_COMMISSION_RATE` |
+| DB columns | camelCase (Prisma) | `onboardingStatus` |
+| API routes | kebab-case | `/api/v1/merchant/onboarding` |
+
+## NestJS
+
+- One module per domain: `*.module.ts`, `*.controller.ts`, `*.service.ts`
+- DTOs in `dto/` subfolder with `class-validator` decorators
+- Services contain business logic; controllers are thin
+- Use `PrismaService` — no raw SQL without justification
+
+## Next.js
+
+- Server Components by default
+- `'use client'` only for interactivity (forms, modals, QR scanner)
+- Colocate feature components: `app/(crm)/contacts/_components/`
+- API client in `lib/api/` per app
+
+## Error Handling
+
+```typescript
+// API: consistent error shape
+throw new BadRequestException({
+  message: 'Validation failed',
+  details: [{ field: 'email', message: 'Invalid email' }],
+});
+```
+
+- Log errors server-side; never expose stack traces in production
+- Frontend: toast for transient errors, inline for form validation
+
+## Git Commits
+
+Format: `type(scope): description`
+
+Types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`
+
+## Testing
+
+- Unit: `*.spec.ts` / `*.test.ts`
+- API integration: Supertest in `apps/api/test/`
+- E2E: Playwright in `e2e/`
+- Map every P0 acceptance criterion to a test
+
+## Imports
+
+```typescript
+// Order: external → @meridian/* → relative
+import { Injectable } from '@nestjs/common';
+import { OnboardingStatus } from '@meridian/shared';
+import { PrismaService } from '../prisma/prisma.service';
+```
