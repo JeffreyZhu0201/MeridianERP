@@ -251,12 +251,3 @@ export function PurchaseOrderForm({
     </div>
   );
 }
-
-export function productsToVariantOptions(products: Product[]): VariantOption[] {
-  return products.flatMap((p) =>
-    p.variants.map((v) => ({
-      id: v.id,
-      label: `${p.name} — ${v.sku}`,
-    })),
-  );
-}

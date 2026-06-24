@@ -18,6 +18,7 @@ import {
 import type { StockAdjustmentWithDetails, StockLevelWithDetails } from '@meridian/shared';
 
 import { buildInventoryQuery, downloadInventoryExport } from '@/lib/inventory';
+import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface InventoryReportsTabsProps {
   stockLevels: StockLevelWithDetails[];
@@ -56,6 +57,11 @@ export function InventoryReportsTabs({
     router.push(`/inventory/reports?${params.toString()}`);
   }
 
+  const zh = inventoryZh.reports;
+  const stock = inventoryZh.stock;
+  const adj = inventoryZh.adjustments;
+  const common = inventoryZh.common;
+
   async function exportStock() {
     setExportError('');
     try {
@@ -65,7 +71,7 @@ export function InventoryReportsTabs({
         'stock-report.csv',
       );
     } catch (err) {
-      setExportError(err instanceof Error ? err.message : 'Export failed');
+      setExportError(err instanceof Error ? err.message : '导出失败');
     }
   }
 
@@ -79,7 +85,7 @@ export function InventoryReportsTabs({
         'adjustments-report.csv',
       );
     } catch (err) {
-      setExportError(err instanceof Error ? err.message : 'Export failed');
+      setExportError(err instanceof Error ? err.message : '导出失败');
     }
   }
 
@@ -89,24 +95,24 @@ export function InventoryReportsTabs({
         <button
           type="button"
           onClick={() => setTab('stock')}
-          className={`border-b-2 px-4 py-2 text-sm font-medium ${
+          className={`min-h-11 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             tab === 'stock'
               ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Stock summary
+          {zh.tabStock}
         </button>
         <button
           type="button"
           onClick={() => setTab('adjustments')}
-          className={`border-b-2 px-4 py-2 text-sm font-medium ${
+          className={`min-h-11 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
             tab === 'adjustments'
               ? 'border-primary text-primary'
-              : 'border-transparent text-muted-foreground'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          Adjustment history
+          {zh.tabAdjustments}
         </button>
       </div>
 
@@ -115,25 +121,25 @@ export function InventoryReportsTabs({
       {tab === 'stock' ? (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-3">
-            <MetricCard title="Total SKUs" value={metrics.totalSkus} />
-            <MetricCard title="Units on hand" value={metrics.totalUnits.toLocaleString()} />
-            <MetricCard title="Low-stock count" value={metrics.lowStockCount} />
+            <MetricCard title={zh.totalSkus} value={metrics.totalSkus} />
+            <MetricCard title={zh.totalUnits} value={metrics.totalUnits.toLocaleString()} />
+            <MetricCard title={zh.lowStockCount} value={metrics.lowStockCount} />
           </div>
           <div className="flex justify-end">
-            <Button variant="outline" onClick={exportStock}>
-              Export CSV
+            <Button variant="outline" onClick={exportStock} className="min-h-11">
+              {zh.exportCsv}
             </Button>
           </div>
-          <div className="rounded-xl border">
+          <div className="overflow-x-auto rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Variant</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Warehouse</TableHead>
-                  <TableHead className="text-right">On hand</TableHead>
-                  <TableHead className="text-right">Threshold</TableHead>
+                  <TableHead>{stock.product}</TableHead>
+                  <TableHead>变体</TableHead>
+                  <TableHead>{stock.sku}</TableHead>
+                  <TableHead>{stock.warehouse}</TableHead>
+                  <TableHead className="text-right">{stock.onHand}</TableHead>
+                  <TableHead className="text-right">{stock.threshold}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -159,37 +165,39 @@ export function InventoryReportsTabs({
         <div className="space-y-6">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-2">
-              <Label htmlFor="rep-from">From</Label>
+              <Label htmlFor="rep-from">{adj.filterFrom}</Label>
               <Input
                 id="rep-from"
                 type="date"
                 value={from}
                 onChange={(e) => updateDateFilter('from', e.target.value)}
+                className="min-h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rep-to">To</Label>
+              <Label htmlFor="rep-to">{adj.filterTo}</Label>
               <Input
                 id="rep-to"
                 type="date"
                 value={to}
                 onChange={(e) => updateDateFilter('to', e.target.value)}
+                className="min-h-11"
               />
             </div>
-            <Button variant="outline" onClick={exportAdjustments}>
-              Export CSV
+            <Button variant="outline" onClick={exportAdjustments} className="min-h-11">
+              {zh.exportCsv}
             </Button>
           </div>
-          <div className="rounded-xl border">
+          <div className="overflow-x-auto rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Warehouse</TableHead>
-                  <TableHead className="text-right">Delta</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Actor</TableHead>
+                  <TableHead>日期</TableHead>
+                  <TableHead>{stock.product}</TableHead>
+                  <TableHead>{stock.warehouse}</TableHead>
+                  <TableHead className="text-right">变动</TableHead>
+                  <TableHead>{adj.reason}</TableHead>
+                  <TableHead>操作人</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

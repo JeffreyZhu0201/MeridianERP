@@ -13,6 +13,10 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { InventoryQueueService } from '../queue/inventory-queue.service';
 
+/**
+ * 库存领域服务：仓库、库存水平、调整、采购单与可售数量同步。
+ * 所有写操作在事务内完成，并异步刷新变体可售缓存。
+ */
 export interface StockMutationResult {
   stockLevelId: string;
   quantityBefore: number;
@@ -29,6 +33,7 @@ export class InventoryService {
     private readonly inventoryQueue: InventoryQueueService,
   ) {}
 
+  /** 查询变体在门店展示用的可售库存（缓存字段） */
   async getSellableQuantity(variantId: string): Promise<number> {
     const variant = await this.prisma.productVariant.findUnique({
       where: { id: variantId },
@@ -40,6 +45,7 @@ export class InventoryService {
     return variant.inventory;
   }
 
+  /** 为新建变体在默认仓库初始化库存水平 */
   async seedVariantStockLevel(
     tenantId: string,
     variantId: string,
@@ -71,6 +77,7 @@ export class InventoryService {
     await this.syncVariantInventoryCache(variantId);
   }
 
+  /** 确保租户具备默认仓库与库存设置（幂等迁移） */
   async migrateTenantInventory(tenantId: string): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       await tx.tenantInventorySettings.upsert({

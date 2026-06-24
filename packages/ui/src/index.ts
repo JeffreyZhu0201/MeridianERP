@@ -4,6 +4,8 @@ export { StoreShell, type StoreShellProps } from './components/shells/store-shel
 export { ProductCard, type ProductCardProps } from './components/product-card';
 export { CartDrawer, type CartDrawerItem, type CartDrawerProps } from './components/cart-drawer';
 export { MetricCard, type MetricCardProps } from './components/metric-card';
+export { PageHeader, type PageHeaderProps } from './components/page-header';
+export { EmptyState, type EmptyStateProps } from './components/empty-state';
 export { PurchaseOrderStatusBadge } from './components/inventory/purchase-order-status-badge';
 export { StockAdjustmentReasonBadge } from './components/inventory/stock-adjustment-reason-badge';
 export { Button, type ButtonProps } from './components/ui/button';

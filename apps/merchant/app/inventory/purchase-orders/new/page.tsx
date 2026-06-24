@@ -2,7 +2,6 @@ import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import {
   apiFetch,
   type OnboardingProfile,
-  type PaginatedResponse,
   type Product,
 } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -10,8 +9,8 @@ import type { Warehouse } from '@meridian/shared';
 
 import {
   PurchaseOrderForm,
-  productsToVariantOptions,
 } from '../_components/purchase-order-form';
+import { productsToPoVariantOptions } from '@/lib/product-variants';
 
 interface NewPurchaseOrderPageProps {
   searchParams: Promise<{ variantId?: string }>;
@@ -25,10 +24,7 @@ export default async function NewPurchaseOrderPage({ searchParams }: NewPurchase
 
   const [warehouses, productsRes, profile] = await Promise.all([
     apiFetch<Warehouse[]>('/merchant/inventory/warehouses', {}, token).catch(() => []),
-    apiFetch<PaginatedResponse<Product>>('/merchant/products?limit=500', {}, token).catch(() => ({
-      data: [],
-      meta: { total: 0, page: 1, limit: 500 },
-    })),
+    apiFetch<Product[]>('/merchant/products?limit=500', {}, token).catch(() => []),
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
@@ -36,7 +32,7 @@ export default async function NewPurchaseOrderPage({ searchParams }: NewPurchase
     <MerchantShellWrapper businessName={profile?.businessName}>
       <PurchaseOrderForm
         warehouses={warehouses}
-        variants={productsToVariantOptions(productsRes.data)}
+        variants={productsToPoVariantOptions(productsRes)}
         token={token}
         prefillVariantId={variantId}
       />

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Button,
+  EmptyState,
   PurchaseOrderStatusBadge,
   Select,
   Table,
@@ -16,6 +17,8 @@ import {
 import { PurchaseOrderStatus } from '@meridian/shared';
 import type { PurchaseOrder, Warehouse } from '@meridian/shared';
 
+import { inventoryZh } from '@/lib/i18n/inventory-zh';
+
 interface PurchaseOrdersTableProps {
   orders: Array<
     PurchaseOrder & { warehouse?: { name: string }; warehouseName?: string }
@@ -27,7 +30,7 @@ interface PurchaseOrdersTableProps {
 }
 
 export function PurchaseOrdersTable({
-  orders,
+  orders = [],
   total,
   page,
   warehouses,
@@ -46,6 +49,9 @@ export function PurchaseOrdersTable({
   }
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
+  const zh = inventoryZh.purchaseOrders;
+  const common = inventoryZh.common;
+  const poStatus = inventoryZh.poStatus;
 
   return (
     <>
@@ -53,31 +59,33 @@ export function PurchaseOrdersTable({
         <div className="flex flex-wrap gap-3">
           <div className="space-y-2">
             <label htmlFor="po-status" className="text-sm font-medium">
-              Status
+              {zh.filterStatus}
             </label>
             <Select
               id="po-status"
               value={status}
               onChange={(e) => updateFilter('status', e.target.value)}
+              className="min-h-11"
             >
-              <option value="">All</option>
+              <option value="">全部</option>
               {Object.values(PurchaseOrderStatus).map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {poStatus[s as keyof typeof poStatus] ?? s}
                 </option>
               ))}
             </Select>
           </div>
           <div className="space-y-2">
             <label htmlFor="po-warehouse" className="text-sm font-medium">
-              Warehouse
+              {zh.warehouse}
             </label>
             <Select
               id="po-warehouse"
               value={warehouseId}
               onChange={(e) => updateFilter('warehouseId', e.target.value)}
+              className="min-h-11"
             >
-              <option value="">All</option>
+              <option value="">{common.allWarehouses}</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -88,26 +96,24 @@ export function PurchaseOrdersTable({
         </div>
         <Link
           href="/inventory/purchase-orders/new"
-          className="inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          Create purchase order
+          {zh.new}
         </Link>
       </div>
 
       {orders.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
-          No purchase orders yet
-        </div>
+        <EmptyState title={zh.emptyTitle} description={zh.emptyDescription} />
       ) : (
-        <div className="rounded-xl border">
+        <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>PO #</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ordered</TableHead>
+                <TableHead>{zh.poNumber}</TableHead>
+                <TableHead>{zh.supplier}</TableHead>
+                <TableHead>{zh.warehouse}</TableHead>
+                <TableHead>{zh.status}</TableHead>
+                <TableHead>{zh.created}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -147,11 +153,12 @@ export function PurchaseOrdersTable({
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Page {page} of {totalPages}</span>
+          <span>{common.pageOf(page, total)}</span>
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
+              className="min-h-9"
               disabled={page <= 1}
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
@@ -159,11 +166,12 @@ export function PurchaseOrdersTable({
                 router.push(`/inventory/purchase-orders?${params.toString()}`);
               }}
             >
-              Previous
+              {common.previous}
             </Button>
             <Button
               size="sm"
               variant="outline"
+              className="min-h-9"
               disabled={page >= totalPages}
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
@@ -171,7 +179,7 @@ export function PurchaseOrdersTable({
                 router.push(`/inventory/purchase-orders?${params.toString()}`);
               }}
             >
-              Next
+              {common.next}
             </Button>
           </div>
         </div>

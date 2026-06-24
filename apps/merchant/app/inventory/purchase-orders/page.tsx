@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
 
+import { PageHeader } from '@meridian/ui';
+
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { buildInventoryQuery, type InventoryPaginated } from '@/lib/inventory';
+import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { buildInventoryQuery, emptyInventoryPage, normalizeInventoryPage, type InventoryPaginated } from '@/lib/inventory';
 import type { PurchaseOrder, Warehouse } from '@meridian/shared';
 
 import { PurchaseOrdersTable } from './_components/purchase-orders-table';
@@ -12,6 +15,7 @@ interface PurchaseOrdersPageProps {
   searchParams: Promise<{ status?: string; warehouseId?: string; page?: string }>;
 }
 
+/** 商户端 — 采购订单列表 */
 export default async function PurchaseOrdersPage({ searchParams }: PurchaseOrdersPageProps) {
   const token = await getToken();
   if (!token) return null;
@@ -29,19 +33,23 @@ export default async function PurchaseOrdersPage({ searchParams }: PurchaseOrder
       })}`,
       {},
       token,
-    ).catch(() => ({ items: [], total: 0, page: 1, limit: 20 })),
+    ).catch(() => emptyInventoryPage<PurchaseOrder>(20)),
     apiFetch<Warehouse[]>('/merchant/inventory/warehouses', {}, token).catch(() => []),
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const zh = inventoryZh.purchaseOrders;
+
+  const ordersPage = normalizeInventoryPage(ordersRes);
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Purchase orders</h1>
+        <PageHeader title={zh.title} description={zh.description} />
         <Suspense>
           <PurchaseOrdersTable
-            orders={ordersRes.items}
-            total={ordersRes.total}
+            orders={ordersPage.items}
+            total={ordersPage.total}
             page={page}
             warehouses={warehouses}
             token={token}

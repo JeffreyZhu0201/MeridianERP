@@ -1,10 +1,11 @@
 import { Badge } from '../ui/badge';
 
+/** 库存调整原因徽章（中文） */
 const reasonLabels: Record<string, string> = {
-  DAMAGE: 'Damage',
-  COUNT_CORRECTION: 'Count correction',
-  RETURN: 'Return',
-  OTHER: 'Other',
+  DAMAGE: '损耗',
+  COUNT_CORRECTION: '盘点校正',
+  RETURN: '退货入库',
+  OTHER: '其他',
 };
 
 export function StockAdjustmentReasonBadge({ reason }: { reason: string }) {

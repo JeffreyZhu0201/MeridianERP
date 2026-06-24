@@ -1,9 +1,12 @@
 import { Suspense } from 'react';
 
+import { PageHeader } from '@meridian/ui';
+
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { buildInventoryQuery, type InventoryPaginated } from '@/lib/inventory';
+import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { buildInventoryQuery, emptyInventoryPage, normalizeInventoryPage, type InventoryPaginated } from '@/lib/inventory';
 import type { LowStockAlertItem, StockAdjustmentWithDetails, StockLevelWithDetails } from '@meridian/shared';
 
 import { InventoryReportsTabs } from './_components/inventory-reports-tabs';
@@ -12,6 +15,7 @@ interface ReportsPageProps {
   searchParams: Promise<{ tab?: string; from?: string; to?: string }>;
 }
 
+/** 商户端 — 库存汇总与调整报表 */
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const token = await getToken();
   if (!token) return null;
@@ -28,7 +32,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         `/merchant/inventory/stock-levels${buildInventoryQuery({ limit: 500 })}`,
         {},
         token,
-      ).catch(() => ({ items: [], total: 0, page: 1, limit: 500 })),
+      ).catch(() => emptyInventoryPage<StockLevelWithDetails>(500)),
     ),
     apiFetch<InventoryPaginated<StockAdjustmentWithDetails>>(
       `/merchant/inventory/reports/adjustments${buildInventoryQuery({
@@ -47,7 +51,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         })}`,
         {},
         token,
-      ).catch(() => ({ items: [], total: 0, page: 1, limit: 500 })),
+      ).catch(() => emptyInventoryPage<StockAdjustmentWithDetails>(500)),
     ),
     apiFetch<{ items: LowStockAlertItem[] }>('/merchant/inventory/alerts/low-stock', {}, token).catch(
       () => ({ items: [] }),
@@ -55,19 +59,22 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
-  const totalUnits = stockRes.items.reduce((sum, l) => sum + l.quantityOnHand, 0);
-  const skuCount = new Set(stockRes.items.map((l) => l.variantId)).size;
+  const stockPage = normalizeInventoryPage(stockRes);
+  const adjustmentsPage = normalizeInventoryPage(adjustmentsRes);
+  const totalUnits = stockPage.items.reduce((sum, l) => sum + l.quantityOnHand, 0);
+  const skuCount = new Set(stockPage.items.map((l) => l.variantId)).size;
+  const zh = inventoryZh.reports;
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Inventory reports</h1>
+        <PageHeader title={zh.title} description={zh.description} />
         <Suspense>
           <InventoryReportsTabs
-            stockLevels={stockRes.items}
-            adjustments={adjustmentsRes.items}
+            stockLevels={stockPage.items}
+            adjustments={adjustmentsPage.items}
             metrics={{
-              totalSkus: skuCount || stockRes.total,
+              totalSkus: skuCount || stockPage.total,
               totalUnits,
               lowStockCount: alertsRes.items.length,
             }}

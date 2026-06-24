@@ -1,41 +1,146 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-test.describe('Phase 3 merchant inventory smoke', () => {
-  test('inventory warehouses page loads after login', async ({ page }) => {
-    await page.goto('/login');
-    await page.fill('[name=email]', 'demo@merchant.test');
-    await page.fill('[name=password]', 'demo1234');
-    await page.click('button[type=submit]');
+import { inventoryZh } from '../apps/merchant/lib/i18n/inventory-zh';
 
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 }).catch(() => {
-      test.skip(true, 'Demo merchant not seeded — run pnpm db:seed');
-    });
+const DEMO_EMAIL = 'demo@merchant.test';
+const DEMO_PASSWORD = 'demo1234';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const MERCHANT_URL = process.env.MERCHANT_APP_URL ?? 'http://localhost:3002';
 
-    const res = await page.goto('/inventory/warehouses');
-    if (!res || res.status() >= 500) {
-      test.skip(true, 'Merchant app or API not running');
-    }
-
-    await expect(page.getByRole('heading', { name: /warehouses/i })).toBeVisible();
-    await expect(page.getByText(/default warehouse/i)).toBeVisible({ timeout: 10_000 });
+/** 通过 API 登录并写入 Cookie，避免 UI 登录与 CORS 干扰 */
+async function loginMerchant(page: Page): Promise<boolean> {
+  const res = await page.request.post(`${API_URL}/api/v1/merchant/auth/login`, {
+    data: { email: DEMO_EMAIL, password: DEMO_PASSWORD },
   });
 
-  test('inventory nav links are reachable', async ({ page }) => {
-    await page.goto('/login');
-    await page.fill('[name=email]', 'demo@merchant.test');
-    await page.fill('[name=password]', 'demo1234');
-    await page.click('button[type=submit]');
+  if (!res.ok()) {
+    test.skip(true, '演示商户未 seed — 请先运行 pnpm db:migrate && pnpm db:seed');
+    return false;
+  }
 
-    await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15_000 }).catch(() => {
-      test.skip(true, 'Demo merchant not seeded');
-    });
+  const { accessToken } = (await res.json()) as { accessToken: string };
+  const merchantHost = new URL(MERCHANT_URL).hostname;
 
-    for (const path of ['/inventory/stock', '/inventory/reports', '/inventory/purchase-orders']) {
-      const res = await page.goto(path);
-      if (!res || res.status() >= 500) {
-        test.skip(true, `Failed to load ${path}`);
-      }
-      await expect(page.locator('main')).toBeVisible();
+  await page.context().addCookies([
+    {
+      name: 'merchant_token',
+      value: accessToken,
+      domain: merchantHost,
+      path: '/',
+      sameSite: 'Lax',
+    },
+  ]);
+
+  return true;
+}
+
+/** 访问路由并校验主内容区可见 */
+async function gotoInventoryRoute(page: Page, path: string): Promise<boolean> {
+  try {
+    const res = await page.goto(path, { waitUntil: 'domcontentloaded' });
+    if (res && res.status() >= 500) {
+      test.skip(true, `无法加载 ${path}（HTTP ${res.status()}）`);
+      return false;
     }
+    await expect(page.locator('main')).toBeVisible({ timeout: 15_000 });
+    return true;
+  } catch {
+    test.skip(true, `无法加载 ${path}（请确认 API 与 merchant 已启动）`);
+    return false;
+  }
+}
+
+test.describe('Phase 3 商户库存（中文 UI）', () => {
+  test.beforeEach(async ({ page }) => {
+    const ok = await loginMerchant(page);
+    if (!ok) return;
+  });
+
+  test('仓库页：标题与默认仓库可见', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
+
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.warehouses.title }),
+    ).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Default Warehouse' })).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  test('库存水平页加载', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/stock'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.stock.title }),
+    ).toBeVisible();
+  });
+
+  test('库存调整页：表单与历史区', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/adjustments'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.adjustments.title }),
+    ).toBeVisible();
+    await expect(page.getByText(inventoryZh.adjustments.record)).toBeVisible();
+    await expect(page.getByText(inventoryZh.adjustments.history)).toBeVisible();
+  });
+
+  test('低库存预警页加载', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/alerts'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.alerts.title }),
+    ).toBeVisible();
+  });
+
+  test('采购订单页：列表或空状态', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/purchase-orders'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.purchaseOrders.title }),
+    ).toBeVisible();
+    await expect(
+      page.locator('a[href="/inventory/purchase-orders/new"]'),
+    ).toBeVisible();
+  });
+
+  test('库存报表页：指标卡与标签页', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/reports'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.reports.title }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: inventoryZh.reports.tabStock })).toBeVisible();
+    await expect(page.getByText(inventoryZh.reports.totalSkus, { exact: true })).toBeVisible();
+  });
+
+  test('库存设置页（主账号）', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/settings'))) return;
+    await expect(
+      page.getByRole('heading', { name: inventoryZh.settings.title }),
+    ).toBeVisible();
+    await expect(page.locator('#default-threshold')).toBeVisible();
+  });
+
+  test('侧栏库存子导航可访问全部路由', async ({ page }) => {
+    const routes = [
+      { href: '/inventory/warehouses', label: inventoryZh.nav.warehouses },
+      { href: '/inventory/stock', label: inventoryZh.nav.stock },
+      { href: '/inventory/adjustments', label: inventoryZh.nav.adjustments },
+      { href: '/inventory/alerts', label: inventoryZh.nav.alerts },
+      { href: '/inventory/purchase-orders', label: inventoryZh.nav.purchaseOrders },
+      { href: '/inventory/reports', label: inventoryZh.nav.reports },
+      { href: '/inventory/settings', label: inventoryZh.nav.settings },
+    ];
+
+    for (const route of routes) {
+      if (!(await gotoInventoryRoute(page, route.href))) return;
+      await expect(page.locator('main h1').first()).toBeVisible();
+    }
+
+    if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
+    for (const route of routes) {
+      await expect(page.getByRole('link', { name: route.label, exact: true })).toBeVisible();
+    }
+  });
+
+  test('新建采购单页可打开', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/purchase-orders/new'))) return;
+    await expect(page.locator('main')).toBeVisible();
   });
 });

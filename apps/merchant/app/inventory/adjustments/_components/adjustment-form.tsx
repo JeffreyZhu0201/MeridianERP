@@ -8,6 +8,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  EmptyState,
   Input,
   Label,
   Select,
@@ -24,13 +25,8 @@ import { StockAdjustmentReason } from '@meridian/shared';
 import type { StockAdjustmentWithDetails, Warehouse } from '@meridian/shared';
 
 import { apiFetch, type Product } from '@/lib/api';
-
-interface VariantOption {
-  id: string;
-  sku: string;
-  name: string;
-  productName: string;
-}
+import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import type { VariantOption } from '@/lib/product-variants';
 
 interface AdjustmentFormProps {
   warehouses: Warehouse[];
@@ -71,6 +67,10 @@ export function AdjustmentForm({
     );
   });
 
+  const zh = inventoryZh.adjustments;
+  const common = inventoryZh.common;
+  const reasons = inventoryZh.adjustmentReason;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -92,25 +92,26 @@ export function AdjustmentForm({
       setNote('');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Adjustment failed');
+      setError(err instanceof Error ? err.message : zh.failed);
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Record adjustment</CardTitle>
+        <CardTitle>{zh.record}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="adj-warehouse">Warehouse</Label>
+              <Label htmlFor="adj-warehouse">{zh.warehouse}</Label>
               <Select
                 id="adj-warehouse"
                 value={warehouseId}
                 onChange={(e) => setWarehouseId(e.target.value)}
                 required
+                className="min-h-11"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -120,20 +121,22 @@ export function AdjustmentForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="adj-variant-search">Product variant</Label>
+              <Label htmlFor="adj-variant-search">{zh.variant}</Label>
               <Input
                 id="adj-variant-search"
-                placeholder="Search SKU or name…"
+                placeholder={zh.variantSearch}
                 value={variantSearch}
                 onChange={(e) => setVariantSearch(e.target.value)}
+                className="min-h-11"
               />
               <Select
                 id="adj-variant"
                 value={variantId}
                 onChange={(e) => setVariantId(e.target.value)}
                 required
+                className="min-h-11"
               >
-                <option value="">Select variant</option>
+                <option value="">请选择变体</option>
                 {filteredVariants.map((v) => (
                   <option key={v.id} value={v.id}>
                     {v.productName} — {v.sku}
@@ -145,7 +148,7 @@ export function AdjustmentForm({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">Adjustment type</legend>
+              <legend className="text-sm font-medium">{zh.direction}</legend>
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="radio"
@@ -153,7 +156,7 @@ export function AdjustmentForm({
                   checked={direction === 'increase'}
                   onChange={() => setDirection('increase')}
                 />
-                Increase
+                {zh.increase}
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -162,11 +165,11 @@ export function AdjustmentForm({
                   checked={direction === 'decrease'}
                   onChange={() => setDirection('decrease')}
                 />
-                Decrease
+                {zh.decrease}
               </label>
             </fieldset>
             <div className="space-y-2">
-              <Label htmlFor="adj-qty">Quantity</Label>
+              <Label htmlFor="adj-qty">{zh.quantity}</Label>
               <Input
                 id="adj-qty"
                 type="number"
@@ -175,30 +178,32 @@ export function AdjustmentForm({
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
                 required
+                className="min-h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="adj-reason">Reason</Label>
+              <Label htmlFor="adj-reason">{zh.reason}</Label>
               <Select
                 id="adj-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value as StockAdjustmentReason)}
+                className="min-h-11"
               >
-                <option value={StockAdjustmentReason.DAMAGE}>Damage</option>
-                <option value={StockAdjustmentReason.COUNT_CORRECTION}>Count correction</option>
-                <option value={StockAdjustmentReason.RETURN}>Return</option>
-                <option value={StockAdjustmentReason.OTHER}>Other</option>
+                <option value={StockAdjustmentReason.DAMAGE}>{reasons.DAMAGE}</option>
+                <option value={StockAdjustmentReason.COUNT_CORRECTION}>{reasons.COUNT_CORRECTION}</option>
+                <option value={StockAdjustmentReason.RETURN}>{reasons.RETURN}</option>
+                <option value={StockAdjustmentReason.OTHER}>{reasons.OTHER}</option>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="adj-note">Note</Label>
+            <Label htmlFor="adj-note">{zh.note}</Label>
             <Textarea
               id="adj-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder={reason === StockAdjustmentReason.OTHER ? 'Required for Other' : 'Optional'}
+              placeholder={reason === StockAdjustmentReason.OTHER ? '选择「其他」时请填写说明' : '选填'}
             />
           </div>
 
@@ -208,7 +213,7 @@ export function AdjustmentForm({
             </p>
           ) : null}
 
-          <Button type="submit">Record adjustment</Button>
+          <Button type="submit" className="min-h-11">{zh.submit}</Button>
         </form>
       </CardContent>
     </Card>
@@ -230,6 +235,9 @@ export function AdjustmentsHistoryTable({
 }: AdjustmentsHistoryTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const zh = inventoryZh.adjustments;
+  const common = inventoryZh.common;
+  const reasons = inventoryZh.adjustmentReason;
   const warehouseId = searchParams.get('warehouseId') ?? '';
   const reason = searchParams.get('reason') ?? '';
   const from = searchParams.get('from') ?? '';
@@ -247,34 +255,37 @@ export function AdjustmentsHistoryTable({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-medium">History</h2>
+      <h2 className="text-lg font-medium">{zh.history}</h2>
       <div className="flex flex-wrap gap-3">
         <div className="space-y-2">
-          <Label htmlFor="from-date">From</Label>
+          <Label htmlFor="from-date">{zh.filterFrom}</Label>
           <Input
             id="from-date"
             type="date"
             value={from}
             onChange={(e) => updateFilter('from', e.target.value)}
+            className="min-h-11"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="to-date">To</Label>
+          <Label htmlFor="to-date">{zh.filterTo}</Label>
           <Input
             id="to-date"
             type="date"
             value={to}
             onChange={(e) => updateFilter('to', e.target.value)}
+            className="min-h-11"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="hist-warehouse">Warehouse</Label>
+          <Label htmlFor="hist-warehouse">{zh.warehouse}</Label>
           <Select
             id="hist-warehouse"
             value={warehouseId}
             onChange={(e) => updateFilter('warehouseId', e.target.value)}
+            className="min-h-11"
           >
-            <option value="">All</option>
+            <option value="">{common.allWarehouses}</option>
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -283,16 +294,17 @@ export function AdjustmentsHistoryTable({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="hist-reason">Reason</Label>
+          <Label htmlFor="hist-reason">{zh.filterReason}</Label>
           <Select
             id="hist-reason"
             value={reason}
             onChange={(e) => updateFilter('reason', e.target.value)}
+            className="min-h-11"
           >
-            <option value="">All</option>
+            <option value="">全部</option>
             {Object.values(StockAdjustmentReason).map((r) => (
               <option key={r} value={r}>
-                {r}
+                {reasons[r as keyof typeof reasons] ?? r}
               </option>
             ))}
           </Select>
@@ -300,21 +312,19 @@ export function AdjustmentsHistoryTable({
       </div>
 
       {adjustments.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
-          No adjustments yet
-        </div>
+        <EmptyState title={zh.emptyHistory} />
       ) : (
-        <div className="rounded-xl border">
+        <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead>Warehouse</TableHead>
-                <TableHead className="text-right">Δ</TableHead>
-                <TableHead className="text-right">Before → After</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Actor</TableHead>
+                <TableHead>日期</TableHead>
+                <TableHead>{inventoryZh.stock.product}</TableHead>
+                <TableHead>{zh.warehouse}</TableHead>
+                <TableHead className="text-right">变动</TableHead>
+                <TableHead className="text-right">调整前 → 后</TableHead>
+                <TableHead>{zh.reason}</TableHead>
+                <TableHead>操作人</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -351,11 +361,12 @@ export function AdjustmentsHistoryTable({
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Page {page} of {totalPages}</span>
+          <span>{common.pageOf(page, total)}</span>
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
+              className="min-h-9"
               disabled={page <= 1}
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
@@ -363,11 +374,12 @@ export function AdjustmentsHistoryTable({
                 router.push(`/inventory/adjustments?${params.toString()}`);
               }}
             >
-              Previous
+              {common.previous}
             </Button>
             <Button
               size="sm"
               variant="outline"
+              className="min-h-9"
               disabled={page >= totalPages}
               onClick={() => {
                 const params = new URLSearchParams(searchParams.toString());
@@ -375,22 +387,11 @@ export function AdjustmentsHistoryTable({
                 router.push(`/inventory/adjustments?${params.toString()}`);
               }}
             >
-              Next
+              {common.next}
             </Button>
           </div>
         </div>
       ) : null}
     </div>
-  );
-}
-
-export function productsToVariantOptions(products: Product[]): VariantOption[] {
-  return products.flatMap((p) =>
-    p.variants.map((v) => ({
-      id: v.id,
-      sku: v.sku,
-      name: v.name,
-      productName: p.name,
-    })),
   );
 }

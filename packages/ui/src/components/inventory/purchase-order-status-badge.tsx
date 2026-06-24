@@ -1,20 +1,21 @@
 import { Badge, type BadgeVariant } from '../ui/badge';
 import { cn } from '../../lib/utils';
 
+/** 采购单状态徽章文案（商户端中文） */
 const statusConfig: Record<string, { label: string; variant: BadgeVariant; className?: string }> = {
-  DRAFT: { label: 'Draft', variant: 'secondary' },
-  ORDERED: { label: 'Ordered', variant: 'outline' },
+  DRAFT: { label: '草稿', variant: 'secondary' },
+  ORDERED: { label: '已下单', variant: 'outline' },
   PARTIALLY_RECEIVED: {
-    label: 'Partial',
+    label: '部分收货',
     variant: 'warning',
     className: 'bg-amber-50 text-amber-600 border-amber-200',
   },
   RECEIVED: {
-    label: 'Received',
+    label: '已收货',
     variant: 'success',
     className: 'bg-emerald-50 text-emerald-600 border-emerald-200',
   },
-  CANCELLED: { label: 'Cancelled', variant: 'destructive' },
+  CANCELLED: { label: '已取消', variant: 'destructive' },
 };
 
 export function PurchaseOrderStatusBadge({
