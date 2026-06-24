@@ -1,0 +1,53 @@
+---
+description: Prefix shell commands with rtk for compact, token-efficient output
+alwaysApply: true
+---
+
+# RTK Command Prefix
+
+Always prefix terminal commands with `rtk`. If RTK has a filter for the command, output is compact; otherwise it passes through unchanged.
+
+## Golden rule
+
+```bash
+# ❌ Wrong
+git add . && git commit -m "msg" && git push
+
+# ✅ Correct
+rtk git add . && rtk git commit -m "msg" && rtk git push
+```
+
+Use `rtk` in every chained command (`&&`, `|`, `;`).
+
+## MeridianERP commands
+
+```bash
+# Git / GitHub
+rtk git status
+rtk git diff
+rtk git log --oneline -5
+rtk gh pr checks
+
+# Package manager & build
+rtk pnpm install
+rtk pnpm run build
+rtk next build
+
+# Tests (this repo)
+rtk jest                    # API unit/e2e via jest
+rtk playwright test         # e2e/ Playwright
+rtk pnpm --filter @meridian/api test:e2e
+
+# Prisma & Docker
+rtk prisma migrate dev
+rtk docker compose -f docker/docker-compose.yml ps
+
+# Debug noisy output
+rtk err <cmd>               # errors only
+rtk proxy <cmd>             # bypass filter when debugging
+```
+
+## When to skip RTK
+
+- Interactive commands that need full TUI (`vim`, `less`, `gh auth login`)
+- When the user explicitly asks for raw/unfiltered output
