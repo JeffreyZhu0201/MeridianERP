@@ -34,3 +34,6 @@ apps/api/prisma/*.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Agent temp payloads
+.push-*.json
