@@ -1,0 +1,53 @@
+---
+description: MeridianERP multi-agent workflow orchestration across PM, Architect, Design, FE, BE, QA, and DevOps roles
+alwaysApply: true
+---
+
+# Workflow Orchestration
+
+Follow this phase order for every feature. Delegate to the matching subagent in `.cursor/agents/`.
+
+| Phase | Subagent | Output |
+|-------|----------|--------|
+| 1. Discovery | `product-manager` | `docs/prd/<feature>.md` |
+| 2. Architecture | `architect` | `docs/architecture/<feature>.md` |
+| 3. UI spec | `ui-designer` | Figma + `docs/design/<feature>.md` |
+| 4. Implementation | `nextjs-frontend` + `nestjs-backend` | `apps/admin`, `apps/merchant`, `apps/api`, `packages/shared` |
+| 5. Verification | `test-engineer` | Tests + test report |
+| 6. Shipping | `devops-engineer` | `docker/`, CI config |
+| 7. GitHub | user / agent | PR opened, CI green, merged to `main` |
+
+## Rules
+
+- Never skip upstream artifacts. No implementation without PRD and architecture doc for the feature.
+- Frontend and backend may run in parallel only after API contracts exist in `packages/shared` or OpenAPI.
+- UI changes flow Figma → code via `ui-designer`. Code-only UI drift must be pushed back to Figma before merge.
+- End each phase with a **Handoff** block:
+
+```
+## Handoff
+- **Scope**: what was completed
+- **Files**: paths touched
+- **Open questions**: blockers or decisions needed
+- **Next agent**: who picks up next
+```
+
+## GitHub shipping
+
+After Phase 6, follow `.cursor/rules/github-workflow.mdc`:
+
+1. Push feature branch (`feat/...` or `fix/...`)
+2. Open PR via `gh` with Summary, Docs, and Test plan sections
+3. PR must reference touched docs under `docs/prd/`, `docs/architecture/`, `docs/design/`
+4. Wait for lint → test → build checks before merge
+5. End with a **GitHub Handoff** block (branch, PR URL, CI status)
+
+## When to delegate proactively
+
+- Vague requirements → `product-manager`
+- After PRD exists → `architect`
+- Screens or Figma URLs → `ui-designer`
+- API/UI code → `nestjs-backend` / `nextjs-frontend`
+- Before merge → `test-engineer`
+- Docker/CI/env → `devops-engineer`
+- PR creation, CI failures, branch strategy → `github-workflow.mdc`; invoke `devops-engineer` for workflow YAML
