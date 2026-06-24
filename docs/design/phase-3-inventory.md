@@ -15,9 +15,9 @@
 | Frame | Node ID | React route |
 |-------|---------|-------------|
 | Warehouses list | [1:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=1-2) | `/inventory/warehouses` |
-| Stock levels | TBD | `/inventory/stock` |
+| Stock levels | [5:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=5-2) | `/inventory/stock` |
 | Adjustments | TBD | `/inventory/adjustments` |
-| Low-stock alerts | TBD | `/inventory/alerts` |
+| Low-stock alerts | [10:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=10-2) | `/inventory/alerts` |
 | Purchase orders list | TBD | `/inventory/purchase-orders` |
 | Purchase order detail | TBD | `/inventory/purchase-orders/[id]` |
 | Receive goods dialog | TBD | `/inventory/purchase-orders/[id]` (modal) |
