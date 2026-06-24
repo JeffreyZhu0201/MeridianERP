@@ -1,0 +1,40 @@
+---
+description: PRD structure and product requirements conventions
+globs: docs/prd/**,docs/**/*.md
+alwaysApply: false
+---
+
+# Product Requirements (PRD)
+
+Write PRDs to `docs/prd/<feature>.md` using this template:
+
+```markdown
+# <Feature Name>
+
+## Problem
+What user pain or business need does this solve?
+
+## Users
+Who benefits? Primary and secondary personas.
+
+## User Stories
+| ID | Story | Priority | Acceptance Criteria |
+|----|-------|----------|---------------------|
+| US-1 | As a … I want … so that … | P0/P1/P2 | Given/When/Then |
+
+## Non-Goals
+Explicitly out of scope for this iteration.
+
+## Success Metrics
+Measurable outcomes (adoption, latency, error rate, etc.).
+
+## Open Questions
+Decisions needed before architecture.
+```
+
+## Guidelines
+
+- Acceptance criteria must be testable (Given/When/Then).
+- P0 = MVP blocker; P1 = important; P2 = nice-to-have.
+- Keep PRDs outcome-focused, not implementation-prescriptive.
+- Hand off to `architect` with open technical questions listed.
