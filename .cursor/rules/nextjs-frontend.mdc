@@ -1,0 +1,41 @@
+---
+description: Next.js App Router and shadcn frontend conventions
+globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**
+alwaysApply: false
+---
+
+# Next.js Frontend
+
+## Apps
+
+| App | Port | API env var |
+|-----|------|-------------|
+| `apps/admin` | 3000 | `NEXT_PUBLIC_API_URL` |
+| `apps/merchant` | 3002 | `NEXT_PUBLIC_API_URL` |
+| `apps/store` | 3003 | `NEXT_PUBLIC_API_URL` (Phase 2) |
+
+## Structure
+
+- App Router only (`app/` directory)
+- Feature routes: `app/(crm)/contacts/page.tsx`
+- Shared UI from `@meridian/ui`; app-specific in `components/`
+- Server Components by default; `'use client'` only when needed
+
+## Data fetching
+
+- Server Components: fetch with cookies forwarded to API
+- Client forms: React Hook Form + Zod resolver from `@meridian/shared`
+- Mutations: server actions or client fetch with toast feedback
+
+## Auth per portal
+
+- Admin: platform JWT in `admin_access_token` cookie
+- Merchant: merchant JWT in `merchant_access_token` cookie
+- Middleware in each app validates cookie and redirects to `/login`
+
+## Rules
+
+- Import shared types from `@meridian/shared`
+- No inline styles; Tailwind utilities only
+- Match `docs/design/` wireframes and design-system tokens
+- Skeleton loaders for tables, not spinners

@@ -12,6 +12,10 @@ out/
 .env
 .env.local
 .env.*.local
+apps/api/.env
+
+# Agent / local tooling
+.rtk/
 
 # IDE
 .idea/
@@ -34,3 +38,6 @@ apps/api/prisma/*.db
 *.log
 npm-debug.log*
 pnpm-debug.log*
+
+# Agent temp payloads
+.push-*.json

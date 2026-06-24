@@ -1,0 +1,49 @@
+---
+description: UI design, shadcn patterns, and Figma sync policy
+globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**
+alwaysApply: false
+---
+
+# UI Design
+
+## Design system
+
+- Reference: `docs/design/design-system.md` and `.cursor/rules/design-system.mdc`
+- shadcn/ui primitives in `components/ui/` or `packages/ui/components/ui/`
+- Extend via composition, not forked copies of shadcn source
+- Design tokens via Tailwind CSS variables in `globals.css`
+- No inline styles; use Tailwind utility classes
+
+## Portal layouts
+
+| App | Layout | Key screens (Phase 1) |
+|-----|--------|----------------------|
+| `apps/admin` | AdminShell (sidebar + tenant switcher) | Dashboard, Merchants, Merchant detail |
+| `apps/merchant` | MerchantShell (sidebar) | Dashboard, CRM, Distributors, Bind |
+| `apps/store` | StoreShell (Phase 2) | Catalog, Cart, Bind |
+
+Wireframes: `docs/design/phase-1-admin.md`, `docs/design/phase-1-merchant.md`
+
+## Figma sync policy
+
+- Figma is the source of truth for visual design
+- Document mappings in `docs/design/<feature>.md`
+- Figma → code: import via Figma MCP, adapt to shadcn
+- Code → Figma: push UI drift back before merge
+
+## Accessibility
+
+- Target WCAG 2.1 AA
+- Semantic HTML, keyboard navigation, visible focus states
+- 44px touch targets on mobile bind flow
+
+## File layout
+
+```
+apps/{admin|merchant|store}/
+  app/(feature)/       # Route groups
+  components/ui/       # shadcn primitives (or import from @meridian/ui)
+  components/          # Feature components
+packages/ui/
+  components/          # Shared shells, DataTable wrappers
+```

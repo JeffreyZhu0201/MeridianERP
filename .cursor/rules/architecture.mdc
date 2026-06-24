@@ -1,0 +1,43 @@
+---
+description: System architecture, ADRs, and API contract conventions
+globs: docs/architecture/**,packages/shared/**
+alwaysApply: false
+---
+
+# Architecture
+
+Write architecture docs to `docs/architecture/<feature>.md`.
+
+## Document structure
+
+```markdown
+# <Feature> Architecture
+
+## Overview
+High-level approach and key decisions.
+
+## API Contracts
+Endpoints, request/response shapes (link to packages/shared types).
+
+## Data Model
+Prisma models and relationships.
+
+## Module Boundaries
+NestJS modules and Next.js feature folders affected.
+
+## Async Jobs
+BullMQ queue names, job payloads, retry policy.
+
+## Caching
+Redis keys, TTL, invalidation strategy.
+
+## ADRs
+| Decision | Choice | Rationale |
+```
+
+## Conventions
+
+- Default to REST; document OpenAPI paths when added.
+- Shared types/DTOs/Zod schemas go in `packages/shared` before parallel FE/BE work.
+- One NestJS module per domain (`*.module.ts`, `*.controller.ts`, `*.service.ts`).
+- Record significant trade-offs as ADR rows, not inline debate.
