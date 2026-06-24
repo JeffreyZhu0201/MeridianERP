@@ -10,7 +10,7 @@
 | US-3.4: Low-stock alerts when Q ≤ T; removed after replenishment | `apps/api/test/inventory-adjustments.e2e-spec.ts` | PASS |
 | US-3.5: Create PO (DRAFT/ORDERED); reject invalid variant/warehouse | `apps/api/test/inventory-purchase-orders.e2e-spec.ts` | PASS |
 | US-3.6: Receive partial/full; stock increases; RECEIVED when complete | `apps/api/test/inventory-purchase-orders.e2e-spec.ts` | PASS |
-| US-3.7: Inventory reports (stock snapshot, adjustment history) | — | NOT COVERED |
+| US-3.7: Inventory reports (stock snapshot, adjustment history, CSV) | `apps/api/test/inventory-reports.e2e-spec.ts` | PASS |
 | US-3.8: Checkout rejects oversell; decrements stock on PAID | `apps/api/test/store-checkout.e2e-spec.ts` | PASS |
 
 ## Summary
