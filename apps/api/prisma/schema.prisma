@@ -1,0 +1,419 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum OnboardingStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum LeadStage {
+  NEW
+  QUALIFIED
+  WON
+  LOST
+}
+
+enum ActivityType {
+  CALL
+  NOTE
+  MEETING
+}
+
+enum CommissionType {
+  PERCENT
+  FIXED
+}
+
+enum BindType {
+  MERCHANT
+  CUSTOMER
+}
+
+enum PlatformRole {
+  SUPER_ADMIN
+  PLATFORM_OPS
+}
+
+enum MerchantRole {
+  MERCHANT_OWNER
+  MERCHANT_STAFF
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  FULFILLED
+  CANCELLED
+  REFUNDED
+}
+
+enum LedgerStatus {
+  ACCRUED
+  SETTLED
+  VOID
+}
+
+enum SettlementBatchStatus {
+  DRAFT
+  EXPORTED
+  PAID
+}
+
+model PlatformUser {
+  id        String       @id @default(cuid())
+  email     String       @unique
+  password  String
+  role      PlatformRole
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+}
+
+model Tenant {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  merchantProfile MerchantProfile?
+  users           User[]
+  companies       CrmCompany[]
+  contacts        CrmContact[]
+  leads           CrmLead[]
+  activities      CrmActivity[]
+  distributors    Distributor[]
+  bindings        Binding[]
+  customers       Customer[]
+  categories      Category[]
+  products        Product[]
+  carts           Cart[]
+  orders          Order[]
+  commissionEntries CommissionLedger[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model MerchantProfile {
+  id               String           @id @default(cuid())
+  tenantId         String           @unique
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+  businessName     String
+  legalName        String?
+  contactEmail     String
+  contactPhone     String?
+  onboardingStatus OnboardingStatus @default(DRAFT)
+  rejectionReason  String?
+  submittedAt      DateTime?
+  reviewedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model User {
+  id        String       @id @default(cuid())
+  tenantId  String
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  email     String
+  password  String
+  role      MerchantRole
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model CrmCompany {
+  id        String       @id @default(cuid())
+  tenantId  String
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  name      String
+  website   String?
+  contacts  CrmContact[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([tenantId])
+}
+
+model CrmContact {
+  id         String        @id @default(cuid())
+  tenantId   String
+  tenant     Tenant        @relation(fields: [tenantId], references: [id])
+  companyId  String?
+  company    CrmCompany?   @relation(fields: [companyId], references: [id])
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  leads      CrmLead[]
+  activities CrmActivity[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@index([tenantId])
+}
+
+model CrmLead {
+  id            String       @id @default(cuid())
+  tenantId      String
+  tenant        Tenant       @relation(fields: [tenantId], references: [id])
+  contactId     String?
+  contact       CrmContact?  @relation(fields: [contactId], references: [id])
+  title         String
+  stage         LeadStage    @default(NEW)
+  source        String?
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([tenantId])
+  @@index([stage])
+}
+
+model CrmActivity {
+  id        String       @id @default(cuid())
+  tenantId  String
+  tenant    Tenant       @relation(fields: [tenantId], references: [id])
+  contactId String?
+  contact   CrmContact?  @relation(fields: [contactId], references: [id])
+  leadId    String?
+  type      ActivityType
+  note      String
+  createdAt DateTime     @default(now())
+
+  @@index([tenantId])
+}
+
+model Distributor {
+  id             String              @id @default(cuid())
+  tenantId       String
+  tenant         Tenant              @relation(fields: [tenantId], references: [id])
+  name           String
+  email          String?
+  phone          String?
+  commissionRate Decimal             @db.Decimal(10, 4)
+  commissionType CommissionType      @default(PERCENT)
+  isActive       Boolean             @default(true)
+  qrCodes        DistributorQrCode[]
+  bindings       Binding[]
+  leads          CrmLead[]
+  orders         Order[]
+  carts          Cart[]
+  commissionEntries CommissionLedger[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([tenantId])
+}
+
+model DistributorQrCode {
+  id            String      @id @default(cuid())
+  distributorId String
+  distributor   Distributor @relation(fields: [distributorId], references: [id])
+  token         String      @unique
+  bindType      BindType    @default(MERCHANT)
+  expiresAt     DateTime
+  createdAt     DateTime    @default(now())
+
+  @@index([distributorId])
+}
+
+model Binding {
+  id            String      @id @default(cuid())
+  tenantId      String
+  tenant        Tenant      @relation(fields: [tenantId], references: [id])
+  distributorId String
+  distributor   Distributor @relation(fields: [distributorId], references: [id])
+  bindableType  BindType
+  bindableId    String
+  boundAt       DateTime    @default(now())
+
+  @@unique([bindableType, bindableId])
+  @@index([tenantId])
+  @@index([distributorId])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  email     String
+  password  String
+  firstName String?
+  lastName  String?
+  orders    Order[]
+  carts     Cart[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  tenantId  String
+  tenant    Tenant     @relation(fields: [tenantId], references: [id])
+  parentId  String?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  name      String
+  slug      String
+  products  Product[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  tenantId    String
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  categoryId  String?
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  name        String
+  slug        String
+  description String?
+  isPublished Boolean          @default(false)
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([categoryId])
+}
+
+model ProductVariant {
+  id        String     @id @default(cuid())
+  productId String
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku       String
+  name      String
+  price     Decimal    @db.Decimal(12, 2)
+  inventory Int        @default(0)
+  isActive  Boolean    @default(true)
+  cartItems CartItem[]
+  orderLines OrderLine[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([productId, sku])
+  @@index([productId])
+}
+
+model Cart {
+  id            String     @id @default(cuid())
+  tenantId      String
+  tenant        Tenant     @relation(fields: [tenantId], references: [id])
+  customerId    String?
+  customer      Customer?  @relation(fields: [customerId], references: [id])
+  sessionId     String?
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id])
+  items         CartItem[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([sessionId])
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cartId    String
+  cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  quantity  Int            @default(1)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([cartId, variantId])
+  @@index([cartId])
+}
+
+model Order {
+  id                    String            @id @default(cuid())
+  tenantId              String
+  tenant                Tenant            @relation(fields: [tenantId], references: [id])
+  customerId            String?
+  customer              Customer?         @relation(fields: [customerId], references: [id])
+  distributorId         String?
+  distributor           Distributor?      @relation(fields: [distributorId], references: [id])
+  status                OrderStatus       @default(PENDING_PAYMENT)
+  currency              String            @default("USD")
+  subtotal              Decimal           @db.Decimal(12, 2)
+  tax                   Decimal           @default(0) @db.Decimal(12, 2)
+  total                 Decimal           @db.Decimal(12, 2)
+  guestEmail            String?
+  stripePaymentIntentId String?           @unique
+  lines                 OrderLine[]
+  commissionEntry       CommissionLedger?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([tenantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([distributorId])
+}
+
+model OrderLine {
+  id          String         @id @default(cuid())
+  orderId     String
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId   String?
+  variant     ProductVariant? @relation(fields: [variantId], references: [id])
+  productName String
+  variantName String
+  quantity    Int
+  unitPrice   Decimal        @db.Decimal(12, 2)
+  lineTotal   Decimal        @db.Decimal(12, 2)
+
+  @@index([orderId])
+}
+
+model CommissionLedger {
+  id                String             @id @default(cuid())
+  tenantId          String
+  tenant            Tenant             @relation(fields: [tenantId], references: [id])
+  orderId           String             @unique
+  order             Order              @relation(fields: [orderId], references: [id])
+  distributorId     String
+  distributor       Distributor        @relation(fields: [distributorId], references: [id])
+  amount            Decimal            @db.Decimal(12, 2)
+  status            LedgerStatus       @default(ACCRUED)
+  settlementBatchId String?
+  settlementBatch   SettlementBatch?   @relation(fields: [settlementBatchId], references: [id])
+  settledAt         DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([tenantId])
+  @@index([distributorId])
+  @@index([status])
+  @@index([settlementBatchId])
+}
+
+model SettlementBatch {
+  id          String                @id @default(cuid())
+  periodStart DateTime
+  periodEnd   DateTime
+  status      SettlementBatchStatus @default(DRAFT)
+  exportedAt  DateTime?
+  entries     CommissionLedger[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+}

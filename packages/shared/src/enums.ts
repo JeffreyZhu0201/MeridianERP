@@ -38,3 +38,23 @@ export enum MerchantRole {
   MERCHANT_OWNER = 'MERCHANT_OWNER',
   MERCHANT_STAFF = 'MERCHANT_STAFF',
 }
+
+export enum OrderStatus {
+  PENDING_PAYMENT = 'PENDING_PAYMENT',
+  PAID = 'PAID',
+  FULFILLED = 'FULFILLED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED',
+}
+
+export enum LedgerStatus {
+  ACCRUED = 'ACCRUED',
+  SETTLED = 'SETTLED',
+  VOID = 'VOID',
+}
+
+export enum SettlementBatchStatus {
+  DRAFT = 'DRAFT',
+  EXPORTED = 'EXPORTED',
+  PAID = 'PAID',
+}

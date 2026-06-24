@@ -1,16 +1,18 @@
 # MeridianERP
 
-Multi-tenant SaaS ERP platform with CRM, merchant onboarding, distributor QR binding, and (Phase 2) integrated e-commerce.
+Multi-tenant SaaS ERP platform with CRM, merchant onboarding, distributor QR binding, and integrated e-commerce.
 
 ## Stack
 
 | Layer | Technology |
 |-------|------------|
-| Admin portal | Next.js + shadcn/ui (`apps/admin`) |
-| Merchant portal | Next.js + shadcn/ui (`apps/merchant`) |
-| API | NestJS (`apps/api`) |
-| Database | PostgreSQL + Prisma |
-| Cache / Queue | Redis + BullMQ |
+| Admin portal | Next.js + `@meridian/ui` (`apps/admin`, port 3000) |
+| Merchant portal | Next.js + `@meridian/ui` (`apps/merchant`, port 3002) |
+| Storefront | Next.js + `@meridian/ui` (`apps/store`, port 3003) |
+| API | NestJS + Prisma (`apps/api`, port 3001) |
+| Database | Prisma Postgres (managed) via Prisma ORM |
+| Cache / Queue | Redis (local Docker) + BullMQ (email + commission jobs stubbed) |
+| Payments | Stripe (mock mode when `STRIPE_SECRET_KEY` contains `mock`) |
 | Monorepo | pnpm workspaces + Turborepo |
 
 ## Repository structure
@@ -18,41 +20,106 @@ Multi-tenant SaaS ERP platform with CRM, merchant onboarding, distributor QR bin
 ```
 apps/admin/       Super admin ERP (port 3000)
 apps/merchant/    Merchant portal (port 3002)
+apps/store/       Consumer storefront (port 3003)
 apps/api/         NestJS API (port 3001)
 packages/shared/  Shared types and enums
-packages/ui/      Shared shadcn shells (planned)
+packages/ui/      Shared shells, tables, forms
 docs/             PRD, architecture, design, execution guides
-.cursor/          Agent rules and subagents
-docker/           Compose and Dockerfiles (planned)
+docker/           Compose + Dockerfiles
+e2e/              Playwright smoke tests
 ```
 
 ## Development status
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Auth, CRM, onboarding, distributor QR | In progress |
-| 2 | E-commerce store, commission settlement | Planned |
+| 1 | Auth, CRM, onboarding, distributor QR | **Complete** |
+| 2 | E-commerce store, commission settlement | **Complete** |
 | 3 | Inventory, reports, advanced ERP | Planned |
 
-### Loop progress (agent-driven)
-
-| Loop | Date | Completed | Next |
-|------|------|-----------|------|
-| 1 | 2025-06-24 | Monorepo root scaffold, `@meridian/shared` enums, agent docs | NestJS API scaffold (Task 2) |
-
 ## Quick start
+
+### Prerequisites
+
+- Node.js 22+, pnpm 9.15
+- Docker Desktop (Redis only for local dev)
+- [Prisma Data Platform](https://console.prisma.io) account (managed Postgres)
+
+### Recommended: Prisma Postgres + local apps
+
+Database is **Prisma-hosted**; API and Next.js portals run **locally** (not in Docker).
 
 ```bash
 cp .env.example .env
 pnpm install
 pnpm --filter @meridian/shared build
+
+# 1. Provision Prisma Postgres (first time only)
+cd apps/api && npx prisma init --db
+# Copy DATABASE_URL + DIRECT_DATABASE_URL into root .env
+
+# 2. Start Redis (only local infra dependency)
+pnpm deps
+
+# 3. Migrate & seed Prisma Postgres
+pnpm db:setup
+
+# 4. Start API + all frontends (one terminal)
+pnpm dev
 ```
 
-Full local stack (after Docker scaffold):
+| Service | URL |
+|---------|-----|
+| API | http://localhost:3001 |
+| Admin | http://localhost:3000 |
+| Merchant | http://localhost:3002 |
+| Store | http://localhost:3003/s/demo |
+
+**Seed credentials:** `admin@meridian.test` / `admin123`
+
+Run services individually if preferred: `pnpm dev:api`, `pnpm dev:admin`, `pnpm dev:merchant`, `pnpm dev:store`.
+
+### Optional: local Docker Postgres
+
+For offline development without Prisma Postgres, uncomment the local `DATABASE_URL` in `.env` and omit `DIRECT_DATABASE_URL`:
 
 ```bash
-docker compose --profile dev up
+docker compose -f docker/docker-compose.yml up -d postgres redis
+pnpm db:setup
+pnpm dev
 ```
+
+### Docker (full stack — CI / production-like)
+
+Runs postgres, redis, api, and all frontends in containers:
+
+```bash
+docker compose -f docker/docker-compose.yml --profile dev up --build
+```
+
+### Verification
+
+```bash
+pnpm --filter @meridian/api test:e2e    # 25 API e2e tests (mock Prisma)
+pnpm test:e2e                           # Playwright (admin + store projects)
+pnpm test:e2e:ui                        # interactive debug UI
+pnpm test:e2e:debug -- e2e/phase-2-store.spec.ts
+```
+
+## Phase 2 deliverables
+
+| Area | Endpoints / routes |
+|------|-------------------|
+| Store auth | `POST /api/v1/store/:slug/auth/register`, `login` |
+| Store catalog | `GET /api/v1/store/:slug/products`, `products/:slug` |
+| Cart & checkout | `/api/v1/store/:slug/cart`, `checkout`, Stripe webhook |
+| Merchant catalog | CRUD `/api/v1/merchant/products`, `/categories` |
+| Merchant orders | `GET /api/v1/merchant/orders` |
+| Commission | Accrual on PAID → `CommissionLedger` |
+| Platform | `GET /platform/orders`, `/settlements`, `POST settlements/export` |
+| Store UI | `/s/[slug]/` products, cart, checkout, login, register |
+| Merchant UI | `/catalog/products`, `/catalog/categories` |
+| Admin UI | `/orders`, `/settlements` |
 
 ## Documentation
 
@@ -60,22 +127,12 @@ docker compose --profile dev up
 |-----|------|
 | Platform spec | [docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md](docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md) |
 | Phase 1 PRD | [docs/prd/phase-1-foundation.md](docs/prd/phase-1-foundation.md) |
-| Phase 1 architecture | [docs/architecture/phase-1-foundation.md](docs/architecture/phase-1-foundation.md) |
-| Implementation plan | [docs/superpowers/plans/2025-06-24-phase-1-foundation.md](docs/superpowers/plans/2025-06-24-phase-1-foundation.md) |
+| Phase 2 PRD | [docs/prd/phase-2-ecommerce.md](docs/prd/phase-2-ecommerce.md) |
+| Phase 2 architecture | [docs/architecture/phase-2-ecommerce.md](docs/architecture/phase-2-ecommerce.md) |
+| Phase 2 store design | [docs/design/phase-2-store.md](docs/design/phase-2-store.md) |
+| **Phase 2 implementation plan** | [docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md](docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md) |
 | Execution guide | [docs/execution/README.md](docs/execution/README.md) |
-| Design system | [docs/design/design-system.md](docs/design/design-system.md) |
-
-## Agent workflow
-
-Development follows the Cursor agent pipeline documented in `.cursor/rules/workflow-orchestration.mdc`:
-
-1. Product Manager → PRD
-2. Architect → architecture + shared contracts
-3. UI Designer → Figma + design docs
-4. Frontend + Backend (parallel)
-5. Test Engineer → verification
-6. DevOps Engineer → Docker/CI
-7. GitHub → PR with green checks (see `github-workflow.mdc`)
+| **Git & PR workflow** | [docs/execution/git-workflow.md](docs/execution/git-workflow.md) |
 
 ## License
 
