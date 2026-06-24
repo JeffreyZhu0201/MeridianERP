@@ -13,10 +13,14 @@ Every feature follows this sequence. Do not skip phases.
 4. nextjs-frontend + nestjs-backend (parallel, after API contracts exist)
 5. test-engineer     → tests + report
 6. devops-engineer   → Docker/CI updates
-7. GitHub            → PR opened, CI green, merge to main
+7. GitHub            → PR to develop, CI green, merge feature branch
 ```
 
 Orchestration rules: `.cursor/rules/workflow-orchestration.mdc` and `.cursor/rules/github-workflow.mdc` (always on).
+
+**Git branching:** `feature/*` → `develop` → `main`. See [git-workflow.md](git-workflow.md).
+
+**Handoffs:** Each phase ends with a Handoff saved to `docs/handoffs/<feature>-<phase>.md`. Template: [handoffs/README.md](handoffs/README.md).
 
 ## Phase Gates
 

@@ -1,32 +1,59 @@
 ---
-description: GitHub branch, PR, and CI orchestration aligned with MeridianERP agent workflow phases
+description: Git branching (main/develop/feature), PR gates, and CI orchestration
 alwaysApply: true
 ---
 
 # GitHub Workflow Orchestration
 
-Follow this after local agent phases complete (see `.cursor/rules/workflow-orchestration.mdc`). Use `gh` for all GitHub operations.
+Follow after local agent phases complete (see `workflow-orchestration.mdc`). Use `rtk gh` / `rtk git` for GitHub operations.
 
-## Branch strategy
+## Branch model (main → develop → feature)
 
-- `main` is protected — never force-push
-- Features: `feat/<scope>-<short-name>` (e.g. `feat/crm-leads`)
-- Fixes: `fix/<scope>-<short-name>`
-- Infra/docs: `chore/<short-name>`
+```
+main          production-ready; tag releases here
+  ↑
+develop       integration branch; default base for daily work
+  ↑
+feature/*     short-lived work branches
+```
+
+| Branch | Purpose | Rules |
+|--------|---------|-------|
+| `main` | Production | Protected — never force-push; merge from `develop` (release) or `hotfix/*` only |
+| `develop` | Integration | Default checkout for new work; CI must pass before merging features |
+| `feature/*` | New work | Branch **from `develop`**; PR **into `develop`** |
+
+### Branch naming
+
+```bash
+feature/<scope>-<short-name>   # e.g. feature/phase-3-inventory
+fix/<scope>-<short-name>       # bugfix → develop
+hotfix/<scope>-<short-name>    # urgent prod fix → main (+ back-merge to develop)
+chore/<short-name>             # tooling/docs → develop
+```
+
+### Daily flow
+
+```bash
+rtk git checkout develop && rtk git pull
+rtk git checkout -b feature/phase-3-inventory
+# … implement, test, commit …
+rtk git push -u origin HEAD
+rtk gh pr create --base develop --head feature/phase-3-inventory
+```
+
+Release: open PR `develop` → `main` after phase gate + CI green. Never commit directly to `main` or `develop`.
 
 ## PR phase gate
 
-Do not open a PR until upstream artifacts exist:
+Do not open a PR until:
 
-- `docs/prd/<feature>.md` (or approved foundation docs for scaffold work)
+- `docs/prd/<feature>.md` (or approved foundation docs)
 - `docs/architecture/<feature>.md`
-- `docs/design/<feature>.md` (for UI changes)
+- `docs/design/<feature>.md` (UI changes)
+- `test-engineer` report mapped to P0 criteria
 
-Phase 5 (`test-engineer`) must produce a test report before PR creation.
-
-## PR requirements
-
-Every PR body must include:
+## PR body template
 
 ```markdown
 ## Summary
@@ -39,42 +66,25 @@ Every PR body must include:
 - [ ] <checklist mapped to P0 acceptance criteria>
 ```
 
-Use `gh pr create` with a HEREDOC body. Link related issues when applicable.
-
 ## CI expectations
 
-When `.github/workflows/` exists, required pipeline order:
-
 1. **Lint** — ESLint, Prettier, typecheck
-2. **Test** — unit + API integration
+2. **Test** — unit + API integration + Playwright smoke
 3. **Build** — all apps and packages compile
 
-Block merge if any check fails or P0 tests are missing.  
-`devops-engineer` owns workflow YAML; follow this rule for job order and PR gates.
+Block merge if any check fails. Never `git push --force` to `main` or `develop`.
 
-## Agent mapping
+## Commit policy
 
-| Agent phase | GitHub action |
-|-------------|---------------|
-| `test-engineer` | Test report pasted into PR test plan |
-| `devops-engineer` | Docker/CI config in PR; future Actions YAML |
-| User / agent | Push branch, open PR, monitor checks |
-
-## gh CLI rules
-
-- Use `gh` for PRs, checks, issues, releases
-- Check CI: `gh pr checks <number>`
-- Never `git push --force` to `main`
+- Conventions: `feat:`, `fix:`, `chore:`, `test:`
 - Only create commits when the user explicitly requests
 
-## Shipping handoff
-
-End implementation work with:
+## Handoff block
 
 ```
 ## GitHub Handoff
-- **Branch**: feat/...
-- **PR**: <url or "ready to open">
-- **CI**: pending | green | failed (with failing job)
-- **Docs referenced**: docs/prd/..., docs/architecture/..., docs/design/...
+- **Branch**: feature/... (base: develop)
+- **PR**: <url or ready to open> → develop
+- **CI**: pending | green | failed
+- **Docs**: docs/prd/..., docs/architecture/..., docs/design/...
 ```

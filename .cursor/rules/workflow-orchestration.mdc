@@ -15,14 +15,16 @@ Follow this phase order for every feature. Delegate to the matching subagent in 
 | 4. Implementation | `nextjs-frontend` + `nestjs-backend` | `apps/admin`, `apps/merchant`, `apps/api`, `packages/shared` |
 | 5. Verification | `test-engineer` | Tests + test report |
 | 6. Shipping | `devops-engineer` | `docker/`, CI config |
-| 7. GitHub | user / agent | PR opened, CI green, merged to `main` |
+| 7. GitHub | user / agent | PR to `develop`, CI green, merge feature branch |
 
 ## Rules
 
+- **Strict phase order** — invoke the matching subagent for each phase; do not implement in the parent agent unless unblocking a failed subagent.
 - Never skip upstream artifacts. No implementation without PRD and architecture doc for the feature.
 - Frontend and backend may run in parallel only after API contracts exist in `packages/shared` or OpenAPI.
 - UI changes flow Figma → code via `ui-designer`. Code-only UI drift must be pushed back to Figma before merge.
-- End each phase with a **Handoff** block:
+- Branch from `develop` (`feature/*`); PR targets `develop`. Release merges `develop` → `main` only after a phase gate.
+- End each phase with a **Handoff** block (save to `docs/handoffs/<feature>-<phase>.md`):
 
 ```
 ## Handoff
@@ -36,11 +38,11 @@ Follow this phase order for every feature. Delegate to the matching subagent in 
 
 After Phase 6, follow `.cursor/rules/github-workflow.mdc`:
 
-1. Push feature branch (`feat/...` or `fix/...`)
-2. Open PR via `gh` with Summary, Docs, and Test plan sections
+1. Branch from `develop`: `feature/<scope>-<name>`
+2. Push and open PR **into `develop`** via `gh` with Summary, Docs, and Test plan
 3. PR must reference touched docs under `docs/prd/`, `docs/architecture/`, `docs/design/`
 4. Wait for lint → test → build checks before merge
-5. End with a **GitHub Handoff** block (branch, PR URL, CI status)
+5. Save **GitHub Handoff** to `docs/handoffs/<feature>-github.md`
 
 ## When to delegate proactively
 
