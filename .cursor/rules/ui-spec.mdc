@@ -1,0 +1,40 @@
+---
+description: UI constraint spec — canonical component library and tokens in apps/ui-spec
+globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**,apps/ui-spec/**
+alwaysApply: false
+---
+
+# UI Spec (`apps/ui-spec`)
+
+**Do not use Figma** for UI design or frontend implementation in this repo. The canonical UI constraint library is `apps/ui-spec`.
+
+## When to read
+
+Before designing screens (`ui-designer`) or implementing UI (`nextjs-frontend`), read:
+
+1. `apps/ui-spec/README.md` — overview and usage
+2. `apps/ui-spec/src/app/globals.css` — design tokens (colors, radius, sidebar)
+3. `apps/ui-spec/components.json` — shadcn style (`base-nova`), icon library (`lucide`)
+4. `apps/ui-spec/src/app/page.tsx` — component showcase (variants, composition patterns)
+5. `apps/ui-spec/src/components/ui/*.tsx` — allowed primitives and their APIs
+
+Run locally: `pnpm --filter @meridian/ui-spec dev` (if configured) or `cd apps/ui-spec && pnpm dev`.
+
+## Rules
+
+- **Components:** Only use primitives defined in `apps/ui-spec/src/components/ui/`. Map to `packages/ui` or app `components/ui/` — keep APIs aligned with ui-spec.
+- **Tokens:** Match CSS variables from `apps/ui-spec/src/app/globals.css`. Do not invent one-off hex colors.
+- **Variants:** Follow showcase usage in `page.tsx` (Button, Badge, Table, Dialog, Sheet, etc.).
+- **Icons:** `lucide-react` per ui-spec `components.json` (portals may use `@tabler/icons-react` in shells only if already established in `packages/ui`).
+- **No Figma MCP:** Do not call Figma tools, sync to Figma, or block on Figma node IDs.
+
+## Portal implementation
+
+| Layer | Location |
+|-------|----------|
+| Spec (source) | `apps/ui-spec/` |
+| Shared shells & composites | `packages/ui/` |
+| App routes & feature UI | `apps/admin/`, `apps/merchant/`, `apps/store/` |
+| Screen wireframes | `docs/design/<feature>.md` |
+
+Design docs describe layout and behavior; visual constraints come from ui-spec.

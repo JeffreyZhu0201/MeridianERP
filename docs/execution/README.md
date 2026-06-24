@@ -9,7 +9,7 @@ Every feature follows this sequence. Do not skip phases.
 ```
 1. product-manager  → docs/prd/<feature>.md
 2. architect         → docs/architecture/<feature>.md + packages/shared types
-3. ui-designer       → docs/design/<feature>.md + Figma
+3. ui-designer       → docs/design/<feature>.md + apps/ui-spec constraints
 4. nextjs-frontend + nestjs-backend (parallel, after API contracts exist)
 5. test-engineer     → tests + report
 6. devops-engineer   → Docker/CI updates

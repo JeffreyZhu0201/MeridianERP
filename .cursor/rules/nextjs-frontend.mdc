@@ -33,9 +33,15 @@ alwaysApply: false
 - Merchant: merchant JWT in `merchant_access_token` cookie
 - Middleware in each app validates cookie and redirects to `/login`
 
+## UI spec
+
+- Before building UI, read `apps/ui-spec/` per `.cursor/rules/ui-spec.mdc`
+- Use components and tokens from ui-spec; do not use Figma
+- Mirror primitive APIs from `apps/ui-spec/src/components/ui/`
+
 ## Rules
 
 - Import shared types from `@meridian/shared`
 - No inline styles; Tailwind utilities only
-- Match `docs/design/` wireframes and design-system tokens
+- Match `docs/design/` wireframes and ui-spec tokens
 - Skeleton loaders for tables, not spinners

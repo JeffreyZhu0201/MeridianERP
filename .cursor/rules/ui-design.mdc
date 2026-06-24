@@ -1,17 +1,23 @@
 ---
-description: UI design, shadcn patterns, and Figma sync policy
-globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**
+description: UI design, shadcn patterns, and apps/ui-spec constraint policy
+globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**,apps/ui-spec/**
 alwaysApply: false
 ---
 
 # UI Design
 
+## UI spec (canonical)
+
+- **Source of truth:** `apps/ui-spec/` — see `.cursor/rules/ui-spec.mdc`
+- Read `apps/ui-spec/src/app/page.tsx` for allowed components and variants
+- **Do not use Figma** for design or implementation in this repo
+
 ## Design system
 
-- Reference: `docs/design/design-system.md` and `.cursor/rules/design-system.mdc`
-- shadcn/ui primitives in `components/ui/` or `packages/ui/components/ui/`
+- Reference: `docs/design/design-system.md`, `.cursor/rules/design-system.mdc`, `apps/ui-spec/src/app/globals.css`
+- shadcn/ui primitives: mirror `apps/ui-spec/src/components/ui/` in `packages/ui` or app `components/ui/`
 - Extend via composition, not forked copies of shadcn source
-- Design tokens via Tailwind CSS variables in `globals.css`
+- Design tokens via ui-spec CSS variables
 - No inline styles; use Tailwind utility classes
 
 ## Portal layouts
@@ -24,12 +30,11 @@ alwaysApply: false
 
 Wireframes: `docs/design/phase-1-admin.md`, `docs/design/phase-1-merchant.md`
 
-## Figma sync policy
+## Design doc policy
 
-- Figma is the source of truth for visual design
-- Document mappings in `docs/design/<feature>.md`
-- Figma → code: import via Figma MCP, adapt to shadcn
-- Code → Figma: push UI drift back before merge
+- Screen specs live in `docs/design/<feature>.md`
+- Map each element to a ui-spec component (e.g. `Table`, `Dialog`, `Badge`)
+- Token or primitive changes: update `apps/ui-spec` first, then portal code
 
 ## Accessibility
 

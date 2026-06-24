@@ -271,7 +271,8 @@ npx shadcn@latest add button card badge table form input select textarea dialog 
 
 ---
 
-## Figma
+## UI spec
 
-Figma file to be created by ui-designer subagent on first screen implementation.  
-Document node IDs in `docs/design/phase-1-admin.md` and `docs/design/phase-1-merchant.md`.
+Canonical component library: `apps/ui-spec/` (`@meridian/ui-spec`).  
+Agents read `apps/ui-spec/src/app/page.tsx` and `src/components/ui/` before designing or implementing UI.  
+Do not use Figma for this repo.

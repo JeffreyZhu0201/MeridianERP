@@ -5,7 +5,8 @@ alwaysApply: true
 
 # Design System
 
-Full reference: `docs/design/design-system.md`
+Full reference: `docs/design/design-system.md`  
+Component library & tokens: `apps/ui-spec/` (`.cursor/rules/ui-spec.mdc`)
 
 ## Typography
 
@@ -38,7 +39,7 @@ Support light and dark mode from day one. Set theme once in root layout.
 
 ## Components
 
-Import shadcn from `packages/ui` or app-local `components/ui/`. Never ship default uncustomized theme.
+Import shadcn from `packages/ui` or app-local `components/ui/`, aligned with `apps/ui-spec/src/components/ui/`. Never ship default uncustomized theme.
 
 Required patterns: DataTable, Form, Dialog, Sheet, Badge, Tabs, Skeleton loaders.
 

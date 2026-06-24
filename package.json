@@ -6,6 +6,7 @@
     "dev:admin": "pnpm --filter @meridian/admin dev",
     "dev:merchant": "pnpm --filter @meridian/merchant dev",
     "dev:store": "pnpm --filter @meridian/store dev",
+    "dev:ui-spec": "pnpm --filter @meridian/ui-spec dev",
     "dev:api": "pnpm --filter @meridian/api dev",
     "deps": "docker compose -f docker/docker-compose.yml up -d redis",
     "db:generate": "pnpm --filter @meridian/api prisma:generate",
