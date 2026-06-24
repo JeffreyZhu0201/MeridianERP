@@ -1,0 +1,42 @@
+---
+description: NestJS backend, Prisma, Redis cache, and BullMQ conventions
+globs: apps/api/**
+alwaysApply: false
+---
+
+# NestJS Backend
+
+## Module layout
+
+```
+apps/api/src/
+  <domain>/
+    <domain>.module.ts
+    <domain>.controller.ts
+    <domain>.service.ts
+    dto/
+  prisma/
+    schema.prisma
+```
+
+## Patterns
+
+- DTOs: `class-validator` decorators; share Zod schemas via `packages/shared`
+- Database: inject `PrismaService`; no raw SQL unless justified
+- Cache: `@nestjs/cache-manager` with Redis store
+- Queues: `@nestjs/bullmq` with `@Processor()` for job handlers
+
+```typescript
+// ✅ BullMQ processor
+@Processor('email')
+export class EmailProcessor extends WorkerHost {
+  async process(job: Job<SendEmailPayload>) { /* ... */ }
+}
+```
+
+## API rules
+
+- RESTful routes; consistent error shape `{ statusCode, message, error }`
+- Validate all inputs via DTOs or Zod pipes
+- Export shared types to `packages/shared` before frontend integration
+- Log errors; never expose stack traces in production responses
