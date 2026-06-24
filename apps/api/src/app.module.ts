@@ -7,6 +7,7 @@ import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { BindingsModule } from './bindings/bindings.module';
 import { CommissionModule } from './commission/commission.module';
 import { EnvModule } from './config/env.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { PaymentModule } from './payment/payment.module';
 import { PlatformModule } from './platform/platform.module';
@@ -22,6 +23,7 @@ import { StoreModule } from './store/store.module';
     QueueModule,
     PaymentModule,
     CommissionModule,
+    InventoryModule,
     PlatformModule,
     MerchantModule,
     BindingsModule,

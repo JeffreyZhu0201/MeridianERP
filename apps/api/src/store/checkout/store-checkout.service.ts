@@ -8,8 +8,10 @@ import { OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { CommissionService } from '../../commission/commission.service';
+import { InventoryService } from '../../inventory/inventory.service';
 import { PaymentService } from '../../payment/payment.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { InventoryQueueService } from '../../queue/inventory-queue.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
 import { StoreTenantService } from '../common/store-tenant.service';
 import { CheckoutDto } from '../cart/dto/cart.dto';
@@ -32,6 +34,8 @@ export class StoreCheckoutService {
     private readonly paymentService: PaymentService,
     private readonly commissionService: CommissionService,
     private readonly emailQueue: EmailQueueService,
+    private readonly inventoryService: InventoryService,
+    private readonly inventoryQueue: InventoryQueueService,
   ) {}
 
   async checkout(
@@ -70,7 +74,8 @@ export class StoreCheckoutService {
       if (!item.variant.isActive || !item.variant.product.isPublished) {
         throw new BadRequestException('Cart contains unavailable items');
       }
-      if (item.variant.inventory < item.quantity) {
+      const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
+      if (sellable < item.quantity) {
         throw new BadRequestException(`Insufficient inventory for ${item.variant.name}`);
       }
     }
@@ -183,13 +188,7 @@ export class StoreCheckoutService {
         data: { status: OrderStatus.PAID },
       });
 
-      for (const line of order.lines) {
-        if (!line.variantId) continue;
-        await tx.productVariant.update({
-          where: { id: line.variantId },
-          data: { inventory: { decrement: line.quantity } },
-        });
-      }
+      await this.inventoryService.markOrderPaidAndDecrement(orderId, tx);
 
       if (order.customerId) {
         const cart = await tx.cart.findFirst({
@@ -200,6 +199,8 @@ export class StoreCheckoutService {
         }
       }
     });
+
+    await this.inventoryQueue.enqueueLowStockCheck({ tenantId: order.tenantId });
 
     await this.commissionService.accrueOnPaid(orderId);
     await this.emailQueue.sendMerchantWelcome(

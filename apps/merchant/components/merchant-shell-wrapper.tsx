@@ -10,10 +10,12 @@ export function MerchantShellWrapper({
   children,
   businessName,
   userEmail,
+  lowStockAlertCount,
 }: {
   children: React.ReactNode;
   businessName?: string;
   userEmail?: string;
+  lowStockAlertCount?: number;
 }) {
   const router = useRouter();
 
@@ -24,7 +26,12 @@ export function MerchantShellWrapper({
   }
 
   return (
-    <MerchantShell businessName={businessName} userEmail={userEmail} onLogout={handleLogout}>
+    <MerchantShell
+      businessName={businessName}
+      userEmail={userEmail}
+      lowStockAlertCount={lowStockAlertCount}
+      onLogout={handleLogout}
+    >
       {children}
     </MerchantShell>
   );

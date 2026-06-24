@@ -3,6 +3,51 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
+async function seedTenantInventory(tenantId: string) {
+  await prisma.tenantInventorySettings.upsert({
+    where: { tenantId },
+    create: { tenantId, defaultReorderThreshold: 5 },
+    update: {},
+  });
+
+  let warehouse = await prisma.warehouse.findFirst({
+    where: { tenantId, isDefault: true },
+  });
+  if (!warehouse) {
+    warehouse = await prisma.warehouse.create({
+      data: {
+        tenantId,
+        name: 'Default Warehouse',
+        isDefault: true,
+        isActive: true,
+      },
+    });
+  }
+
+  const variants = await prisma.productVariant.findMany({
+    where: { product: { tenantId } },
+    select: { id: true, inventory: true },
+  });
+
+  for (const variant of variants) {
+    await prisma.stockLevel.upsert({
+      where: {
+        warehouseId_variantId: {
+          warehouseId: warehouse.id,
+          variantId: variant.id,
+        },
+      },
+      create: {
+        tenantId,
+        warehouseId: warehouse.id,
+        variantId: variant.id,
+        quantityOnHand: variant.inventory,
+      },
+      update: {},
+    });
+  }
+}
+
 async function main() {
   await prisma.platformUser.upsert({
     where: { email: 'admin@meridian.test' },
@@ -54,7 +99,10 @@ async function main() {
       include: { variants: true },
     });
 
+    await seedTenantInventory(tenant.id);
     void product;
+  } else {
+    await seedTenantInventory(existingTenant.id);
   }
 }
 

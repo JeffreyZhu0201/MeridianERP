@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { slugify } from '../../common/utils/slug.util';
+import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MerchantCategoriesService } from './categories.service';
 import { CreateProductDto, UpdateProductDto } from './dto/catalog.dto';
@@ -14,6 +15,7 @@ export class MerchantProductsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly categoriesService: MerchantCategoriesService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   findAll(tenantId: string) {
@@ -46,7 +48,7 @@ export class MerchantProductsService {
     if (dto.categoryId) {
       await this.categoriesService.findOne(tenantId, dto.categoryId);
     }
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         tenantId,
         name: dto.name,
@@ -66,6 +68,17 @@ export class MerchantProductsService {
       },
       include: { category: true, variants: true },
     });
+
+    await this.inventoryService.migrateTenantInventory(tenantId);
+    for (const variant of product.variants) {
+      await this.inventoryService.seedVariantStockLevel(
+        tenantId,
+        variant.id,
+        variant.inventory,
+      );
+    }
+
+    return product;
   }
 
   async update(tenantId: string, id: string, dto: UpdateProductDto) {
@@ -106,7 +119,7 @@ export class MerchantProductsService {
           sku: v.sku,
           name: v.name,
           price: v.price,
-          inventory: v.inventory ?? 0,
+          inventory: 0,
           isActive: v.isActive ?? true,
         })),
       });

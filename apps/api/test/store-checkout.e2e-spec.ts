@@ -166,5 +166,36 @@ describe('StoreCheckout (e2e)', () => {
       .expect(200);
 
     expect(products.body[0].variants[0].inventory).toBe(7);
+
+    const stockLevels = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/stock-levels')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .query({ variantId })
+      .expect(200);
+
+    expect(stockLevels.body.data[0].quantityOnHand).toBe(7);
+  });
+
+  it('rejects checkout when quantity exceeds sellable stock (US-3.8)', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 11 })
+      .expect(201);
+
+    const checkout = await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/checkout')
+      .set('X-Cart-Session', sessionId)
+      .send({ guestEmail: 'guest@example.com' })
+      .expect(400);
+
+    expect(checkout.body.message).toMatch(/insufficient inventory/i);
+
+    const products = await request(app.getHttpServer())
+      .get('/api/v1/merchant/products')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(products.body[0].variants[0].inventory).toBe(10);
   });
 });

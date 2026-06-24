@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
@@ -40,7 +41,6 @@ export function ProductsTable({ products: initial, categories, token }: Products
     variantName: 'Default',
     sku: '',
     price: '',
-    inventory: '0',
   });
   const [error, setError] = useState('');
 
@@ -55,7 +55,6 @@ export function ProductsTable({ products: initial, categories, token }: Products
       variantName: 'Default',
       sku: '',
       price: '',
-      inventory: '0',
     });
     setOpen(true);
   }
@@ -72,7 +71,6 @@ export function ProductsTable({ products: initial, categories, token }: Products
       variantName: variant?.name ?? 'Default',
       sku: variant?.sku ?? '',
       price: variant ? String(variant.price) : '',
-      inventory: variant ? String(variant.inventory) : '0',
     });
     setOpen(true);
   }
@@ -91,7 +89,6 @@ export function ProductsTable({ products: initial, categories, token }: Products
             name: form.variantName,
             sku: form.sku || form.slug || form.name.toLowerCase().replace(/\s+/g, '-'),
             price: parseFloat(form.price) || 0,
-            inventory: parseInt(form.inventory, 10) || 0,
           },
         ],
       };
@@ -149,6 +146,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
                 <TableHead>Slug</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Price</TableHead>
+                <TableHead className="text-right">Sellable</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -162,6 +160,9 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     <TableCell className="font-mono text-xs">{product.slug}</TableCell>
                     <TableCell>{product.category?.name ?? '—'}</TableCell>
                     <TableCell>{variant ? formatPrice(variant.price) : '—'}</TableCell>
+                    <TableCell className="text-right font-mono text-sm tabular-nums">
+                      {variant ? variant.inventory : '—'}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={product.isPublished ? 'default' : 'secondary'}>
                         {product.isPublished ? 'Published' : 'Draft'}
@@ -284,13 +285,28 @@ export function ProductsTable({ products: initial, categories, token }: Products
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="inventory">Inventory</Label>
-                  <Input
-                    id="inventory"
-                    type="number"
-                    value={form.inventory}
-                    onChange={(e) => setForm({ ...form, inventory: e.target.value })}
-                  />
+                  <Label>Sellable quantity</Label>
+                  <p
+                    className="font-mono text-lg font-semibold tabular-nums"
+                    aria-readonly="true"
+                  >
+                    {editing?.variants[0]?.inventory ?? 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Synced from default warehouse.{' '}
+                    {form.sku ? (
+                      <Link
+                        href={`/inventory/stock?q=${encodeURIComponent(form.sku)}`}
+                        className="text-primary hover:underline"
+                      >
+                        Manage stock
+                      </Link>
+                    ) : (
+                      <Link href="/inventory/adjustments" className="text-primary hover:underline">
+                        Adjust via Inventory
+                      </Link>
+                    )}
+                  </p>
                 </div>
               </div>
             </div>

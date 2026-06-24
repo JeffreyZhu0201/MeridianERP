@@ -9,7 +9,9 @@ import {
   OrderStatus,
   PlatformRole,
   Prisma,
+  PurchaseOrderStatus,
   SettlementBatchStatus,
+  StockAdjustmentReason,
 } from '@prisma/client';
 
 type Id = string;
@@ -38,6 +40,14 @@ export function createMockPrisma() {
   const orderLines = new Map<Id, OrderLineRecord>();
   const commissionLedgers = new Map<Id, CommissionLedgerRecord>();
   const settlementBatches = new Map<Id, SettlementBatchRecord>();
+  const inventorySettings = new Map<Id, TenantInventorySettingsRecord>();
+  const warehouses = new Map<Id, WarehouseRecord>();
+  const stockLevels = new Map<Id, StockLevelRecord>();
+  const stockAdjustments = new Map<Id, StockAdjustmentRecord>();
+  const purchaseOrders = new Map<Id, PurchaseOrderRecord>();
+  const purchaseOrderLines = new Map<Id, PurchaseOrderLineRecord>();
+  const purchaseOrderReceipts = new Map<Id, PurchaseOrderReceiptRecord>();
+  const purchaseOrderReceiptLines = new Map<Id, PurchaseOrderReceiptLineRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -199,6 +209,7 @@ export function createMockPrisma() {
     name: string;
     price: Prisma.Decimal;
     inventory: number;
+    reorderThreshold: number | null;
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -271,6 +282,87 @@ export function createMockPrisma() {
     exportedAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
+  }
+
+  interface TenantInventorySettingsRecord {
+    tenantId: Id;
+    defaultReorderThreshold: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface WarehouseRecord {
+    id: Id;
+    tenantId: Id;
+    name: string;
+    address: string | null;
+    isDefault: boolean;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface StockLevelRecord {
+    id: Id;
+    tenantId: Id;
+    warehouseId: Id;
+    variantId: Id;
+    quantityOnHand: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface StockAdjustmentRecord {
+    id: Id;
+    tenantId: Id;
+    warehouseId: Id;
+    variantId: Id;
+    actorId: Id;
+    reason: StockAdjustmentReason;
+    note: string | null;
+    quantityDelta: number;
+    quantityBefore: number;
+    quantityAfter: number;
+    createdAt: Date;
+  }
+
+  interface PurchaseOrderRecord {
+    id: Id;
+    tenantId: Id;
+    warehouseId: Id;
+    supplierName: string;
+    status: PurchaseOrderStatus;
+    poNumber: string;
+    createdById: Id;
+    orderedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface PurchaseOrderLineRecord {
+    id: Id;
+    purchaseOrderId: Id;
+    variantId: Id;
+    quantityOrdered: number;
+    quantityReceived: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface PurchaseOrderReceiptRecord {
+    id: Id;
+    tenantId: Id;
+    purchaseOrderId: Id;
+    receivedById: Id;
+    note: string | null;
+    createdAt: Date;
+  }
+
+  interface PurchaseOrderReceiptLineRecord {
+    id: Id;
+    receiptId: Id;
+    purchaseOrderLineId: Id;
+    quantityReceived: number;
   }
 
   const now = () => new Date();
@@ -437,6 +529,135 @@ export function createMockPrisma() {
       result.entries = [...commissionLedgers.values()]
         .filter((e) => e.settlementBatchId === batch.id)
         .map((e) => attachCommissionEntry(e, entriesInclude.include));
+    }
+    return result;
+  };
+
+  const filterStockLevels = (where: Record<string, unknown>) => {
+    let items = [...stockLevels.values()];
+    if (where.tenantId) items = items.filter((sl) => sl.tenantId === where.tenantId);
+    if (where.warehouseId) items = items.filter((sl) => sl.warehouseId === where.warehouseId);
+    if (where.variantId) items = items.filter((sl) => sl.variantId === where.variantId);
+    return items;
+  };
+
+  const attachStockLevel = (sl: StockLevelRecord, include?: Record<string, unknown>) => {
+    const result: Record<string, unknown> = { ...sl };
+    if (include?.warehouse) {
+      const warehouse = warehouses.get(sl.warehouseId);
+      if (warehouse) {
+        result.warehouse = { id: warehouse.id, name: warehouse.name, isDefault: warehouse.isDefault };
+      }
+    }
+    if (include?.variant) {
+      const variant = productVariants.get(sl.variantId);
+      if (variant) {
+        const product = products.get(variant.productId);
+        result.variant = {
+          ...variant,
+          product: product ? { name: product.name } : undefined,
+        };
+      }
+    }
+    return result;
+  };
+
+  const filterAdjustments = (where: Record<string, unknown>) => {
+    let items = [...stockAdjustments.values()];
+    if (where.tenantId) items = items.filter((a) => a.tenantId === where.tenantId);
+    if (where.warehouseId) items = items.filter((a) => a.warehouseId === where.warehouseId);
+    if (where.variantId) items = items.filter((a) => a.variantId === where.variantId);
+    if (where.reason) items = items.filter((a) => a.reason === where.reason);
+    if (where.createdAt && typeof where.createdAt === 'object') {
+      const createdAt = where.createdAt as { gte?: Date; lte?: Date };
+      if (createdAt.gte) items = items.filter((a) => a.createdAt >= createdAt.gte!);
+      if (createdAt.lte) items = items.filter((a) => a.createdAt <= createdAt.lte!);
+    }
+    return items;
+  };
+
+  const attachAdjustment = (adj: StockAdjustmentRecord, include?: Record<string, unknown>) => {
+    const result: Record<string, unknown> = { ...adj };
+    if (include?.actor) {
+      const actor = users.get(adj.actorId);
+      if (actor) result.actor = { id: actor.id, email: actor.email };
+    }
+    if (include?.warehouse) {
+      const warehouse = warehouses.get(adj.warehouseId);
+      if (warehouse) result.warehouse = { id: warehouse.id, name: warehouse.name };
+    }
+    if (include?.variant) {
+      const variant = productVariants.get(adj.variantId);
+      if (variant) {
+        const product = products.get(variant.productId);
+        result.variant = {
+          id: variant.id,
+          sku: variant.sku,
+          name: variant.name,
+          product: product ? { name: product.name } : undefined,
+        };
+      }
+    }
+    return result;
+  };
+
+  const filterPurchaseOrders = (where: Record<string, unknown>) => {
+    let items = [...purchaseOrders.values()];
+    if (where.tenantId) items = items.filter((po) => po.tenantId === where.tenantId);
+    if (where.id) items = items.filter((po) => po.id === where.id);
+    if (where.status) items = items.filter((po) => po.status === where.status);
+    if (where.warehouseId) items = items.filter((po) => po.warehouseId === where.warehouseId);
+    return items;
+  };
+
+  const attachPurchaseOrder = (po: PurchaseOrderRecord, include?: Record<string, unknown>) => {
+    const result: Record<string, unknown> = { ...po };
+    if (include?.warehouse) {
+      const warehouse = warehouses.get(po.warehouseId);
+      if (warehouse) result.warehouse = { id: warehouse.id, name: warehouse.name };
+    }
+    if (include?.createdBy) {
+      const user = users.get(po.createdById);
+      if (user) result.createdBy = { id: user.id, email: user.email };
+    }
+    if (include?.lines) {
+      result.lines = [...purchaseOrderLines.values()]
+        .filter((l) => l.purchaseOrderId === po.id)
+        .map((line) => {
+          const variant = productVariants.get(line.variantId);
+          const product = variant ? products.get(variant.productId) : null;
+          return {
+            ...line,
+            variant: variant
+              ? {
+                  id: variant.id,
+                  sku: variant.sku,
+                  name: variant.name,
+                  product: product ? { name: product.name } : undefined,
+                }
+              : undefined,
+          };
+        });
+    }
+    if (include?.receipts) {
+      result.receipts = [...purchaseOrderReceipts.values()]
+        .filter((r) => r.purchaseOrderId === po.id)
+        .map((receipt) => ({
+          ...receipt,
+          receivedBy: (() => {
+            const user = users.get(receipt.receivedById);
+            return user ? { id: user.id, email: user.email } : undefined;
+          })(),
+          lines: [...purchaseOrderReceiptLines.values()]
+            .filter((l) => l.receiptId === receipt.id)
+            .map((line) => ({
+              ...line,
+              purchaseOrderLine: (() => {
+                const pol = purchaseOrderLines.get(line.purchaseOrderLineId);
+                return pol ? { id: pol.id, variantId: pol.variantId } : undefined;
+              })(),
+            })),
+        }));
     }
     return result;
   };
@@ -1052,6 +1273,7 @@ export function createMockPrisma() {
               createdAt: now(),
               updatedAt: now(),
               inventory: v.inventory ?? 0,
+              reorderThreshold: null,
               isActive: v.isActive ?? true,
               ...v,
             };
@@ -1092,6 +1314,31 @@ export function createMockPrisma() {
       },
     },
     productVariant: {
+      findUnique: async ({
+        where,
+        select,
+        include,
+      }: {
+        where: { id: string };
+        select?: { inventory?: boolean };
+        include?: { product?: { select?: { tenantId?: boolean } } };
+      }) => {
+        const variant = productVariants.get(where.id) ?? null;
+        if (!variant) return null;
+        if (select?.inventory) {
+          return { inventory: variant.inventory };
+        }
+        if (include?.product) {
+          const product = products.get(variant.productId);
+          return {
+            ...variant,
+            product: product
+              ? { tenantId: product.tenantId }
+              : null,
+          };
+        }
+        return variant;
+      },
       findFirst: async ({
         where,
       }: {
@@ -1126,6 +1373,34 @@ export function createMockPrisma() {
         if (!variant) return null;
         return attachVariant(variant, { product: { select: { id: true, name: true, slug: true, isPublished: true } } });
       },
+      findMany: async ({
+        where,
+        select,
+      }: {
+        where?: { product?: { tenantId?: string }; id?: { in: string[] } };
+        select?: { id?: boolean; inventory?: boolean; reorderThreshold?: boolean };
+      }) => {
+        let items = [...productVariants.values()];
+        if (where?.product?.tenantId) {
+          items = items.filter((v) => {
+            const product = products.get(v.productId);
+            return product?.tenantId === where.product?.tenantId;
+          });
+        }
+        if (where?.id?.in) {
+          items = items.filter((v) => where.id!.in.includes(v.id));
+        }
+        if (select) {
+          return items.map((v) => {
+            const row: Record<string, unknown> = {};
+            if (select.id) row.id = v.id;
+            if (select.inventory) row.inventory = v.inventory;
+            if (select.reorderThreshold) row.reorderThreshold = v.reorderThreshold;
+            return row;
+          });
+        }
+        return items;
+      },
       createMany: async ({
         data,
       }: {
@@ -1136,6 +1411,7 @@ export function createMockPrisma() {
             id: nextId('var'),
             createdAt: now(),
             updatedAt: now(),
+            reorderThreshold: null,
             ...item,
           };
           productVariants.set(record.id, record);
@@ -1167,9 +1443,436 @@ export function createMockPrisma() {
         } else if (data.inventory && typeof data.inventory === 'object' && 'decrement' in data.inventory) {
           inventory -= data.inventory.decrement;
         }
-        const updated = { ...existing, ...data, inventory, updatedAt: now() };
+        const updated = {
+          ...existing,
+          ...data,
+          inventory,
+          reorderThreshold:
+            data.reorderThreshold !== undefined
+              ? data.reorderThreshold
+              : existing.reorderThreshold,
+          updatedAt: now(),
+        };
         productVariants.set(where.id, updated);
         return updated;
+      },
+    },
+    tenantInventorySettings: {
+      findUnique: async ({ where }: { where: { tenantId: string } }) =>
+        inventorySettings.get(where.tenantId) ?? null,
+      findUniqueOrThrow: async ({ where }: { where: { tenantId: string } }) => {
+        const settings = inventorySettings.get(where.tenantId);
+        if (!settings) throw new Error('Settings not found');
+        return settings;
+      },
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { tenantId: string };
+        create: Omit<TenantInventorySettingsRecord, 'createdAt' | 'updatedAt'>;
+        update: Partial<TenantInventorySettingsRecord>;
+      }) => {
+        const existing = inventorySettings.get(where.tenantId);
+        if (existing) {
+          const updated = { ...existing, ...update, updatedAt: now() };
+          inventorySettings.set(where.tenantId, updated);
+          return updated;
+        }
+        const record: TenantInventorySettingsRecord = {
+          createdAt: now(),
+          updatedAt: now(),
+          ...create,
+        };
+        inventorySettings.set(record.tenantId, record);
+        return record;
+      },
+    },
+    warehouse: {
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+      }: {
+        where: { tenantId?: string };
+        include?: { stockLevels?: { select?: Record<string, boolean> } };
+        orderBy?: Array<{ isDefault?: 'desc' | 'asc'; name?: 'asc' }>;
+      }) => {
+        let items = [...warehouses.values()];
+        if (where.tenantId) items = items.filter((w) => w.tenantId === where.tenantId);
+        if (orderBy) {
+          for (const ob of orderBy) {
+            if (ob.isDefault) {
+              items = items.sort((a, b) =>
+                ob.isDefault === 'desc'
+                  ? Number(b.isDefault) - Number(a.isDefault)
+                  : Number(a.isDefault) - Number(b.isDefault),
+              );
+            }
+            if (ob.name) {
+              items = items.sort((a, b) => a.name.localeCompare(b.name));
+            }
+          }
+        }
+        return items.map((w) => {
+          const row: Record<string, unknown> = { ...w };
+          if (include?.stockLevels) {
+            row.stockLevels = [...stockLevels.values()]
+              .filter((sl) => sl.warehouseId === w.id)
+              .map((sl) => ({ quantityOnHand: sl.quantityOnHand, variantId: sl.variantId }));
+          }
+          return row;
+        });
+      },
+      findFirst: async ({
+        where,
+      }: {
+        where: {
+          id?: string;
+          tenantId?: string;
+          isDefault?: boolean;
+          isActive?: boolean;
+        };
+      }) => {
+        let items = [...warehouses.values()];
+        if (where.id) items = items.filter((w) => w.id === where.id);
+        if (where.tenantId) items = items.filter((w) => w.tenantId === where.tenantId);
+        if (where.isDefault !== undefined) {
+          items = items.filter((w) => w.isDefault === where.isDefault);
+        }
+        if (where.isActive !== undefined) {
+          items = items.filter((w) => w.isActive === where.isActive);
+        }
+        return items[0] ?? null;
+      },
+      create: async ({
+        data,
+      }: {
+        data: Omit<WarehouseRecord, 'id' | 'createdAt' | 'updatedAt'>;
+      }) => {
+        const record: WarehouseRecord = {
+          id: nextId('wh'),
+          createdAt: now(),
+          updatedAt: now(),
+          address: data.address ?? null,
+          isDefault: data.isDefault ?? false,
+          isActive: data.isActive ?? true,
+          ...data,
+        };
+        warehouses.set(record.id, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<WarehouseRecord>;
+      }) => {
+        const existing = warehouses.get(where.id);
+        if (!existing) throw new Error('Warehouse not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        warehouses.set(where.id, updated);
+        return updated;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where: { tenantId?: string; isDefault?: boolean };
+        data: Partial<WarehouseRecord>;
+      }) => {
+        let count = 0;
+        for (const [id, w] of warehouses) {
+          if (where.tenantId && w.tenantId !== where.tenantId) continue;
+          if (where.isDefault !== undefined && w.isDefault !== where.isDefault) continue;
+          warehouses.set(id, { ...w, ...data, updatedAt: now() });
+          count++;
+        }
+        return { count };
+      },
+    },
+    stockLevel: {
+      findMany: async ({
+        where,
+        skip,
+        take,
+        include,
+        orderBy,
+      }: {
+        where: Record<string, unknown>;
+        skip?: number;
+        take?: number;
+        include?: Record<string, unknown>;
+        orderBy?: { updatedAt?: 'desc' };
+      }) => {
+        let items = filterStockLevels(where);
+        if (orderBy?.updatedAt === 'desc') {
+          items = items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+        }
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
+        }
+        return items.map((sl) => attachStockLevel(sl, include));
+      },
+      count: async ({ where }: { where: Record<string, unknown> }) =>
+        filterStockLevels(where).length,
+      findUnique: async ({
+        where,
+      }: {
+        where: { warehouseId_variantId: { warehouseId: string; variantId: string } };
+      }) => {
+        const { warehouseId, variantId } = where.warehouseId_variantId;
+        return (
+          [...stockLevels.values()].find(
+            (sl) => sl.warehouseId === warehouseId && sl.variantId === variantId,
+          ) ?? null
+        );
+      },
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { warehouseId_variantId: { warehouseId: string; variantId: string } };
+        create: Omit<StockLevelRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        update: Partial<StockLevelRecord>;
+      }) => {
+        const existing = await mock.stockLevel.findUnique({ where });
+        if (existing) {
+          const updated = { ...existing, ...update, updatedAt: now() };
+          stockLevels.set(existing.id, updated);
+          return updated;
+        }
+        const record: StockLevelRecord = {
+          id: nextId('sl'),
+          createdAt: now(),
+          updatedAt: now(),
+          ...create,
+        };
+        stockLevels.set(record.id, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<StockLevelRecord>;
+      }) => {
+        const existing = stockLevels.get(where.id);
+        if (!existing) throw new Error('Stock level not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        stockLevels.set(where.id, updated);
+        return updated;
+      },
+    },
+    stockAdjustment: {
+      findMany: async ({
+        where,
+        skip,
+        take,
+        orderBy,
+        include,
+      }: {
+        where: Record<string, unknown>;
+        skip?: number;
+        take?: number;
+        orderBy?: { createdAt: 'desc' };
+        include?: Record<string, unknown>;
+      }) => {
+        let items = filterAdjustments(where);
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
+        }
+        return items.map((a) => attachAdjustment(a, include));
+      },
+      count: async ({ where }: { where: Record<string, unknown> }) =>
+        filterAdjustments(where).length,
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Omit<StockAdjustmentRecord, 'id' | 'createdAt'>;
+        include?: Record<string, unknown>;
+      }) => {
+        const record: StockAdjustmentRecord = {
+          id: nextId('adj'),
+          createdAt: now(),
+          ...data,
+        };
+        stockAdjustments.set(record.id, record);
+        return attachAdjustment(record, include);
+      },
+    },
+    purchaseOrder: {
+      findMany: async ({
+        where,
+        skip,
+        take,
+        orderBy,
+        include,
+      }: {
+        where: Record<string, unknown>;
+        skip?: number;
+        take?: number;
+        orderBy?: { createdAt: 'desc' };
+        include?: Record<string, unknown>;
+      }) => {
+        let items = filterPurchaseOrders(where);
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
+        }
+        return items.map((po) => attachPurchaseOrder(po, include));
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where: Record<string, unknown>;
+        include?: Record<string, unknown>;
+      }) => {
+        const po = filterPurchaseOrders(where)[0];
+        if (!po) return null;
+        return attachPurchaseOrder(po, include);
+      },
+      count: async ({ where }: { where: Record<string, unknown> }) =>
+        filterPurchaseOrders(where).length,
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Omit<PurchaseOrderRecord, 'id' | 'createdAt' | 'updatedAt'> & {
+          lines?: { create: Array<Omit<PurchaseOrderLineRecord, 'id' | 'purchaseOrderId' | 'createdAt' | 'updatedAt' | 'quantityReceived'>> };
+        };
+        include?: Record<string, unknown>;
+      }) => {
+        const { lines, ...poData } = data;
+        const record: PurchaseOrderRecord = {
+          id: nextId('po'),
+          createdAt: now(),
+          updatedAt: now(),
+          orderedAt: poData.orderedAt ?? null,
+          ...poData,
+        };
+        purchaseOrders.set(record.id, record);
+        if (lines?.create) {
+          for (const line of lines.create) {
+            const poLine: PurchaseOrderLineRecord = {
+              id: nextId('pol'),
+              purchaseOrderId: record.id,
+              quantityReceived: 0,
+              createdAt: now(),
+              updatedAt: now(),
+              ...line,
+            };
+            purchaseOrderLines.set(poLine.id, poLine);
+          }
+        }
+        return attachPurchaseOrder(record, include);
+      },
+      update: async ({
+        where,
+        data,
+        include,
+      }: {
+        where: { id: string };
+        data: Partial<PurchaseOrderRecord>;
+        include?: Record<string, unknown>;
+      }) => {
+        const existing = purchaseOrders.get(where.id);
+        if (!existing) throw new Error('PO not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        purchaseOrders.set(where.id, updated);
+        return attachPurchaseOrder(updated, include);
+      },
+    },
+    purchaseOrderLine: {
+      findMany: async ({ where }: { where: { purchaseOrderId?: string } }) => {
+        let items = [...purchaseOrderLines.values()];
+        if (where.purchaseOrderId) {
+          items = items.filter((l) => l.purchaseOrderId === where.purchaseOrderId);
+        }
+        return items;
+      },
+      deleteMany: async ({ where }: { where: { purchaseOrderId: string } }) => {
+        let count = 0;
+        for (const [id, line] of purchaseOrderLines) {
+          if (line.purchaseOrderId === where.purchaseOrderId) {
+            purchaseOrderLines.delete(id);
+            count++;
+          }
+        }
+        return { count };
+      },
+      createMany: async ({
+        data,
+      }: {
+        data: Array<Omit<PurchaseOrderLineRecord, 'id' | 'createdAt' | 'updatedAt' | 'quantityReceived'>>;
+      }) => {
+        for (const item of data) {
+          const record: PurchaseOrderLineRecord = {
+            id: nextId('pol'),
+            quantityReceived: 0,
+            createdAt: now(),
+            updatedAt: now(),
+            ...item,
+          };
+          purchaseOrderLines.set(record.id, record);
+        }
+        return { count: data.length };
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<PurchaseOrderLineRecord>;
+      }) => {
+        const existing = purchaseOrderLines.get(where.id);
+        if (!existing) throw new Error('PO line not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        purchaseOrderLines.set(where.id, updated);
+        return updated;
+      },
+    },
+    purchaseOrderReceipt: {
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Omit<PurchaseOrderReceiptRecord, 'id' | 'createdAt'> & {
+          lines?: { create: Array<{ purchaseOrderLineId: string; quantityReceived: number }> };
+        };
+        include?: { lines?: boolean };
+      }) => {
+        const { lines, ...receiptData } = data;
+        const record: PurchaseOrderReceiptRecord = {
+          id: nextId('por'),
+          createdAt: now(),
+          ...receiptData,
+        };
+        purchaseOrderReceipts.set(record.id, record);
+        const createdLines: PurchaseOrderReceiptLineRecord[] = [];
+        if (lines?.create) {
+          for (const line of lines.create) {
+            const rl: PurchaseOrderReceiptLineRecord = {
+              id: nextId('porl'),
+              receiptId: record.id,
+              ...line,
+            };
+            purchaseOrderReceiptLines.set(rl.id, rl);
+            createdLines.push(rl);
+          }
+        }
+        return include?.lines ? { ...record, lines: createdLines } : record;
       },
     },
     cart: {

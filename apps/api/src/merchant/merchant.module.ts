@@ -18,11 +18,13 @@ import { ActivitiesController } from './crm/activities/activities.controller';
 import { ActivitiesService } from './crm/activities/activities.service';
 import { DistributorsController } from './distributors/distributors.controller';
 import { DistributorsService } from './distributors/distributors.service';
+import { InventoryModule } from '../inventory/inventory.module';
+import { MerchantInventoryModule } from './inventory/merchant-inventory.module';
 import { MerchantOrdersController } from './orders/merchant-orders.controller';
 import { MerchantOrdersService } from './orders/merchant-orders.service';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, InventoryModule, MerchantInventoryModule],
   controllers: [
     MerchantAuthController,
     OnboardingController,

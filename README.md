@@ -35,7 +35,7 @@ e2e/              Playwright smoke tests
 |-------|-------|--------|
 | 1 | Auth, CRM, onboarding, distributor QR | **Complete** |
 | 2 | E-commerce store, commission settlement | **Complete** |
-| 3 | Inventory, reports, advanced ERP | Planned |
+| 3 | Inventory, warehouses, purchase orders | **Complete** |
 
 ## Quick start
 
@@ -106,6 +106,17 @@ pnpm test:e2e:ui                        # interactive debug UI
 pnpm test:e2e:debug -- e2e/phase-2-store.spec.ts
 ```
 
+## Phase 3 deliverables
+
+| Area | Endpoints / routes |
+|------|-------------------|
+| Merchant inventory | `/api/v1/merchant/inventory/*` — settings, warehouses, stock-levels, adjustments, low-stock, POs, reports + CSV |
+| Platform inventory | `GET /api/v1/platform/inventory/tenants/:tenantId/*` (read-only) |
+| Checkout | Sellable qty + decrement via `InventoryService` (default warehouse) |
+| Merchant UI | `/inventory/warehouses`, `/stock`, `/adjustments`, `/alerts`, `/purchase-orders`, `/reports`, `/settings` |
+| Admin UI | `/inventory/tenants/[tenantId]` |
+| Demo seed | Default Warehouse + stock levels for `demo` tenant (`DEMO-001`: 100 units) |
+
 ## Phase 2 deliverables
 
 | Area | Endpoints / routes |
@@ -130,7 +141,11 @@ pnpm test:e2e:debug -- e2e/phase-2-store.spec.ts
 | Phase 2 PRD | [docs/prd/phase-2-ecommerce.md](docs/prd/phase-2-ecommerce.md) |
 | Phase 2 architecture | [docs/architecture/phase-2-ecommerce.md](docs/architecture/phase-2-ecommerce.md) |
 | Phase 2 store design | [docs/design/phase-2-store.md](docs/design/phase-2-store.md) |
-| **Phase 2 implementation plan** | [docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md](docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md) |
+| Phase 2 implementation plan | [docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md](docs/superpowers/plans/2025-06-24-phase-2-ecommerce.md) |
+| Phase 3 PRD | [docs/prd/phase-3-inventory.md](docs/prd/phase-3-inventory.md) |
+| Phase 3 architecture | [docs/architecture/phase-3-inventory.md](docs/architecture/phase-3-inventory.md) |
+| Phase 3 design | [docs/design/phase-3-inventory.md](docs/design/phase-3-inventory.md) |
+| **Phase 3 implementation plan** | [docs/superpowers/plans/2025-06-24-phase-3-inventory.md](docs/superpowers/plans/2025-06-24-phase-3-inventory.md) |
 | Execution guide | [docs/execution/README.md](docs/execution/README.md) |
 | **Git & PR workflow** | [docs/execution/git-workflow.md](docs/execution/git-workflow.md) |
 

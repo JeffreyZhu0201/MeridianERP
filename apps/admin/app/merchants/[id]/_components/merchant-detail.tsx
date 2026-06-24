@@ -85,6 +85,13 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
               Reject
             </Button>
           </div>
+        ) : merchant.tenantId ? (
+          <Link
+            href={`/inventory/tenants/${merchant.tenantId}`}
+            className="inline-flex h-9 items-center rounded-full border border-input bg-background px-4 text-sm font-medium hover:bg-accent"
+          >
+            View inventory
+          </Link>
         ) : null}
       </div>
 

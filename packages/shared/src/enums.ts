@@ -58,3 +58,18 @@ export enum SettlementBatchStatus {
   EXPORTED = 'EXPORTED',
   PAID = 'PAID',
 }
+
+export enum PurchaseOrderStatus {
+  DRAFT = 'DRAFT',
+  ORDERED = 'ORDERED',
+  PARTIALLY_RECEIVED = 'PARTIALLY_RECEIVED',
+  RECEIVED = 'RECEIVED',
+  CANCELLED = 'CANCELLED',
+}
+
+export enum StockAdjustmentReason {
+  DAMAGE = 'DAMAGE',
+  COUNT_CORRECTION = 'COUNT_CORRECTION',
+  RETURN = 'RETURN',
+  OTHER = 'OTHER',
+}

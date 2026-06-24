@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { CommissionModule } from '../commission/commission.module';
+import { InventoryModule } from '../inventory/inventory.module';
 import { PaymentModule } from '../payment/payment.module';
 import { QueueModule } from '../queue/queue.module';
 import { StoreAuthController } from './auth/store-auth.controller';
@@ -14,7 +15,7 @@ import { StoreCheckoutService } from './checkout/store-checkout.service';
 import { StoreTenantService } from './common/store-tenant.service';
 
 @Module({
-  imports: [AuthModule, PaymentModule, CommissionModule, QueueModule],
+  imports: [AuthModule, PaymentModule, CommissionModule, QueueModule, InventoryModule],
   controllers: [
     StoreAuthController,
     StoreCatalogController,
