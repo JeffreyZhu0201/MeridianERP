@@ -1,0 +1,52 @@
+---
+description: MeridianERP tech stack conventions for TypeScript monorepo
+alwaysApply: true
+---
+
+# Tech Stack
+
+## Monorepo layout
+
+```
+apps/admin/      # Super admin ERP (Next.js + shadcn)
+apps/merchant/   # Merchant portal (Next.js + shadcn)
+apps/store/      # E-commerce (Next.js, Phase 2)
+apps/api/        # NestJS API
+packages/shared/ # DTOs, types, Zod schemas, enums
+packages/ui/     # Shared shadcn shells, layout, data-table
+docker/          # Compose, Dockerfiles
+docs/prd/        # Product requirements
+docs/architecture/
+docs/design/
+docs/execution/  # Agent workflow and runbooks
+```
+
+## Stack
+
+- **Language**: TypeScript strict mode everywhere
+- **Package manager**: pnpm workspaces + Turborepo
+- **Frontend**: Next.js App Router, shadcn/ui, Tailwind CSS v4
+- **Backend**: NestJS modules/controllers/services
+- **Database**: PostgreSQL via Prisma (`apps/api/prisma/`)
+- **Cache**: Redis via `@nestjs/cache-manager`
+- **Queue**: BullMQ backed by Redis
+- **Containers**: Docker Compose — `postgres`, `redis`, `api`, `admin`, `merchant`
+
+## Shared contracts
+
+- API types and Zod schemas live in `packages/shared`
+- Import as `@meridian/shared` across all apps
+- UI shells and shared components in `packages/ui` as `@meridian/ui`
+
+## Environment
+
+- Secrets in `.env` (gitignored); document keys in `.env.example`
+- Local dev: `docker compose --profile dev up`
+- API: `http://localhost:3001`, Admin: `3000`, Merchant: `3002`
+
+## Key docs
+
+- Platform spec: `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md`
+- Phase 1 plan: `docs/superpowers/plans/2025-06-24-phase-1-foundation.md`
+- Design system: `docs/design/design-system.md`
+- Execution guide: `docs/execution/README.md`
