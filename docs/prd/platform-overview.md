@@ -1,8 +1,8 @@
 # MeridianERP — Platform Overview
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Last updated:** 2025-06-25  
-**Status:** Phases 1–4 core complete; storefront commerce + settings + distributor portal delivered
+**Status:** Phases 1–4 core complete; Phase 5 PRD drafted (distribution network & factory allocation)
 
 ## Executive Summary
 
@@ -27,9 +27,23 @@ JWT realms: `admin`, `merchant`, `store`, `distributor` — separate cookie name
 | **2** E-commerce | Catalog, cart, checkout, commission, settlements | ✅ Complete | ⚠️ Partial | ⚠️ Catalog only | ✅ Core |
 | **3** Inventory | Warehouses, adjustments, POs, transfers, reports | ✅ Complete | ⚠️ Read-only | ✅ Complete | N/A |
 | **4** Distributor | Bindings, commissions, distributor portal | ✅ Complete | ⚠️ Partial | ✅ Complete | N/A |
+| **5** Distribution & allocation | Unified store, invite hierarchy, withdrawals, factory catalog & CRM | ❌ Not started | ❌ Not started | ❌ Not started | ❌ Not started |
 | **Settings** | Platform + tenant settings, team management | ✅ Complete | ✅ | ✅ | N/A |
 
 **Legend:** ✅ Complete · ⚠️ Partial · ❌ Not started
+
+### Phase 5 — Distribution & factory allocation (planned)
+
+| Capability | Scope | PRD |
+|------------|-------|-----|
+| Unified store entry + store picker | `apps/store` `/` | US-5.1, US-5.2 |
+| 6-char invite codes + distributor tree | Merchant + API | US-5.4–US-5.7, US-5.18 |
+| Customer promotion toggle | Merchant Settings | US-5.3 (US-5.8 P1) |
+| Distributor upline view + withdrawal requests | `apps/distributor`, merchant approve | US-5.10–US-5.13 |
+| Platform CRM + master SKU catalog | `apps/admin` | US-5.14, US-5.15 |
+| Factory allocation + merchant replenishment requests | Admin + merchant | US-5.16, US-5.17 |
+
+See `docs/prd/phase-5-distribution-and-allocation.md` for full stories and release slices.
 
 ## Domain Capabilities (as implemented)
 
@@ -106,13 +120,14 @@ JWT realms: `admin`, `merchant`, `store`, `distributor` — separate cookie name
 | Platform design spec | `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md` |
 | Platform settings PRD | `docs/prd/platform-settings.md` |
 | Distributor portal PRD | `docs/prd/distributor-portal.md` |
+| Phase 5 distribution & allocation PRD | `docs/prd/phase-5-distribution-and-allocation.md` |
 | Gaps epic handoffs | `docs/handoffs/gaps-wave-*.md` |
 | Design system | `docs/design/design-system.md` |
 
 ## Recommended Next Work
 
-1. **Merchant orders UI (G-11)** — wire `GET /merchant/orders` to merchant portal
-2. **CRM activities UI (G-10)** — complete Phase 1 US-7
-3. **Platform dashboard API (G-3)** — real metrics for admin home
-4. **Admin merchant detail enrichment (G-4)**
-5. **Store customer QR bind (G-7)** — end-to-end attribution in storefront UI
+1. **Phase 5 architecture** — `docs/architecture/phase-5-distribution-and-allocation.md` (invite codes, hierarchy, factory catalog, allocation)
+2. **Phase 5 Slice 1** — unified store picker + invite registration bind (US-5.1, US-5.5, US-5.6, US-5.18)
+3. **Merchant orders UI (G-11)** — wire `GET /merchant/orders` to merchant portal
+4. **Store customer QR bind (G-7)** — end-to-end attribution in storefront UI
+5. **Platform dashboard API (G-3)** — real metrics for admin home

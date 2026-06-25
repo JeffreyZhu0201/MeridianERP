@@ -39,7 +39,7 @@ export function StoreShell({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-10 border-b bg-background">
+      <header className="sticky top-0 z-10 border-b border-border/50 bg-background">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
           <Link
             href={base}
@@ -121,7 +121,7 @@ export function StoreShell({
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
 
-      <footer className="border-t py-6">
+      <footer className="border-t border-border/50 py-6">
         <div className="mx-auto max-w-6xl px-4 text-center text-xs text-muted-foreground">
           {tc('poweredBy')}
         </div>

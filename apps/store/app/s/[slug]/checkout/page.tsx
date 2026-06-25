@@ -3,7 +3,7 @@ import { FormPageFrame } from '@meridian/ui';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
-import { getServerCartSession } from '@/lib/cart-session';
+import { getServerCartSession } from '@/lib/cart-session.server';
 import { getToken } from '@/lib/auth';
 import { CheckoutForm } from './_components/checkout-form';
 

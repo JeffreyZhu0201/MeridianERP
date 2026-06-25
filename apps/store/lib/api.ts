@@ -6,7 +6,7 @@ import {
 
 export type { BindVerifyResponse, StoreClaimBindingResponse };
 
-import { ensureCartSessionId } from './cart-session';
+import { ensureCartSessionId } from './cart-session.client';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 export const STORE_APP_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';

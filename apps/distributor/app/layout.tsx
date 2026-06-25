@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getLocale, getMessages } from 'next-intl/server';
+import { getLocale, getMessages, getTimeZone } from 'next-intl/server';
 import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui';
 
 import { DistributorHeader } from '@/components/distributor-header';
@@ -19,12 +19,13 @@ export default async function RootLayout({
 }) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const timeZone = await getTimeZone();
   const token = await getToken();
 
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <PortalLocaleProvider locale={locale} messages={messages}>
+        <PortalLocaleProvider locale={locale} messages={messages} timeZone={timeZone}>
           <PortalThemeProvider storageKey="meridian-theme-distributor">
             {token ? <DistributorHeader /> : null}
             <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>

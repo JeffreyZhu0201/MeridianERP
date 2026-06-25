@@ -36,7 +36,7 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         role="dialog"
         aria-modal
         aria-labelledby="dialog-title"
-        className="relative z-50 w-full max-w-lg rounded-xl border bg-background p-6 shadow-lg"
+        className="relative z-50 w-full max-w-lg rounded-xl bg-background p-6 ring-1 ring-foreground/10"
       >
         <h2 id="dialog-title" className="text-lg font-medium">
           {title}

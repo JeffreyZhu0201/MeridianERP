@@ -95,14 +95,14 @@ Define in `packages/ui/styles/globals.css` and import in each app.
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 240 4% 10%;
-  --input: 240 4% 10%;
+  --border: 0 0% 100% / 0.08;
+  --input: 240 3.7% 15.9%;
   --ring: 217 91% 60%;
-  --sidebar-border: 240 4% 10%;
+  --sidebar-border: 0 0% 100% / 0.08;
 }
 ```
 
-Dark mode borders use lower lightness (`10%`) than secondary surfaces (`15.9%`) so table rows, cards, and shell dividers read as soft gray rather than bright lines.
+Dark mode uses **alpha hairlines** for borders (`8%` white) and decouples `--input` from `--border` so form controls can use `dark:bg-input/30`. Cards and overlays use `ring-1 ring-foreground/10` instead of `border` + `shadow`. See [`dark-mode-borders.md`](./dark-mode-borders.md).
 
 ### Locale (i18n)
 

@@ -698,6 +698,72 @@ export default function ComponentShowcase() {
         </div>
       </div>
 
+      {/* Dark mode borders — regression reference for portal tokens */}
+      <section id="dark-mode-borders" className="mt-16 flex flex-col gap-10 border-t border-border/50 pt-12">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Dark mode / Borders</h2>
+          <p className="text-sm text-muted-foreground">
+            Toggle dark mode above. Borders use 8% white alpha hairlines; surfaces use ring-1 ring-foreground/10.
+            Portals mirror these tokens via packages/ui/styles/globals.css.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Card &amp; outline button</CardTitle>
+              <CardDescription>ring-1 ring-foreground/10 — no border + shadow stack.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap items-center gap-4">
+              <Button variant="outline">Outline</Button>
+              <Input placeholder="Input with dark:bg-input/30" className="max-w-xs" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Table dividers</CardTitle>
+              <CardDescription>Row borders inherit softened --border token.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Qty</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>WDG-001</TableCell>
+                    <TableCell>24</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>WDG-002</TableCell>
+                    <TableCell>8</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Shell header divider</CardTitle>
+              <CardDescription>border-border/50 hairline — ERP and Store shell headers.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-hidden rounded-lg ring-1 ring-foreground/10">
+                <div className="flex h-10 items-center border-b border-border/50 px-4 text-xs text-muted-foreground">
+                  Header · LocaleToggle · ModeToggle
+                </div>
+                <div className="bg-muted/30 p-4 text-xs text-muted-foreground">Main content area</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* shadcn blocks — page frameworks (portal reference) */}
       <section className="mt-16 flex flex-col gap-10 border-t pt-12">
         <div>

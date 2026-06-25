@@ -48,7 +48,7 @@ export function AuthLayout({
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </div>
-        <Card className="border shadow-sm">
+        <Card>
           <CardContent className="pt-6">{children}</CardContent>
         </Card>
         {footer ? <div className="text-center text-sm text-muted-foreground">{footer}</div> : null}

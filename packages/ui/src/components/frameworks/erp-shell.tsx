@@ -53,7 +53,7 @@ export function ErpShell({
         {sidebarFooter ? <SidebarFooter>{sidebarFooter}</SidebarFooter> : null}
       </Sidebar>
       <SidebarInset className={className}>
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/50 px-4">
           <SidebarTrigger />
           {headerStart}
           <div className="ml-auto flex items-center gap-2">

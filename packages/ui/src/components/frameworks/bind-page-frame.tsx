@@ -37,7 +37,7 @@ export function BindPageFrame({
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
         </div>
-        <Card className="border shadow-sm">
+        <Card>
           <CardContent className="space-y-6 pt-6">{children}</CardContent>
         </Card>
         {footer ? <div className="text-center text-sm text-muted-foreground">{footer}</div> : null}

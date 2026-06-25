@@ -28,7 +28,7 @@ export function ShellFrame({ sidebar, header, children, className }: ShellFrameP
       </Sheet>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border/50 px-4">
           <button
             type="button"
             className="inline-flex size-9 items-center justify-center rounded-md hover:bg-muted md:hidden"
