@@ -43,7 +43,7 @@ docs/execution/  # Agent workflow and runbooks
 ## Environment
 
 - Secrets in `.env` (gitignored); document keys in `.env.example`
-- **Local dev (default):** `rtk pnpm deps` (Redis) + **one terminal per app** — `rtk pnpm dev:api`, `dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor`. See root `README.md`. Do not put shell comments on the same line as `pnpm dev:*`.
+- **Local dev (default):** `rtk pnpm deps` (Redis) + `rtk pnpm dev` (API + all portals via Turborepo). Per-app: `dev:api`, `dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor`. See root `README.md`. Do not put shell comments on the same line as `pnpm dev:*`.
 - **Docker full stack (optional):** `docker compose -f docker/docker-compose.yml --profile dev up`
 - API: `http://localhost:3001`, Admin: `3000`, Merchant: `3002`, Store: `3003`, Distributor: `3005`
 

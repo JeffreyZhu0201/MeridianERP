@@ -76,7 +76,7 @@ pnpm db:setup
 `pnpm deps` starts Redis only (`docker compose … up -d redis`).  
 `pnpm db:setup` runs Prisma generate, migrate, and seed.
 
-### 2. Daily development — one terminal per service
+### 2. Daily development
 
 **Infrastructure** (once per machine, or after reboot):
 
@@ -86,28 +86,32 @@ rtk pnpm deps
 
 Starts Redis only. For local Postgres: `docker compose -f docker/docker-compose.yml up -d postgres redis`.
 
-**Applications** — open a **separate terminal** for each service you need. Start the API first; portals depend on it.
-
-| Order | Service | Command | URL |
-|-------|---------|---------|-----|
-| 1 | API | `rtk pnpm dev:api` | http://localhost:3001 |
-| 2 | Admin | `rtk pnpm dev:admin` | http://localhost:3000 |
-| 3 | Merchant | `rtk pnpm dev:merchant` | http://localhost:3002 |
-| 4 | Store | `rtk pnpm dev:store` | http://localhost:3003/s/demo |
-| 5 | Distributor | `rtk pnpm dev:distributor` | http://localhost:3005 |
-| — | UI spec (optional) | `rtk pnpm dev:ui-spec` | http://localhost:3004 |
-
-Copy-paste **one command per line**. Shell comments on the same line are passed as CLI args and break Next.js:
+**Applications** — one command starts API + all portals (Turborepo, parallel):
 
 ```bash
-# wrong — Next.js receives "#" and Chinese text as directories
-rtk pnpm dev:admin    # 3000
-
-# correct
-rtk pnpm dev:admin
+rtk pnpm dev
 ```
 
-**Do not** use `pnpm dev` for day-to-day work — it runs Turborepo and starts every app in one process tree. Use the per-service commands above.
+| Service | URL |
+|---------|-----|
+| API | http://localhost:3001 |
+| Admin | http://localhost:3000 |
+| Merchant | http://localhost:3002 |
+| Store | http://localhost:3003/s/demo |
+| Distributor | http://localhost:3005 |
+
+**Single service** (lighter logs, or when only one portal is needed):
+
+| Service | Command |
+|---------|---------|
+| API | `rtk pnpm dev:api` |
+| Admin | `rtk pnpm dev:admin` |
+| Merchant | `rtk pnpm dev:merchant` |
+| Store | `rtk pnpm dev:store` |
+| Distributor | `rtk pnpm dev:distributor` |
+| UI spec (optional) | `rtk pnpm dev:ui-spec` → http://localhost:3004 |
+
+Do not put shell comments on the same line as `pnpm dev:*` — Next.js treats them as CLI args and fails.
 
 **Locale:** Header language toggle (EN / 中文); preference stored in `meridian_locale_<portal>` cookie. Messages live in `packages/shared/src/i18n/`.
 
@@ -142,8 +146,8 @@ docker compose -f docker/docker-compose.yml --profile dev up --build
 
 | Symptom | Fix |
 |---------|-----|
-| Port 3000/3001/3002/3003 won’t open | Run that service’s `rtk pnpm dev:*` in its **own** terminal |
-| Page hangs or never loads | `lsof -i :3000` then `kill <PID>`; restart `rtk pnpm dev:admin` |
+| Port 3000/3001/3002/3003 won’t open | Restart `rtk pnpm dev`, or run that service’s `rtk pnpm dev:*` alone |
+| Page hangs or never loads | `lsof -i :3000` then `kill <PID>`; restart `rtk pnpm dev` |
 | `Invalid project directory … /#` | Comment on same line as command — use `rtk pnpm dev:admin` alone |
 | API errors / empty dashboards | Start `rtk pnpm dev:api` first; `NEXT_PUBLIC_API_URL=http://localhost:3001` |
 | `JWT_DISTRIBUTOR_SECRET` missing | Add to `.env` from `.env.example`, restart API |
