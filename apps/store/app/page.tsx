@@ -1,23 +1,25 @@
 import Link from 'next/link';
-import { Card, CardContent } from '@meridian/ui';
+import { getTranslations } from 'next-intl/server';
+import { AuthStatusFrame } from '@meridian/ui';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const t = await getTranslations('store');
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="space-y-4 p-6 pt-6 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">MeridianERP Store</h1>
-          <p className="text-sm text-muted-foreground">
-            Visit a store at <code className="text-foreground">/s/your-store-slug</code>
-          </p>
-          <Link
-            href="/s/demo"
-            className="inline-block text-sm text-primary hover:underline"
-          >
-            Try demo store →
-          </Link>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthStatusFrame
+      subtitle={t('home.portalSubtitle')}
+      title={t('home.title')}
+      description={
+        <>
+          {t('home.visitPath')}{' '}
+          <code className="text-foreground">/s/your-store-slug</code>
+        </>
+      }
+      footer={
+        <Link href="/s/demo" className="text-sm text-primary hover:underline">
+          {t('home.tryDemo')}
+        </Link>
+      }
+    />
   );
 }

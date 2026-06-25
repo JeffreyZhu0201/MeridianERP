@@ -25,9 +25,9 @@ Open the showcase to preview every allowed component in light/dark mode.
 
 ## Agent workflow
 
-1. **ui-designer** — Read showcase + tokens; write `docs/design/<feature>.md` with component mappings (e.g. `Table`, `Dialog`, `Badge variant="destructive"`).
-2. **nextjs-frontend** — Implement portals using the same primitives; mirror APIs from `src/components/ui/` into `packages/ui` or app `components/ui/`.
-3. **New primitive or token** — Add to ui-spec first, then propagate to `packages/ui` and portal apps.
+1. **ui-designer** — Read `src/app/page.tsx` showcase; write `docs/design/<feature>.md` with **ui-spec example mappings** per screen (e.g. `Table`, `Dialog`, `Badge variant="destructive"`).
+2. **nextjs-frontend** — Implement portals by **mirroring showcase compositions**; sync primitives from `src/components/ui/` into `packages/ui` or app `components/ui/`.
+3. **New primitive or pattern** — Add example to ui-spec showcase first, then propagate to `packages/ui` and portal apps.
 
 ## Stack
 

@@ -1,6 +1,27 @@
+export { AuthLayout, type AuthLayoutProps } from './components/auth-layout';
 export { AdminShell, type AdminShellProps } from './components/shells/admin-shell';
+/** @deprecated Use ErpShell instead */
+export { ShellFrame, type ShellFrameProps } from './components/shells/shell-frame';
 export { MerchantShell, type MerchantShellProps } from './components/shells/merchant-shell';
 export { StoreShell, type StoreShellProps } from './components/shells/store-shell';
+export { ErpShell, type ErpShellProps } from './components/frameworks/erp-shell';
+export {
+  ListPageFrame,
+  type ListPageFrameProps,
+  DetailPageFrame,
+  type DetailPageFrameProps,
+  FormPageFrame,
+  type FormPageFrameProps,
+  SettingsPageFrame,
+  type SettingsPageFrameProps,
+  BindPageFrame,
+  type BindPageFrameProps,
+  DashboardPageFrame,
+  type DashboardPageFrameProps,
+  AuthStatusFrame,
+  type AuthStatusFrameProps,
+} from './components/frameworks';
+export { ThemeProvider, ModeToggle, LocaleToggle, PortalThemeProvider, PortalLocaleProvider, AuthToolbar } from './components/theme';
 export { ProductCard, type ProductCardProps } from './components/product-card';
 export { CartDrawer, type CartDrawerItem, type CartDrawerProps } from './components/cart-drawer';
 export { MetricCard, type MetricCardProps } from './components/metric-card';
@@ -22,7 +43,35 @@ export {
   TableHead,
   TableCell,
 } from './components/ui/table';
-export { Dialog, DialogCloseButton, Skeleton } from './components/ui/dialog';
+export { Dialog, DialogCloseButton, Skeleton as DialogSkeleton } from './components/ui/dialog';
 export { Sheet, SheetFooter } from './components/ui/sheet';
 export { Select } from './components/ui/select';
+export { Skeleton } from './components/ui/skeleton';
+export { Separator } from './components/ui/separator';
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from './components/ui/breadcrumb';
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from './components/ui/sidebar';
 export { cn } from './lib/utils';

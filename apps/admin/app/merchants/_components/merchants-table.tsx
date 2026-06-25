@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
-  Dialog,
-  DialogCloseButton,
   Table,
   TableBody,
   TableCell,
@@ -28,6 +27,7 @@ interface MerchantsTableProps {
 
 export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
   const router = useRouter();
+  const t = useTranslations('admin.merchants');
   const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
@@ -39,7 +39,7 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
       setApproveId(null);
       router.refresh();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Approve failed');
+      setActionError(err instanceof Error ? err.message : t('approveFailed'));
     }
   }
 
@@ -48,20 +48,20 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
     try {
       await apiFetch(
         `/platform/merchants/${id}/reject`,
-        { method: 'POST', body: JSON.stringify({ rejectionReason: reason }) },
+        { method: 'POST', body: JSON.stringify({ reason }) },
         token,
       );
       setRejectId(null);
       router.refresh();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Reject failed');
+      setActionError(err instanceof Error ? err.message : t('rejectFailed'));
     }
   }
 
   if (merchants.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">No merchants yet</p>
+        <p className="text-muted-foreground">{t('emptyTable')}</p>
       </div>
     );
   }
@@ -73,11 +73,11 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Business Name</TableHead>
-              <TableHead>Contact Email</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Submitted</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('columns.businessName')}</TableHead>
+              <TableHead>{t('columns.contactEmail')}</TableHead>
+              <TableHead>{t('columns.status')}</TableHead>
+              <TableHead>{t('columns.submitted')}</TableHead>
+              <TableHead className="text-right">{t('columns.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -97,21 +97,21 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
                   <div className="flex justify-end gap-2">
                     <Link href={`/merchants/${merchant.id}`}>
                       <Button variant="outline" size="sm">
-                        View
+                        {t('view')}
                       </Button>
                     </Link>
                     {merchant.onboardingStatus === OnboardingStatus.SUBMITTED ||
                     merchant.onboardingStatus === OnboardingStatus.UNDER_REVIEW ? (
                       <>
                         <Button size="sm" onClick={() => setApproveId(merchant.id)}>
-                          Approve
+                          {t('approve')}
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => setRejectId(merchant.id)}
                         >
-                          Reject
+                          {t('reject')}
                         </Button>
                       </>
                     ) : null}

@@ -95,11 +95,26 @@ Define in `packages/ui/styles/globals.css` and import in each app.
   --accent-foreground: 0 0% 98%;
   --destructive: 0 62% 50%;
   --destructive-foreground: 0 0% 100%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
+  --border: 240 4% 10%;
+  --input: 240 4% 10%;
   --ring: 217 91% 60%;
+  --sidebar-border: 240 4% 10%;
 }
 ```
+
+Dark mode borders use lower lightness (`10%`) than secondary surfaces (`15.9%`) so table rows, cards, and shell dividers read as soft gray rather than bright lines.
+
+### Locale (i18n)
+
+| Item | Value |
+|------|-------|
+| Locales | `en` (default), `zh-CN` |
+| Storage | Cookie per portal: `meridian_locale_admin`, `meridian_locale_merchant`, `meridian_locale_store`, `meridian_locale_distributor` |
+| Messages | `packages/shared/src/i18n/messages/{en,zh-CN}/` |
+| UI toggle | `LocaleToggle` in ERP/Store shell header (left of `ModeToggle`); `AuthToolbar` on login/register |
+| Library | `next-intl` — cookie locale, no URL prefix |
+
+---
 
 ### Status Colors
 

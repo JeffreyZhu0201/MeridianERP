@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -21,7 +22,6 @@ import {
 import type { Warehouse } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface WarehousesTableProps {
   warehouses: Warehouse[];
@@ -40,8 +40,8 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const zh = inventoryZh.warehouses;
-  const common = inventoryZh.common;
+  const t = useTranslations('merchant.inventory.warehouses');
+  const tCommon = useTranslations('common');
 
   function openCreate() {
     setEditing(null);
@@ -86,7 +86,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
       setDialogOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : zh.saveFailed);
+      setError(err instanceof Error ? err.message : t('saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -103,7 +103,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
       );
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : zh.setDefaultFailed);
+      setError(err instanceof Error ? err.message : t('setDefaultFailed'));
     }
   }
 
@@ -112,19 +112,19 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
       <div className="flex justify-end">
         {isOwner ? (
           <Button onClick={openCreate} className="min-h-11">
-            {zh.add}
+            {t('add')}
           </Button>
         ) : null}
       </div>
 
       {warehouses.length === 0 ? (
         <EmptyState
-          title={zh.emptyTitle}
-          description={zh.emptyDescription}
+          title={t('emptyTitle')}
+          description={t('emptyDescription')}
           action={
             isOwner ? (
               <Button onClick={openCreate} className="min-h-11">
-                {zh.add}
+                {t('add')}
               </Button>
             ) : undefined
           }
@@ -134,11 +134,11 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{zh.name}</TableHead>
-                <TableHead>{zh.address}</TableHead>
-                <TableHead>{zh.defaultBadge}</TableHead>
-                <TableHead>{common.status}</TableHead>
-                {isOwner ? <TableHead className="text-right">{common.actions}</TableHead> : null}
+                <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('address')}</TableHead>
+                <TableHead>{t('defaultBadge')}</TableHead>
+                <TableHead>{tCommon('status')}</TableHead>
+                {isOwner ? <TableHead className="text-right">{tCommon('actions')}</TableHead> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -150,14 +150,14 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
                   </TableCell>
                   <TableCell>
                     {warehouse.isDefault ? (
-                      <Badge variant="outline">{zh.defaultBadge}</Badge>
+                      <Badge variant="outline">{t('defaultBadge')}</Badge>
                     ) : (
                       '—'
                     )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={warehouse.isActive ? 'success' : 'secondary'}>
-                      {warehouse.isActive ? common.active : common.inactive}
+                      {warehouse.isActive ? tCommon('active') : tCommon('inactive')}
                     </Badge>
                   </TableCell>
                   {isOwner ? (
@@ -169,7 +169,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
                           className="min-h-9"
                           onClick={() => openEdit(warehouse)}
                         >
-                          {common.edit}
+                          {tCommon('edit')}
                         </Button>
                         {!warehouse.isDefault ? (
                           <Button
@@ -178,7 +178,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
                             className="min-h-9"
                             onClick={() => setDefaultDialog(warehouse)}
                           >
-                            {zh.setDefault}
+                            {t('setDefault')}
                           </Button>
                         ) : null}
                       </div>
@@ -194,19 +194,19 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
       <Dialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title={editing ? zh.edit : zh.add}
+        title={editing ? t('edit') : t('add')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setDialogOpen(false)}>{common.cancel}</DialogCloseButton>
+            <DialogCloseButton onClick={() => setDialogOpen(false)}>{tCommon('cancel')}</DialogCloseButton>
             <Button onClick={handleSave} disabled={saving || !form.name.trim()}>
-              {saving ? common.loading : common.save}
+              {saving ? tCommon('loading') : tCommon('save')}
             </Button>
           </>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="wh-name">{zh.name}</Label>
+            <Label htmlFor="wh-name">{t('name')}</Label>
             <Input
               id="wh-name"
               value={form.name}
@@ -217,7 +217,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="wh-address">{zh.address}</Label>
+            <Label htmlFor="wh-address">{t('address')}</Label>
             <Textarea
               id="wh-address"
               value={form.address}
@@ -232,9 +232,9 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 className="size-4 rounded border-input"
               />
-              {common.active}
+              {tCommon('active')}
               {editing.isDefault && !form.isActive ? (
-                <span className="text-xs text-amber-600">{zh.deactivateWarning}</span>
+                <span className="text-xs text-amber-600">{t('deactivateWarning')}</span>
               ) : null}
             </label>
           ) : null}
@@ -249,15 +249,15 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
       <Dialog
         open={!!defaultDialog}
         onOpenChange={(open) => !open && setDefaultDialog(null)}
-        title={zh.setDefaultTitle}
+        title={t('setDefaultTitle')}
         description={
-          defaultDialog ? zh.setDefaultDescription(defaultDialog.name) : undefined
+          defaultDialog ? t('setDefaultDescription', { name: defaultDialog.name }) : undefined
         }
         footer={
           <>
-            <DialogCloseButton onClick={() => setDefaultDialog(null)}>{common.cancel}</DialogCloseButton>
+            <DialogCloseButton onClick={() => setDefaultDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
             <Button onClick={() => defaultDialog && handleSetDefault(defaultDialog)}>
-              {common.confirm}
+              {tCommon('confirm')}
             </Button>
           </>
         }

@@ -1,5 +1,27 @@
 # UI Polish — Chinese Inventory Localization & UX
 
+**Status:** P0 largely complete · P1 partial · See [platform overview](./platform-overview.md)
+
+## Implementation Status (2025-06-25)
+
+| ID | Story | Priority | Status | Evidence |
+|----|-------|----------|--------|----------|
+| US-ZH-1 | Simplified Chinese inventory UI | P0 | ✅ | `apps/merchant/lib/i18n/inventory-zh.ts`; all `/inventory/*` routes |
+| US-ZH-2 | Chinese empty states + CTAs | P0 | ✅ | Per-route components with Chinese copy |
+| US-ZH-3 | Chinese form validation feedback | P0 | ✅ | Adjustment, warehouse, PO, settings forms |
+| US-ZH-4 | Playwright inventory route E2E | P0 | ✅ | `e2e/phase-3-inventory.spec.ts` (9 routes + login) |
+| US-ZH-5 | Chinese code comments | P1 | ⚠️ Partial | Some modules commented; not ≥80% coverage |
+| US-ZH-6 | Figma frame sync | P1 | ❌ Deferred | No frame links in design doc yet |
+| US-ZH-7 | Data-dense UX consistency | P1 | ✅ | Skeleton loaders, badge semantics, compact tables |
+
+### String strategy (resolved)
+
+Centralized dictionary at `apps/merchant/lib/i18n/inventory-zh.ts` — avoids full i18n framework while keeping strings maintainable. Playwright imports the same dictionary for stable heading assertions.
+
+### Out of scope (unchanged)
+
+CRM, catalog, distributors, admin portal, and storefront remain English.
+
 ## Problem
 
 Phase 3 merchant inventory is functionally complete but ships in English with uneven UX polish. Primary users are Chinese-speaking merchant owners and staff who need inventory screens in their working language, clearer empty and error states, and consistent data-dense dashboard patterns. Developer-facing inventory code lacks Chinese comments, slowing onboarding for the team. E2E coverage only smoke-tests three routes; Figma frames were deferred during Phase 3 design.
@@ -63,20 +85,29 @@ Phase 3 merchant inventory is functionally complete but ships in English with un
 | Comment coverage (inventory modules) | ≥ 80% of non-trivial exported functions/components in scoped modules have intent comments |
 | Zero English regression in nav | Inventory sidebar group shows Chinese labels only |
 
-## Open Questions
+## Open Questions (resolved / remaining)
 
-| # | Question | Notes for architect |
-|---|----------|---------------------|
-| 1 | String strategy without i18n framework | Inline constants vs single `inventory-zh.ts` dictionary per app; avoid patterns that block future i18n |
-| 2 | Playwright selectors for Chinese UI | Prefer `data-testid` for route shells vs role+name in Chinese |
-| 3 | API error code → Chinese message map | Which inventory endpoints return structured codes vs free-text `message`? |
-| 4 | Figma file target | New file vs extend existing MeridianERP merchant library |
-| 5 | Comment scope boundary | Include `packages/shared` inventory Zod schemas and enums, or UI/API only? |
-| 6 | Catalog product sheet sellable qty | Translate the read-only inventory link in catalog Sheet (P1) or strictly `/inventory/*` only? |
+| # | Question | Decision | Status |
+|---|----------|----------|--------|
+| 1 | String strategy without i18n | `inventory-zh.ts` dictionary in merchant app | ✅ |
+| 2 | Playwright selectors | Role + name using `inventoryZh` constants | ✅ |
+| 3 | API error → Chinese map | UI maps known validation; generic API errors shown as-is | ⚠️ Partial |
+| 4 | Figma file target | Deferred — ui-spec is canonical; Figma sync P1 not done | ❌ |
+| 5 | Comment scope | Merchant inventory + API inventory modules; shared types optional | ⚠️ Partial |
+| 6 | Catalog sellable qty link | Remains English (out of `/inventory/*` scope) | ✅ By design |
 
 ## Dependencies
 
-- Phase 3 inventory implementation merged on `develop`
-- `docs/design/design-system.md` and `docs/design/phase-3-inventory.md`
-- Demo merchant seed (`demo@merchant.test`) for Playwright
-- Figma MCP access for frame sync (Phase 3 UI spec handoff)
+- Phase 3 inventory implementation merged on `develop` ✅
+- `docs/design/design-system.md` and `docs/design/phase-3-inventory.md` ✅
+- Demo merchant seed (`demo@merchant.test`) for Playwright ✅
+- Figma MCP access for frame sync — **remaining P1 work**
+
+## Related Documents
+
+| Document | Path |
+|----------|------|
+| Platform overview | `docs/prd/platform-overview.md` |
+| Phase 3 PRD | `docs/prd/phase-3-inventory.md` |
+| Design | `docs/design/phase-3-inventory.md` |
+| Discovery handoff | `docs/handoffs/ui-polish-discovery.md` |

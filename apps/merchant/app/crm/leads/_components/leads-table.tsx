@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -37,6 +38,8 @@ interface LeadsTableProps {
 export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('merchant.crm.leads');
+  const tCommon = useTranslations('common');
   const stageFilter = searchParams.get('stage') ?? '';
   const [leads] = useState(initial);
   const [open, setOpen] = useState(false);
@@ -44,6 +47,10 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
   const [error, setError] = useState('');
 
   const filtered = stageFilter ? leads.filter((l) => l.stage === stageFilter) : leads;
+
+  function stageLabel(stage: string): string {
+    return t(`stage.${stage as 'NEW' | 'QUALIFIED' | 'WON' | 'LOST'}`);
+  }
 
   function updateStageFilter(value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -70,7 +77,7 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
@@ -86,38 +93,39 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
     <>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
-          <Label htmlFor="stage-filter">Stage</Label>
+          <Label htmlFor="stage-filter">{t('stageFilter')}</Label>
           <Select
             id="stage-filter"
             value={stageFilter}
             onChange={(e) => updateStageFilter(e.target.value)}
           >
-            <option value="">All</option>
-            <option value={LeadStage.NEW}>New</option>
-            <option value={LeadStage.QUALIFIED}>Qualified</option>
-            <option value={LeadStage.WON}>Won</option>
-            <option value={LeadStage.LOST}>Lost</option>
+            <option value="">{t('all')}</option>
+            {Object.values(LeadStage).map((s) => (
+              <option key={s} value={s}>
+                {stageLabel(s)}
+              </option>
+            ))}
           </Select>
         </div>
-        <Button onClick={() => setOpen(true)}>Add Lead</Button>
+        <Button onClick={() => setOpen(true)}>{t('add')}</Button>
       </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
-          No leads yet
+          {t('empty')}
         </div>
       ) : (
         <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Source</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Distributor</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead className="text-right">Stage</TableHead>
+                <TableHead>{t('tableTitle')}</TableHead>
+                <TableHead>{t('tableStage')}</TableHead>
+                <TableHead>{t('tableSource')}</TableHead>
+                <TableHead>{t('tableContact')}</TableHead>
+                <TableHead>{t('tableDistributor')}</TableHead>
+                <TableHead>{t('tableUpdated')}</TableHead>
+                <TableHead className="text-right">{t('changeStage')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,7 +133,9 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
                 <TableRow key={lead.id}>
                   <TableCell className="font-medium">{lead.title}</TableCell>
                   <TableCell>
-                    <Badge variant={stageVariant[lead.stage] ?? 'secondary'}>{lead.stage}</Badge>
+                    <Badge variant={stageVariant[lead.stage] ?? 'secondary'}>
+                      {stageLabel(lead.stage)}
+                    </Badge>
                   </TableCell>
                   <TableCell>{lead.source ?? '—'}</TableCell>
                   <TableCell>
@@ -145,7 +155,7 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
                     >
                       {Object.values(LeadStage).map((s) => (
                         <option key={s} value={s}>
-                          {s}
+                          {stageLabel(s)}
                         </option>
                       ))}
                     </Select>
@@ -160,19 +170,19 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title="Add Lead"
+        title={t('addTitle')}
         footer={
           <SheetFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tCommon('save')}</Button>
           </SheetFooter>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">{t('tableTitle')}</Label>
             <Input
               id="title"
               value={form.title}
@@ -180,13 +190,13 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="contactId">Contact</Label>
+            <Label htmlFor="contactId">{t('tableContact')}</Label>
             <Select
               id="contactId"
               value={form.contactId}
               onChange={(e) => setForm({ ...form, contactId: e.target.value })}
             >
-              <option value="">None</option>
+              <option value="">{tCommon('none')}</option>
               {contacts.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.firstName} {c.lastName}
@@ -195,7 +205,7 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="source">Source</Label>
+            <Label htmlFor="source">{t('tableSource')}</Label>
             <Input
               id="source"
               value={form.source}

@@ -1,8 +1,9 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Badge, Button, Select } from '@meridian/ui';
+import { Button, Select } from '@meridian/ui';
 
 import { apiFetch, storePath, type Product } from '@/lib/api';
 
@@ -20,6 +21,7 @@ function formatPrice(price: string | number): string {
 
 export function ProductDetail({ product, storeSlug, token }: ProductDetailProps) {
   const router = useRouter();
+  const t = useTranslations('store');
   const activeVariants = product.variants.filter((v) => v.isActive);
   const [variantId, setVariantId] = useState(activeVariants[0]?.id ?? '');
   const [adding, setAdding] = useState(false);
@@ -39,12 +41,12 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
           method: 'POST',
           body: JSON.stringify({ variantId, quantity: 1 }),
         },
-        token,
+        token ? token : { storeSlug },
       );
       router.push(`/s/${storeSlug}/cart`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to add to cart');
+      setError(err instanceof Error ? err.message : t('product.addFailed'));
     } finally {
       setAdding(false);
     }
@@ -55,20 +57,10 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
       <div className="aspect-square rounded-xl bg-muted" />
 
       <div className="space-y-6">
-        <div className="space-y-2">
-          {product.category ? (
-            <Badge variant="secondary">{product.category.name}</Badge>
-          ) : null}
-          <h1 className="text-2xl font-semibold tracking-tight">{product.name}</h1>
-          {product.description ? (
-            <p className="text-sm text-muted-foreground">{product.description}</p>
-          ) : null}
-        </div>
-
         {activeVariants.length > 1 ? (
           <div className="space-y-2">
             <label htmlFor="variant" className="text-sm font-medium">
-              Variant
+              {t('product.variant')}
             </label>
             <Select
               id="variant"
@@ -89,10 +81,10 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
             <p className="text-2xl font-semibold">{formatPrice(selected.price)}</p>
             <p className="text-sm text-muted-foreground">
               {selected.inventory <= 0
-                ? 'Out of stock'
+                ? t('product.outOfStock')
                 : selected.inventory <= 5
-                  ? `Only ${selected.inventory} left`
-                  : 'In stock'}
+                  ? t('product.lowStock', { count: selected.inventory })
+                  : t('product.inStock')}
             </p>
           </div>
         ) : null}
@@ -103,7 +95,11 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
           disabled={outOfStock || adding}
           onClick={handleAddToCart}
         >
-          {adding ? 'Adding…' : outOfStock ? 'Out of stock' : 'Add to cart'}
+          {adding
+            ? t('product.adding')
+            : outOfStock
+              ? t('product.outOfStock')
+              : t('product.addToCart')}
         </Button>
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}

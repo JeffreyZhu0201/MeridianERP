@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
@@ -24,6 +25,8 @@ interface CompaniesTableProps {
 }
 
 export function CompaniesTable({ companies: initial, token }: CompaniesTableProps) {
+  const t = useTranslations('merchant.crm.companies');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [companies] = useState(initial);
   const [open, setOpen] = useState(false);
@@ -58,12 +61,12 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tc('errors.saveFailed'));
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this company?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await apiFetch(`/merchant/companies/${id}`, { method: 'DELETE' }, token);
     router.refresh();
   }
@@ -71,14 +74,14 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>Add Company</Button>
+        <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
       {companies.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">No companies yet</p>
+          <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
-            Add your first company
+            {t('emptyAction')}
           </Button>
         </div>
       ) : (
@@ -86,10 +89,10 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Website</TableHead>
-                <TableHead>Contacts</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{tc('name')}</TableHead>
+                <TableHead>{t('website')}</TableHead>
+                <TableHead>{t('contacts')}</TableHead>
+                <TableHead className="text-right">{tc('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -101,14 +104,14 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button size="sm" variant="outline" onClick={() => openEdit(company)}>
-                        Edit
+                        {tc('edit')}
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(company.id)}
                       >
-                        Delete
+                        {tc('delete')}
                       </Button>
                     </div>
                   </TableCell>
@@ -122,19 +125,19 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title={editing ? 'Edit Company' : 'Add Company'}
+        title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <SheetFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tc('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tc('save')}</Button>
           </SheetFooter>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{tc('name')}</Label>
             <Input
               id="name"
               value={form.name}
@@ -142,7 +145,7 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="website">Website</Label>
+            <Label htmlFor="website">{t('website')}</Label>
             <Input
               id="website"
               value={form.website}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Badge,
   EmptyState,
@@ -13,20 +14,19 @@ import {
 } from '@meridian/ui';
 import type { LowStockAlertItem } from '@meridian/shared';
 
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
-
 interface LowStockAlertsTableProps {
   items: LowStockAlertItem[];
 }
 
 /** 低库存预警表格：支持跳转调整与新建采购单 */
 export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
-  const zh = inventoryZh.alerts;
-  const stock = inventoryZh.stock;
-  const common = inventoryZh.common;
+  const t = useTranslations('merchant.inventory.alerts');
+  const tStock = useTranslations('merchant.inventory.stock');
+  const tAdj = useTranslations('merchant.inventory.adjustments');
+  const tCommon = useTranslations('common');
 
   if (items.length === 0) {
-    return <EmptyState title={zh.emptyTitle} description={zh.emptyDescription} />;
+    return <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />;
   }
 
   return (
@@ -34,11 +34,11 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{common.status}</TableHead>
-            <TableHead>{stock.product} / {stock.sku}</TableHead>
-            <TableHead className="text-right">{zh.onHand}</TableHead>
-            <TableHead className="text-right">{zh.threshold}</TableHead>
-            <TableHead className="text-right">{common.actions}</TableHead>
+            <TableHead>{tCommon('status')}</TableHead>
+            <TableHead>{tStock('product')} / {tStock('sku')}</TableHead>
+            <TableHead className="text-right">{t('onHand')}</TableHead>
+            <TableHead className="text-right">{t('threshold')}</TableHead>
+            <TableHead className="text-right">{tCommon('actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -49,9 +49,9 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
             >
               <TableCell>
                 {item.quantityOnHand === 0 ? (
-                  <Badge variant="destructive">{stock.outOfStock}</Badge>
+                  <Badge variant="destructive">{tStock('outOfStock')}</Badge>
                 ) : (
-                  <Badge variant="warning">{stock.lowStock}</Badge>
+                  <Badge variant="warning">{tStock('lowStock')}</Badge>
                 )}
               </TableCell>
               <TableCell>
@@ -70,13 +70,13 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
                     href={`/inventory/adjustments?variantId=${item.variantId}&warehouseId=${item.warehouseId}`}
                     className="inline-flex min-h-9 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
-                    {inventoryZh.adjustments.record}
+                    {tAdj('record')}
                   </Link>
                   <Link
                     href={`/inventory/purchase-orders/new?variantId=${item.variantId}`}
                     className="inline-flex min-h-9 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
-                    {zh.reorder}
+                    {t('reorder')}
                   </Link>
                 </div>
               </TableCell>

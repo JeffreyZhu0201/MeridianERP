@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button, Dialog, DialogCloseButton, Label, Textarea } from '@meridian/ui';
 
 interface RejectDialogProps {
@@ -10,6 +11,8 @@ interface RejectDialogProps {
 }
 
 export function RejectDialog({ open, onOpenChange, onConfirm }: RejectDialogProps) {
+  const t = useTranslations('admin.merchants');
+  const tc = useTranslations('common');
   const [reason, setReason] = useState('');
 
   function handleClose() {
@@ -21,11 +24,11 @@ export function RejectDialog({ open, onOpenChange, onConfirm }: RejectDialogProp
     <Dialog
       open={open}
       onOpenChange={(next) => !next && handleClose()}
-      title="Reject merchant"
-      description="Provide a reason for rejection. The merchant will be notified."
+      title={t('rejectTitle')}
+      description={t('rejectDescription')}
       footer={
         <>
-          <DialogCloseButton onClick={handleClose} />
+          <DialogCloseButton onClick={handleClose}>{tc('cancel')}</DialogCloseButton>
           <Button
             variant="destructive"
             disabled={!reason.trim()}
@@ -34,18 +37,18 @@ export function RejectDialog({ open, onOpenChange, onConfirm }: RejectDialogProp
               setReason('');
             }}
           >
-            Reject
+            {t('reject')}
           </Button>
         </>
       }
     >
       <div className="space-y-2">
-        <Label htmlFor="rejection-reason">Rejection reason</Label>
+        <Label htmlFor="rejection-reason">{t('rejectReason')}</Label>
         <Textarea
           id="rejection-reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="Explain why this application was rejected"
+          placeholder={t('rejectReasonPlaceholder')}
           required
         />
       </div>

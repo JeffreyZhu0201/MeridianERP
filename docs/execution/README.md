@@ -118,8 +118,8 @@ EOF
 |-----------|---------------|
 | PostgreSQL | **Prisma Postgres** (managed cloud) |
 | Redis | Local Docker (`pnpm deps`) |
-| NestJS API | Local (`pnpm dev:api`) |
-| Next.js portals | Local (`pnpm dev`) |
+| NestJS API | Local (`rtk pnpm dev:api`) |
+| Next.js portals | Local — **one terminal each** (`rtk pnpm dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor`) |
 
 ### First-time setup
 
@@ -136,10 +136,16 @@ pnpm deps          # Redis only
 pnpm db:setup      # generate + migrate + seed
 ```
 
-### Run all apps locally
+### Run locally (recommended)
+
+Open **one terminal per service**. Start API first.
 
 ```bash
-pnpm dev
+rtk pnpm dev:api
+rtk pnpm dev:admin
+rtk pnpm dev:merchant
+rtk pnpm dev:store
+rtk pnpm dev:distributor   # optional
 ```
 
 | Service | URL |
@@ -148,15 +154,9 @@ pnpm dev
 | Admin | http://localhost:3000 |
 | Merchant | http://localhost:3002 |
 | Store | http://localhost:3003 |
+| Distributor | http://localhost:3005 |
 
-### Run individually
-
-```bash
-pnpm dev:api
-pnpm dev:admin
-pnpm dev:merchant
-pnpm dev:store
-```
+Do not append shell comments on the same line as `pnpm dev:*` — they break Next.js. Root `pnpm dev` prints a pointer to this section.
 
 ### Full Docker stack (optional)
 

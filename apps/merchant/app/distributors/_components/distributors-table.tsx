@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
@@ -26,9 +27,10 @@ interface DistributorsTableProps {
   token: string;
 }
 
-export function DistributorsTable({ distributors: initial, token }: DistributorsTableProps) {
+export function DistributorsTable({ distributors, token }: DistributorsTableProps) {
   const router = useRouter();
-  const [distributors] = useState(initial);
+  const t = useTranslations('merchant.distributors.table');
+  const tCommon = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Distributor | null>(null);
   const [form, setForm] = useState({
@@ -83,31 +85,31 @@ export function DistributorsTable({ distributors: initial, token }: Distributors
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>Add Distributor</Button>
+        <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
       {distributors.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
-          No distributors yet
+          {t('empty')}
         </div>
       ) : (
         <div className="rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Commission</TableHead>
-                <TableHead>Active</TableHead>
-                <TableHead>Bindings</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{tCommon('name')}</TableHead>
+                <TableHead>{tCommon('email')}</TableHead>
+                <TableHead>{t('commission')}</TableHead>
+                <TableHead>{tCommon('active')}</TableHead>
+                <TableHead>{t('bindings')}</TableHead>
+                <TableHead className="text-right">{tCommon('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -121,13 +123,13 @@ export function DistributorsTable({ distributors: initial, token }: Distributors
                   <TableCell>{d.email ?? '—'}</TableCell>
                   <TableCell>
                     {d.commissionRate}
-                    {d.commissionType === CommissionType.PERCENT ? '%' : ' fixed'}
+                    {d.commissionType === CommissionType.PERCENT ? '%' : t('fixedSuffix')}
                   </TableCell>
-                  <TableCell>{d.isActive ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{d.isActive ? tCommon('yes') : tCommon('no')}</TableCell>
                   <TableCell>{d._count?.bindings ?? 0}</TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="outline" onClick={() => openEdit(d)}>
-                      Edit
+                      {tCommon('edit')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -140,40 +142,40 @@ export function DistributorsTable({ distributors: initial, token }: Distributors
       <Dialog
         open={open}
         onOpenChange={setOpen}
-        title={editing ? 'Edit Distributor' : 'Add Distributor'}
+        title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <>
             <DialogCloseButton onClick={() => setOpen(false)} />
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tCommon('save')}</Button>
           </>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{tCommon('name')}</Label>
             <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{tCommon('email')}</Label>
             <Input id="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{tCommon('phone')}</Label>
             <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="commissionType">Commission type</Label>
+            <Label htmlFor="commissionType">{t('commissionType')}</Label>
             <Select
               id="commissionType"
               value={form.commissionType}
               onChange={(e) => setForm({ ...form, commissionType: e.target.value as CommissionType })}
             >
-              <option value={CommissionType.PERCENT}>Percent</option>
-              <option value={CommissionType.FIXED}>Fixed</option>
+              <option value={CommissionType.PERCENT}>{t('percent')}</option>
+              <option value={CommissionType.FIXED}>{t('fixed')}</option>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="commissionRate">Commission rate</Label>
+            <Label htmlFor="commissionRate">{t('commissionRate')}</Label>
             <Input
               id="commissionRate"
               type="number"

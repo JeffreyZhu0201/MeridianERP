@@ -697,6 +697,106 @@ export default function ComponentShowcase() {
           </Card>
         </div>
       </div>
+
+      {/* shadcn blocks — page frameworks (portal reference) */}
+      <section className="mt-16 flex flex-col gap-10 border-t pt-12">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Page frameworks</h2>
+          <p className="text-sm text-muted-foreground">
+            Mapped to shadcn blocks — dashboard-01, sidebar-03, login-03. Portals mirror these in @meridian/ui.
+          </p>
+        </div>
+
+        <Card id="framework-erp-shell">
+          <CardHeader>
+            <CardTitle>FW-SHELL-ERP (dashboard-01 + sidebar-03)</CardTitle>
+            <CardDescription>Collapsible sidebar + inset header + main content area.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex min-h-48 overflow-hidden rounded-lg border">
+              <div className="hidden w-48 shrink-0 border-r bg-sidebar p-3 md:block">
+                <p className="text-xs font-medium text-sidebar-foreground">Navigation</p>
+              </div>
+              <div className="flex flex-1 flex-col">
+                <div className="flex h-10 items-center border-b px-3 text-xs text-muted-foreground">
+                  Header · SidebarTrigger · ModeToggle
+                </div>
+                <div className="flex-1 bg-muted/30 p-4 text-xs text-muted-foreground">Main content</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card id="framework-list-page">
+          <CardHeader>
+            <CardTitle>FW-LIST (dashboard-01 data table)</CardTitle>
+            <CardDescription>PageHeader + filters + sticky Table.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-2xl font-semibold tracking-tight">Entity list</h3>
+              <p className="text-sm text-muted-foreground">Description and primary action on the right.</p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Example row</TableCell>
+                  <TableCell><Badge>Active</Badge></TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card id="framework-auth">
+          <CardHeader>
+            <CardTitle>FW-AUTH (login-03)</CardTitle>
+            <CardDescription>Muted canvas, brand mark, compact Card form, fixed ModeToggle.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative flex min-h-64 flex-col items-center justify-center rounded-lg bg-muted p-6">
+              <div className="absolute right-4 top-4">
+                <ModeToggle />
+              </div>
+              <div className="w-full max-w-xs space-y-4">
+                <div className="text-center text-sm font-medium">MeridianERP</div>
+                <Card>
+                  <CardContent className="pt-6">
+                    <Button className="w-full">Sign in</Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card id="framework-detail-page">
+          <CardHeader>
+            <CardTitle>FW-DETAIL (dashboard-01 cards)</CardTitle>
+            <CardDescription>Breadcrumb + PageHeader + Card sections / Tabs.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem><BreadcrumbLink href="#">CRM</BreadcrumbLink></BreadcrumbItem>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem><BreadcrumbPage>Contact</BreadcrumbPage></BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+            <h3 className="text-2xl font-semibold tracking-tight">Record detail</h3>
+            <Card>
+              <CardHeader><CardTitle className="text-base">Summary</CardTitle></CardHeader>
+              <CardContent className="text-sm text-muted-foreground">Metadata fields in a dense card.</CardContent>
+            </Card>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import { getTranslations } from 'next-intl/server';
+import { ListPageFrame } from '@meridian/ui';
+
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type PaginatedResponse, type PlatformOrder } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -11,6 +14,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const token = await getToken();
   if (!token) return null;
 
+  const t = await getTranslations('admin.orders');
   const params = await searchParams;
   const query = new URLSearchParams();
   query.set('page', params.page ?? '1');
@@ -31,13 +35,9 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
   return (
     <AdminShellWrapper>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Orders</h1>
-        <p className="text-sm text-muted-foreground">
-          Cross-tenant order list (read-only)
-        </p>
+      <ListPageFrame title={t('title')} description={t('description')}>
         <OrdersTable orders={orders} />
-      </div>
+      </ListPageFrame>
     </AdminShellWrapper>
   );
 }

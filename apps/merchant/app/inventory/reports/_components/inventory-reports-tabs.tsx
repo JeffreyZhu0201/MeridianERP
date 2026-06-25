@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
@@ -18,7 +19,6 @@ import {
 import type { StockAdjustmentWithDetails, StockLevelWithDetails } from '@meridian/shared';
 
 import { buildInventoryQuery, downloadInventoryExport } from '@/lib/inventory';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface InventoryReportsTabsProps {
   stockLevels: StockLevelWithDetails[];
@@ -44,6 +44,11 @@ export function InventoryReportsTabs({
   const to = searchParams.get('to') ?? '';
   const [exportError, setExportError] = useState('');
 
+  const t = useTranslations('merchant.inventory.reports');
+  const tStock = useTranslations('merchant.inventory.stock');
+  const tAdj = useTranslations('merchant.inventory.adjustments');
+  const tCommon = useTranslations('common');
+
   function setTab(next: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', next);
@@ -57,11 +62,6 @@ export function InventoryReportsTabs({
     router.push(`/inventory/reports?${params.toString()}`);
   }
 
-  const zh = inventoryZh.reports;
-  const stock = inventoryZh.stock;
-  const adj = inventoryZh.adjustments;
-  const common = inventoryZh.common;
-
   async function exportStock() {
     setExportError('');
     try {
@@ -71,7 +71,7 @@ export function InventoryReportsTabs({
         'stock-report.csv',
       );
     } catch (err) {
-      setExportError(err instanceof Error ? err.message : '导出失败');
+      setExportError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
@@ -85,7 +85,7 @@ export function InventoryReportsTabs({
         'adjustments-report.csv',
       );
     } catch (err) {
-      setExportError(err instanceof Error ? err.message : '导出失败');
+      setExportError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
@@ -101,7 +101,7 @@ export function InventoryReportsTabs({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          {zh.tabStock}
+          {t('tabStock')}
         </button>
         <button
           type="button"
@@ -112,7 +112,7 @@ export function InventoryReportsTabs({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          {zh.tabAdjustments}
+          {t('tabAdjustments')}
         </button>
       </div>
 
@@ -121,25 +121,25 @@ export function InventoryReportsTabs({
       {tab === 'stock' ? (
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-3">
-            <MetricCard title={zh.totalSkus} value={metrics.totalSkus} />
-            <MetricCard title={zh.totalUnits} value={metrics.totalUnits.toLocaleString()} />
-            <MetricCard title={zh.lowStockCount} value={metrics.lowStockCount} />
+            <MetricCard title={t('totalSkus')} value={metrics.totalSkus} />
+            <MetricCard title={t('totalUnits')} value={metrics.totalUnits.toLocaleString()} />
+            <MetricCard title={t('lowStockCount')} value={metrics.lowStockCount} />
           </div>
           <div className="flex justify-end">
             <Button variant="outline" onClick={exportStock} className="min-h-11">
-              {zh.exportCsv}
+              {t('exportCsv')}
             </Button>
           </div>
           <div className="overflow-x-auto rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{stock.product}</TableHead>
+                  <TableHead>{tStock('product')}</TableHead>
                   <TableHead>变体</TableHead>
-                  <TableHead>{stock.sku}</TableHead>
-                  <TableHead>{stock.warehouse}</TableHead>
-                  <TableHead className="text-right">{stock.onHand}</TableHead>
-                  <TableHead className="text-right">{stock.threshold}</TableHead>
+                  <TableHead>{tStock('sku')}</TableHead>
+                  <TableHead>{tStock('warehouse')}</TableHead>
+                  <TableHead className="text-right">{tStock('onHand')}</TableHead>
+                  <TableHead className="text-right">{tStock('threshold')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -165,7 +165,7 @@ export function InventoryReportsTabs({
         <div className="space-y-6">
           <div className="flex flex-wrap items-end gap-3">
             <div className="space-y-2">
-              <Label htmlFor="rep-from">{adj.filterFrom}</Label>
+              <Label htmlFor="rep-from">{tAdj('filterFrom')}</Label>
               <Input
                 id="rep-from"
                 type="date"
@@ -175,7 +175,7 @@ export function InventoryReportsTabs({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="rep-to">{adj.filterTo}</Label>
+              <Label htmlFor="rep-to">{tAdj('filterTo')}</Label>
               <Input
                 id="rep-to"
                 type="date"
@@ -185,7 +185,7 @@ export function InventoryReportsTabs({
               />
             </div>
             <Button variant="outline" onClick={exportAdjustments} className="min-h-11">
-              {zh.exportCsv}
+              {t('exportCsv')}
             </Button>
           </div>
           <div className="overflow-x-auto rounded-xl border">
@@ -193,33 +193,33 @@ export function InventoryReportsTabs({
               <TableHeader>
                 <TableRow>
                   <TableHead>日期</TableHead>
-                  <TableHead>{stock.product}</TableHead>
-                  <TableHead>{stock.warehouse}</TableHead>
+                  <TableHead>{tStock('product')}</TableHead>
+                  <TableHead>{tStock('warehouse')}</TableHead>
                   <TableHead className="text-right">变动</TableHead>
-                  <TableHead>{adj.reason}</TableHead>
+                  <TableHead>{tAdj('reason')}</TableHead>
                   <TableHead>操作人</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {adjustments.map((adj) => (
-                  <TableRow key={adj.id}>
+                {adjustments.map((row) => (
+                  <TableRow key={row.id}>
                     <TableCell className="text-muted-foreground">
-                      {new Date(adj.createdAt).toLocaleString()}
+                      {new Date(row.createdAt).toLocaleString()}
                     </TableCell>
-                    <TableCell>{adj.variant.productName}</TableCell>
-                    <TableCell>{adj.warehouse.name}</TableCell>
+                    <TableCell>{row.variant.productName}</TableCell>
+                    <TableCell>{row.warehouse.name}</TableCell>
                     <TableCell
                       className={`text-right font-mono text-sm ${
-                        adj.quantityDelta > 0 ? 'text-emerald-600' : 'text-destructive'
+                        row.quantityDelta > 0 ? 'text-emerald-600' : 'text-destructive'
                       }`}
                     >
-                      {adj.quantityDelta > 0 ? `+${adj.quantityDelta}` : adj.quantityDelta}
+                      {row.quantityDelta > 0 ? `+${row.quantityDelta}` : row.quantityDelta}
                     </TableCell>
                     <TableCell>
-                      <StockAdjustmentReasonBadge reason={adj.reason} />
+                      <StockAdjustmentReasonBadge reason={row.reason} />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {adj.actor.email}
+                      {row.actor.email}
                     </TableCell>
                   </TableRow>
                 ))}

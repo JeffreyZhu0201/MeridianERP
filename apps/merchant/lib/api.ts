@@ -47,6 +47,19 @@ export interface PaginatedResponse<T> {
   meta: { total: number; page: number; limit: number };
 }
 
+/** Merchant list APIs return a raw array; legacy callers expect PaginatedResponse. */
+export function asList<T>(response: PaginatedResponse<T> | T[] | null | undefined): T[] {
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response.data)) return response.data;
+  return [];
+}
+
+export function asListTotal<T>(response: PaginatedResponse<T> | T[] | null | undefined): number {
+  if (Array.isArray(response)) return response.length;
+  if (response?.meta?.total != null) return response.meta.total;
+  return asList(response).length;
+}
+
 export interface AuthResponse {
   accessToken: string;
   user: { id: string; email: string; role: string };
@@ -95,14 +108,14 @@ export interface Distributor {
   commissionRate: string | number;
   commissionType: string;
   isActive: boolean;
+  portalEnabled?: boolean;
+  lastLoginAt?: string | null;
   _count?: { bindings: number };
 }
 
-export interface QrResponse {
-  token: string;
-  url: string;
-  expiresAt: string;
-}
+import type { BindVerifyResponse, GenerateQrResponse } from '@meridian/shared';
+
+export type { BindVerifyResponse, GenerateQrResponse };
 
 export interface Binding {
   id: string;
@@ -111,13 +124,6 @@ export interface Binding {
   lead?: { title: string };
 }
 
-export interface BindVerifyResponse {
-  valid: boolean;
-  distributorName?: string;
-  requiresAuth?: boolean;
-  expired?: boolean;
-  error?: string;
-}
 
 export interface MerchantDashboard {
   businessName: string;

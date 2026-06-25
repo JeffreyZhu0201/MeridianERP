@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button, Input, Label } from '@meridian/ui';
+import type { CheckoutResponse } from '@meridian/shared';
 
-import { apiFetch, type Cart } from '@/lib/api';
+import { apiFetch, storePath, type Cart } from '@/lib/api';
+import { CheckoutPaymentStep } from './checkout-payment-step';
 
 interface CheckoutFormProps {
   storeSlug: string;
@@ -21,10 +24,11 @@ function formatPrice(price: string | number): string {
 
 export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
   const router = useRouter();
+  const t = useTranslations('store');
   const [email, setEmail] = useState('');
-  const [createAccount, setCreateAccount] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [checkout, setCheckout] = useState<CheckoutResponse | null>(null);
 
   const subtotal =
     cart?.items.reduce(
@@ -35,11 +39,26 @@ export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
   if (!cart || cart.items.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-8 text-center">
-        <p className="text-muted-foreground">Your cart is empty</p>
+        <p className="text-muted-foreground">{t('checkout.emptyCart')}</p>
         <Link href={`/s/${storeSlug}`}>
-          <Button className="mt-4">Continue shopping</Button>
+          <Button className="mt-4">{t('cart.continueShopping')}</Button>
         </Link>
       </div>
+    );
+  }
+
+  if (checkout) {
+    return (
+      <CheckoutPaymentStep
+        storeSlug={storeSlug}
+        checkout={checkout}
+        token={token}
+        onComplete={(orderId) => {
+          router.push(`/s/${storeSlug}/orders/${orderId}/confirmation`);
+          router.refresh();
+        }}
+        onError={setError}
+      />
     );
   }
 
@@ -48,18 +67,17 @@ export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
     setError('');
     setLoading(true);
     try {
-      await apiFetch(
-        '/store/checkout',
+      const res = await apiFetch<CheckoutResponse>(
+        storePath(storeSlug, 'checkout'),
         {
           method: 'POST',
-          body: JSON.stringify({ guestEmail: email, createAccount }),
+          body: JSON.stringify({ guestEmail: token ? undefined : email }),
         },
-        token,
+        token ? token : { storeSlug },
       );
-      router.push(`/s/${storeSlug}/account`);
-      router.refresh();
+      setCheckout(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed');
+      setError(err instanceof Error ? err.message : t('checkout.checkoutFailed'));
     } finally {
       setLoading(false);
     }
@@ -68,14 +86,16 @@ export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-xl border p-4">
-        <p className="text-sm font-medium">Order summary</p>
+        <p className="text-sm font-medium">{t('checkout.orderSummary')}</p>
         <p className="mt-1 text-2xl font-semibold">{formatPrice(subtotal)}</p>
-        <p className="text-xs text-muted-foreground">{cart.items.length} item(s)</p>
+        <p className="text-xs text-muted-foreground">
+          {t('checkout.items', { count: cart.items.length })}
+        </p>
       </div>
 
-      <div className="space-y-4">
+      {!token ? (
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t('checkout.email')}</Label>
           <Input
             id="email"
             type="email"
@@ -85,28 +105,12 @@ export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
             placeholder="you@example.com"
           />
         </div>
-
-        {!token ? (
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={createAccount}
-              onChange={(e) => setCreateAccount(e.target.checked)}
-              className="size-4 rounded border-input"
-            />
-            Create an account for faster checkout next time
-          </label>
-        ) : null}
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        Payment via Stripe will be integrated in a follow-up. This creates a pending order.
-      </p>
+      ) : null}
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <Button type="submit" className="w-full" size="lg" disabled={loading}>
-        {loading ? 'Processing…' : 'Place order'}
+        {loading ? t('checkout.creatingOrder') : t('checkout.continueToPayment')}
       </Button>
     </form>
   );

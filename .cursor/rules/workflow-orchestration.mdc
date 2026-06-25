@@ -11,7 +11,7 @@ Follow this phase order for every feature. Delegate to the matching subagent in 
 |-------|----------|--------|
 | 1. Discovery | `product-manager` | `docs/prd/<feature>.md` |
 | 2. Architecture | `architect` | `docs/architecture/<feature>.md` |
-| 3. UI spec | `ui-designer` | `apps/ui-spec` constraints + `docs/design/<feature>.md` |
+| 3. UI spec | `ui-designer` | `apps/ui-spec` showcase refs + `docs/design/<feature>.md` |
 | 4. Implementation | `nextjs-frontend` + `nestjs-backend` | `apps/admin`, `apps/merchant`, `apps/api`, `packages/shared` |
 | 5. Verification | `test-engineer` | Tests + test report |
 | 6. Shipping | `devops-engineer` | `docker/`, CI config |
@@ -22,7 +22,7 @@ Follow this phase order for every feature. Delegate to the matching subagent in 
 - **Strict phase order** — invoke the matching subagent for each phase; do not implement in the parent agent unless unblocking a failed subagent.
 - Never skip upstream artifacts. No implementation without PRD and architecture doc for the feature.
 - Frontend and backend may run in parallel only after API contracts exist in `packages/shared` or OpenAPI.
-- UI changes follow `apps/ui-spec` constraints. New primitives or token changes go in ui-spec first, then `packages/ui` / portal apps.
+- UI changes follow `apps/ui-spec` showcase examples (`.cursor/rules/ui-spec.mdc`). New primitives or compositions: add to ui-spec `page.tsx` first, then `packages/ui` / portal apps.
 - Branch from `develop` (`feature/*`); PR targets `develop`. Release merges `develop` → `main` only after a phase gate.
 - End each phase with a **Handoff** block (save to `docs/handoffs/<feature>-<phase>.md`):
 
@@ -48,7 +48,7 @@ After Phase 6, follow `.cursor/rules/github-workflow.mdc`:
 
 - Vague requirements → `product-manager`
 - After PRD exists → `architect`
-- Screens or UI layout → `ui-designer` (reads `apps/ui-spec`, not Figma)
+- Screens or UI layout → `ui-designer` (maps screens to `apps/ui-spec/src/app/page.tsx` showcase examples; not Figma)
 - API/UI code → `nestjs-backend` / `nextjs-frontend`
 - Before merge → `test-engineer`
 - Docker/CI/env → `devops-engineer`

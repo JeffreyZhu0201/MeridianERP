@@ -1,9 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
+  DetailPageFrame,
   Dialog,
   DialogCloseButton,
   Input,
@@ -29,6 +31,7 @@ interface PurchaseOrderDetailProps {
 
 export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderDetailProps) {
   const router = useRouter();
+  const t = useTranslations('merchant.inventory.purchaseOrders.detail');
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [receiveQtys, setReceiveQtys] = useState<Record<string, string>>({});
@@ -45,6 +48,17 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
     totalReceived === 0;
 
   const isDraft = po.status === PurchaseOrderStatus.DRAFT;
+
+  const description = po.orderedAt
+    ? t('descriptionOrdered', {
+        supplier: po.supplierName,
+        warehouse: po.warehouse.name,
+        date: new Date(po.orderedAt).toLocaleDateString(),
+      })
+    : t('description', {
+        supplier: po.supplierName,
+        warehouse: po.warehouse.name,
+      });
 
   function openReceive() {
     const initial: Record<string, string> = {};
@@ -67,14 +81,14 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       .filter((l) => l.quantityReceived > 0);
 
     if (lines.length === 0) {
-      setError('Enter quantity for at least one line');
+      setError(t('minQtyError'));
       return;
     }
 
     for (const line of lines) {
       const poLine = po.lines.find((l) => l.id === line.purchaseOrderLineId);
       if (poLine && line.quantityReceived > poLine.quantityRemaining) {
-        setError(`Quantity exceeds remaining for ${poLine.variant.sku}`);
+        setError(t('exceedsRemaining', { sku: poLine.variant.sku }));
         return;
       }
     }
@@ -87,7 +101,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       setReceiveOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Receive failed');
+      setError(err instanceof Error ? err.message : t('receiveFailed'));
     }
   }
 
@@ -99,7 +113,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       setCancelOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Cancel failed');
+      setError(err instanceof Error ? err.message : t('cancelFailed'));
     }
   }
 
@@ -110,48 +124,40 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       }, token);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Submit failed');
+      setError(err instanceof Error ? err.message : t('submitFailed'));
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="font-mono text-2xl font-semibold tracking-tight">{po.poNumber}</h1>
-            <PurchaseOrderStatusBadge status={po.status} />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Supplier: {po.supplierName} · Warehouse: {po.warehouse.name}
-            {po.orderedAt ? ` · Ordered ${new Date(po.orderedAt).toLocaleDateString()}` : ''}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {isDraft ? (
-            <Button onClick={handleSubmit}>Submit order</Button>
-          ) : null}
-          {canReceive ? (
-            <Button onClick={openReceive}>Receive goods</Button>
-          ) : null}
-          {canCancel ? (
-            <Button variant="destructive" onClick={() => setCancelOpen(true)}>
-              Cancel PO
-            </Button>
-          ) : null}
-        </div>
-      </div>
+    <>
+      <DetailPageFrame
+        title={po.poNumber}
+        description={description}
+        backHref="/inventory/purchase-orders"
+        backLabel={t('backLabel')}
+        badges={<PurchaseOrderStatusBadge status={po.status} />}
+        actions={
+          <>
+            {isDraft ? <Button onClick={handleSubmit}>{t('submitOrder')}</Button> : null}
+            {canReceive ? <Button onClick={openReceive}>{t('receiveGoods')}</Button> : null}
+            {canCancel ? (
+              <Button variant="destructive" onClick={() => setCancelOpen(true)}>
+                {t('cancelPo')}
+              </Button>
+            ) : null}
+          </>
+        }
+      >
+        {error && !receiveOpen ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      {error && !receiveOpen ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <div className="rounded-xl border">
+        <div className="rounded-xl border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Variant / SKU</TableHead>
-              <TableHead className="text-right">Ordered</TableHead>
-              <TableHead className="text-right">Received</TableHead>
-              <TableHead className="text-right">Remaining</TableHead>
+              <TableHead>{t('variantSku')}</TableHead>
+              <TableHead className="text-right">{t('ordered')}</TableHead>
+              <TableHead className="text-right">{t('received')}</TableHead>
+              <TableHead className="text-right">{t('remaining')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -178,32 +184,37 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
 
       {po.receipts.length > 0 ? (
         <div className="space-y-3">
-          <h2 className="text-lg font-medium">Receive history</h2>
+          <h2 className="text-lg font-medium">{t('receiveHistory')}</h2>
           <div className="space-y-2">
             {po.receipts.map((receipt) => (
               <div key={receipt.id} className="rounded-xl border p-4 text-sm">
                 <p className="font-medium">
-                  {new Date(receipt.createdAt).toLocaleString()} ·{' '}
-                  {receipt.lines.reduce((s, l) => s + l.quantityReceived, 0)} units · by{' '}
-                  {receipt.receivedBy.email}
+                  {t('receiptSummary', {
+                    date: new Date(receipt.createdAt).toLocaleString(),
+                    units: receipt.lines.reduce((s, l) => s + l.quantityReceived, 0),
+                    email: receipt.receivedBy.email,
+                  })}
                 </p>
                 {receipt.note ? (
-                  <p className="mt-1 text-muted-foreground">Note: {receipt.note}</p>
+                  <p className="mt-1 text-muted-foreground">
+                    {t('notePrefix')} {receipt.note}
+                  </p>
                 ) : null}
               </div>
             ))}
           </div>
         </div>
       ) : null}
+      </DetailPageFrame>
 
       <Dialog
         open={receiveOpen}
         onOpenChange={setReceiveOpen}
-        title="Receive goods"
+        title={t('receiveTitle')}
         footer={
           <>
             <DialogCloseButton onClick={() => setReceiveOpen(false)} />
-            <Button onClick={handleReceive}>Confirm receive</Button>
+            <Button onClick={handleReceive}>{t('confirmReceive')}</Button>
           </>
         }
       >
@@ -213,11 +224,11 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
               <div>
                 <p className="text-sm font-medium">{line.variant.sku}</p>
                 <p className="text-xs text-muted-foreground">
-                  Remaining: {line.quantityRemaining}
+                  {t('remainingLabel', { count: line.quantityRemaining })}
                 </p>
               </div>
               <div className="w-24 space-y-1">
-                <Label htmlFor={`recv-${line.id}`}>Qty</Label>
+                <Label htmlFor={`recv-${line.id}`}>{t('qty')}</Label>
                 <Input
                   id={`recv-${line.id}`}
                   type="number"
@@ -233,7 +244,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
             </div>
           ))}
           <div className="space-y-2">
-            <Label htmlFor="recv-note">Note</Label>
+            <Label htmlFor="recv-note">{t('note')}</Label>
             <Textarea
               id="recv-note"
               value={receiveNote}
@@ -251,17 +262,17 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       <Dialog
         open={cancelOpen}
         onOpenChange={setCancelOpen}
-        title={`Cancel ${po.poNumber}?`}
-        description="This cannot be undone."
+        title={t('cancelTitle', { poNumber: po.poNumber })}
+        description={t('cancelDescription')}
         footer={
           <>
             <DialogCloseButton onClick={() => setCancelOpen(false)} />
             <Button variant="destructive" onClick={handleCancel}>
-              Cancel PO
+              {t('cancelPo')}
             </Button>
           </>
         }
       />
-    </div>
+    </>
   );
 }

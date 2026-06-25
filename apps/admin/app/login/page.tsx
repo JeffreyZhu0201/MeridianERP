@@ -1,11 +1,15 @@
 import { Suspense } from 'react';
+import { AuthToolbar } from '@meridian/ui';
 
 import { LoginForm } from './_components/login-form';
 
 export default function LoginPage() {
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <>
+      <AuthToolbar portal="admin" />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </>
   );
 }

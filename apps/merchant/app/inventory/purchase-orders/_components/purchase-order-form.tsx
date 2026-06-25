@@ -1,10 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   Button,
+  FormPageFrame,
   Input,
   Label,
   Select,
@@ -44,6 +45,8 @@ export function PurchaseOrderForm({
   purchaseOrderId,
   initial,
 }: PurchaseOrderFormProps) {
+  const t = useTranslations('merchant.inventory.purchaseOrders.form');
+  const tc = useTranslations('common');
   const router = useRouter();
   const isEdit = !!purchaseOrderId;
   const [supplierName, setSupplierName] = useState(initial?.supplierName ?? '');
@@ -86,7 +89,7 @@ export function PurchaseOrderForm({
     };
 
     if (payload.lines.length === 0) {
-      setError('Add at least one line item');
+      setError(t('minLineError'));
       return;
     }
 
@@ -115,25 +118,42 @@ export function PurchaseOrderForm({
       }
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tc('errors.saveFailed'));
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/inventory/purchase-orders" className="hover:text-foreground">
-          ← Purchase orders
-        </Link>
-      </div>
-
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {isEdit ? 'Edit purchase order' : 'Create purchase order'}
-      </h1>
-
-      <div className="grid gap-4 sm:grid-cols-2">
+    <FormPageFrame
+      title={isEdit ? t('editTitle') : t('createTitle')}
+      footer={
+        <>
+          <Button variant="outline" onClick={() => router.push('/inventory/purchase-orders')}>
+            {tc('cancel')}
+          </Button>
+          {isEdit ? (
+            <>
+              <Button variant="outline" onClick={() => save('DRAFT')}>
+                {t('saveDraft')}
+              </Button>
+              <Button onClick={() => save('ORDERED')}>{t('saveAndOrder')}</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => save('DRAFT')}>
+                {t('saveDraft')}
+              </Button>
+              <Button onClick={() => save(createStatus)}>
+                {createStatus === 'ORDERED' ? t('saveAndOrder') : t('saveDraft')}
+              </Button>
+            </>
+          )}
+        </>
+      }
+    >
+      <div className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="supplier">Supplier name</Label>
+          <Label htmlFor="supplier">{t('supplierName')}</Label>
           <Input
             id="supplier"
             value={supplierName}
@@ -142,7 +162,7 @@ export function PurchaseOrderForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="po-warehouse">Target warehouse</Label>
+          <Label htmlFor="po-warehouse">{t('targetWarehouse')}</Label>
           <Select
             id="po-warehouse"
             value={warehouseId}
@@ -159,7 +179,7 @@ export function PurchaseOrderForm({
 
       {!isEdit ? (
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium">Create as</legend>
+          <legend className="text-sm font-medium">{t('createAs')}</legend>
           <label className="mr-4 flex items-center gap-2 text-sm">
             <input
               type="radio"
@@ -167,7 +187,7 @@ export function PurchaseOrderForm({
               checked={createStatus === 'DRAFT'}
               onChange={() => setCreateStatus('DRAFT')}
             />
-            Save draft
+            {t('saveDraft')}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input
@@ -176,28 +196,28 @@ export function PurchaseOrderForm({
               checked={createStatus === 'ORDERED'}
               onChange={() => setCreateStatus('ORDERED')}
             />
-            Mark ordered
+            {t('markOrdered')}
           </label>
         </fieldset>
       ) : null}
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium">Line items</h2>
+          <h2 className="text-lg font-medium">{t('lineItems')}</h2>
           <Button type="button" variant="outline" size="sm" onClick={addLine}>
-            Add line
+            {t('addLine')}
           </Button>
         </div>
         {lines.map((line, index) => (
           <div key={index} className="flex flex-wrap items-end gap-3">
             <div className="min-w-[200px] flex-1 space-y-2">
-              <Label htmlFor={`variant-${index}`}>Variant</Label>
+              <Label htmlFor={`variant-${index}`}>{t('variant')}</Label>
               <Select
                 id={`variant-${index}`}
                 value={line.variantId}
                 onChange={(e) => updateLine(index, 'variantId', e.target.value)}
               >
-                <option value="">Select variant</option>
+                <option value="">{t('selectVariant')}</option>
                 {variants.map((v) => (
                   <option key={v.id} value={v.id}>
                     {v.label}
@@ -206,7 +226,7 @@ export function PurchaseOrderForm({
               </Select>
             </div>
             <div className="w-32 space-y-2">
-              <Label htmlFor={`qty-${index}`}>Qty ordered</Label>
+              <Label htmlFor={`qty-${index}`}>{t('qtyOrdered')}</Label>
               <Input
                 id={`qty-${index}`}
                 type="number"
@@ -217,7 +237,7 @@ export function PurchaseOrderForm({
             </div>
             {lines.length > 1 ? (
               <Button type="button" variant="ghost" size="sm" onClick={() => removeLine(index)}>
-                Remove
+                {tc('remove')}
               </Button>
             ) : null}
           </div>
@@ -225,29 +245,7 @@ export function PurchaseOrderForm({
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" onClick={() => router.push('/inventory/purchase-orders')}>
-          Cancel
-        </Button>
-        {isEdit ? (
-          <>
-            <Button variant="outline" onClick={() => save('DRAFT')}>
-              Save draft
-            </Button>
-            <Button onClick={() => save('ORDERED')}>Save &amp; order</Button>
-          </>
-        ) : (
-          <>
-            <Button variant="outline" onClick={() => save('DRAFT')}>
-              Save draft
-            </Button>
-            <Button onClick={() => save(createStatus)}>
-              {createStatus === 'ORDERED' ? 'Save & order' : 'Save draft'}
-            </Button>
-          </>
-        )}
       </div>
-    </div>
+    </FormPageFrame>
   );
 }

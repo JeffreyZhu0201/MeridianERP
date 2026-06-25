@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
@@ -24,6 +25,8 @@ interface ContactsTableProps {
 }
 
 export function ContactsTable({ contacts: initial, token }: ContactsTableProps) {
+  const t = useTranslations('merchant.crm.contacts');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [contacts, setContacts] = useState(initial);
   const [open, setOpen] = useState(false);
@@ -68,12 +71,12 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tc('errors.saveFailed'));
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this contact?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await apiFetch(`/merchant/contacts/${id}`, { method: 'DELETE' }, token);
     setContacts((prev) => prev.filter((c) => c.id !== id));
     router.refresh();
@@ -82,14 +85,14 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>Add Contact</Button>
+        <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
       {contacts.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">No contacts yet</p>
+          <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
-            Add your first contact
+            {t('emptyAction')}
           </Button>
         </div>
       ) : (
@@ -97,12 +100,12 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>First Name</TableHead>
-                <TableHead>Last Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Company</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t('firstName')}</TableHead>
+                <TableHead>{t('lastName')}</TableHead>
+                <TableHead>{tc('email')}</TableHead>
+                <TableHead>{tc('phone')}</TableHead>
+                <TableHead>{t('company')}</TableHead>
+                <TableHead className="text-right">{tc('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -116,14 +119,14 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button size="sm" variant="outline" onClick={() => openEdit(contact)}>
-                        Edit
+                        {tc('edit')}
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(contact.id)}
                       >
-                        Delete
+                        {tc('delete')}
                       </Button>
                     </div>
                   </TableCell>
@@ -137,19 +140,19 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title={editing ? 'Edit Contact' : 'Add Contact'}
+        title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <SheetFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tc('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tc('save')}</Button>
           </SheetFooter>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="firstName">First name</Label>
+            <Label htmlFor="firstName">{t('firstName')}</Label>
             <Input
               id="firstName"
               value={form.firstName}
@@ -157,7 +160,7 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="lastName">Last name</Label>
+            <Label htmlFor="lastName">{t('lastName')}</Label>
             <Input
               id="lastName"
               value={form.lastName}
@@ -165,7 +168,7 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{tc('email')}</Label>
             <Input
               id="email"
               type="email"
@@ -174,7 +177,7 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">{tc('phone')}</Label>
             <Input
               id="phone"
               value={form.phone}

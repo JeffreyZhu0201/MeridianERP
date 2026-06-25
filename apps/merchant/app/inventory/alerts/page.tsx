@@ -1,12 +1,12 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { PageHeader } from '@meridian/ui';
+import { ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken, isMerchantOwner } from '@/lib/auth';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { getTranslations } from 'next-intl/server';
 import type { LowStockAlertItem } from '@meridian/shared';
 
 import { LowStockAlertsTable } from './_components/low-stock-alerts-table';
@@ -24,29 +24,28 @@ export default async function AlertsPage() {
   ]);
 
   const items = alertsRes.items;
-  const zh = inventoryZh.alerts;
+  const t = await getTranslations('merchant.inventory.alerts');
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName} lowStockAlertCount={items.length}>
-      <div className="space-y-6">
-        <PageHeader
-          title={zh.title}
-          description={zh.description(items.length)}
-          action={
-            isMerchantOwner(token) ? (
-              <Link
-                href="/inventory/settings"
-                className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
-              >
-                {zh.settingsLink}
-              </Link>
-            ) : undefined
-          }
-        />
+      <ListPageFrame
+        title={t('title')}
+        description={t('description', { count: items.length })}
+        action={
+          isMerchantOwner(token) ? (
+            <Link
+              href="/inventory/settings"
+              className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
+            >
+              {t('settingsLink')}
+            </Link>
+          ) : undefined
+        }
+      >
         <Suspense>
           <LowStockAlertsTable items={items} />
         </Suspense>
-      </div>
+      </ListPageFrame>
     </MerchantShellWrapper>
   );
 }

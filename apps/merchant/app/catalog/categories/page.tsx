@@ -1,6 +1,10 @@
+import { getTranslations } from 'next-intl/server';
+import { ListPageFrame } from '@meridian/ui';
+
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import {
   apiFetch,
+  asList,
   type Category,
   type OnboardingProfile,
   type PaginatedResponse,
@@ -9,23 +13,22 @@ import { getToken } from '@/lib/auth';
 import { CategoriesTable } from './_components/categories-table';
 
 export default async function CategoriesPage() {
+  const t = await getTranslations('merchant.catalog.categories');
   const token = await getToken();
   if (!token) return null;
 
   const [categoriesRes, profile] = await Promise.all([
-    apiFetch<PaginatedResponse<Category>>('/merchant/categories', {}, token).catch(() => ({
-      data: [],
-      meta: { total: 0, page: 1, limit: 20 },
-    })),
+    apiFetch<PaginatedResponse<Category> | Category[]>('/merchant/categories', {}, token).catch(
+      () => [] as Category[],
+    ),
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Categories</h1>
-        <CategoriesTable categories={categoriesRes.data} token={token} />
-      </div>
+      <ListPageFrame title={t('title')}>
+        <CategoriesTable categories={asList(categoriesRes)} token={token} />
+      </ListPageFrame>
     </MerchantShellWrapper>
   );
 }

@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@meridian/ui';
 
 import { apiFetch } from '@/lib/api';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface InventorySettingsFormProps {
   defaultReorderThreshold: number;
@@ -24,8 +24,8 @@ export function InventorySettingsForm({
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const zh = inventoryZh.settings;
-  const common = inventoryZh.common;
+  const t = useTranslations('merchant.inventory.settings');
+  const tCommon = useTranslations('common');
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -42,7 +42,7 @@ export function InventorySettingsForm({
       setSaved(true);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : zh.saveFailed);
+      setError(err instanceof Error ? err.message : t('saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -51,12 +51,12 @@ export function InventorySettingsForm({
   return (
     <Card className="max-w-lg">
       <CardHeader>
-        <CardTitle>{zh.defaultThreshold}</CardTitle>
+        <CardTitle>{t('defaultThreshold')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="default-threshold">{zh.defaultThreshold}</Label>
+            <Label htmlFor="default-threshold">{t('defaultThreshold')}</Label>
             <Input
               id="default-threshold"
               type="number"
@@ -66,7 +66,7 @@ export function InventorySettingsForm({
               onChange={(e) => setThreshold(e.target.value)}
               className="min-h-11"
             />
-            <p className="text-xs text-muted-foreground">{zh.defaultThresholdHelp}</p>
+            <p className="text-xs text-muted-foreground">{t('defaultThresholdHelp')}</p>
           </div>
           {error ? (
             <p className="text-sm text-destructive" role="alert">
@@ -75,11 +75,11 @@ export function InventorySettingsForm({
           ) : null}
           {saved ? (
             <p className="text-sm text-emerald-600" role="status">
-              {zh.saved}
+              {t('saved')}
             </p>
           ) : null}
           <Button type="submit" disabled={saving} className="min-h-11">
-            {saving ? common.loading : common.save}
+            {saving ? tCommon('loading') : tCommon('save')}
           </Button>
         </form>
       </CardContent>
@@ -88,10 +88,10 @@ export function InventorySettingsForm({
 }
 
 export function StaffForbidden() {
-  const zh = inventoryZh.settings;
+  const t = useTranslations('merchant.inventory.settings');
   return (
     <div className="rounded-xl border border-dashed p-12 text-center">
-      <p className="text-muted-foreground">{zh.forbidden}</p>
+      <p className="text-muted-foreground">{t('forbidden')}</p>
       <Link
         href="/inventory/alerts"
         className="mt-4 inline-flex min-h-11 items-center text-sm text-primary hover:underline"

@@ -1,12 +1,12 @@
 import { Suspense } from 'react';
 
-import { PageHeader } from '@meridian/ui';
+import { ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch } from '@/lib/api';
 import type { OnboardingProfile } from '@/lib/api';
 import { getToken, isMerchantOwner } from '@/lib/auth';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { getTranslations } from 'next-intl/server';
 import type { StockLevelWithDetails, TenantInventorySettings, Warehouse } from '@meridian/shared';
 
 import { StockLevelsTable } from './_components/stock-levels-table';
@@ -45,14 +45,13 @@ export default async function StockPage({ searchParams }: StockPageProps) {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
-  const zh = inventoryZh.stock;
+  const t = await getTranslations('merchant.inventory.stock');
 
   const levelsPage = normalizeInventoryPage(levelsRes);
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <div className="space-y-6">
-        <PageHeader title={zh.title} description={zh.description} />
+      <ListPageFrame title={t('title')} description={t('description')}>
         <Suspense>
           <StockLevelsTable
             initialLevels={levelsPage.items}
@@ -63,7 +62,7 @@ export default async function StockPage({ searchParams }: StockPageProps) {
             defaultThreshold={settings.defaultReorderThreshold}
           />
         </Suspense>
-      </div>
+      </ListPageFrame>
     </MerchantShellWrapper>
   );
 }

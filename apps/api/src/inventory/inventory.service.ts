@@ -224,6 +224,83 @@ export class InventoryService {
     return this.mapAdjustment(result.adjustment);
   }
 
+  async applyTransferLineInTx(
+    tx: TxClient,
+    params: {
+      tenantId: string;
+      fromWarehouseId: string;
+      toWarehouseId: string;
+      variantId: string;
+      quantity: number;
+      actorId: string;
+      note?: string | null;
+    },
+  ): Promise<void> {
+    const {
+      tenantId,
+      fromWarehouseId,
+      toWarehouseId,
+      variantId,
+      quantity,
+      actorId,
+      note,
+    } = params;
+
+    if (quantity <= 0 || !Number.isInteger(quantity)) {
+      throw new BadRequestException('Transfer quantity must be a positive integer');
+    }
+
+    await this.assertVariantInTenant(tx, tenantId, variantId);
+    await this.assertWarehouseInTenant(tx, tenantId, fromWarehouseId);
+    await this.assertWarehouseInTenant(tx, tenantId, toWarehouseId);
+
+    const outMutation = await this.applyQuantityDelta(
+      tx,
+      tenantId,
+      fromWarehouseId,
+      variantId,
+      -quantity,
+    );
+
+    const inMutation = await this.applyQuantityDelta(
+      tx,
+      tenantId,
+      toWarehouseId,
+      variantId,
+      quantity,
+    );
+
+    await tx.stockAdjustment.create({
+      data: {
+        tenantId,
+        warehouseId: fromWarehouseId,
+        variantId,
+        actorId,
+        reason: StockAdjustmentReason.TRANSFER_OUT,
+        note: note ?? null,
+        quantityDelta: -quantity,
+        quantityBefore: outMutation.quantityBefore,
+        quantityAfter: outMutation.quantityAfter,
+      },
+    });
+
+    await tx.stockAdjustment.create({
+      data: {
+        tenantId,
+        warehouseId: toWarehouseId,
+        variantId,
+        actorId,
+        reason: StockAdjustmentReason.TRANSFER_IN,
+        note: note ?? null,
+        quantityDelta: quantity,
+        quantityBefore: inMutation.quantityBefore,
+        quantityAfter: inMutation.quantityAfter,
+      },
+    });
+
+    await this.syncVariantInventoryCache(variantId, tx);
+  }
+
   async incrementFromReceive(
     tenantId: string,
     warehouseId: string,

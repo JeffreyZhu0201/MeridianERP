@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
+import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 import { PlatformMerchantsService } from './platform-merchants.service';
 
 @Controller('platform/merchants')
@@ -18,11 +19,8 @@ export class PlatformMerchantsController {
   constructor(private readonly platformMerchantsService: PlatformMerchantsService) {}
 
   @Get()
-  list(@Query('page') page?: string, @Query('limit') limit?: string) {
-    return this.platformMerchantsService.list(
-      page ? parseInt(page, 10) : 1,
-      limit ? parseInt(limit, 10) : 20,
-    );
+  list(@Query() query: ListMerchantsQueryDto) {
+    return this.platformMerchantsService.list(query);
   }
 
   @Get(':id')

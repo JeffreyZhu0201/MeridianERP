@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
-import { Button, Card, CardContent, Input, Label } from '@meridian/ui';
+import { AuthLayout, Button, Input, Label } from '@meridian/ui';
 
 import { API_URL, AUTH_COOKIE, type AuthResponse } from '@/lib/api';
 
 function LoginForm() {
+  const t = useTranslations('merchant.login');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -29,7 +31,7 @@ function LoginForm() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message ?? 'Invalid credentials');
+        throw new Error(body.message ?? t('invalidCredentials'));
       }
 
       const data = (await res.json()) as AuthResponse;
@@ -38,59 +40,55 @@ function LoginForm() {
       router.push(from);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setError(err instanceof Error ? err.message : t('signInFailed'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
-        <CardContent className="space-y-6 p-6 pt-6">
-          <div className="space-y-1 text-center">
-            <p className="text-xl font-semibold">MeridianERP</p>
-            <h1 className="text-lg font-medium">Merchant Portal</h1>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </form>
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthLayout
+      subtitle={t('subtitle')}
+      footer={
+        <>
+          {t('noAccount')}{' '}
+          <Link href="/register" className="text-primary hover:underline">
+            {t('registerLink')}
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">{t('email')}</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">{t('password')}</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? t('signingIn') : t('submit')}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }
 

@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
+  Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  DetailPageFrame,
   Table,
   TableBody,
   TableCell,
@@ -30,6 +33,10 @@ interface MerchantDetailActionsProps {
 
 export function MerchantDetailView({ merchant, token }: MerchantDetailActionsProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('admin.merchants');
+  const td = useTranslations('admin.merchants.detail');
+  const tc = useTranslations('common');
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [error, setError] = useState('');
@@ -46,7 +53,7 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
       router.push('/merchants');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Approve failed');
+      setError(err instanceof Error ? err.message : t('approveFailed'));
     }
   }
 
@@ -55,34 +62,29 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
     try {
       await apiFetch(
         `/platform/merchants/${merchant.id}/reject`,
-        { method: 'POST', body: JSON.stringify({ rejectionReason: reason }) },
+        { method: 'POST', body: JSON.stringify({ reason }) },
         token,
       );
       setRejectOpen(false);
       router.push('/merchants');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Reject failed');
+      setError(err instanceof Error ? err.message : t('rejectFailed'));
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-2">
-          <Link href="/merchants" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Back to merchants
-          </Link>
-          <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{merchant.businessName}</h1>
-            <StatusBadge status={merchant.onboardingStatus} />
-          </div>
-        </div>
-        {canReview ? (
+    <DetailPageFrame
+      title={merchant.businessName}
+      backHref="/merchants"
+      backLabel={t('title')}
+      badges={<StatusBadge status={merchant.onboardingStatus} />}
+      actions={
+        canReview ? (
           <div className="flex gap-2">
-            <Button onClick={() => setApproveOpen(true)}>Approve</Button>
+            <Button onClick={() => setApproveOpen(true)}>{t('approve')}</Button>
             <Button variant="destructive" onClick={() => setRejectOpen(true)}>
-              Reject
+              {t('reject')}
             </Button>
           </div>
         ) : merchant.tenantId ? (
@@ -90,16 +92,16 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
             href={`/inventory/tenants/${merchant.tenantId}`}
             className="inline-flex h-9 items-center rounded-full border border-input bg-background px-4 text-sm font-medium hover:bg-accent"
           >
-            View inventory
+            {t('viewInventory')}
           </Link>
-        ) : null}
-      </div>
-
+        ) : undefined
+      }
+    >
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       {merchant.onboardingStatus === OnboardingStatus.REJECTED && merchant.rejectionReason ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
-          <p className="font-medium text-destructive">Rejection reason</p>
+          <p className="font-medium text-destructive">{t('rejectReason')}</p>
           <p className="mt-1">{merchant.rejectionReason}</p>
         </div>
       ) : null}
@@ -107,86 +109,104 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Profile</CardTitle>
+            <CardTitle>{td('profile')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Legal name</span>
+              <span className="text-muted-foreground">{td('legalName')}</span>
               <span>{merchant.legalName ?? '—'}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Contact email</span>
+              <span className="text-muted-foreground">{td('contactEmail')}</span>
               <span>{merchant.contactEmail}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Contact phone</span>
+              <span className="text-muted-foreground">{td('contactPhone')}</span>
               <span>{merchant.contactPhone ?? '—'}</span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Submitted</span>
+              <span className="text-muted-foreground">{td('submitted')}</span>
               <span>
                 {merchant.submittedAt
-                  ? new Date(merchant.submittedAt).toLocaleString()
+                  ? new Date(merchant.submittedAt).toLocaleString(locale)
                   : '—'}
               </span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Reviewed</span>
+              <span className="text-muted-foreground">{td('reviewed')}</span>
               <span>
-                {merchant.reviewedAt ? new Date(merchant.reviewedAt).toLocaleString() : '—'}
+                {merchant.reviewedAt ? new Date(merchant.reviewedAt).toLocaleString(locale) : '—'}
               </span>
             </div>
           </CardContent>
         </Card>
 
-        {merchant.crmSummary ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>CRM Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-semibold">{merchant.crmSummary.contacts}</p>
-                <p className="text-xs text-muted-foreground">Contacts</p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold">{merchant.crmSummary.companies}</p>
-                <p className="text-xs text-muted-foreground">Companies</p>
-              </div>
-              <div>
-                <p className="text-2xl font-semibold">{merchant.crmSummary.leads}</p>
-                <p className="text-xs text-muted-foreground">Leads</p>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
-      </div>
-
-      {merchant.distributors && merchant.distributors.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Distributors</CardTitle>
+            <CardTitle>{td('crmSummary')}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-semibold">{merchant.crmSummary.contacts}</p>
+              <p className="text-xs text-muted-foreground">{td('contacts')}</p>
+            </div>
+            <div>
+              <p className="text-2xl font-semibold">{merchant.crmSummary.companies}</p>
+              <p className="text-xs text-muted-foreground">{td('companies')}</p>
+            </div>
+            <div>
+              <p className="text-2xl font-semibold">{merchant.crmSummary.leads}</p>
+              <p className="text-xs text-muted-foreground">{td('leads')}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{td('distributors')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {merchant.distributors.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>{td('columns.name')}</TableHead>
+                  <TableHead>{td('columns.status')}</TableHead>
+                  <TableHead className="text-right">{td('columns.totalBindings')}</TableHead>
+                  <TableHead className="text-right">{td('columns.bindingsLast30Days')}</TableHead>
+                  <TableHead className="text-right">{td('columns.ordersLast30Days')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {merchant.distributors.map((d) => (
-                  <TableRow key={d.id}>
-                    <TableCell>{d.name}</TableCell>
-                    <TableCell>{d.isActive ? 'Active' : 'Inactive'}</TableCell>
+                {merchant.distributors.map((distributor) => (
+                  <TableRow key={distributor.id}>
+                    <TableCell className="font-medium">{distributor.name}</TableCell>
+                    <TableCell>
+                      <Badge variant={distributor.isActive ? 'success' : 'secondary'}>
+                        {distributor.isActive ? tc('active') : tc('inactive')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {distributor.bindingCount}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {distributor.bindingsLast30Days}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {distributor.attributedOrdersLast30Days}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-      ) : null}
+          ) : (
+            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+              {td('noDistributors')}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <ApproveDialog
         open={approveOpen}
@@ -194,6 +214,6 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
         onConfirm={handleApprove}
       />
       <RejectDialog open={rejectOpen} onOpenChange={setRejectOpen} onConfirm={handleReject} />
-    </div>
+    </DetailPageFrame>
   );
 }

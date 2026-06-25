@@ -49,6 +49,18 @@ async function seedTenantInventory(tenantId: string) {
 }
 
 async function main() {
+  await prisma.platformSettings.upsert({
+    where: { id: 'singleton' },
+    update: {},
+    create: {
+      id: 'singleton',
+      platformName: 'MeridianERP',
+      supportEmail: 'support@meridian.test',
+      distributorPortalEnabled: true,
+      emailQueueEnabled: true,
+    },
+  });
+
   await prisma.platformUser.upsert({
     where: { email: 'admin@meridian.test' },
     update: {},
@@ -100,9 +112,32 @@ async function main() {
     });
 
     await seedTenantInventory(tenant.id);
+
+    await prisma.tenantSettings.upsert({
+      where: { tenantId: tenant.id },
+      update: {},
+      create: {
+        tenantId: tenant.id,
+        defaultCommissionRate: 10,
+        defaultCommissionType: 'PERCENT',
+        notifyOnBinding: true,
+        notifyOnCommission: true,
+      },
+    });
     void product;
   } else {
     await seedTenantInventory(existingTenant.id);
+    await prisma.tenantSettings.upsert({
+      where: { tenantId: existingTenant.id },
+      update: {},
+      create: {
+        tenantId: existingTenant.id,
+        defaultCommissionRate: 10,
+        defaultCommissionType: 'PERCENT',
+        notifyOnBinding: true,
+        notifyOnCommission: true,
+      },
+    });
   }
 }
 

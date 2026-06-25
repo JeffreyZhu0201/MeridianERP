@@ -50,15 +50,15 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-    // Remove nativeButton if it's passed from parent to avoid React warning
-    if ('nativeButton' in props) {
-      delete (props as any).nativeButton
-    }
+    
+    // Create a new props object to avoid mutating the original
+    const { nativeButton, ...restProps } = props as any;
+    
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        {...props}
+        {...restProps}
       />
     )
   }

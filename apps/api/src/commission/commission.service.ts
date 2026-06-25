@@ -3,12 +3,14 @@ import { CommissionType, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CommissionQueueService } from '../queue/commission-queue.service';
+import { EmailQueueService } from '../queue/email-queue.service';
 
 @Injectable()
 export class CommissionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly commissionQueue: CommissionQueueService,
+    private readonly emailQueue: EmailQueueService,
   ) {}
 
   async accrueOnPaid(orderId: string): Promise<void> {
@@ -47,6 +49,18 @@ export class CommissionService {
     });
 
     await this.commissionQueue.enqueueAccrual(order.id);
+
+    const settings = await this.prisma.tenantSettings.findUnique({
+      where: { tenantId: order.tenantId },
+    });
+    if (settings?.notifyOnCommission !== false) {
+      await this.emailQueue.sendCommissionAccrued({
+        tenantId: order.tenantId,
+        orderId: order.id,
+        distributorId: distributor.id,
+        amount: amount.toString(),
+      });
+    }
   }
 
   calculateAmount(

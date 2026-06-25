@@ -1,12 +1,55 @@
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { getTranslations } from 'next-intl/server';
+import { SettingsPageFrame } from '@meridian/ui';
+import type { PlatformSettingsDto } from '@meridian/shared';
 
-export default function SettingsPage() {
+import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { ApiError, apiFetch } from '@/lib/api';
+import { getToken } from '@/lib/auth';
+
+import { PlatformSettingsForm } from './_components/platform-settings-form';
+
+const DEFAULT_SETTINGS: PlatformSettingsDto = {
+  id: 'singleton',
+  platformName: 'MeridianERP',
+  supportEmail: null,
+  distributorPortalEnabled: true,
+  emailQueueEnabled: true,
+  updatedAt: new Date(0).toISOString(),
+  stripeMode: 'mock',
+  stripeKeyHint: null,
+  webhookUrl: 'http://localhost:3001/api/v1/store/checkout/webhooks/stripe',
+};
+
+export default async function SettingsPage() {
+  const token = await getToken();
+  if (!token) return null;
+
+  const t = await getTranslations('admin.settings');
+
+  let settings = DEFAULT_SETTINGS;
+  let loadError: string | null = null;
+
+  try {
+    settings = await apiFetch<PlatformSettingsDto>('/platform/settings', {}, token);
+  } catch (err) {
+    loadError =
+      err instanceof ApiError && err.status === 404
+        ? t('loadError')
+        : err instanceof Error
+          ? err.message
+          : t('loadError');
+  }
+
   return (
     <AdminShellWrapper>
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Platform settings coming in a future release.</p>
-      </div>
+      <SettingsPageFrame title={t('title')} description={t('description')}>
+        {loadError ? (
+          <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive" role="alert">
+            {loadError}
+          </p>
+        ) : null}
+        <PlatformSettingsForm settings={settings} token={token} readOnly={!!loadError} />
+      </SettingsPageFrame>
     </AdminShellWrapper>
   );
 }

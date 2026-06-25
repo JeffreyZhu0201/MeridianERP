@@ -181,3 +181,39 @@ export class PurchaseOrderListQueryDto extends ListQueryDto {
   @IsString()
   warehouseId?: string;
 }
+
+export class CreateStockTransferLineDto {
+  @IsString()
+  variantId!: string;
+
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+}
+
+export class CreateStockTransferDto {
+  @IsString()
+  fromWarehouseId!: string;
+
+  @IsString()
+  toWarehouseId!: string;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @ValidateNested({ each: true })
+  @Type(() => CreateStockTransferLineDto)
+  @ArrayMinSize(1)
+  lines!: CreateStockTransferLineDto[];
+}
+
+export class StockTransferListQueryDto extends ListQueryDto {
+  @IsOptional()
+  @IsString()
+  fromWarehouseId?: string;
+
+  @IsOptional()
+  @IsString()
+  toWarehouseId?: string;
+}

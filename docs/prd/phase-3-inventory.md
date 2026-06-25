@@ -1,5 +1,42 @@
 # Phase 3 Inventory — Product Requirements
 
+**Status:** ✅ Shipped (API + merchant UI) · P0 tests green · See [platform overview](./platform-overview.md)
+
+## Implementation Status (2025-06-25)
+
+| ID | Story | Priority | API | Merchant UI | Tests |
+|----|-------|----------|-----|-------------|-------|
+| US-3.1 | Warehouses / default warehouse | P0 | ✅ | ✅ | `inventory-warehouses.e2e-spec.ts` |
+| US-3.2 | Stock levels per warehouse + migration | P0 | ✅ | ✅ | `inventory-warehouses.e2e-spec.ts` |
+| US-3.3 | Auditable adjustments | P0 | ✅ | ✅ | `inventory-adjustments.e2e-spec.ts` |
+| US-3.4 | Low-stock alerts | P0 | ✅ | ✅ (nav badge) | `inventory-adjustments.e2e-spec.ts` |
+| US-3.5 | Create purchase orders | P0 | ✅ | ✅ | `inventory-purchase-orders.e2e-spec.ts` |
+| US-3.6 | Receive goods against PO | P0 | ✅ | ✅ | `inventory-purchase-orders.e2e-spec.ts` |
+| US-3.7 | Inventory reports + CSV | P0 | ✅ | ✅ | `inventory-reports.e2e-spec.ts` |
+| US-3.8 | Checkout stock validation | P0 | ✅ | N/A (store) | `store-checkout.e2e-spec.ts` |
+| US-3.9 | Per-variant reorder thresholds | P1 | ✅ | ✅ | adjustments e2e |
+| US-3.10 | PO list/filter/detail | P1 | ✅ | ✅ | PO e2e |
+| US-3.11 | Cancel unreceived PO | P1 | ✅ | ✅ | PO e2e |
+| US-3.12 | Export report CSV | P1 | ✅ | ✅ | `inventory-reports.e2e-spec.ts` |
+| US-3.13 | Platform read-only inventory | P1 | ✅ | — | ✅ Admin hidden route |
+| US-3.14 | Sellable qty in catalog | P1 | ✅ | ✅ (variant `inventory` cache) | — |
+| US-3.15 | Inter-warehouse transfers | P2 | ❌ | ❌ | — |
+| US-3.16–3.18 | GL, hierarchies, analytics | P2 | ❌ | ❌ | Deferred |
+
+### Merchant inventory routes (all implemented)
+
+`/inventory/warehouses` · `/inventory/stock` · `/inventory/adjustments` · `/inventory/alerts` · `/inventory/purchase-orders` (+ `/new`, `/[id]`) · `/inventory/reports` · `/inventory/settings`
+
+### Architecture decisions (locked)
+
+See `docs/architecture/phase-3-inventory.md` for full detail. Summary:
+
+- `ProductVariant.inventory` = **cached sellable aggregate** synced on every stock movement (default warehouse on-hand)
+- All mutations through `InventoryService` with transactional hard-block on negative stock
+- PO receive model: `PurchaseOrderReceipt` events, multiple partial receives per line
+- RBAC: owner + staff may adjust/receive; warehouse CRUD and tenant settings are owner-only
+- Adjustment reasons: enum `DAMAGE | COUNT_CORRECTION | RETURN | OTHER`
+
 ## Problem
 
 Phase 2 tracks a single `inventory` count per product variant and decrements it when orders are paid. Merchants selling physical goods need warehouse-aware stock management: multiple storage locations, auditable adjustments, replenishment via purchase orders, and visibility into low-stock risk — without leaving the merchant portal or breaking the storefront checkout flow.
@@ -69,26 +106,29 @@ Phase 2 tracks a single `inventory` count per product variant and decrements it 
 | API p95 (inventory CRUD) | < 400ms on local Docker stack |
 | P0 test coverage | 100% of P0 acceptance criteria mapped to automated tests |
 
-## Open Questions
+## Open Questions (resolved)
 
-| # | Question | Notes for architect |
-|---|----------|---------------------|
-| 1 | How should Phase 2 `ProductVariant.inventory` relate to warehouse stock? | Option A: deprecate field, derive sellable qty from warehouse sums. Option B: keep as cached aggregate synced on every movement. Migration path required. |
-| 2 | Which warehouses are "fulfillable" for storefront checkout in MVP? | PRD assumes default warehouse only; confirm no multi-warehouse allocation in P0. |
-| 3 | PO status enum and transitions | Proposed: DRAFT → ORDERED → PARTIALLY_RECEIVED → RECEIVED; CANCELLED from DRAFT/ORDERED if zero received. |
-| 4 | Adjustment reason codes | Fixed enum (DAMAGE, COUNT_CORRECTION, RETURN, OTHER) vs free text only? |
-| 5 | RBAC for inventory vs catalog | Can MERCHANT_STAFF adjust stock and receive POs, or owner-only for some actions? |
-| 6 | Negative stock policy | Hard block on adjustments and checkout only, or allow backorder flag per variant later? |
-| 7 | Partial PO receive | Multiple receive events per line until fully received — confirm event model vs single receive form. |
-| 8 | Platform admin inventory access | Read-only summary sufficient, or also adjustment/PO visiblity for support tickets? |
-| 9 | Low-stock default threshold | Tenant-wide default (e.g. 5) when variant threshold unset? |
-| 10 | Commission / order flow impact | Confirm PAID order still triggers inventory decrement once per line; no double-decrement if order status replayed. |
+| # | Question | Decision | Status |
+|---|----------|----------|--------|
+| 1 | `ProductVariant.inventory` vs warehouse stock | Cached aggregate synced on every movement; migration copies legacy counts to default warehouse | ✅ |
+| 2 | Fulfillable warehouses for checkout (MVP) | Default warehouse only; no multi-warehouse allocation | ✅ |
+| 3 | PO status enum and transitions | `DRAFT → ORDERED → PARTIALLY_RECEIVED → RECEIVED`; `CANCELLED` from DRAFT/ORDERED if zero received | ✅ |
+| 4 | Adjustment reason codes | Fixed enum + optional note | ✅ |
+| 5 | RBAC for inventory | Staff: adjust + PO; Owner: warehouse CRUD + settings | ✅ |
+| 6 | Negative stock policy | Hard block on adjustments and checkout | ✅ |
+| 7 | Partial PO receive | Event model (`PurchaseOrderReceipt`); multiple receives per line | ✅ |
+| 8 | Platform admin inventory access | Read-only summary, adjustments, and PO list | ✅ |
+| 9 | Low-stock default threshold | Tenant-wide default (default: 5) via `TenantInventorySettings` | ✅ |
+| 10 | Commission / order flow impact | Single decrement on PAID; idempotent via `InventoryService` | ✅ |
 
 ## Related Documents
 
 | Document | Path |
 |----------|------|
+| Platform overview | `docs/prd/platform-overview.md` |
 | Phase 1 PRD | `docs/prd/phase-1-foundation.md` |
 | Phase 2 PRD | `docs/prd/phase-2-ecommerce.md` |
 | Platform spec | `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md` |
-| Phase 2 architecture | `docs/architecture/phase-2-ecommerce.md` |
+| Phase 3 architecture | `docs/architecture/phase-3-inventory.md` |
+| Phase 3 design | `docs/design/phase-3-inventory.md` |
+| Verification handoff | `docs/handoffs/phase-3-inventory-verification.md` |

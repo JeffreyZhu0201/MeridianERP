@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
@@ -29,6 +30,7 @@ function formatPrice(price: string | number): string {
 
 export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
   const router = useRouter();
+  const t = useTranslations('store');
   const [cart, setCart] = useState(initial);
   const [updating, setUpdating] = useState<string | null>(null);
 
@@ -39,7 +41,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
       await apiFetch(
         storePath(storeSlug, `cart/items/${itemId}`),
         { method: 'PATCH', body: JSON.stringify({ quantity }) },
-        token,
+        token ? token : { storeSlug },
       );
       setCart((prev) => ({
         ...prev,
@@ -56,7 +58,11 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
   async function removeItem(itemId: string) {
     setUpdating(itemId);
     try {
-      await apiFetch(storePath(storeSlug, `cart/items/${itemId}`), { method: 'DELETE' }, token);
+      await apiFetch(
+        storePath(storeSlug, `cart/items/${itemId}`),
+        { method: 'DELETE' },
+        token ? token : { storeSlug },
+      );
       setCart((prev) => ({
         ...prev,
         items: prev.items.filter((item) => item.id !== itemId),
@@ -79,10 +85,10 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Variant</TableHead>
-                <TableHead>Qty</TableHead>
-                <TableHead className="text-right">Total</TableHead>
+                <TableHead>{t('cart.product')}</TableHead>
+                <TableHead>{t('cart.variant')}</TableHead>
+                <TableHead>{t('cart.qty')}</TableHead>
+                <TableHead className="text-right">{t('cart.total')}</TableHead>
                 <TableHead />
               </TableRow>
             </TableHeader>
@@ -122,7 +128,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
                       disabled={updating === item.id}
                       onClick={() => removeItem(item.id)}
                     >
-                      Remove
+                      {t('cart.remove')}
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -135,12 +141,12 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
       <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
         <div className="rounded-xl border p-4">
           <div className="flex items-center justify-between text-sm font-medium">
-            <span>Subtotal</span>
+            <span>{t('cart.subtotal')}</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           <Link href={`/s/${storeSlug}/checkout`} className="mt-4 block">
             <Button className="w-full" size="lg">
-              Checkout
+              {t('cart.checkout')}
             </Button>
           </Link>
         </div>

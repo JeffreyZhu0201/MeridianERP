@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { BindType, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { CommissionService } from '../../commission/commission.service';
@@ -66,6 +66,25 @@ export class StoreCheckoutService {
       throw new BadRequestException('Cart is empty');
     }
 
+    let distributorId = cart.distributorId;
+    if (!distributorId && user?.userId) {
+      const binding = await this.prisma.binding.findUnique({
+        where: {
+          bindableType_bindableId: {
+            bindableType: BindType.CUSTOMER,
+            bindableId: user.userId,
+          },
+        },
+      });
+      if (binding && binding.tenantId === tenant.id) {
+        distributorId = binding.distributorId;
+        await this.prisma.cart.update({
+          where: { id: cart.id },
+          data: { distributorId },
+        });
+      }
+    }
+
     if (!user && !dto.guestEmail) {
       throw new BadRequestException('guestEmail is required for guest checkout');
     }
@@ -91,7 +110,7 @@ export class StoreCheckoutService {
       data: {
         tenantId: tenant.id,
         customerId: user?.userId ?? null,
-        distributorId: cart.distributorId,
+        distributorId,
         status: OrderStatus.PENDING_PAYMENT,
         subtotal,
         tax,
@@ -138,6 +157,7 @@ export class StoreCheckoutService {
         id: paymentIntent.id,
         clientSecret: paymentIntent.clientSecret,
       },
+      mockPayment: this.paymentService.isMockMode(),
     };
   }
 
@@ -176,7 +196,7 @@ export class StoreCheckoutService {
   private async markOrderPaid(orderId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { lines: true },
+      include: { lines: true, customer: true },
     });
     if (!order || order.status !== OrderStatus.PENDING_PAYMENT) {
       return;
@@ -203,9 +223,14 @@ export class StoreCheckoutService {
     await this.inventoryQueue.enqueueLowStockCheck({ tenantId: order.tenantId });
 
     await this.commissionService.accrueOnPaid(orderId);
-    await this.emailQueue.sendMerchantWelcome(
-      order.guestEmail ?? 'customer@store.test',
-      `Order ${orderId}`,
-    );
+
+    const confirmationEmail = order.guestEmail ?? order.customer?.email;
+    if (confirmationEmail) {
+      await this.emailQueue.sendOrderConfirmation(
+        order.tenantId,
+        orderId,
+        confirmationEmail,
+      );
+    }
   }
 }

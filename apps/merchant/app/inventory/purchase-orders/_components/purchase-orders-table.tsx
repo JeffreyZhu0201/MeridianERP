@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Button,
   EmptyState,
@@ -16,8 +17,6 @@ import {
 } from '@meridian/ui';
 import { PurchaseOrderStatus } from '@meridian/shared';
 import type { PurchaseOrder, Warehouse } from '@meridian/shared';
-
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface PurchaseOrdersTableProps {
   orders: Array<
@@ -40,6 +39,11 @@ export function PurchaseOrdersTable({
   const status = searchParams.get('status') ?? '';
   const warehouseId = searchParams.get('warehouseId') ?? '';
 
+  const t = useTranslations('merchant.inventory.purchaseOrders');
+  const tCommon = useTranslations('common');
+  const tInvCommon = useTranslations('merchant.inventory.common');
+  const tPoStatus = useTranslations('merchant.inventory.poStatus');
+
   function updateFilter(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set(key, value);
@@ -49,9 +53,6 @@ export function PurchaseOrdersTable({
   }
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
-  const zh = inventoryZh.purchaseOrders;
-  const common = inventoryZh.common;
-  const poStatus = inventoryZh.poStatus;
 
   return (
     <>
@@ -59,7 +60,7 @@ export function PurchaseOrdersTable({
         <div className="flex flex-wrap gap-3">
           <div className="space-y-2">
             <label htmlFor="po-status" className="text-sm font-medium">
-              {zh.filterStatus}
+              {t('filterStatus')}
             </label>
             <Select
               id="po-status"
@@ -70,14 +71,14 @@ export function PurchaseOrdersTable({
               <option value="">全部</option>
               {Object.values(PurchaseOrderStatus).map((s) => (
                 <option key={s} value={s}>
-                  {poStatus[s as keyof typeof poStatus] ?? s}
+                  {tPoStatus(s)}
                 </option>
               ))}
             </Select>
           </div>
           <div className="space-y-2">
             <label htmlFor="po-warehouse" className="text-sm font-medium">
-              {zh.warehouse}
+              {t('warehouse')}
             </label>
             <Select
               id="po-warehouse"
@@ -85,7 +86,7 @@ export function PurchaseOrdersTable({
               onChange={(e) => updateFilter('warehouseId', e.target.value)}
               className="min-h-11"
             >
-              <option value="">{common.allWarehouses}</option>
+              <option value="">{tInvCommon('allWarehouses')}</option>
               {warehouses.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -98,22 +99,22 @@ export function PurchaseOrdersTable({
           href="/inventory/purchase-orders/new"
           className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          {zh.new}
+          {t('new')}
         </Link>
       </div>
 
       {orders.length === 0 ? (
-        <EmptyState title={zh.emptyTitle} description={zh.emptyDescription} />
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
         <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{zh.poNumber}</TableHead>
-                <TableHead>{zh.supplier}</TableHead>
-                <TableHead>{zh.warehouse}</TableHead>
-                <TableHead>{zh.status}</TableHead>
-                <TableHead>{zh.created}</TableHead>
+                <TableHead>{t('poNumber')}</TableHead>
+                <TableHead>{t('supplier')}</TableHead>
+                <TableHead>{t('warehouse')}</TableHead>
+                <TableHead>{t('status')}</TableHead>
+                <TableHead>{t('created')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -153,7 +154,7 @@ export function PurchaseOrdersTable({
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{common.pageOf(page, total)}</span>
+          <span>{tCommon('pageOf', { page, total })}</span>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -166,7 +167,7 @@ export function PurchaseOrdersTable({
                 router.push(`/inventory/purchase-orders?${params.toString()}`);
               }}
             >
-              {common.previous}
+              {tCommon('previous')}
             </Button>
             <Button
               size="sm"
@@ -179,7 +180,7 @@ export function PurchaseOrdersTable({
                 router.push(`/inventory/purchase-orders?${params.toString()}`);
               }}
             >
-              {common.next}
+              {tCommon('next')}
             </Button>
           </div>
         </div>

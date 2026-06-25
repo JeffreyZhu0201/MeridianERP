@@ -26,12 +26,12 @@ export default defineConfig({
     },
     {
       name: 'store',
-      testMatch: /phase-2-store\.spec\.ts/,
+      testMatch: /phase-2-store\.spec\.ts|gaps-store\.spec\.ts|i18n-locale\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: STORE_URL },
     },
     {
       name: 'merchant',
-      testMatch: /phase-3-inventory\.spec\.ts/,
+      testMatch: /phase-3-inventory\.spec\.ts|i18n-locale\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: MERCHANT_URL },
     },
   ],

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
@@ -25,6 +26,8 @@ interface CategoriesTableProps {
 
 export function CategoriesTable({ categories: initial, token }: CategoriesTableProps) {
   const router = useRouter();
+  const t = useTranslations('merchant.catalog.categories');
+  const tCommon = useTranslations('common');
   const [categories, setCategories] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Category | null>(null);
@@ -65,12 +68,12 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this category?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await apiFetch(`/merchant/categories/${id}`, { method: 'DELETE' }, token);
     setCategories((prev) => prev.filter((c) => c.id !== id));
     router.refresh();
@@ -79,14 +82,14 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>Add Category</Button>
+        <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
       {categories.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">No categories yet</p>
+          <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
-            Add your first category
+            {t('emptyAction')}
           </Button>
         </div>
       ) : (
@@ -94,11 +97,11 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Parent</TableHead>
-                <TableHead>Products</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{tCommon('name')}</TableHead>
+                <TableHead>{t('slug')}</TableHead>
+                <TableHead>{t('parent')}</TableHead>
+                <TableHead>{t('products')}</TableHead>
+                <TableHead className="text-right">{tCommon('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -111,14 +114,14 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button size="sm" variant="outline" onClick={() => openEdit(category)}>
-                        Edit
+                        {tCommon('edit')}
                       </Button>
                       <Button
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(category.id)}
                       >
-                        Delete
+                        {tCommon('delete')}
                       </Button>
                     </div>
                   </TableCell>
@@ -132,19 +135,19 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title={editing ? 'Edit Category' : 'Add Category'}
+        title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <SheetFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tCommon('save')}</Button>
           </SheetFooter>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{tCommon('name')}</Label>
             <Input
               id="name"
               value={form.name}
@@ -152,12 +155,12 @@ export function CategoriesTable({ categories: initial, token }: CategoriesTableP
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t('slug')}</Label>
             <Input
               id="slug"
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              placeholder="auto-generated from name"
+              placeholder={t('slugPlaceholder')}
             />
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}

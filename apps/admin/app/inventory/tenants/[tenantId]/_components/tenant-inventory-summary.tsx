@@ -6,6 +6,7 @@ import {
   Badge,
   Card,
   CardContent,
+  DetailPageFrame,
   MetricCard,
   PurchaseOrderStatusBadge,
   StockAdjustmentReasonBadge,
@@ -41,17 +42,12 @@ export function TenantInventorySummary({
   const tab = searchParams.get('tab') ?? 'overview';
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Link href="/merchants" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Merchants
-        </Link>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {businessName} — Inventory
-        </h1>
-        <p className="text-sm text-muted-foreground">Read-only support view</p>
-      </div>
-
+    <DetailPageFrame
+      title={`${businessName} — Inventory`}
+      description="Read-only support view"
+      backHref="/merchants"
+      backLabel="Merchants"
+    >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
         Read-only support view. Changes must be made by the merchant.
       </div>
@@ -196,6 +192,6 @@ export function TenantInventorySummary({
           </Table>
         </div>
       ) : null}
-    </div>
+    </DetailPageFrame>
   );
 }

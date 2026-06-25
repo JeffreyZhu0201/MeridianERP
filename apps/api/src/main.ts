@@ -11,6 +11,7 @@ async function bootstrap() {
       process.env.ADMIN_APP_URL ?? 'http://localhost:3000',
       process.env.MERCHANT_APP_URL ?? 'http://localhost:3002',
       process.env.STORE_APP_URL ?? 'http://localhost:3003',
+      process.env.DISTRIBUTOR_APP_URL ?? 'http://localhost:3005',
     ],
     credentials: true,
   });

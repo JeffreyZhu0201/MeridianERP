@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { ProductCard } from '@meridian/ui';
 
 import type { Product } from '@/lib/api';
@@ -13,11 +14,13 @@ function getFromPrice(variants: Product['variants']): number {
   return Math.min(...active.map((v) => Number(v.price)));
 }
 
-export function ProductGrid({ products, storeSlug }: ProductGridProps) {
+export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
+  const t = await getTranslations('store');
+
   if (!products?.length) {
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">No products yet</p>
+        <p className="text-muted-foreground">{t('home.empty')}</p>
       </div>
     );
   }

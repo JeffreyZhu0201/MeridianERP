@@ -1,3 +1,9 @@
+import type {
+  PlatformDashboardStats,
+  PlatformMerchantDetail,
+  PlatformRecentMerchant,
+} from '@meridian/shared';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 export const AUTH_COOKIE = 'admin_token';
 
@@ -47,39 +53,14 @@ export interface PaginatedResponse<T> {
   meta: { total: number; page: number; limit: number };
 }
 
-export interface MerchantListItem {
-  id: string;
-  businessName: string;
-  contactEmail: string;
-  onboardingStatus: string;
-  submittedAt?: string;
-}
+/** Merchant list row — same shape as dashboard recent merchants. */
+export type MerchantListItem = PlatformRecentMerchant;
 
-export interface MerchantDetail extends MerchantListItem {
-  legalName?: string;
-  contactPhone?: string;
-  rejectionReason?: string;
-  reviewedAt?: string;
-  tenantId?: string;
-  crmSummary?: {
-    contacts: number;
-    companies: number;
-    leads: number;
-  };
-  distributors?: Array<{
-    id: string;
-    name: string;
-    isActive: boolean;
-  }>;
-}
+/** Platform admin merchant detail with CRM + distributor enrichment (US-4.5). */
+export type MerchantDetail = PlatformMerchantDetail;
 
-export interface DashboardStats {
-  totalMerchants: number;
-  pendingReview: number;
-  activeDistributors: number;
-  bindingsLast30Days: number;
-  recentMerchants: MerchantListItem[];
-}
+/** Platform dashboard aggregates (US-4.5 / G-3). */
+export type DashboardStats = PlatformDashboardStats;
 
 export interface AuthResponse {
   accessToken: string;

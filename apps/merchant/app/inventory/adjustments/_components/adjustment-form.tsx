@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
@@ -25,7 +26,6 @@ import { StockAdjustmentReason } from '@meridian/shared';
 import type { StockAdjustmentWithDetails, Warehouse } from '@meridian/shared';
 
 import { apiFetch, type Product } from '@/lib/api';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 import type { VariantOption } from '@/lib/product-variants';
 
 interface AdjustmentFormProps {
@@ -67,9 +67,9 @@ export function AdjustmentForm({
     );
   });
 
-  const zh = inventoryZh.adjustments;
-  const common = inventoryZh.common;
-  const reasons = inventoryZh.adjustmentReason;
+  const t = useTranslations('merchant.inventory.adjustments');
+  const tCommon = useTranslations('common');
+  const tReasons = useTranslations('merchant.inventory.adjustmentReason');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,20 +92,20 @@ export function AdjustmentForm({
       setNote('');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : zh.failed);
+      setError(err instanceof Error ? err.message : t('failed'));
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{zh.record}</CardTitle>
+        <CardTitle>{t('record')}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="adj-warehouse">{zh.warehouse}</Label>
+              <Label htmlFor="adj-warehouse">{t('warehouse')}</Label>
               <Select
                 id="adj-warehouse"
                 value={warehouseId}
@@ -121,10 +121,10 @@ export function AdjustmentForm({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="adj-variant-search">{zh.variant}</Label>
+              <Label htmlFor="adj-variant-search">{t('variant')}</Label>
               <Input
                 id="adj-variant-search"
-                placeholder={zh.variantSearch}
+                placeholder={t('variantSearch')}
                 value={variantSearch}
                 onChange={(e) => setVariantSearch(e.target.value)}
                 className="min-h-11"
@@ -148,7 +148,7 @@ export function AdjustmentForm({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <fieldset className="space-y-2">
-              <legend className="text-sm font-medium">{zh.direction}</legend>
+              <legend className="text-sm font-medium">{t('direction')}</legend>
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="radio"
@@ -156,7 +156,7 @@ export function AdjustmentForm({
                   checked={direction === 'increase'}
                   onChange={() => setDirection('increase')}
                 />
-                {zh.increase}
+                {t('increase')}
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -165,11 +165,11 @@ export function AdjustmentForm({
                   checked={direction === 'decrease'}
                   onChange={() => setDirection('decrease')}
                 />
-                {zh.decrease}
+                {t('decrease')}
               </label>
             </fieldset>
             <div className="space-y-2">
-              <Label htmlFor="adj-qty">{zh.quantity}</Label>
+              <Label htmlFor="adj-qty">{t('quantity')}</Label>
               <Input
                 id="adj-qty"
                 type="number"
@@ -182,23 +182,23 @@ export function AdjustmentForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="adj-reason">{zh.reason}</Label>
+              <Label htmlFor="adj-reason">{t('reason')}</Label>
               <Select
                 id="adj-reason"
                 value={reason}
                 onChange={(e) => setReason(e.target.value as StockAdjustmentReason)}
                 className="min-h-11"
               >
-                <option value={StockAdjustmentReason.DAMAGE}>{reasons.DAMAGE}</option>
-                <option value={StockAdjustmentReason.COUNT_CORRECTION}>{reasons.COUNT_CORRECTION}</option>
-                <option value={StockAdjustmentReason.RETURN}>{reasons.RETURN}</option>
-                <option value={StockAdjustmentReason.OTHER}>{reasons.OTHER}</option>
+                <option value={StockAdjustmentReason.DAMAGE}>{tReasons('DAMAGE')}</option>
+                <option value={StockAdjustmentReason.COUNT_CORRECTION}>{tReasons('COUNT_CORRECTION')}</option>
+                <option value={StockAdjustmentReason.RETURN}>{tReasons('RETURN')}</option>
+                <option value={StockAdjustmentReason.OTHER}>{tReasons('OTHER')}</option>
               </Select>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="adj-note">{zh.note}</Label>
+            <Label htmlFor="adj-note">{t('note')}</Label>
             <Textarea
               id="adj-note"
               value={note}
@@ -213,7 +213,7 @@ export function AdjustmentForm({
             </p>
           ) : null}
 
-          <Button type="submit" className="min-h-11">{zh.submit}</Button>
+          <Button type="submit" className="min-h-11">{t('submit')}</Button>
         </form>
       </CardContent>
     </Card>
@@ -235,9 +235,11 @@ export function AdjustmentsHistoryTable({
 }: AdjustmentsHistoryTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const zh = inventoryZh.adjustments;
-  const common = inventoryZh.common;
-  const reasons = inventoryZh.adjustmentReason;
+  const t = useTranslations('merchant.inventory.adjustments');
+  const tStock = useTranslations('merchant.inventory.stock');
+  const tCommon = useTranslations('common');
+  const tInvCommon = useTranslations('merchant.inventory.common');
+  const tReasons = useTranslations('merchant.inventory.adjustmentReason');
   const warehouseId = searchParams.get('warehouseId') ?? '';
   const reason = searchParams.get('reason') ?? '';
   const from = searchParams.get('from') ?? '';
@@ -255,10 +257,10 @@ export function AdjustmentsHistoryTable({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-medium">{zh.history}</h2>
+      <h2 className="text-lg font-medium">{t('history')}</h2>
       <div className="flex flex-wrap gap-3">
         <div className="space-y-2">
-          <Label htmlFor="from-date">{zh.filterFrom}</Label>
+          <Label htmlFor="from-date">{t('filterFrom')}</Label>
           <Input
             id="from-date"
             type="date"
@@ -268,7 +270,7 @@ export function AdjustmentsHistoryTable({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="to-date">{zh.filterTo}</Label>
+          <Label htmlFor="to-date">{t('filterTo')}</Label>
           <Input
             id="to-date"
             type="date"
@@ -278,14 +280,14 @@ export function AdjustmentsHistoryTable({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="hist-warehouse">{zh.warehouse}</Label>
+          <Label htmlFor="hist-warehouse">{t('warehouse')}</Label>
           <Select
             id="hist-warehouse"
             value={warehouseId}
             onChange={(e) => updateFilter('warehouseId', e.target.value)}
             className="min-h-11"
           >
-            <option value="">{common.allWarehouses}</option>
+            <option value="">{tInvCommon('allWarehouses')}</option>
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -294,7 +296,7 @@ export function AdjustmentsHistoryTable({
           </Select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="hist-reason">{zh.filterReason}</Label>
+          <Label htmlFor="hist-reason">{t('filterReason')}</Label>
           <Select
             id="hist-reason"
             value={reason}
@@ -304,7 +306,7 @@ export function AdjustmentsHistoryTable({
             <option value="">全部</option>
             {Object.values(StockAdjustmentReason).map((r) => (
               <option key={r} value={r}>
-                {reasons[r as keyof typeof reasons] ?? r}
+                {tReasons(r)}
               </option>
             ))}
           </Select>
@@ -312,18 +314,18 @@ export function AdjustmentsHistoryTable({
       </div>
 
       {adjustments.length === 0 ? (
-        <EmptyState title={zh.emptyHistory} />
+        <EmptyState title={t('emptyHistory')} />
       ) : (
         <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>日期</TableHead>
-                <TableHead>{inventoryZh.stock.product}</TableHead>
-                <TableHead>{zh.warehouse}</TableHead>
+                <TableHead>{tStock('product')}</TableHead>
+                <TableHead>{t('warehouse')}</TableHead>
                 <TableHead className="text-right">变动</TableHead>
                 <TableHead className="text-right">调整前 → 后</TableHead>
-                <TableHead>{zh.reason}</TableHead>
+                <TableHead>{t('reason')}</TableHead>
                 <TableHead>操作人</TableHead>
               </TableRow>
             </TableHeader>
@@ -361,7 +363,7 @@ export function AdjustmentsHistoryTable({
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{common.pageOf(page, total)}</span>
+          <span>{tCommon('pageOf', { page, total })}</span>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -374,7 +376,7 @@ export function AdjustmentsHistoryTable({
                 router.push(`/inventory/adjustments?${params.toString()}`);
               }}
             >
-              {common.previous}
+              {tCommon('previous')}
             </Button>
             <Button
               size="sm"
@@ -387,7 +389,7 @@ export function AdjustmentsHistoryTable({
                 router.push(`/inventory/adjustments?${params.toString()}`);
               }}
             >
-              {common.next}
+              {tCommon('next')}
             </Button>
           </div>
         </div>

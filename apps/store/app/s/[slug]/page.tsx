@@ -1,3 +1,6 @@
+import { getTranslations } from 'next-intl/server';
+import { ListPageFrame } from '@meridian/ui';
+
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart, type Product } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -10,6 +13,7 @@ interface StoreHomePageProps {
 export default async function StoreHomePage({ params }: StoreHomePageProps) {
   const { slug } = await params;
   const token = await getToken();
+  const t = await getTranslations('store');
 
   const [products, cart] = await Promise.all([
     apiFetch<Product[]>(storePath(slug, 'products')).catch(() => []),
@@ -18,16 +22,23 @@ export default async function StoreHomePage({ params }: StoreHomePageProps) {
 
   const storeName = slug.charAt(0).toUpperCase() + slug.slice(1);
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const isEmpty = products.length === 0;
 
   return (
     <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Shop</h1>
-          <p className="text-sm text-muted-foreground">Browse our catalog</p>
-        </div>
+      <ListPageFrame
+        title={t('home.shop')}
+        description={t('home.browseCatalog')}
+        emptyState={
+          isEmpty ? (
+            <div className="rounded-xl border border-dashed p-12 text-center">
+              <p className="text-muted-foreground">{t('home.empty')}</p>
+            </div>
+          ) : undefined
+        }
+      >
         <ProductGrid products={products} storeSlug={slug} />
-      </div>
+      </ListPageFrame>
     </StoreShellWrapper>
   );
 }

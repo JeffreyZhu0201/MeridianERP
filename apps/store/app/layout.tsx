@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { getLocale, getMessages } from 'next-intl/server';
+import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -6,15 +8,20 @@ export const metadata: Metadata = {
   description: 'Consumer storefront',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
+        <PortalLocaleProvider locale={locale} messages={messages}>
+          <PortalThemeProvider storageKey="meridian-theme-store">{children}</PortalThemeProvider>
+        </PortalLocaleProvider>
       </body>
     </html>
   );

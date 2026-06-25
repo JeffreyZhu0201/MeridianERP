@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button, Dialog, DialogCloseButton } from '@meridian/ui';
 
 interface ApproveDialogProps {
@@ -9,21 +10,24 @@ interface ApproveDialogProps {
 }
 
 export function ApproveDialog({ open, onOpenChange, onConfirm }: ApproveDialogProps) {
+  const t = useTranslations('admin.merchants');
+  const tc = useTranslations('common');
+
   return (
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Approve merchant"
-      description="This will provision the tenant and activate the merchant account."
+      title={t('approveTitle')}
+      description={t('approveDescription')}
       footer={
         <>
-          <DialogCloseButton onClick={() => onOpenChange(false)} />
+          <DialogCloseButton onClick={() => onOpenChange(false)}>{tc('cancel')}</DialogCloseButton>
           <Button
             onClick={() => {
               onConfirm();
             }}
           >
-            Approve
+            {t('approve')}
           </Button>
         </>
       }

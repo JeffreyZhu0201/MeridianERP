@@ -1,6 +1,6 @@
 export interface JwtPayload {
   sub: string;
-  aud: 'admin' | 'merchant' | 'store';
+  aud: 'admin' | 'merchant' | 'store' | 'distributor';
   tenantId?: string;
   roles: string[];
 }

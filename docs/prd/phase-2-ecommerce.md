@@ -1,5 +1,43 @@
 # Phase 2 E-commerce — Product Requirements
 
+**Status:** API complete · Store UI ~60% · Merchant catalog done · See [platform overview](./platform-overview.md)
+
+## Implementation Status (2025-06-25)
+
+| ID | Story | API | Merchant UI | Store UI | Admin UI | Tests |
+|----|-------|-----|-------------|----------|----------|-------|
+| US-2.1 | Product catalog CRUD | ✅ | ✅ Products + Categories | ✅ Browse + PDP | — | `store-catalog.e2e-spec.ts` |
+| US-2.2 | Customer register/login | ✅ | — | ✅ | — | `store-auth.e2e-spec.ts` |
+| US-2.3 | Cart + checkout | ✅ | — | ⚠️ G-5, G-6, G-9 | — | `store-checkout.e2e-spec.ts` |
+| US-2.4 | Distributor attribution | ✅ (cart `distributorId`) | — | ❌ G-7 customer bind | — | checkout e2e (API) |
+| US-2.5 | Commission on PAID | ✅ | — | N/A | — | `store-checkout.e2e-spec.ts` |
+| US-2.6 | Settlement ledger + export | ✅ | — | N/A | ✅ | — |
+| US-2.7 | Inventory decrement | ✅ | — (catalog shows qty) | N/A | — | `store-checkout.e2e-spec.ts` |
+
+### Store routes (`apps/store`)
+
+| Route | Status |
+|-------|--------|
+| `/` | ✅ Landing |
+| `/s/[slug]` | ✅ Product grid |
+| `/s/[slug]/products/[productSlug]` | ✅ PDP with stock badge |
+| `/s/[slug]/cart` | ⚠️ Logged-in only; guest session missing |
+| `/s/[slug]/checkout` | ⚠️ Wrong API path; no Stripe UI |
+| `/s/[slug]/login`, `/register` | ✅ |
+| `/s/[slug]/account` | ❌ Stub — no order history API |
+| `/s/[slug]/bind/[token]` | ⚠️ UI exists; API contract mismatch |
+
+### Merchant gaps (Phase 2)
+
+- **G-11:** `GET /merchant/orders` API exists; no merchant orders UI
+- Product images: placeholder only
+- No order confirmation page in store
+
+### Payment flow
+
+- Backend: `POST /store/:slug/checkout`, Stripe webhook, `simulate-payment` for test env
+- Frontend: creates pending order only; Stripe Payment Element not integrated
+
 ## Problem
 
 Merchants approved in Phase 1 need a consumer-facing storefront to sell products, while the platform must attribute orders to distributors and accrue commission for later settlement.
@@ -57,3 +95,23 @@ Merchants approved in Phase 1 need a consumer-facing storefront to sell products
 - Phase 1 complete: tenant slugs, distributor bindings, merchant auth
 - Stripe test keys in `.env`
 - `apps/store` on port 3003
+
+## Follow-up Work (to close Phase 2 UI)
+
+| Priority | Item | Ref |
+|----------|------|-----|
+| P0 | Fix checkout API path to `/store/${slug}/checkout` | G-5 |
+| P0 | Send `X-Cart-Session` for guest carts | G-6 |
+| P0 | Customer bind flow (store JWT or dedicated claim endpoint) | G-7 |
+| P1 | Stripe Payment Element + order confirmation page | G-9 |
+| P1 | Customer order history API + account page | G-8 |
+| P1 | Merchant orders list UI | G-11 |
+| P2 | Product images, cart drawer, catalog search | design doc |
+
+## Related Documents
+
+| Document | Path |
+|----------|------|
+| Platform overview | `docs/prd/platform-overview.md` |
+| Architecture | `docs/architecture/phase-2-ecommerce.md` |
+| Store wireframes | `docs/design/phase-2-store.md` |

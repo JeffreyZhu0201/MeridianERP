@@ -16,15 +16,18 @@ import { LeadsController } from './crm/leads/leads.controller';
 import { LeadsService } from './crm/leads/leads.service';
 import { ActivitiesController } from './crm/activities/activities.controller';
 import { ActivitiesService } from './crm/activities/activities.service';
+import { CommissionsModule } from './commissions/commissions.module';
 import { DistributorsController } from './distributors/distributors.controller';
 import { DistributorsService } from './distributors/distributors.service';
 import { InventoryModule } from '../inventory/inventory.module';
 import { MerchantInventoryModule } from './inventory/merchant-inventory.module';
 import { MerchantOrdersController } from './orders/merchant-orders.controller';
 import { MerchantOrdersService } from './orders/merchant-orders.service';
+import { MerchantDashboardModule } from './dashboard/merchant-dashboard.module';
+import { MerchantSettingsModule } from './settings/merchant-settings.module';
 
 @Module({
-  imports: [AuthModule, InventoryModule, MerchantInventoryModule],
+  imports: [AuthModule, InventoryModule, MerchantInventoryModule, CommissionsModule, MerchantDashboardModule, MerchantSettingsModule],
   controllers: [
     MerchantAuthController,
     OnboardingController,

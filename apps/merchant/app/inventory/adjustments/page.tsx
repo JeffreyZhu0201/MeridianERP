@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 
-import { PageHeader } from '@meridian/ui';
+import { ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile, type Product } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { getTranslations } from 'next-intl/server';
 import { buildInventoryQuery, emptyInventoryPage, normalizeInventoryPage, type InventoryPaginated } from '@/lib/inventory';
 import type { StockAdjustmentWithDetails, Warehouse } from '@meridian/shared';
 
@@ -53,14 +53,13 @@ export default async function AdjustmentsPage({ searchParams }: AdjustmentsPageP
   ]);
 
   const defaultWarehouse = warehouses.find((w) => w.isDefault);
-  const zh = inventoryZh.adjustments;
+  const t = await getTranslations('merchant.inventory.adjustments');
 
   const historyPage = normalizeInventoryPage(historyRes);
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <div className="space-y-6">
-        <PageHeader title={zh.title} description={zh.description} />
+      <ListPageFrame title={t('title')} description={t('description')}>
         <Suspense>
           <AdjustmentForm
             warehouses={warehouses}
@@ -77,7 +76,7 @@ export default async function AdjustmentsPage({ searchParams }: AdjustmentsPageP
             warehouses={warehouses}
           />
         </Suspense>
-      </div>
+      </ListPageFrame>
     </MerchantShellWrapper>
   );
 }

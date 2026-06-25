@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -29,6 +30,8 @@ interface ProductsTableProps {
 
 export function ProductsTable({ products: initial, categories, token }: ProductsTableProps) {
   const router = useRouter();
+  const t = useTranslations('merchant.catalog.products');
+  const tCommon = useTranslations('common');
   const [products, setProducts] = useState(initial);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -107,12 +110,12 @@ export function ProductsTable({ products: initial, categories, token }: Products
       setOpen(false);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : tCommon('errors.saveFailed'));
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this product?')) return;
+    if (!confirm(t('deleteConfirm'))) return;
     await apiFetch(`/merchant/products/${id}`, { method: 'DELETE' }, token);
     setProducts((prev) => prev.filter((p) => p.id !== id));
     router.refresh();
@@ -127,14 +130,14 @@ export function ProductsTable({ products: initial, categories, token }: Products
   return (
     <>
       <div className="flex justify-end">
-        <Button onClick={openCreate}>Add Product</Button>
+        <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
       {products.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center">
-          <p className="text-muted-foreground">No products yet</p>
+          <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
-            Add your first product
+            {t('emptyAction')}
           </Button>
         </div>
       ) : (
@@ -142,13 +145,13 @@ export function ProductsTable({ products: initial, categories, token }: Products
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Slug</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead className="text-right">Sellable</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{tCommon('name')}</TableHead>
+                <TableHead>{t('slug')}</TableHead>
+                <TableHead>{t('category')}</TableHead>
+                <TableHead>{t('price')}</TableHead>
+                <TableHead className="text-right">{t('sellable')}</TableHead>
+                <TableHead>{tCommon('status')}</TableHead>
+                <TableHead className="text-right">{tCommon('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -165,20 +168,20 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     </TableCell>
                     <TableCell>
                       <Badge variant={product.isPublished ? 'default' : 'secondary'}>
-                        {product.isPublished ? 'Published' : 'Draft'}
+                        {product.isPublished ? t('published') : t('draft')}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button size="sm" variant="outline" onClick={() => openEdit(product)}>
-                          Edit
+                          {tCommon('edit')}
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(product.id)}
                         >
-                          Delete
+                          {tCommon('delete')}
                         </Button>
                       </div>
                     </TableCell>
@@ -193,19 +196,19 @@ export function ProductsTable({ products: initial, categories, token }: Products
       <Sheet
         open={open}
         onOpenChange={setOpen}
-        title={editing ? 'Edit Product' : 'Add Product'}
+        title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <SheetFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tCommon('cancel')}
             </Button>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>{tCommon('save')}</Button>
           </SheetFooter>
         }
       >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">{tCommon('name')}</Label>
             <Input
               id="name"
               value={form.name}
@@ -213,16 +216,16 @@ export function ProductsTable({ products: initial, categories, token }: Products
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="slug">Slug</Label>
+            <Label htmlFor="slug">{t('slug')}</Label>
             <Input
               id="slug"
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              placeholder="auto-generated from name"
+              placeholder={t('slugPlaceholder')}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">{t('description')}</Label>
             <Textarea
               id="description"
               value={form.description}
@@ -230,14 +233,14 @@ export function ProductsTable({ products: initial, categories, token }: Products
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="categoryId">Category</Label>
+            <Label htmlFor="categoryId">{t('category')}</Label>
             <select
               id="categoryId"
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
               className="flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
             >
-              <option value="">None</option>
+              <option value="">{tCommon('none')}</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -252,13 +255,13 @@ export function ProductsTable({ products: initial, categories, token }: Products
               onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
               className="size-4 rounded border-input"
             />
-            Published
+            {t('published')}
           </label>
           <div className="border-t pt-4">
-            <p className="mb-3 text-sm font-medium">Default variant</p>
+            <p className="mb-3 text-sm font-medium">{t('defaultVariant')}</p>
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="variantName">Variant name</Label>
+                <Label htmlFor="variantName">{t('variantName')}</Label>
                 <Input
                   id="variantName"
                   value={form.variantName}
@@ -266,7 +269,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="sku">SKU</Label>
+                <Label htmlFor="sku">{t('sku')}</Label>
                 <Input
                   id="sku"
                   value={form.sku}
@@ -275,7 +278,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="price">Price</Label>
+                  <Label htmlFor="price">{t('price')}</Label>
                   <Input
                     id="price"
                     type="number"
@@ -285,7 +288,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Sellable quantity</Label>
+                  <Label>{t('sellableQuantity')}</Label>
                   <p
                     className="font-mono text-lg font-semibold tabular-nums"
                     aria-readonly="true"
@@ -293,17 +296,17 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     {editing?.variants[0]?.inventory ?? 0}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Synced from default warehouse.{' '}
+                    {t('syncedFromWarehouse')}{' '}
                     {form.sku ? (
                       <Link
                         href={`/inventory/stock?q=${encodeURIComponent(form.sku)}`}
                         className="text-primary hover:underline"
                       >
-                        Manage stock
+                        {t('manageStock')}
                       </Link>
                     ) : (
                       <Link href="/inventory/adjustments" className="text-primary hover:underline">
-                        Adjust via Inventory
+                        {t('adjustViaInventory')}
                       </Link>
                     )}
                   </p>

@@ -3,11 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { OnboardingStatus } from '@prisma/client';
+import { MerchantProfile, OnboardingStatus, OrderStatus, Prisma } from '@prisma/client';
+import type {
+  MerchantCrmSummary,
+  MerchantDistributorSummary,
+  PlatformMerchantDetail,
+} from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
 import { slugify } from '../../common/utils/slug.util';
+import { dashboardWindowStart } from '../../common/date-range';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
+import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 
 @Injectable()
 export class PlatformMerchantsService {
@@ -16,16 +23,32 @@ export class PlatformMerchantsService {
     private readonly emailQueue: EmailQueueService,
   ) {}
 
-  async list(page = 1, limit = 20) {
+  async list(query: ListMerchantsQueryDto = {}) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
     const skip = (page - 1) * limit;
+
+    const where: Prisma.MerchantProfileWhereInput = {};
+    if (query.status) {
+      where.onboardingStatus = query.status;
+    }
+    if (query.search?.trim()) {
+      const term = query.search.trim();
+      where.OR = [
+        { businessName: { contains: term, mode: 'insensitive' } },
+        { contactEmail: { contains: term, mode: 'insensitive' } },
+      ];
+    }
+
     const [items, total] = await Promise.all([
       this.prisma.merchantProfile.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: { tenant: true },
       }),
-      this.prisma.merchantProfile.count(),
+      this.prisma.merchantProfile.count({ where }),
     ]);
     return {
       data: items,
@@ -37,21 +60,17 @@ export class PlatformMerchantsService {
     };
   }
 
-  async getById(id: string) {
-    const profile = await this.prisma.merchantProfile.findUnique({
-      where: { id },
-      include: {
-        tenant: { include: { users: { select: { id: true, email: true, role: true } } } },
-      },
-    });
-    if (!profile) {
-      throw new NotFoundException('Merchant not found');
-    }
-    return profile;
+  async getById(id: string): Promise<PlatformMerchantDetail> {
+    const profile = await this.findProfileById(id);
+    const [crmSummary, distributors] = await Promise.all([
+      this.getCrmSummary(profile.tenantId),
+      this.getDistributorSummaries(profile.tenantId),
+    ]);
+    return this.toPlatformMerchantDetail(profile, crmSummary, distributors);
   }
 
   async approve(id: string) {
-    const profile = await this.getById(id);
+    const profile = await this.findProfileById(id);
     if (
       profile.onboardingStatus !== OnboardingStatus.SUBMITTED &&
       profile.onboardingStatus !== OnboardingStatus.UNDER_REVIEW
@@ -84,7 +103,7 @@ export class PlatformMerchantsService {
   }
 
   async reject(id: string, dto: RejectMerchantDto) {
-    const profile = await this.getById(id);
+    const profile = await this.findProfileById(id);
     if (
       profile.onboardingStatus !== OnboardingStatus.SUBMITTED &&
       profile.onboardingStatus !== OnboardingStatus.UNDER_REVIEW
@@ -101,5 +120,101 @@ export class PlatformMerchantsService {
     });
     await this.emailQueue.sendMerchantRejected(profile.contactEmail, dto.reason);
     return updated;
+  }
+
+  private async findProfileById(id: string): Promise<MerchantProfile> {
+    const profile = await this.prisma.merchantProfile.findUnique({
+      where: { id },
+    });
+    if (!profile) {
+      throw new NotFoundException('Merchant not found');
+    }
+    return profile;
+  }
+
+  private async getCrmSummary(tenantId: string): Promise<MerchantCrmSummary> {
+    const [contacts, companies, leads] = await Promise.all([
+      this.prisma.crmContact.count({ where: { tenantId } }),
+      this.prisma.crmCompany.count({ where: { tenantId } }),
+      this.prisma.crmLead.count({ where: { tenantId } }),
+    ]);
+    return { contacts, companies, leads };
+  }
+
+  private async getDistributorSummaries(
+    tenantId: string,
+  ): Promise<MerchantDistributorSummary[]> {
+    const windowStart = dashboardWindowStart();
+
+    const [distributorRows, bindingTotals, bindingRecent, orderRecent] =
+      await Promise.all([
+        this.prisma.distributor.findMany({
+          where: { tenantId },
+          orderBy: { name: 'asc' },
+          select: { id: true, name: true, isActive: true },
+        }),
+        this.prisma.binding.groupBy({
+          by: ['distributorId'],
+          where: { tenantId },
+          _count: true,
+        }),
+        this.prisma.binding.groupBy({
+          by: ['distributorId'],
+          where: { tenantId, boundAt: { gte: windowStart } },
+          _count: true,
+        }),
+        this.prisma.order.groupBy({
+          by: ['distributorId'],
+          where: {
+            tenantId,
+            status: OrderStatus.PAID,
+            createdAt: { gte: windowStart },
+          },
+          _count: true,
+        }),
+      ]);
+
+    const totalByDistributor = new Map(
+      bindingTotals.map((row) => [row.distributorId, row._count]),
+    );
+    const recentBindingsByDistributor = new Map(
+      bindingRecent.map((row) => [row.distributorId, row._count]),
+    );
+    const recentOrdersByDistributor = new Map(
+      orderRecent
+        .filter((row) => row.distributorId != null)
+        .map((row) => [row.distributorId!, row._count]),
+    );
+
+    return distributorRows.map((distributor) => ({
+      id: distributor.id,
+      name: distributor.name,
+      isActive: distributor.isActive,
+      bindingCount: totalByDistributor.get(distributor.id) ?? 0,
+      bindingsLast30Days: recentBindingsByDistributor.get(distributor.id) ?? 0,
+      attributedOrdersLast30Days:
+        recentOrdersByDistributor.get(distributor.id) ?? 0,
+    }));
+  }
+
+  private toPlatformMerchantDetail(
+    profile: MerchantProfile,
+    crmSummary: MerchantCrmSummary,
+    distributors: MerchantDistributorSummary[],
+  ): PlatformMerchantDetail {
+    return {
+      id: profile.id,
+      businessName: profile.businessName,
+      legalName: profile.legalName,
+      contactEmail: profile.contactEmail,
+      contactPhone: profile.contactPhone,
+      onboardingStatus: profile.onboardingStatus,
+      rejectionReason: profile.rejectionReason,
+      submittedAt: profile.submittedAt?.toISOString() ?? null,
+      reviewedAt: profile.reviewedAt?.toISOString() ?? null,
+      tenantId: profile.tenantId,
+      crmSummary,
+      distributors,
+    };
   }
 }

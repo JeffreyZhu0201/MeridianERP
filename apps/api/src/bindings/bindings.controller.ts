@@ -19,10 +19,10 @@ export class BindingsController {
   @UseGuards(MerchantAuthGuard)
   @Post('claim')
   @HttpCode(201)
-  claim(
+  claimMerchant(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: ClaimBindingDto,
   ) {
-    return this.bindingsService.claim(user.tenantId!, dto);
+    return this.bindingsService.claimMerchant(user.tenantId!, dto);
   }
 }

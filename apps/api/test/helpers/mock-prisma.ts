@@ -12,6 +12,7 @@ import {
   PurchaseOrderStatus,
   SettlementBatchStatus,
   StockAdjustmentReason,
+  StockTransferStatus,
 } from '@prisma/client';
 
 type Id = string;
@@ -41,6 +42,8 @@ export function createMockPrisma() {
   const commissionLedgers = new Map<Id, CommissionLedgerRecord>();
   const settlementBatches = new Map<Id, SettlementBatchRecord>();
   const inventorySettings = new Map<Id, TenantInventorySettingsRecord>();
+  const tenantSettings = new Map<Id, TenantSettingsRecord>();
+  const platformSettings = new Map<Id, PlatformSettingsRecord>();
   const warehouses = new Map<Id, WarehouseRecord>();
   const stockLevels = new Map<Id, StockLevelRecord>();
   const stockAdjustments = new Map<Id, StockAdjustmentRecord>();
@@ -48,6 +51,8 @@ export function createMockPrisma() {
   const purchaseOrderLines = new Map<Id, PurchaseOrderLineRecord>();
   const purchaseOrderReceipts = new Map<Id, PurchaseOrderReceiptRecord>();
   const purchaseOrderReceiptLines = new Map<Id, PurchaseOrderReceiptLineRecord>();
+  const stockTransfers = new Map<Id, StockTransferRecord>();
+  const stockTransferLines = new Map<Id, StockTransferLineRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -144,6 +149,9 @@ export function createMockPrisma() {
     name: string;
     email: string | null;
     phone: string | null;
+    passwordHash: string | null;
+    portalEnabled: boolean;
+    lastLoginAt: Date | null;
     commissionRate: Prisma.Decimal;
     commissionType: CommissionType;
     isActive: boolean;
@@ -157,6 +165,7 @@ export function createMockPrisma() {
     token: string;
     bindType: BindType;
     expiresAt: Date;
+    revokedAt: Date | null;
     createdAt: Date;
   }
 
@@ -291,6 +300,25 @@ export function createMockPrisma() {
     updatedAt: Date;
   }
 
+  interface TenantSettingsRecord {
+    tenantId: Id;
+    defaultCommissionRate: Prisma.Decimal | null;
+    defaultCommissionType: CommissionType | null;
+    notifyOnBinding: boolean;
+    notifyOnCommission: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface PlatformSettingsRecord {
+    id: Id;
+    platformName: string;
+    supportEmail: string | null;
+    distributorPortalEnabled: boolean;
+    emailQueueEnabled: boolean;
+    updatedAt: Date;
+  }
+
   interface WarehouseRecord {
     id: Id;
     tenantId: Id;
@@ -363,6 +391,24 @@ export function createMockPrisma() {
     receiptId: Id;
     purchaseOrderLineId: Id;
     quantityReceived: number;
+  }
+
+  interface StockTransferRecord {
+    id: Id;
+    tenantId: Id;
+    fromWarehouseId: Id;
+    toWarehouseId: Id;
+    status: StockTransferStatus;
+    note: string | null;
+    createdById: Id;
+    createdAt: Date;
+  }
+
+  interface StockTransferLineRecord {
+    id: Id;
+    transferId: Id;
+    variantId: Id;
+    quantity: number;
   }
 
   const now = () => new Date();
@@ -460,6 +506,14 @@ export function createMockPrisma() {
     if (include?.distributor && order.distributorId) {
       result.distributor = distributors.get(order.distributorId) ?? null;
     }
+    if (include?._count) {
+      const countInclude = include._count as { select?: { lines?: boolean } };
+      if (countInclude.select?.lines) {
+        result._count = {
+          lines: [...orderLines.values()].filter((l) => l.orderId === order.id).length,
+        };
+      }
+    }
     if (include?.tenant) {
       const tenant = tenants.get(order.tenantId);
       if (typeof include.tenant === 'object' && 'select' in include.tenant) {
@@ -516,6 +570,11 @@ export function createMockPrisma() {
         result.tenant = tenant;
       }
     }
+    if (include?.settlementBatch) {
+      result.settlementBatch = entry.settlementBatchId
+        ? (settlementBatches.get(entry.settlementBatchId) ?? null)
+        : null;
+    }
     return result;
   };
 
@@ -529,6 +588,133 @@ export function createMockPrisma() {
       result.entries = [...commissionLedgers.values()]
         .filter((e) => e.settlementBatchId === batch.id)
         .map((e) => attachCommissionEntry(e, entriesInclude.include));
+    }
+    return result;
+  };
+
+  const applyDateRange = (
+    date: Date,
+    range?: { gte?: Date; lte?: Date },
+  ) => {
+    if (!range) return true;
+    if (range.gte && date < range.gte) return false;
+    if (range.lte && date > range.lte) return false;
+    return true;
+  };
+
+  const attachBinding = (
+    binding: BindingRecord,
+    include?: Record<string, unknown>,
+  ) => {
+    const result: Record<string, unknown> = { ...binding };
+    if (include?.distributor) {
+      const distributor = distributors.get(binding.distributorId);
+      if (
+        typeof include.distributor === 'object' &&
+        'select' in include.distributor
+      ) {
+        const select = include.distributor.select as Record<string, boolean>;
+        result.distributor = distributor
+          ? Object.fromEntries(
+              Object.keys(select)
+                .filter((k) => select[k])
+                .map((k) => [k, distributor[k as keyof DistributorRecord]]),
+            )
+          : null;
+      } else {
+        result.distributor = distributor;
+      }
+    }
+    return result;
+  };
+
+  const filterBindings = (where: Record<string, unknown>) => {
+    let items = [...bindings.values()];
+    if (where.tenantId) items = items.filter((b) => b.tenantId === where.tenantId);
+    if (where.distributorId) {
+      items = items.filter((b) => b.distributorId === where.distributorId);
+    }
+    if (where.bindableType) {
+      items = items.filter((b) => b.bindableType === where.bindableType);
+    }
+    if (where.boundAt) {
+      items = items.filter((b) =>
+        applyDateRange(b.boundAt, where.boundAt as { gte?: Date; lte?: Date }),
+      );
+    }
+    return items;
+  };
+
+  const filterOrders = (where: Record<string, unknown>) => {
+    let items = [...orders.values()];
+    if (where.tenantId) items = items.filter((o) => o.tenantId === where.tenantId);
+    if (where.distributorId) {
+      items = items.filter((o) => o.distributorId === where.distributorId);
+    }
+    if (where.status) items = items.filter((o) => o.status === where.status);
+    if (where.id) items = items.filter((o) => o.id === where.id);
+    if (where.customerId) {
+      items = items.filter((o) => o.customerId === where.customerId);
+    }
+    if (where.createdAt) {
+      items = items.filter((o) =>
+        applyDateRange(o.createdAt, where.createdAt as { gte?: Date; lte?: Date }),
+      );
+    }
+    return items;
+  };
+
+  const filterCommissionLedgers = (where: Record<string, unknown>) => {
+    let items = [...commissionLedgers.values()];
+    if (where.tenantId) items = items.filter((e) => e.tenantId === where.tenantId);
+    if (where.distributorId) {
+      items = items.filter((e) => e.distributorId === where.distributorId);
+    }
+    if (where.status) {
+      const status = where.status;
+      if (typeof status === 'object' && status !== null && 'not' in status) {
+        items = items.filter(
+          (e) => e.status !== (status as { not: LedgerStatus }).not,
+        );
+      } else {
+        items = items.filter((e) => e.status === status);
+      }
+    }
+    if (where.createdAt) {
+      items = items.filter((e) =>
+        applyDateRange(e.createdAt, where.createdAt as { gte?: Date; lte?: Date }),
+      );
+    }
+    if (where.settlementBatchId === null) {
+      items = items.filter((e) => e.settlementBatchId === null);
+    }
+    return items;
+  };
+
+  const applyOrderSelect = (
+    order: OrderRecord,
+    select?: Record<string, unknown>,
+  ) => {
+    if (!select) return attachOrder(order);
+    const result: Record<string, unknown> = {};
+    if (select.createdAt) result.createdAt = order.createdAt;
+    if (select.total) result.total = order.total;
+    if (select.commissionEntry) {
+      const entry =
+        [...commissionLedgers.values()].find((e) => e.orderId === order.id) ??
+        null;
+      if (entry && typeof select.commissionEntry === 'object' && 'select' in select.commissionEntry) {
+        const entrySelect = select.commissionEntry.select as Record<string, boolean>;
+        result.commissionEntry = entry
+          ? Object.fromEntries(
+              Object.keys(entrySelect)
+                .filter((k) => entrySelect[k])
+                .map((k) => [k, entry[k as keyof CommissionLedgerRecord]]),
+            )
+          : null;
+      } else {
+        result.commissionEntry = entry;
+      }
     }
     return result;
   };
@@ -574,6 +760,60 @@ export function createMockPrisma() {
       if (createdAt.lte) items = items.filter((a) => a.createdAt <= createdAt.lte!);
     }
     return items;
+  };
+
+  const filterStockTransfers = (where: Record<string, unknown>) => {
+    let items = [...stockTransfers.values()];
+    if (where.tenantId) items = items.filter((t) => t.tenantId === where.tenantId);
+    if (where.id) items = items.filter((t) => t.id === where.id);
+    if (where.fromWarehouseId) {
+      items = items.filter((t) => t.fromWarehouseId === where.fromWarehouseId);
+    }
+    if (where.toWarehouseId) {
+      items = items.filter((t) => t.toWarehouseId === where.toWarehouseId);
+    }
+    return items;
+  };
+
+  const attachStockTransfer = (transfer: StockTransferRecord, include?: Record<string, unknown>) => {
+    const result: Record<string, unknown> = { ...transfer };
+    if (include?.fromWarehouse) {
+      const warehouse = warehouses.get(transfer.fromWarehouseId);
+      if (warehouse) result.fromWarehouse = { id: warehouse.id, name: warehouse.name };
+    }
+    if (include?.toWarehouse) {
+      const warehouse = warehouses.get(transfer.toWarehouseId);
+      if (warehouse) result.toWarehouse = { id: warehouse.id, name: warehouse.name };
+    }
+    if (include?.createdBy) {
+      const user = users.get(transfer.createdById);
+      if (user) result.createdBy = { id: user.id, email: user.email };
+    }
+    if (include?.lines) {
+      const lineInclude =
+        typeof include.lines === 'object' && 'include' in include.lines
+          ? (include.lines as { include?: Record<string, unknown> }).include
+          : undefined;
+      result.lines = [...stockTransferLines.values()]
+        .filter((line) => line.transferId === transfer.id)
+        .map((line) => {
+          const lineResult: Record<string, unknown> = { ...line };
+          if (lineInclude?.variant) {
+            const variant = productVariants.get(line.variantId);
+            if (variant) {
+              const product = products.get(variant.productId);
+              lineResult.variant = {
+                id: variant.id,
+                sku: variant.sku,
+                name: variant.name,
+                product: product ? { name: product.name } : undefined,
+              };
+            }
+          }
+          return lineResult;
+        });
+    }
+    return result;
   };
 
   const attachAdjustment = (adj: StockAdjustmentRecord, include?: Record<string, unknown>) => {
@@ -674,6 +914,38 @@ export function createMockPrisma() {
     throw new Error('Unsupported transaction');
   };
 
+  const filterMerchantProfiles = (
+    items: MerchantProfileRecord[],
+    where?: Record<string, unknown>,
+  ): MerchantProfileRecord[] => {
+    if (!where) return items;
+    let filtered = items;
+    if (where.onboardingStatus) {
+      const status = where.onboardingStatus as OnboardingStatus | { in?: OnboardingStatus[] };
+      if (typeof status === 'string') {
+        filtered = filtered.filter((p) => p.onboardingStatus === status);
+      } else if (status.in) {
+        filtered = filtered.filter((p) => status.in!.includes(p.onboardingStatus));
+      }
+    }
+    if (where.OR && Array.isArray(where.OR)) {
+      const orClauses = where.OR as Array<Record<string, unknown>>;
+      filtered = filtered.filter((p) =>
+        orClauses.some((clause) => {
+          for (const [field, cond] of Object.entries(clause)) {
+            const c = cond as { contains?: string; mode?: string };
+            if (c.contains) {
+              const value = String((p as Record<string, unknown>)[field] ?? '').toLowerCase();
+              if (!value.includes(c.contains.toLowerCase())) return false;
+            }
+          }
+          return true;
+        }),
+      );
+    }
+    return filtered;
+  };
+
   const mock = {
     onModuleInit: jest.fn(),
     onModuleDestroy: jest.fn(),
@@ -730,6 +1002,11 @@ export function createMockPrisma() {
           return [...tenants.values()].find((t) => t.slug === where.slug) ?? null;
         }
         return null;
+      },
+      findUniqueOrThrow: async ({ where }: { where: { id?: string; slug?: string } }) => {
+        const tenant = await mock.tenant.findUnique({ where });
+        if (!tenant) throw new Error('Tenant not found');
+        return tenant;
       },
       update: async ({
         where,
@@ -797,22 +1074,54 @@ export function createMockPrisma() {
         }
         return profile;
       },
+      findUniqueOrThrow: async ({
+        where,
+      }: {
+        where: { tenantId?: string; id?: string };
+      }) => {
+        const profile = await mock.merchantProfile.findUnique({ where });
+        if (!profile) throw new Error('MerchantProfile not found');
+        return profile;
+      },
       findMany: async ({
+        where,
         skip = 0,
         take = 20,
         orderBy,
         include,
+        select,
       }: {
+        where?: Record<string, unknown>;
         skip?: number;
         take?: number;
         orderBy?: { createdAt: 'desc' | 'asc' };
         include?: { tenant?: boolean };
+        select?: {
+          id?: boolean;
+          businessName?: boolean;
+          contactEmail?: boolean;
+          onboardingStatus?: boolean;
+          submittedAt?: boolean;
+        };
       }) => {
-        let items = [...merchantProfiles.values()];
+        let items = filterMerchantProfiles([...merchantProfiles.values()], where);
         if (orderBy?.createdAt === 'desc') {
           items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } else if (orderBy?.createdAt === 'asc') {
+          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
         }
         items = items.slice(skip, skip + take);
+        if (select) {
+          return items.map((p) => {
+            const row: Record<string, unknown> = {};
+            if (select.id) row.id = p.id;
+            if (select.businessName) row.businessName = p.businessName;
+            if (select.contactEmail) row.contactEmail = p.contactEmail;
+            if (select.onboardingStatus) row.onboardingStatus = p.onboardingStatus;
+            if (select.submittedAt) row.submittedAt = p.submittedAt;
+            return row;
+          });
+        }
         if (include?.tenant) {
           return items.map((p) => ({
             ...p,
@@ -821,7 +1130,9 @@ export function createMockPrisma() {
         }
         return items;
       },
-      count: async () => merchantProfiles.size,
+      count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
+        return filterMerchantProfiles([...merchantProfiles.values()], where).length;
+      },
       update: async ({
         where,
         data,
@@ -846,10 +1157,16 @@ export function createMockPrisma() {
         where,
         include,
       }: {
-        where: { email?: string };
+        where: { email?: string; id?: string; tenantId?: string };
         include?: { tenant?: { include?: { merchantProfile?: boolean } } };
       }) => {
-        const user = [...users.values()].find((u) => u.email === where.email) ?? null;
+        let user =
+          [...users.values()].find((u) => {
+            if (where.email && u.email !== where.email) return false;
+            if (where.id && u.id !== where.id) return false;
+            if (where.tenantId && u.tenantId !== where.tenantId) return false;
+            return true;
+          }) ?? null;
         if (!user) return null;
         if (include?.tenant) {
           const tenant = tenants.get(user.tenantId);
@@ -865,10 +1182,38 @@ export function createMockPrisma() {
         }
         return user;
       },
+      findMany: async ({
+        where,
+        orderBy,
+        select,
+      }: {
+        where?: { tenantId?: string };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+      }) => {
+        let items = [...users.values()];
+        if (where?.tenantId) items = items.filter((u) => u.tenantId === where.tenantId);
+        if (orderBy?.createdAt === 'asc') {
+          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        if (select) {
+          return items.map((u) => {
+            const row: Record<string, unknown> = {};
+            if (select.id) row.id = u.id;
+            if (select.email) row.email = u.email;
+            if (select.role) row.role = u.role;
+            if (select.createdAt) row.createdAt = u.createdAt;
+            return row;
+          });
+        }
+        return items;
+      },
       create: async ({
         data,
+        select,
       }: {
         data: Omit<UserRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
       }) => {
         const record: UserRecord = {
           id: nextId('user'),
@@ -877,12 +1222,50 @@ export function createMockPrisma() {
           ...data,
         };
         users.set(record.id, record);
+        if (select) {
+          const row: Record<string, unknown> = {};
+          if (select.id) row.id = record.id;
+          if (select.email) row.email = record.email;
+          if (select.role) row.role = record.role;
+          if (select.createdAt) row.createdAt = record.createdAt;
+          return row;
+        }
         return record;
+      },
+      update: async ({
+        where,
+        data,
+        select,
+      }: {
+        where: { id: string };
+        data: Partial<UserRecord>;
+        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+      }) => {
+        const existing = users.get(where.id);
+        if (!existing) throw new Error('User not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        users.set(where.id, updated);
+        if (select) {
+          const row: Record<string, unknown> = {};
+          if (select.id) row.id = updated.id;
+          if (select.email) row.email = updated.email;
+          if (select.role) row.role = updated.role;
+          if (select.createdAt) row.createdAt = updated.createdAt;
+          return row;
+        }
+        return updated;
+      },
+      delete: async ({ where }: { where: { id: string } }) => {
+        const existing = users.get(where.id);
+        users.delete(where.id);
+        return existing;
       },
     },
     crmCompany: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...companies.values()].filter((c) => c.tenantId === where.tenantId),
+      count: async ({ where }: { where: { tenantId: string } }) =>
+        [...companies.values()].filter((c) => c.tenantId === where.tenantId).length,
       findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
         [...companies.values()].find((c) => c.id === where.id && c.tenantId === where.tenantId) ??
         null,
@@ -916,6 +1299,8 @@ export function createMockPrisma() {
     crmContact: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...contacts.values()].filter((c) => c.tenantId === where.tenantId),
+      count: async ({ where }: { where: { tenantId: string } }) =>
+        [...contacts.values()].filter((c) => c.tenantId === where.tenantId).length,
       findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
         [...contacts.values()].find((c) => c.id === where.id && c.tenantId === where.tenantId) ??
         null,
@@ -949,6 +1334,8 @@ export function createMockPrisma() {
     crmLead: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...leads.values()].filter((l) => l.tenantId === where.tenantId),
+      count: async ({ where }: { where: { tenantId: string } }) =>
+        [...leads.values()].filter((l) => l.tenantId === where.tenantId).length,
       findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
         [...leads.values()].find((l) => l.id === where.id && l.tenantId === where.tenantId) ?? null,
       create: async ({
@@ -1020,45 +1407,140 @@ export function createMockPrisma() {
       },
     },
     distributor: {
-      findMany: async ({ where }: { where: { tenantId: string } }) =>
-        [...distributors.values()].filter((d) => d.tenantId === where.tenantId),
+      findMany: async ({
+        where,
+        orderBy,
+        select,
+        include,
+      }: {
+        where?: {
+          tenantId?: string;
+          email?: string;
+          portalEnabled?: boolean;
+          isActive?: boolean;
+          tenant?: { slug?: string };
+        };
+        orderBy?: { name: 'asc' | 'desc'; boundAt?: 'desc' };
+        select?: { id?: boolean; name?: boolean; isActive?: boolean };
+        include?: { tenant?: boolean };
+      } = {}) => {
+        let items = [...distributors.values()];
+        if (where?.tenantId) {
+          items = items.filter((d) => d.tenantId === where.tenantId);
+        }
+        if (where?.email) {
+          items = items.filter((d) => d.email === where.email);
+        }
+        if (where?.portalEnabled !== undefined) {
+          items = items.filter((d) => d.portalEnabled === where.portalEnabled);
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((d) => d.isActive === where.isActive);
+        }
+        if (where?.tenant?.slug) {
+          items = items.filter((d) => {
+            const tenant = tenants.get(d.tenantId);
+            return tenant?.slug === where.tenant!.slug;
+          });
+        }
+        if (orderBy?.name === 'asc') {
+          items = items.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (orderBy?.name === 'desc') {
+          items = items.sort((a, b) => b.name.localeCompare(a.name));
+        }
+        if (select) {
+          return items.map((d) => {
+            const row: Record<string, unknown> = {};
+            if (select.id) row.id = d.id;
+            if (select.name) row.name = d.name;
+            if (select.isActive) row.isActive = d.isActive;
+            return row;
+          });
+        }
+        if (include?.tenant) {
+          return items.map((d) => ({
+            ...d,
+            tenant: tenants.get(d.tenantId) ?? null,
+          }));
+        }
+        return items;
+      },
+      count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
+        let items = [...distributors.values()];
+        if (where?.tenantId) {
+          items = items.filter((d) => d.tenantId === where.tenantId);
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((d) => d.isActive === where.isActive);
+        }
+        return items.length;
+      },
       findFirst: async ({
         where,
         include,
       }: {
-        where: { id: string; tenantId: string; isActive?: boolean };
-        include?: Record<string, unknown>;
+        where: {
+          id?: string;
+          tenantId?: string;
+          email?: string;
+          isActive?: boolean;
+          portalEnabled?: boolean;
+          tenant?: { slug?: string };
+        };
+        include?: { tenant?: boolean; qrCodes?: { take?: number } };
       }) => {
-        const distributor =
-          [...distributors.values()].find(
-            (d) =>
-              d.id === where.id &&
-              d.tenantId === where.tenantId &&
-              (where.isActive === undefined || d.isActive === where.isActive),
-          ) ?? null;
+        let items = [...distributors.values()];
+        if (where.id) items = items.filter((d) => d.id === where.id);
+        if (where.tenantId) items = items.filter((d) => d.tenantId === where.tenantId);
+        if (where.email) items = items.filter((d) => d.email === where.email);
+        if (where.isActive !== undefined) {
+          items = items.filter((d) => d.isActive === where.isActive);
+        }
+        if (where.portalEnabled !== undefined) {
+          items = items.filter((d) => d.portalEnabled === where.portalEnabled);
+        }
+        if (where.tenant?.slug) {
+          items = items.filter((d) => {
+            const tenant = tenants.get(d.tenantId);
+            return tenant?.slug === where.tenant!.slug;
+          });
+        }
+        const distributor = items[0] ?? null;
         if (!distributor) return null;
         if (include?.qrCodes) {
           const codes = [...qrCodes.values()]
             .filter((q) => q.distributorId === distributor.id)
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .slice(0, (include.qrCodes as { take?: number }).take ?? 5);
+            .slice(0, include.qrCodes.take ?? 5);
           return { ...distributor, qrCodes: codes };
+        }
+        if (include?.tenant) {
+          return { ...distributor, tenant: tenants.get(distributor.tenantId) ?? null };
         }
         return distributor;
       },
       create: async ({
         data,
       }: {
-        data: Omit<DistributorRecord, 'id' | 'createdAt' | 'updatedAt' | 'isActive'> & {
+        data: Omit<
+          DistributorRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt'
+        > & {
           isActive?: boolean;
+          passwordHash?: string | null;
+          portalEnabled?: boolean;
+          lastLoginAt?: Date | null;
         };
       }) => {
         const record: DistributorRecord = {
+          ...data,
           id: nextId('dist'),
           isActive: data.isActive ?? true,
+          passwordHash: data.passwordHash ?? null,
+          portalEnabled: data.portalEnabled ?? false,
+          lastLoginAt: data.lastLoginAt ?? null,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         distributors.set(record.id, record);
         return record;
@@ -1091,6 +1573,7 @@ export function createMockPrisma() {
         const record: DistributorQrCodeRecord = {
           id: nextId('qr'),
           createdAt: now(),
+          revokedAt: null,
           ...data,
         };
         qrCodes.set(record.id, record);
@@ -1112,6 +1595,85 @@ export function createMockPrisma() {
           return { ...qr, distributor: distributors.get(qr.distributorId) };
         }
         return qr;
+      },
+      findFirst: async ({
+        where,
+      }: {
+        where: { id?: string; distributorId?: string };
+      }) => {
+        for (const qr of qrCodes.values()) {
+          if (where.id && qr.id !== where.id) continue;
+          if (where.distributorId && qr.distributorId !== where.distributorId) {
+            continue;
+          }
+          return qr;
+        }
+        return null;
+      },
+      findMany: async ({
+        where,
+        orderBy,
+        skip = 0,
+        take,
+      }: {
+        where: {
+          distributorId: string;
+          bindType?: BindType;
+        };
+        orderBy?: { createdAt: 'asc' | 'desc' };
+        skip?: number;
+        take?: number;
+      }) => {
+        let rows = [...qrCodes.values()].filter((qr) => {
+          if (qr.distributorId !== where.distributorId) return false;
+          if (where.bindType && qr.bindType !== where.bindType) return false;
+          return true;
+        });
+        if (orderBy?.createdAt === 'desc') {
+          rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } else if (orderBy?.createdAt === 'asc') {
+          rows.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        return rows.slice(skip, take === undefined ? undefined : skip + take);
+      },
+      count: async ({
+        where,
+      }: {
+        where: { distributorId: string; bindType?: BindType };
+      }) => {
+        return [...qrCodes.values()].filter((qr) => {
+          if (qr.distributorId !== where.distributorId) return false;
+          if (where.bindType && qr.bindType !== where.bindType) return false;
+          return true;
+        }).length;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where: {
+          distributorId: string;
+          bindType?: BindType;
+          revokedAt?: null;
+          expiresAt?: { gt: Date };
+        };
+        data: Partial<Pick<DistributorQrCodeRecord, 'revokedAt'>>;
+      }) => {
+        let count = 0;
+        const nowDate = now();
+        for (const [id, qr] of qrCodes) {
+          if (where.distributorId && qr.distributorId !== where.distributorId) {
+            continue;
+          }
+          if (where.bindType && qr.bindType !== where.bindType) continue;
+          if (where.revokedAt === null && qr.revokedAt !== null) continue;
+          if (where.expiresAt?.gt && qr.expiresAt <= where.expiresAt.gt) {
+            continue;
+          }
+          qrCodes.set(id, { ...qr, ...data, revokedAt: data.revokedAt ?? nowDate });
+          count++;
+        }
+        return { count };
       },
     },
     customer: {
@@ -1489,6 +2051,97 @@ export function createMockPrisma() {
         return record;
       },
     },
+    tenantSettings: {
+      findUnique: async ({ where }: { where: { tenantId: string } }) =>
+        tenantSettings.get(where.tenantId) ?? null,
+      create: async ({
+        data,
+      }: {
+        data: Omit<TenantSettingsRecord, 'createdAt' | 'updatedAt'>;
+      }) => {
+        const record: TenantSettingsRecord = {
+          createdAt: now(),
+          updatedAt: now(),
+          defaultCommissionRate: null,
+          defaultCommissionType: null,
+          notifyOnBinding: true,
+          notifyOnCommission: true,
+          ...data,
+        };
+        tenantSettings.set(record.tenantId, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { tenantId: string };
+        data: Partial<TenantSettingsRecord>;
+      }) => {
+        const existing = tenantSettings.get(where.tenantId);
+        if (!existing) throw new Error('TenantSettings not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        tenantSettings.set(where.tenantId, updated);
+        return updated;
+      },
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { tenantId: string };
+        create: Omit<TenantSettingsRecord, 'createdAt' | 'updatedAt'>;
+        update: Partial<TenantSettingsRecord>;
+      }) => {
+        const existing = tenantSettings.get(where.tenantId);
+        if (existing) {
+          const updated = { ...existing, ...update, updatedAt: now() };
+          tenantSettings.set(where.tenantId, updated);
+          return updated;
+        }
+        const record: TenantSettingsRecord = {
+          createdAt: now(),
+          updatedAt: now(),
+          defaultCommissionRate: null,
+          defaultCommissionType: null,
+          notifyOnBinding: true,
+          notifyOnCommission: true,
+          ...create,
+        };
+        tenantSettings.set(record.tenantId, record);
+        return record;
+      },
+    },
+    platformSettings: {
+      findUnique: async ({ where }: { where: { id: string } }) =>
+        platformSettings.get(where.id) ?? null,
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { id: string };
+        create: Omit<PlatformSettingsRecord, 'updatedAt'>;
+        update: Partial<PlatformSettingsRecord>;
+      }) => {
+        const existing = platformSettings.get(where.id);
+        if (existing) {
+          const updated = { ...existing, ...update, updatedAt: now() };
+          platformSettings.set(where.id, updated);
+          return updated;
+        }
+        const record: PlatformSettingsRecord = {
+          platformName: 'MeridianERP',
+          supportEmail: null,
+          distributorPortalEnabled: true,
+          emailQueueEnabled: true,
+          updatedAt: now(),
+          ...create,
+        };
+        platformSettings.set(record.id, record);
+        return record;
+      },
+    },
     warehouse: {
       findMany: async ({
         where,
@@ -1707,6 +2360,71 @@ export function createMockPrisma() {
         };
         stockAdjustments.set(record.id, record);
         return attachAdjustment(record, include);
+      },
+    },
+    stockTransfer: {
+      findMany: async ({
+        where,
+        skip,
+        take,
+        orderBy,
+        include,
+      }: {
+        where: Record<string, unknown>;
+        skip?: number;
+        take?: number;
+        orderBy?: { createdAt: 'desc' };
+        include?: Record<string, unknown>;
+      }) => {
+        let items = filterStockTransfers(where);
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
+        }
+        return items.map((t) => attachStockTransfer(t, include));
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where: Record<string, unknown>;
+        include?: Record<string, unknown>;
+      }) => {
+        const transfer = filterStockTransfers(where)[0];
+        if (!transfer) return null;
+        return attachStockTransfer(transfer, include);
+      },
+      count: async ({ where }: { where: Record<string, unknown> }) =>
+        filterStockTransfers(where).length,
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Omit<StockTransferRecord, 'id' | 'createdAt'> & {
+          lines?: { create: Array<Omit<StockTransferLineRecord, 'id' | 'transferId'>> };
+        };
+        include?: Record<string, unknown>;
+      }) => {
+        const { lines, ...transferData } = data;
+        const record: StockTransferRecord = {
+          id: nextId('st'),
+          createdAt: now(),
+          ...transferData,
+        };
+        stockTransfers.set(record.id, record);
+        if (lines?.create) {
+          for (const line of lines.create) {
+            const transferLine: StockTransferLineRecord = {
+              id: nextId('stl'),
+              transferId: record.id,
+              ...line,
+            };
+            stockTransferLines.set(transferLine.id, transferLine);
+          }
+        }
+        return attachStockTransfer(record, include);
       },
     },
     purchaseOrder: {
@@ -2015,23 +2733,30 @@ export function createMockPrisma() {
       findMany: async ({
         where,
         include,
+        select,
         skip,
         take,
         orderBy,
       }: {
-        where?: { tenantId?: string };
+        where?: Record<string, unknown>;
         include?: Record<string, unknown>;
+        select?: Record<string, unknown>;
         skip?: number;
         take?: number;
         orderBy?: { createdAt: 'desc' | 'asc' };
       }) => {
-        let items = [...orders.values()];
-        if (where?.tenantId) items = items.filter((o) => o.tenantId === where.tenantId);
+        let items = filterOrders(where ?? {});
         if (orderBy?.createdAt === 'desc') {
           items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         }
+        if (orderBy?.createdAt === 'asc') {
+          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
+        }
+        if (select) {
+          return items.map((o) => applyOrderSelect(o, select));
         }
         return items.map((o) => attachOrder(o, include));
       },
@@ -2039,12 +2764,10 @@ export function createMockPrisma() {
         where,
         include,
       }: {
-        where: { id?: string; tenantId?: string };
+        where: { id?: string; tenantId?: string; customerId?: string };
         include?: Record<string, unknown>;
       }) => {
-        let items = [...orders.values()];
-        if (where.id) items = items.filter((o) => o.id === where.id);
-        if (where.tenantId) items = items.filter((o) => o.tenantId === where.tenantId);
+        const items = filterOrders(where);
         const order = items[0];
         if (!order) return null;
         return attachOrder(order, include);
@@ -2120,31 +2843,100 @@ export function createMockPrisma() {
         }
         return updated;
       },
+      count: async ({ where }: { where?: Record<string, unknown> }) =>
+        filterOrders(where ?? {}).length,
+      groupBy: async ({
+        by,
+        where,
+        _count,
+      }: {
+        by: ['distributorId'];
+        where?: Record<string, unknown>;
+        _count?: true | { _all?: boolean };
+      }) => {
+        const items = filterOrders(where ?? {});
+        const counts = new Map<string | null, number>();
+        for (const order of items) {
+          const key = order.distributorId;
+          counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+        return [...counts.entries()].map(([distributorId, count]) => ({
+          distributorId,
+          _count: _count ? count : undefined,
+        }));
+      },
+      aggregate: async ({
+        where,
+        _count,
+        _sum,
+      }: {
+        where?: Record<string, unknown>;
+        _count?: { _all?: boolean };
+        _sum?: { total?: boolean };
+      }) => {
+        const items = filterOrders(where ?? {});
+        const result: {
+          _count?: { _all: number };
+          _sum?: { total: Prisma.Decimal | null };
+        } = {};
+        if (_count?._all) {
+          result._count = { _all: items.length };
+        }
+        if (_sum?.total) {
+          const total = items.reduce(
+            (acc, o) => acc.plus(o.total),
+            new Prisma.Decimal(0),
+          );
+          result._sum = { total: items.length ? total : null };
+        }
+        return result;
+      },
     },
     commissionLedger: {
       findMany: async ({
         where,
         include,
+        skip,
+        take,
+        orderBy,
       }: {
-        where: {
-          status?: LedgerStatus;
-          createdAt?: { gte?: Date; lte?: Date };
-          settlementBatchId?: null;
-        };
+        where?: Record<string, unknown>;
         include?: Record<string, unknown>;
+        skip?: number;
+        take?: number;
+        orderBy?: { createdAt: 'desc' | 'asc' };
       }) => {
-        let items = [...commissionLedgers.values()];
-        if (where.status) items = items.filter((e) => e.status === where.status);
-        if (where.settlementBatchId === null) {
-          items = items.filter((e) => e.settlementBatchId === null);
+        let items = filterCommissionLedgers(where ?? {});
+        if (where?.orderId) {
+          items = items.filter((e) => e.orderId === where.orderId);
         }
-        if (where.createdAt?.gte) {
-          items = items.filter((e) => e.createdAt >= where.createdAt!.gte!);
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         }
-        if (where.createdAt?.lte) {
-          items = items.filter((e) => e.createdAt <= where.createdAt!.lte!);
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
         }
         return items.map((e) => attachCommissionEntry(e, include));
+      },
+      count: async ({ where }: { where?: Record<string, unknown> }) =>
+        filterCommissionLedgers(where ?? {}).length,
+      aggregate: async ({
+        where,
+        _sum,
+      }: {
+        where?: Record<string, unknown>;
+        _sum?: { amount?: boolean };
+      }) => {
+        const items = filterCommissionLedgers(where ?? {});
+        const result: { _sum?: { amount: Prisma.Decimal | null } } = {};
+        if (_sum?.amount) {
+          const amount = items.reduce(
+            (acc, e) => acc.plus(e.amount),
+            new Prisma.Decimal(0),
+          );
+          result._sum = { amount: items.length ? amount : null };
+        }
+        return result;
       },
       create: async ({
         data,
@@ -2238,20 +3030,48 @@ export function createMockPrisma() {
       },
       findMany: async ({
         where,
+        include,
+        orderBy,
       }: {
-        where: { tenantId: string; distributorId: string };
-      }) =>
-        [...bindings.values()].filter(
-          (b) => b.tenantId === where.tenantId && b.distributorId === where.distributorId,
-        ),
+        where?: Record<string, unknown>;
+        include?: Record<string, unknown>;
+        orderBy?: { boundAt?: 'desc' | 'asc' };
+      }) => {
+        let items = filterBindings(where ?? {});
+        if (orderBy?.boundAt === 'desc') {
+          items = items.sort((a, b) => b.boundAt.getTime() - a.boundAt.getTime());
+        }
+        return items.map((binding) => attachBinding(binding, include));
+      },
+      count: async ({ where }: { where?: Record<string, unknown> }) =>
+        filterBindings(where ?? {}).length,
+      groupBy: async ({
+        by,
+        where,
+        _count,
+      }: {
+        by: ['distributorId'];
+        where?: Record<string, unknown>;
+        _count?: true | { _all?: boolean };
+      }) => {
+        const items = filterBindings(where ?? {});
+        const counts = new Map<string, number>();
+        for (const binding of items) {
+          counts.set(binding.distributorId, (counts.get(binding.distributorId) ?? 0) + 1);
+        }
+        return [...counts.entries()].map(([distributorId, count]) => ({
+          distributorId,
+          _count: _count ? count : undefined,
+        }));
+      },
       create: async ({
         data,
       }: {
-        data: Omit<BindingRecord, 'id' | 'boundAt'>;
+        data: Omit<BindingRecord, 'id' | 'boundAt'> & { boundAt?: Date };
       }) => {
         const record: BindingRecord = {
           id: nextId('bind'),
-          boundAt: now(),
+          boundAt: data.boundAt ?? now(),
           ...data,
         };
         bindings.set(record.id, record);
@@ -2293,6 +3113,13 @@ export function createMockPrisma() {
         },
       });
       return { tenant, user };
+    },
+    _expireQrToken: (token: string) => {
+      const id = qrByToken.get(token);
+      if (!id) return;
+      const qr = qrCodes.get(id);
+      if (!qr) return;
+      qrCodes.set(id, { ...qr, expiresAt: new Date(0) });
     },
   };
 

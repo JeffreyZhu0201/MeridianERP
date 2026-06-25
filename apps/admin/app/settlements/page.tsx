@@ -1,3 +1,6 @@
+import { getTranslations } from 'next-intl/server';
+import { ListPageFrame } from '@meridian/ui';
+
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import {
   apiFetch,
@@ -12,6 +15,8 @@ export default async function SettlementsPage() {
   const token = await getToken();
   if (!token) return null;
 
+  const t = await getTranslations('admin.settlements');
+
   const [batchesRes, ledgerRes] = await Promise.all([
     apiFetch<PaginatedResponse<SettlementBatch>>('/platform/settlements', {}, token).catch(
       () => ({ data: [], meta: { total: 0, page: 1, limit: 20 } }),
@@ -25,17 +30,13 @@ export default async function SettlementsPage() {
 
   return (
     <AdminShellWrapper>
-      <div className="space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Settlements</h1>
-        <p className="text-sm text-muted-foreground">
-          Commission ledger and payout export
-        </p>
+      <ListPageFrame title={t('title')} description={t('description')}>
         <SettlementsView
           batches={batchesRes.data}
           ledgerEntries={ledgerRes.data}
           token={token}
         />
-      </div>
+      </ListPageFrame>
     </AdminShellWrapper>
   );
 }

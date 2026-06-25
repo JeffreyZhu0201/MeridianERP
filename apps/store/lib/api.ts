@@ -1,3 +1,13 @@
+import {
+  CART_SESSION_HEADER,
+  type BindVerifyResponse,
+  type StoreClaimBindingResponse,
+} from '@meridian/shared';
+
+export type { BindVerifyResponse, StoreClaimBindingResponse };
+
+import { ensureCartSessionId } from './cart-session';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 export const STORE_APP_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';
 export const AUTH_COOKIE = 'store_token';
@@ -11,18 +21,42 @@ export class ApiError extends Error {
   }
 }
 
+export type StoreApiAuth =
+  | string
+  | {
+      token?: string;
+      storeSlug?: string;
+      cartSession?: string;
+    };
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
-  token?: string,
+  auth?: StoreApiAuth,
 ): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
 
+  let token: string | undefined;
+  let cartSession: string | undefined;
+  let storeSlug: string | undefined;
+
+  if (typeof auth === 'string') {
+    token = auth;
+  } else if (auth) {
+    token = auth.token;
+    cartSession = auth.cartSession;
+    storeSlug = auth.storeSlug;
+  }
+
   if (token) {
     headers.Authorization = `Bearer ${token}`;
+  } else if (cartSession) {
+    headers[CART_SESSION_HEADER] = cartSession;
+  } else if (storeSlug && typeof window !== 'undefined') {
+    headers[CART_SESSION_HEADER] = ensureCartSessionId(storeSlug);
   }
 
   const res = await fetch(`${API_URL}/api/v1${path}`, {
@@ -99,10 +133,3 @@ export interface Cart {
   subtotal: string | number;
 }
 
-export interface BindVerifyResponse {
-  valid: boolean;
-  distributorName?: string;
-  requiresAuth?: boolean;
-  expired?: boolean;
-  error?: string;
-}

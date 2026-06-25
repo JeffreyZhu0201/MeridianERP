@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Button } from '@meridian/ui';
+import { getTranslations } from 'next-intl/server';
+import { Badge, Button, DetailPageFrame } from '@meridian/ui';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart, type Product } from '@/lib/api';
@@ -13,6 +14,7 @@ interface ProductPageProps {
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug, productSlug } = await params;
   const token = await getToken();
+  const t = await getTranslations('store');
 
   const [product, cart] = await Promise.all([
     apiFetch<Product>(storePath(slug, `products/${productSlug}`)).catch(() => null),
@@ -25,19 +27,36 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) {
     return (
       <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
-        <div className="space-y-4 text-center">
-          <h1 className="text-2xl font-semibold">Product not found</h1>
-          <Link href={`/s/${slug}`}>
-            <Button variant="outline">Back to shop</Button>
-          </Link>
-        </div>
+        <DetailPageFrame
+          title={t('product.notFound')}
+          description={t('product.notFoundDescription')}
+          backHref={`/s/${slug}`}
+          backLabel={t('nav.shop')}
+          actions={
+            <Link href={`/s/${slug}`}>
+              <Button variant="outline">{t('product.backToShop')}</Button>
+            </Link>
+          }
+        >
+          {null}
+        </DetailPageFrame>
       </StoreShellWrapper>
     );
   }
 
   return (
     <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
-      <ProductDetail product={product} storeSlug={slug} token={token} />
+      <DetailPageFrame
+        title={product.name}
+        description={product.description ?? undefined}
+        backHref={`/s/${slug}`}
+        backLabel={t('nav.shop')}
+        badges={
+          product.category ? <Badge variant="secondary">{product.category.name}</Badge> : undefined
+        }
+      >
+        <ProductDetail product={product} storeSlug={slug} token={token} />
+      </DetailPageFrame>
     </StoreShellWrapper>
   );
 }

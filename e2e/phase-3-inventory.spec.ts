@@ -1,6 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 
-import { inventoryZh } from '../apps/merchant/lib/i18n/inventory-zh';
+import { merchant } from '../packages/shared/src/i18n/messages/zh-CN/merchant';
+
+const inv = merchant.inventory;
 
 const DEMO_EMAIL = 'demo@merchant.test';
 const DEMO_PASSWORD = 'demo1234';
@@ -60,7 +62,7 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
     if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
 
     await expect(
-      page.getByRole('heading', { name: inventoryZh.warehouses.title }),
+      page.getByRole('heading', { name: inv.warehouses.title }),
     ).toBeVisible();
     await expect(page.getByRole('cell', { name: 'Default Warehouse' })).toBeVisible({
       timeout: 10_000,
@@ -70,30 +72,30 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
   test('库存水平页加载', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/stock'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.stock.title }),
+      page.getByRole('heading', { name: inv.stock.title }),
     ).toBeVisible();
   });
 
   test('库存调整页：表单与历史区', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/adjustments'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.adjustments.title }),
+      page.getByRole('heading', { name: inv.adjustments.title }),
     ).toBeVisible();
-    await expect(page.getByText(inventoryZh.adjustments.record)).toBeVisible();
-    await expect(page.getByText(inventoryZh.adjustments.history)).toBeVisible();
+    await expect(page.getByText(inv.adjustments.record)).toBeVisible();
+    await expect(page.getByText(inv.adjustments.history)).toBeVisible();
   });
 
   test('低库存预警页加载', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/alerts'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.alerts.title }),
+      page.getByRole('heading', { name: inv.alerts.title }),
     ).toBeVisible();
   });
 
   test('采购订单页：列表或空状态', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/purchase-orders'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.purchaseOrders.title }),
+      page.getByRole('heading', { name: inv.purchaseOrders.title }),
     ).toBeVisible();
     await expect(
       page.locator('a[href="/inventory/purchase-orders/new"]'),
@@ -103,29 +105,29 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
   test('库存报表页：指标卡与标签页', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/reports'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.reports.title }),
+      page.getByRole('heading', { name: inv.reports.title }),
     ).toBeVisible();
-    await expect(page.getByRole('button', { name: inventoryZh.reports.tabStock })).toBeVisible();
-    await expect(page.getByText(inventoryZh.reports.totalSkus, { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: inv.reports.tabStock })).toBeVisible();
+    await expect(page.getByText(inv.reports.totalSkus, { exact: true })).toBeVisible();
   });
 
   test('库存设置页（主账号）', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/settings'))) return;
     await expect(
-      page.getByRole('heading', { name: inventoryZh.settings.title }),
+      page.getByRole('heading', { name: inv.settings.title }),
     ).toBeVisible();
     await expect(page.locator('#default-threshold')).toBeVisible();
   });
 
   test('侧栏库存子导航可访问全部路由', async ({ page }) => {
     const routes = [
-      { href: '/inventory/warehouses', label: inventoryZh.nav.warehouses },
-      { href: '/inventory/stock', label: inventoryZh.nav.stock },
-      { href: '/inventory/adjustments', label: inventoryZh.nav.adjustments },
-      { href: '/inventory/alerts', label: inventoryZh.nav.alerts },
-      { href: '/inventory/purchase-orders', label: inventoryZh.nav.purchaseOrders },
-      { href: '/inventory/reports', label: inventoryZh.nav.reports },
-      { href: '/inventory/settings', label: inventoryZh.nav.settings },
+      { href: '/inventory/warehouses', label: inv.nav.warehouses },
+      { href: '/inventory/stock', label: inv.nav.stock },
+      { href: '/inventory/adjustments', label: inv.nav.adjustments },
+      { href: '/inventory/alerts', label: inv.nav.alerts },
+      { href: '/inventory/purchase-orders', label: inv.nav.purchaseOrders },
+      { href: '/inventory/reports', label: inv.nav.reports },
+      { href: '/inventory/settings', label: inv.nav.settings },
     ];
 
     for (const route of routes) {

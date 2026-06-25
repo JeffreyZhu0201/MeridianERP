@@ -1,5 +1,40 @@
 # Phase 1 Foundation — Product Requirements
 
+**Status:** API complete · Admin/Merchant UI ~85% · See [platform overview](./platform-overview.md)
+
+## Implementation Status (2025-06-25)
+
+| ID | Story | API | Admin UI | Merchant UI | Tests |
+|----|-------|-----|----------|-------------|-------|
+| US-1 | Platform admin login | ✅ | ✅ | — | `platform-auth.e2e-spec.ts` |
+| US-2 | Merchant registration | ✅ | — | ✅ | `merchant-onboarding.e2e-spec.ts` |
+| US-3 | Approve/reject merchants | ✅ | ⚠️ Reject body mismatch (G-1) | — | `merchant-onboarding.e2e-spec.ts` |
+| US-4 | Merchant login | ✅ | — | ✅ | onboarding e2e |
+| US-5 | CRM contacts/companies | ✅ | — | ✅ | `crm.e2e-spec.ts` |
+| US-6 | Lead pipeline stages | ✅ | — | ✅ | `crm.e2e-spec.ts` |
+| US-7 | CRM activities | ✅ | — | ❌ No UI | `crm.e2e-spec.ts` |
+| US-8 | Distributor commission settings | ✅ | — | ✅ | `bindings.e2e-spec.ts` |
+| US-9 | Distributor QR generation | ✅ | — | ✅ | `bindings.e2e-spec.ts` |
+| US-10 | QR bind claim flow | ✅ | — | ✅ `/bind/[token]` | `bindings.e2e-spec.ts` |
+| US-11 | Cross-tenant merchant list | ✅ | ⚠️ Filters not wired to API | — | — |
+| US-12 | Role-based access | ✅ | — | ⚠️ Owner-only on some inventory actions | — |
+
+### Delivered beyond original PRD scope
+
+- Platform orders read-only list (`apps/admin/app/orders`)
+- Settlement ledger + CSV export (`apps/admin/app/settlements`)
+- Platform read-only tenant inventory view (`apps/admin/app/inventory/tenants/[tenantId]`)
+
+### Known gaps
+
+- **G-1:** Admin reject sends `rejectionReason`; API expects `reason`
+- **G-3:** Dashboard lacks dedicated API; two metrics hardcoded to 0
+- **G-4:** Merchant detail page expects enriched payload not returned by API
+- **G-10:** CRM activities — API only, no merchant timeline UI
+- Admin tenant switcher documented but not implemented
+- Merchant `/onboarding/pending` shows static status badge
+- Global `/settings` stub on both portals
+
 ## Problem
 
 Platform operators need a multi-tenant system to onboard merchants, manage distributor relationships, and run basic CRM — before launching the integrated e-commerce storefront in Phase 2.
@@ -52,8 +87,17 @@ Platform operators need a multi-tenant system to onboard merchants, manage distr
 
 ## Open Questions
 
-| # | Question | Decision |
-|---|----------|----------|
-| 1 | QR token expiry duration? | 7 days default, configurable per distributor |
-| 2 | Can one entity bind to multiple distributors? | No — one active binding per merchant |
-| 3 | Platform admin write access to tenant CRM? | Read-only default; write requires audit log entry |
+| # | Question | Decision | Status |
+|---|----------|----------|--------|
+| 1 | QR token expiry duration? | 7 days default, configurable per distributor | ✅ Implemented |
+| 2 | Can one entity bind to multiple distributors? | No — one active binding per merchant (`@@unique` on bindable) | ✅ Implemented |
+| 3 | Platform admin write access to tenant CRM? | Read-only default; write requires audit log entry | ✅ Read-only in practice |
+
+## Related Documents
+
+| Document | Path |
+|----------|------|
+| Platform overview | `docs/prd/platform-overview.md` |
+| Architecture | `docs/architecture/phase-1-foundation.md` |
+| Admin wireframes | `docs/design/phase-1-admin.md` |
+| Merchant wireframes | `docs/design/phase-1-merchant.md` |

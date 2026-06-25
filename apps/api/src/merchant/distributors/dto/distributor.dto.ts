@@ -1,10 +1,14 @@
+import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
+  Max,
+  Min,
   MinLength,
 } from 'class-validator';
 import { BindType, CommissionType } from '@prisma/client';
@@ -22,8 +26,9 @@ export class CreateDistributorDto {
   @IsString()
   phone?: string;
 
+  @IsOptional()
   @IsNumber()
-  commissionRate!: number;
+  commissionRate?: number;
 
   @IsOptional()
   @IsEnum(CommissionType)
@@ -57,6 +62,32 @@ export class UpdateDistributorDto {
 }
 
 export class GenerateQrDto {
+  @IsOptional()
+  @IsEnum(BindType)
+  bindType?: BindType;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(90)
+  expiresInDays?: number;
+}
+
+export class QrHistoryListQueryDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
   @IsOptional()
   @IsEnum(BindType)
   bindType?: BindType;

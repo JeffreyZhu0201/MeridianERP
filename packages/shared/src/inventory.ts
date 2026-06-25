@@ -1,4 +1,4 @@
-import type { PurchaseOrderStatus, StockAdjustmentReason } from './enums.js';
+import type { PurchaseOrderStatus, StockAdjustmentReason, StockTransferStatus } from './enums.js';
 
 /** Tenant inventory configuration (1:1 with Tenant). */
 export interface TenantInventorySettings {
@@ -257,6 +257,54 @@ export interface AdjustmentListQuery {
 export interface PurchaseOrderListQuery {
   status?: PurchaseOrderStatus;
   warehouseId?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface StockTransferLine {
+  id: string;
+  transferId: string;
+  variantId: string;
+  quantity: number;
+}
+
+export interface StockTransferLineWithVariant extends StockTransferLine {
+  variant: { id: string; sku: string; name: string; productName: string };
+}
+
+export interface StockTransfer {
+  id: string;
+  tenantId: string;
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  status: StockTransferStatus;
+  note: string | null;
+  createdById: string;
+  createdAt: string;
+}
+
+export interface CreateStockTransferLineRequest {
+  variantId: string;
+  quantity: number;
+}
+
+export interface CreateStockTransferRequest {
+  fromWarehouseId: string;
+  toWarehouseId: string;
+  note?: string;
+  lines: CreateStockTransferLineRequest[];
+}
+
+export interface StockTransferWithDetails extends StockTransfer {
+  fromWarehouse: Pick<Warehouse, 'id' | 'name'>;
+  toWarehouse: Pick<Warehouse, 'id' | 'name'>;
+  createdBy: { id: string; email: string };
+  lines: StockTransferLineWithVariant[];
+}
+
+export interface StockTransferListQuery {
+  fromWarehouseId?: string;
+  toWarehouseId?: string;
   page?: number;
   limit?: number;
 }

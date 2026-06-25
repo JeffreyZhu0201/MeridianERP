@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import {
   Badge,
@@ -21,7 +22,6 @@ import {
 import type { StockLevelWithDetails, Warehouse } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
 
 interface StockLevelsTableProps {
   initialLevels: StockLevelWithDetails[];
@@ -120,8 +120,9 @@ export function StockLevelsTable({
     }
   }
 
-  const zh = inventoryZh.stock;
-  const common = inventoryZh.common;
+  const t = useTranslations('merchant.inventory.stock');
+  const tCommon = useTranslations('common');
+  const tInvCommon = useTranslations('merchant.inventory.common');
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
 
@@ -129,14 +130,14 @@ export function StockLevelsTable({
     <>
       <div className="flex flex-wrap gap-3">
         <div className="space-y-2">
-          <Label htmlFor="warehouse-filter">{zh.warehouse}</Label>
+          <Label htmlFor="warehouse-filter">{t('warehouse')}</Label>
           <Select
             id="warehouse-filter"
             value={warehouseId}
             onChange={(e) => updateParams({ warehouseId: e.target.value, page: '1' })}
             className="min-h-11"
           >
-            <option value="">{common.allWarehouses}</option>
+            <option value="">{tInvCommon('allWarehouses')}</option>
             {warehouses.map((w) => (
               <option key={w.id} value={w.id}>
                 {w.name}
@@ -145,30 +146,30 @@ export function StockLevelsTable({
           </Select>
         </div>
         <div className="min-w-[200px] flex-1 space-y-2">
-          <Label htmlFor="stock-search">{common.search}</Label>
+          <Label htmlFor="stock-search">{tCommon('search')}</Label>
           <Input
             id="stock-search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={zh.searchPlaceholder}
+            placeholder={t('searchPlaceholder')}
             className="min-h-11"
           />
         </div>
       </div>
 
       {levels.length === 0 ? (
-        <EmptyState title={zh.emptyTitle} description={zh.emptyDescription} />
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
         <div className="overflow-x-auto rounded-xl border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{zh.product}</TableHead>
-                <TableHead>{zh.sku}</TableHead>
-                <TableHead>{zh.warehouse}</TableHead>
-                <TableHead className="text-right">{zh.onHand}</TableHead>
-                <TableHead className="text-right">{zh.threshold}</TableHead>
-                <TableHead>{common.status}</TableHead>
+                <TableHead>{t('product')}</TableHead>
+                <TableHead>{t('sku')}</TableHead>
+                <TableHead>{t('warehouse')}</TableHead>
+                <TableHead className="text-right">{t('onHand')}</TableHead>
+                <TableHead className="text-right">{t('threshold')}</TableHead>
+                <TableHead>{tCommon('status')}</TableHead>
                 {isOwner ? <TableHead className="w-12" /> : null}
               </TableRow>
             </TableHeader>
@@ -192,9 +193,9 @@ export function StockLevelsTable({
                   </TableCell>
                   <TableCell>
                     {level.quantityOnHand === 0 ? (
-                      <Badge variant="destructive">{zh.outOfStock}</Badge>
+                      <Badge variant="destructive">{t('outOfStock')}</Badge>
                     ) : isLowStock(level) ? (
-                      <Badge variant="warning">{zh.lowStock}</Badge>
+                      <Badge variant="warning">{t('lowStock')}</Badge>
                     ) : null}
                   </TableCell>
                   {isOwner ? (
@@ -204,9 +205,9 @@ export function StockLevelsTable({
                         variant="ghost"
                         className="min-h-9"
                         onClick={() => openThresholdEdit(level)}
-                        aria-label={zh.editThreshold}
+                        aria-label={t('editThreshold')}
                       >
-                        {common.edit}
+                        {tCommon('edit')}
                       </Button>
                     </TableCell>
                   ) : null}
@@ -223,7 +224,7 @@ export function StockLevelsTable({
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{common.pageOf(page, total)}</span>
+          <span>{tCommon('pageOf', { page, total })}</span>
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -232,7 +233,7 @@ export function StockLevelsTable({
               disabled={page <= 1}
               onClick={() => updateParams({ page: String(page - 1) })}
             >
-              {common.previous}
+              {tCommon('previous')}
             </Button>
             <Button
               size="sm"
@@ -241,7 +242,7 @@ export function StockLevelsTable({
               disabled={page >= totalPages}
               onClick={() => updateParams({ page: String(page + 1) })}
             >
-              {common.next}
+              {tCommon('next')}
             </Button>
           </div>
         </div>
@@ -250,11 +251,11 @@ export function StockLevelsTable({
       <Dialog
         open={!!thresholdDialog}
         onOpenChange={(open) => !open && setThresholdDialog(null)}
-        title={zh.editThreshold}
+        title={t('editThreshold')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setThresholdDialog(null)}>{common.cancel}</DialogCloseButton>
-            <Button onClick={saveThreshold}>{common.save}</Button>
+            <DialogCloseButton onClick={() => setThresholdDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
+            <Button onClick={saveThreshold}>{tCommon('save')}</Button>
           </>
         }
       >
@@ -266,11 +267,11 @@ export function StockLevelsTable({
               onChange={(e) => setUseDefault(e.target.checked)}
               className="size-4 rounded border-input"
             />
-            {zh.useDefaultThreshold}（{defaultThreshold}）
+            {t('useDefaultThreshold')}（{defaultThreshold}）
           </label>
           {!useDefault ? (
             <div className="space-y-2">
-              <Label htmlFor="threshold">{zh.threshold}</Label>
+              <Label htmlFor="threshold">{t('threshold')}</Label>
               <Input
                 id="threshold"
                 type="number"

@@ -1,8 +1,8 @@
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
-import { PageHeader } from '@meridian/ui';
+import { SettingsPageFrame } from '@meridian/ui';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken, isMerchantOwner } from '@/lib/auth';
-import { inventoryZh } from '@/lib/i18n/inventory-zh';
+import { getTranslations } from 'next-intl/server';
 import type { TenantInventorySettings } from '@meridian/shared';
 
 import {
@@ -16,7 +16,7 @@ export default async function InventorySettingsPage() {
   if (!token) return null;
 
   const isOwner = isMerchantOwner(token);
-  const zh = inventoryZh.settings;
+  const t = await getTranslations('merchant.inventory.settings');
 
   const [settings, profile] = await Promise.all([
     apiFetch<TenantInventorySettings>('/merchant/inventory/settings', {}, token).catch(() => ({
@@ -27,8 +27,7 @@ export default async function InventorySettingsPage() {
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <div className="space-y-6">
-        <PageHeader title={zh.title} description={zh.description} />
+      <SettingsPageFrame title={t('title')} description={t('description')}>
         {isOwner ? (
           <InventorySettingsForm
             defaultReorderThreshold={settings.defaultReorderThreshold}
@@ -37,7 +36,7 @@ export default async function InventorySettingsPage() {
         ) : (
           <StaffForbidden />
         )}
-      </div>
+      </SettingsPageFrame>
     </MerchantShellWrapper>
   );
 }

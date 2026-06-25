@@ -2,10 +2,11 @@
   "name": "meridian-erp",
   "private": true,
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "node -e \"console.error('\\nMeridianERP: start each service in its own terminal.\\n  rtk pnpm deps\\n  rtk pnpm dev:api\\n  rtk pnpm dev:admin | dev:merchant | dev:store | dev:distributor\\nSee README.md\\n')\" && exit 1",
     "dev:admin": "pnpm --filter @meridian/admin dev",
     "dev:merchant": "pnpm --filter @meridian/merchant dev",
     "dev:store": "pnpm --filter @meridian/store dev",
+    "dev:distributor": "pnpm --filter @meridian/distributor dev",
     "dev:ui-spec": "pnpm --filter @meridian/ui-spec dev",
     "dev:api": "pnpm --filter @meridian/api dev",
     "deps": "docker compose -f docker/docker-compose.yml up -d redis",

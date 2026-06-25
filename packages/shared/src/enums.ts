@@ -72,4 +72,11 @@ export enum StockAdjustmentReason {
   COUNT_CORRECTION = 'COUNT_CORRECTION',
   RETURN = 'RETURN',
   OTHER = 'OTHER',
+  TRANSFER_OUT = 'TRANSFER_OUT',
+  TRANSFER_IN = 'TRANSFER_IN',
+}
+
+export enum StockTransferStatus {
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }

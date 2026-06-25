@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -21,14 +22,14 @@ interface SettlementsViewProps {
   token: string;
 }
 
-function formatPrice(price: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+function formatPrice(price: string | number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
     Number(price),
   );
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -37,6 +38,8 @@ function formatDate(iso: string): string {
 
 export function SettlementsView({ batches, ledgerEntries, token }: SettlementsViewProps) {
   const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations('admin.settlements');
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,7 +61,7 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
       );
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Export failed');
+      setError(err instanceof Error ? err.message : t('exportFailed'));
     } finally {
       setExporting(false);
     }
@@ -70,40 +73,42 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-muted-foreground">Accrued commissions</p>
-          <p className="text-2xl font-semibold">{formatPrice(accruedTotal)}</p>
-          <p className="text-xs text-muted-foreground">{ledgerEntries.length} entries</p>
+          <p className="text-sm text-muted-foreground">{t('accruedCommissions')}</p>
+          <p className="text-2xl font-semibold">{formatPrice(accruedTotal, locale)}</p>
+          <p className="text-xs text-muted-foreground">
+            {t('entries', { count: ledgerEntries.length })}
+          </p>
         </div>
         <Button onClick={handleExport} disabled={exporting || ledgerEntries.length === 0}>
-          {exporting ? 'Exporting…' : 'Export CSV'}
+          {exporting ? t('exporting') : t('export')}
         </Button>
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Settlement batches</h2>
+        <h2 className="text-lg font-medium">{t('settlementBatches')}</h2>
         {batches.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center">
-            <p className="text-muted-foreground">No settlement batches yet</p>
+            <p className="text-muted-foreground">{t('emptyBatches')}</p>
           </div>
         ) : (
           <div className="rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Period</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Entries</TableHead>
-                  <TableHead>Exported</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead>{t('columns.period')}</TableHead>
+                  <TableHead>{t('columns.status')}</TableHead>
+                  <TableHead>{t('columns.entries')}</TableHead>
+                  <TableHead>{t('columns.exported')}</TableHead>
+                  <TableHead>{t('columns.created')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {batches.map((batch) => (
                   <TableRow key={batch.id}>
                     <TableCell>
-                      {formatDate(batch.periodStart)} — {formatDate(batch.periodEnd)}
+                      {formatDate(batch.periodStart, locale)} — {formatDate(batch.periodEnd, locale)}
                     </TableCell>
                     <TableCell>
                       <Badge variant={batch.status === 'EXPORTED' ? 'default' : 'secondary'}>
@@ -112,10 +117,10 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
                     </TableCell>
                     <TableCell>{batch._count?.entries ?? 0}</TableCell>
                     <TableCell>
-                      {batch.exportedAt ? formatDate(batch.exportedAt) : '—'}
+                      {batch.exportedAt ? formatDate(batch.exportedAt, locale) : '—'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {formatDate(batch.createdAt)}
+                      {formatDate(batch.createdAt, locale)}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -126,21 +131,21 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">Accrued ledger</h2>
+        <h2 className="text-lg font-medium">{t('accruedLedger')}</h2>
         {ledgerEntries.length === 0 ? (
           <div className="rounded-xl border border-dashed p-8 text-center">
-            <p className="text-muted-foreground">No accrued commissions</p>
+            <p className="text-muted-foreground">{t('emptyLedger')}</p>
           </div>
         ) : (
           <div className="rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Merchant</TableHead>
-                  <TableHead>Distributor</TableHead>
-                  <TableHead>Order</TableHead>
-                  <TableHead className="text-right">Commission</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t('columns.merchant')}</TableHead>
+                  <TableHead>{t('columns.distributor')}</TableHead>
+                  <TableHead>{t('columns.order')}</TableHead>
+                  <TableHead className="text-right">{t('columns.commission')}</TableHead>
+                  <TableHead>{t('columns.date')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -151,9 +156,9 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
                     <TableCell className="font-mono text-xs">
                       {entry.order.id.slice(0, 8)}…
                     </TableCell>
-                    <TableCell className="text-right">{formatPrice(entry.amount)}</TableCell>
+                    <TableCell className="text-right">{formatPrice(entry.amount, locale)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
-                      {formatDate(entry.createdAt)}
+                      {formatDate(entry.createdAt, locale)}
                     </TableCell>
                   </TableRow>
                 ))}

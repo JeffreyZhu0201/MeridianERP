@@ -1,12 +1,35 @@
-import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
+import { getTranslations } from 'next-intl/server';
+import { SettingsPageFrame } from '@meridian/ui';
+import type { MerchantSettingsDto, TeamMember } from '@meridian/shared';
 
-export default function SettingsPage() {
+import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
+import { apiFetch } from '@/lib/api';
+import { getToken, isMerchantOwner } from '@/lib/auth';
+
+import { SettingsPanels } from './_components/settings-panels';
+
+export default async function SettingsPage() {
+  const t = await getTranslations('merchant.settings');
+  const token = await getToken();
+  if (!token) return null;
+
+  const isOwner = isMerchantOwner(token);
+
+  const [settings, team] = await Promise.all([
+    apiFetch<MerchantSettingsDto>('/merchant/settings', {}, token),
+    apiFetch<TeamMember[]>('/merchant/team', {}, token),
+  ]);
+
   return (
-    <MerchantShellWrapper>
-      <div className="space-y-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Merchant settings coming in a future release.</p>
-      </div>
+    <MerchantShellWrapper businessName={settings.profile.businessName}>
+      <SettingsPageFrame title={t('title')} description={t('description')}>
+        <SettingsPanels
+          settings={settings}
+          team={team}
+          isOwner={isOwner}
+          token={token}
+        />
+      </SettingsPageFrame>
     </MerchantShellWrapper>
   );
 }

@@ -14,6 +14,7 @@ import { PlatformModule } from './platform/platform.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { QueueModule } from './queue/queue.module';
 import { StoreModule } from './store/store.module';
+import { DistributorModule } from './distributor/distributor.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StoreModule } from './store/store.module';
     MerchantModule,
     BindingsModule,
     StoreModule,
+    DistributorModule,
   ],
   controllers: [AppController],
   providers: [

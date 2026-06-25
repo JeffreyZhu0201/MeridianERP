@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode } from 'react';
 import { IconShoppingCart, IconUser } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
+import { LocaleToggle } from '../theme/locale-toggle';
+import { ModeToggle } from '../theme/mode-toggle';
 import { cn } from '../../lib/utils';
 
 export interface StoreShellProps {
@@ -25,11 +28,13 @@ export function StoreShell({
 }: StoreShellProps) {
   const pathname = usePathname();
   const base = `/s/${storeSlug}`;
+  const t = useTranslations('store.nav');
+  const tc = useTranslations('common');
 
   const navItems = [
-    { href: base, label: 'Shop', exact: true },
-    { href: `${base}/cart`, label: 'Cart' },
-    { href: `${base}/account`, label: 'Account' },
+    { href: base, label: t('shop'), exact: true },
+    { href: `${base}/cart`, label: t('cart') },
+    { href: `${base}/account`, label: t('account') },
   ];
 
   return (
@@ -66,6 +71,8 @@ export function StoreShell({
           </nav>
 
           <div className="flex items-center gap-2">
+            <LocaleToggle portal="store" />
+            <ModeToggle />
             {userEmail ? (
               <div className="hidden items-center gap-2 text-sm sm:flex">
                 <span className="max-w-[140px] truncate text-muted-foreground">{userEmail}</span>
@@ -75,7 +82,7 @@ export function StoreShell({
                     onClick={onLogout}
                     className="rounded-full px-3 py-1 hover:bg-muted"
                   >
-                    Sign out
+                    {tc('signOut')}
                   </button>
                 ) : null}
               </div>
@@ -84,14 +91,14 @@ export function StoreShell({
                 href={`${base}/login`}
                 className="hidden rounded-full px-3 py-1 text-sm text-muted-foreground hover:bg-muted sm:inline"
               >
-                Sign in
+                {tc('signIn')}
               </Link>
             )}
 
             <Link
               href={`${base}/cart`}
               className="relative flex size-11 items-center justify-center rounded-full hover:bg-muted"
-              aria-label={`Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+              aria-label={`${t('cart')}${cartCount > 0 ? `, ${cartCount}` : ''}`}
             >
               <IconShoppingCart className="size-5" stroke={1.5} />
               {cartCount > 0 ? (
@@ -104,7 +111,7 @@ export function StoreShell({
             <Link
               href={userEmail ? `${base}/account` : `${base}/login`}
               className="flex size-11 items-center justify-center rounded-full hover:bg-muted sm:hidden"
-              aria-label="Account"
+              aria-label={t('account')}
             >
               <IconUser className="size-5" stroke={1.5} />
             </Link>
@@ -116,7 +123,7 @@ export function StoreShell({
 
       <footer className="border-t py-6">
         <div className="mx-auto max-w-6xl px-4 text-center text-xs text-muted-foreground">
-          Powered by MeridianERP
+          {tc('poweredBy')}
         </div>
       </footer>
     </div>

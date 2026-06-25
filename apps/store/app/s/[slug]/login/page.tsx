@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
-import { Button, Card, CardContent, Input, Label } from '@meridian/ui';
+import { AuthLayout, AuthToolbar, Button, Input, Label } from '@meridian/ui';
 
 import { API_URL, AUTH_COOKIE, type AuthResponse } from '@/lib/api';
 
@@ -12,6 +13,7 @@ function LoginForm() {
   const params = useParams<{ slug: string }>();
   const searchParams = useSearchParams();
   const slug = params.slug;
+  const t = useTranslations('store');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ function LoginForm() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.message ?? 'Invalid credentials');
+        throw new Error(body.message ?? t('login.invalidCredentials'));
       }
 
       const data = (await res.json()) as AuthResponse;
@@ -40,64 +42,63 @@ function LoginForm() {
       router.push(from);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setError(err instanceof Error ? err.message : t('login.failed'));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardContent className="space-y-6 p-6 pt-6">
-          <div className="space-y-1 text-center">
-            <h1 className="text-xl font-semibold">Sign in</h1>
-            <p className="text-sm text-muted-foreground">Access your account</p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </Button>
-          </form>
-          <p className="text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
-            <Link href={`/s/${slug}/register`} className="text-primary hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthLayout
+      subtitle={t('login.subtitle')}
+      footer={
+        <>
+          {t('login.noAccountPrompt')}{' '}
+          <Link href={`/s/${slug}/register`} className="text-primary hover:underline">
+            {t('login.noAccount')}
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">{t('login.email')}</Label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">{t('login.password')}</Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? t('login.submitting') : t('login.submit')}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
+    <>
+      <AuthToolbar portal="store" />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
+    </>
   );
 }

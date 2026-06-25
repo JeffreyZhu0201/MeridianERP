@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
 
 import type { PlatformOrder } from '@/lib/api';
@@ -8,12 +9,12 @@ interface OrdersTableProps {
   orders: PlatformOrder[];
 }
 
-function formatPrice(price: string | number, currency: string): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(price));
+function formatPrice(price: string | number, currency: string, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(price));
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', {
+function formatDate(iso: string, locale: string): string {
+  return new Date(iso).toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -31,10 +32,13 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
 };
 
 export function OrdersTable({ orders }: OrdersTableProps) {
+  const t = useTranslations('admin.orders');
+  const locale = useLocale();
+
   if (orders.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">No orders found</p>
+        <p className="text-muted-foreground">{t('empty')}</p>
       </div>
     );
   }
@@ -44,13 +48,13 @@ export function OrdersTable({ orders }: OrdersTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Order ID</TableHead>
-            <TableHead>Merchant</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Distributor</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-            <TableHead>Date</TableHead>
+            <TableHead>{t('columns.orderId')}</TableHead>
+            <TableHead>{t('columns.merchant')}</TableHead>
+            <TableHead>{t('columns.customer')}</TableHead>
+            <TableHead>{t('columns.distributor')}</TableHead>
+            <TableHead>{t('columns.status')}</TableHead>
+            <TableHead className="text-right">{t('columns.total')}</TableHead>
+            <TableHead>{t('columns.date')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -68,10 +72,10 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                {formatPrice(order.total, order.currency)}
+                {formatPrice(order.total, order.currency, locale)}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
-                {formatDate(order.createdAt)}
+                {formatDate(order.createdAt, locale)}
               </TableCell>
             </TableRow>
           ))}
