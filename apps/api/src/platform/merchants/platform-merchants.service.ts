@@ -154,6 +154,56 @@ export class PlatformMerchantsService {
     return updated;
   }
 
+  async updateRecruiter(
+    id: string,
+    dto: { recruitedByDistributorId: string | null; reason: string },
+    platformUserId: string,
+  ) {
+    const profile = await this.findProfileById(id);
+    if (profile.onboardingStatus !== OnboardingStatus.APPROVED) {
+      throw new BadRequestException('Only approved merchants can change recruiter');
+    }
+    if (!dto.reason?.trim()) {
+      throw new BadRequestException('Reason is required');
+    }
+
+    if (dto.recruitedByDistributorId) {
+      const distributor = await this.prisma.distributor.findFirst({
+        where: {
+          id: dto.recruitedByDistributorId,
+          tenantId: null,
+          isActive: true,
+        },
+      });
+      if (!distributor) {
+        throw new BadRequestException('Invalid platform distributor');
+      }
+    }
+
+    const previous = profile.recruitedByDistributorId;
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.merchantProfile.update({
+        where: { id },
+        data: {
+          recruitedByDistributorId: dto.recruitedByDistributorId,
+          recruitedAt: dto.recruitedByDistributorId ? new Date() : null,
+        },
+      }),
+      this.prisma.recruiterChangeLog.create({
+        data: {
+          merchantProfileId: id,
+          previousDistributorId: previous,
+          newDistributorId: dto.recruitedByDistributorId,
+          reason: dto.reason.trim(),
+          changedByPlatformUserId: platformUserId,
+        },
+      }),
+    ]);
+
+    return updated;
+  }
+
   private async findProfileById(id: string): Promise<MerchantProfile> {
     const profile = await this.prisma.merchantProfile.findUnique({
       where: { id },

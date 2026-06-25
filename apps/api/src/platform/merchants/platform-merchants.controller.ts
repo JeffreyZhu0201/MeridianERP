@@ -4,11 +4,14 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 import { PlatformMerchantsService } from './platform-merchants.service';
@@ -41,5 +44,18 @@ export class PlatformMerchantsController {
   @HttpCode(201)
   reject(@Param('id') id: string, @Body() dto: RejectMerchantDto) {
     return this.platformMerchantsService.reject(id, dto);
+  }
+
+  @Patch(':id/recruiter')
+  updateRecruiter(
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: { recruitedByDistributorId: string | null; reason: string },
+  ) {
+    return this.platformMerchantsService.updateRecruiter(
+      id,
+      dto,
+      user.userId,
+    );
   }
 }

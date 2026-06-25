@@ -118,6 +118,8 @@ export const store = {
     pickupTitle: 'Pickup code',
     pickupHint: 'Show this code or QR at the branch counter when collecting your order.',
     pickupCodeLabel: '6-digit code',
+    pickedUpTitle: 'Picked up',
+    pickedUpAt: 'Verified {date}',
     deliveryTitle: 'Delivery address',
     shippedAt: 'Shipped {date}',
   },

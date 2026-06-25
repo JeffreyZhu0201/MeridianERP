@@ -36,6 +36,11 @@ export class PlatformDistributorsController {
     return this.service.create(dto);
   }
 
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.service.getById(id);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -68,6 +73,15 @@ export class PlatformDistributorsController {
     @Body() dto: { expiresInDays?: number },
   ) {
     return this.service.createInviteCode(id, dto.expiresInDays);
+  }
+
+  @Post(':id/invite-code/:codeId/revoke')
+  @HttpCode(200)
+  revokeInviteCode(
+    @Param('id') id: string,
+    @Param('codeId') codeId: string,
+  ) {
+    return this.service.revokeInviteCode(id, codeId);
   }
 
   @Get(':id/branches')

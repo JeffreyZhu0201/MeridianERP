@@ -6,9 +6,8 @@ export {
 export {
   OrderListFrame,
   type OrderListFrameProps,
-  type OrderListRow,
-  type OrderListTab,
 } from './order-list-frame';
+export type { OrderListRow, OrderListTab } from '@meridian/shared';
 export {
   PickupVerifyDialog,
   type PickupVerifyDialogProps,

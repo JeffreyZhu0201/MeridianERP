@@ -89,6 +89,7 @@ const mainNav: NavItem[] = [
     ],
   },
   { key: 'orders', href: '/orders', labelKey: 'orders', icon: IconReceipt },
+  { key: 'allocations', href: '/allocations', labelKey: 'allocations', icon: IconPackage },
   { key: 'funds', href: '/funds', labelKey: 'funds', icon: IconWallet },
   { key: 'replenishment', href: '/replenishment', labelKey: 'replenishment', icon: IconTruckDelivery },
   { key: 'commissions', href: '/commissions', labelKey: 'commissions', icon: IconCoin },

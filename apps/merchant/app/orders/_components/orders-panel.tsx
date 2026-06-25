@@ -15,6 +15,7 @@ import {
   type OrderListRow,
 } from '@meridian/ui';
 import type { FulfillmentType, MerchantOrderListItem } from '@meridian/shared';
+import { formatPickupCodeHint } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
@@ -38,7 +39,7 @@ function customerLabel(order: MerchantOrderListItem, guestLabel: string): string
   return order.customer?.email ?? order.guestEmail ?? guestLabel;
 }
 
-function toRow(order: MerchantOrderListItem, guestLabel: string): OrderListRow {
+function toRow(order: MerchantOrderListItem, guestLabel: string, withCodeHint = false): OrderListRow {
   return {
     id: order.id,
     customerLabel: customerLabel(order, guestLabel),
@@ -46,6 +47,7 @@ function toRow(order: MerchantOrderListItem, guestLabel: string): OrderListRow {
     fulfillmentType: (order.fulfillmentType ?? 'PICKUP') as FulfillmentType,
     total: formatMoney(order.total, order.currency),
     createdAt: formatDate(order.createdAt),
+    meta: withCodeHint ? formatPickupCodeHint(order.pickupCode) : undefined,
   };
 }
 
@@ -62,7 +64,7 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
     [orders, t],
   );
   const pendingRows = useMemo(
-    () => pickupPending.map((o) => toRow(o, t('guest'))),
+    () => pickupPending.map((o) => toRow(o, t('guest'), true)),
     [pickupPending, t],
   );
 
@@ -124,6 +126,8 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
           <OrderListFrame
             rows={pendingRows}
             showTabs={false}
+            showMetaColumn
+            metaColumnLabel={t('pickupPending.codeHint')}
             emptyState={
               <div className="rounded-xl ring-1 ring-border p-12 text-center">
                 <p className="text-muted-foreground">{t('pickupPending.empty')}</p>

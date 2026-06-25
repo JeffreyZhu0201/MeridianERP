@@ -4,10 +4,12 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { AllocationOrderStatus } from '@prisma/client';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
@@ -19,8 +21,14 @@ export class PlatformAllocationsController {
   constructor(private readonly service: PlatformAllocationsService) {}
 
   @Get('master-skus')
-  listMasterSkus() {
-    return this.service.listMasterSkus();
+  listMasterSkus(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.listMasterSkus(
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 50,
+    );
   }
 
   @Post('master-skus')
@@ -39,9 +47,28 @@ export class PlatformAllocationsController {
     return this.service.createMasterSku(dto);
   }
 
+  @Patch('master-skus/:id')
+  updateMasterSku(
+    @Param('id') id: string,
+    @Body()
+    dto: {
+      name?: string;
+      quantityOnHand?: number;
+      unitCost?: number;
+      wholesalePrice?: number;
+      retailPrice?: number;
+      isActive?: boolean;
+    },
+  ) {
+    return this.service.updateMasterSku(id, dto);
+  }
+
   @Get()
-  list(@Query('tenantId') tenantId?: string) {
-    return this.service.listAllocations(tenantId);
+  list(
+    @Query('tenantId') tenantId?: string,
+    @Query('status') status?: AllocationOrderStatus,
+  ) {
+    return this.service.listAllocations(tenantId, status);
   }
 
   @Post()

@@ -37,6 +37,30 @@ export interface PickupTokenResponse {
   qrPayload: string;
 }
 
+/** Detail — GET /platform/orders/:id */
+export interface PlatformOrderDetail {
+  id: string;
+  status: OrderStatus;
+  fulfillmentType: FulfillmentType;
+  currency: string;
+  total: string | number;
+  guestEmail: string | null;
+  deliveryAddress: DeliveryAddress | null;
+  createdAt: string;
+  tenant: {
+    id: string;
+    slug: string;
+    businessName?: string | null;
+  };
+  lines: Array<{
+    id: string;
+    productName: string;
+    variantName: string;
+    quantity: number;
+    skuCode?: string | null;
+  }>;
+}
+
 export interface VerifyPickupRequest {
   code: string;
 }

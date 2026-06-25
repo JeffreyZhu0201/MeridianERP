@@ -90,6 +90,41 @@ export class PlatformDistributorsService {
     });
   }
 
+  async getById(id: string) {
+    const d = await this.assertPlatformDistributor(id);
+    const [recruitedCount, inviteCodes] = await Promise.all([
+      this.prisma.merchantProfile.count({
+        where: { recruitedByDistributorId: id },
+      }),
+      this.prisma.merchantRecruitInviteCode.findMany({
+        where: { distributorId: id },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+    ]);
+    const baseUrl = this.env.get('MERCHANT_APP_URL') ?? 'http://localhost:3002';
+    return {
+      id: d.id,
+      name: d.name,
+      email: d.email,
+      phone: d.phone,
+      commissionRate: Number(d.commissionRate),
+      commissionType: d.commissionType,
+      isActive: d.isActive,
+      portalEnabled: d.portalEnabled,
+      recruitedMerchantCount: recruitedCount,
+      createdAt: d.createdAt.toISOString(),
+      inviteCodes: inviteCodes.map((inv) => ({
+        id: inv.id,
+        code: inv.code,
+        expiresAt: inv.expiresAt?.toISOString() ?? null,
+        revokedAt: inv.revokedAt?.toISOString() ?? null,
+        useCount: inv.useCount,
+        url: `${baseUrl}/register?invite=${inv.code}`,
+      })),
+    };
+  }
+
   async createInviteCode(distributorId: string, expiresInDays?: number) {
     await this.assertPlatformDistributor(distributorId);
     for (let i = 0; i < 10; i++) {
@@ -125,6 +160,21 @@ export class PlatformDistributorsService {
       }
     }
     throw new ConflictException('Could not generate invite code');
+  }
+
+  async revokeInviteCode(distributorId: string, codeId: string) {
+    await this.assertPlatformDistributor(distributorId);
+    const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
+      where: { id: codeId, distributorId },
+    });
+    if (!invite) throw new NotFoundException('Invite code not found');
+    if (invite.revokedAt) {
+      throw new BadRequestException('Invite code already revoked');
+    }
+    return this.prisma.merchantRecruitInviteCode.update({
+      where: { id: codeId },
+      data: { revokedAt: new Date() },
+    });
   }
 
   async getBranches(distributorId: string) {

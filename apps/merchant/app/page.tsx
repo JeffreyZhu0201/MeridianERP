@@ -100,10 +100,6 @@ export default async function DashboardPage() {
                     <Link href="/crm/contacts" className="text-sm text-primary hover:underline">
                       {t('addContact')}
                     </Link>
-                    <span className="text-muted-foreground">·</span>
-                    <Link href="/distributors" className="text-sm text-primary hover:underline">
-                      {t('addDistributor')}
-                    </Link>
                   </div>
                 </div>
                 {stats.recentLeads.length === 0 ? (

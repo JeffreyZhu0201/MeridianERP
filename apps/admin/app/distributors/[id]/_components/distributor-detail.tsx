@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
@@ -13,6 +14,8 @@ import {
   DetailPageFrame,
   EmptyState,
   Input,
+  Label,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -21,52 +24,126 @@ import {
   TableRow,
 } from '@meridian/ui';
 
-import {
-  apiFetch,
-  type DistributorBranch,
-  type PlatformDistributor,
-  type RecruitInviteCode,
-} from '@/lib/api';
+import { apiFetch, type DistributorBranch } from '@/lib/api';
+import type { DistributorDetailResponse } from '../page';
 
 interface DistributorDetailViewProps {
-  distributor: PlatformDistributor;
+  distributor: DistributorDetailResponse;
   branches: DistributorBranch[];
   token: string;
 }
 
 export function DistributorDetailView({
-  distributor,
+  distributor: initial,
   branches,
   token,
 }: DistributorDetailViewProps) {
+  const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.distributors');
   const td = useTranslations('admin.distributors.detail');
   const tc = useTranslations('common');
-  const [invite, setInvite] = useState<RecruitInviteCode | null>(null);
+  const [distributor, setDistributor] = useState(initial);
+  const [invite, setInvite] = useState<{ url: string; code: string } | null>(null);
   const [loadingInvite, setLoadingInvite] = useState(false);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [portalPassword, setPortalPassword] = useState('');
+  const [name, setName] = useState(distributor.name);
+  const [commissionRate, setCommissionRate] = useState(String(distributor.commissionRate));
+  const [commissionType, setCommissionType] = useState(distributor.commissionType);
+  const [isActive, setIsActive] = useState(distributor.isActive);
 
   const commissionLabel =
     distributor.commissionType === 'FIXED'
-      ? `$${Number(distributor.commissionRate)}`
+      ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'CNY' }).format(
+          Number(distributor.commissionRate),
+        )
       : `${Number(distributor.commissionRate)}%`;
 
   async function handleInviteCode() {
     setLoadingInvite(true);
     setError('');
     try {
-      const result = await apiFetch<RecruitInviteCode>(
+      const result = await apiFetch<{ url: string; code: string }>(
         `/platform/distributors/${distributor.id}/invite-code`,
         { method: 'POST', body: JSON.stringify({}) },
         token,
       );
       setInvite(result);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : td('inviteCodeFailed'));
     } finally {
       setLoadingInvite(false);
+    }
+  }
+
+  async function handleRevoke(codeId: string) {
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/distributors/${distributor.id}/invite-code/${codeId}/revoke`,
+        { method: 'POST' },
+        token,
+      );
+      setDistributor((d) => ({
+        ...d,
+        inviteCodes: d.inviteCodes.map((c) =>
+          c.id === codeId ? { ...c, revokedAt: new Date().toISOString() } : c,
+        ),
+      }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : td('revokeFailed'));
+    }
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/distributors/${distributor.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            name,
+            commissionRate: Number(commissionRate),
+            commissionType,
+            isActive,
+          }),
+        },
+        token,
+      );
+      setDistributor((d) => ({
+        ...d,
+        name,
+        commissionRate: Number(commissionRate),
+        commissionType,
+        isActive,
+      }));
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : td('saveFailed'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleEnablePortal() {
+    if (!portalPassword.trim()) return;
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/distributors/${distributor.id}/portal`,
+        { method: 'POST', body: JSON.stringify({ password: portalPassword }) },
+        token,
+      );
+      setDistributor((d) => ({ ...d, portalEnabled: true }));
+      setPortalPassword('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : td('portalFailed'));
     }
   }
 
@@ -78,9 +155,11 @@ export function DistributorDetailView({
   }
 
   function formatMoney(value: string | number) {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-      Number(value),
-    );
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'CNY',
+      minimumFractionDigits: 2,
+    }).format(Number(value));
   }
 
   return (
@@ -123,7 +202,7 @@ export function DistributorDetailView({
             <Button variant="outline" size="sm" onClick={handleCopy}>
               {copied ? td('copied') : td('copy')}
             </Button>
-            <span className="text-xs text-muted-foreground font-mono">{invite.code}</span>
+            <span className="font-mono text-xs text-muted-foreground">{invite.code}</span>
           </CardContent>
         </Card>
       ) : null}
@@ -131,62 +210,145 @@ export function DistributorDetailView({
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{td('profile')}</CardTitle>
+            <CardTitle>{td('editSettings')}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">{t('columns.email')}</span>
-              <span>{distributor.email ?? '—'}</span>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="dist-name">{t('columns.name')}</Label>
+              <Input id="dist-name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">{td('phone')}</span>
-              <span>{distributor.phone ?? '—'}</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dist-rate">{td('commissionRate')}</Label>
+                <Input
+                  id="dist-rate"
+                  type="number"
+                  value={commissionRate}
+                  onChange={(e) => setCommissionRate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dist-type">{td('commissionType')}</Label>
+                <Select
+                  id="dist-type"
+                  value={commissionType}
+                  onChange={(e) => setCommissionType(e.target.value)}
+                >
+                  <option value="PERCENT">PERCENT</option>
+                  <option value="FIXED">FIXED</option>
+                </Select>
+              </div>
             </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">{td('commission')}</span>
-              <span>{commissionLabel}</span>
-            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+              />
+              {tc('active')}
+            </label>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? tc('saving') : tc('save')}
+            </Button>
+            {!distributor.portalEnabled ? (
+              <div className="space-y-2 border-t pt-4">
+                <Label htmlFor="portal-pw">{td('portalPassword')}</Label>
+                <Input
+                  id="portal-pw"
+                  type="password"
+                  value={portalPassword}
+                  onChange={(e) => setPortalPassword(e.target.value)}
+                />
+                <Button variant="outline" size="sm" onClick={handleEnablePortal}>
+                  {td('enablePortal')}
+                </Button>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{td('branches')}</CardTitle>
+            <CardTitle>{td('inviteHistory')}</CardTitle>
           </CardHeader>
           <CardContent>
-            {branches.length > 0 ? (
-              <div className="rounded-xl ring-1 ring-border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{td('columns.business')}</TableHead>
-                      <TableHead>{td('columns.slug')}</TableHead>
-                      <TableHead className="text-right">{td('columns.sales')}</TableHead>
-                      <TableHead className="text-right">{td('columns.orders')}</TableHead>
+            {distributor.inviteCodes.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{td('columns.code')}</TableHead>
+                    <TableHead>{td('columns.uses')}</TableHead>
+                    <TableHead>{tc('status')}</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {distributor.inviteCodes.map((code) => (
+                    <TableRow key={code.id}>
+                      <TableCell className="font-mono">{code.code}</TableCell>
+                      <TableCell>{code.useCount}</TableCell>
+                      <TableCell>
+                        {code.revokedAt ? (
+                          <Badge variant="destructive">{td('revoked')}</Badge>
+                        ) : (
+                          <Badge variant="secondary">{tc('active')}</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {!code.revokedAt ? (
+                          <Button size="sm" variant="outline" onClick={() => handleRevoke(code.id)}>
+                            {td('revoke')}
+                          </Button>
+                        ) : null}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {branches.map((branch) => (
-                      <TableRow key={branch.tenantId}>
-                        <TableCell className="font-medium">{branch.businessName}</TableCell>
-                        <TableCell className="font-mono text-xs">{branch.slug}</TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {formatMoney(branch.salesLast30Days)}
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">
-                          {branch.orderCountLast30Days}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
             ) : (
-              <EmptyState title={td('noBranches')} />
+              <EmptyState title={td('noInvites')} />
             )}
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{td('branches')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {branches.length > 0 ? (
+            <div className="rounded-xl ring-1 ring-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{td('columns.business')}</TableHead>
+                    <TableHead>{td('columns.slug')}</TableHead>
+                    <TableHead className="text-right">{td('columns.sales')}</TableHead>
+                    <TableHead className="text-right">{td('columns.orders')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {branches.map((branch) => (
+                    <TableRow key={branch.tenantId}>
+                      <TableCell className="font-medium">{branch.businessName}</TableCell>
+                      <TableCell className="font-mono text-xs">{branch.slug}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatMoney(branch.salesLast30Days)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {branch.orderCountLast30Days}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <EmptyState title={td('noBranches')} />
+          )}
+        </CardContent>
+      </Card>
     </DetailPageFrame>
   );
 }

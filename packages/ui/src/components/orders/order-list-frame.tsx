@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 
+import type { OrderListRow, OrderListTab } from '@meridian/shared';
 import { Badge } from '../ui/badge';
 import { Input } from '../ui/input';
 import { Select } from '../ui/select';
@@ -18,17 +19,7 @@ import { cn } from '../../lib/utils';
 
 import { FulfillmentTypeBadge, type FulfillmentType } from './fulfillment-type-badge';
 
-export type OrderListTab = 'all' | 'pickup' | 'delivery';
-
-export interface OrderListRow {
-  id: string;
-  customerLabel: string;
-  status: string;
-  fulfillmentType: FulfillmentType;
-  total: string;
-  createdAt: string;
-  meta?: string;
-}
+export type { OrderListRow, OrderListTab };
 
 export interface OrderListFrameProps {
   title?: string;
@@ -45,6 +36,8 @@ export interface OrderListFrameProps {
   renderRowAction?: (row: OrderListRow) => React.ReactNode;
   showMerchantColumn?: boolean;
   merchantLabel?: (row: OrderListRow) => string;
+  showMetaColumn?: boolean;
+  metaColumnLabel?: string;
   emptyState?: React.ReactNode;
   isLoading?: boolean;
   className?: string;
@@ -80,6 +73,8 @@ export function OrderListFrame({
   renderRowAction,
   showMerchantColumn = false,
   merchantLabel,
+  showMetaColumn = false,
+  metaColumnLabel = 'Code',
   emptyState,
   isLoading,
   className,
@@ -158,6 +153,7 @@ export function OrderListFrame({
                 <TableHead>Order</TableHead>
                 {showMerchantColumn ? <TableHead>Branch</TableHead> : null}
                 <TableHead>Customer</TableHead>
+                {showMetaColumn ? <TableHead>{metaColumnLabel}</TableHead> : null}
                 <TableHead>Fulfillment</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Total</TableHead>
@@ -179,6 +175,11 @@ export function OrderListFrame({
                     </TableCell>
                   ) : null}
                   <TableCell className="text-sm">{row.customerLabel}</TableCell>
+                  {showMetaColumn ? (
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {row.meta ?? '—'}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     <FulfillmentTypeBadge type={row.fulfillmentType} />
                   </TableCell>

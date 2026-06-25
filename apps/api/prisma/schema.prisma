@@ -174,10 +174,24 @@ model MerchantProfile {
   recruitedAt               DateTime?
   pendingRecruitInviteCode  String?
   storePublished            Boolean          @default(false)
+  recruiterChangeLogs       RecruiterChangeLog[]
   createdAt                 DateTime         @default(now())
   updatedAt                 DateTime         @updatedAt
 
   @@index([recruitedByDistributorId])
+}
+
+model RecruiterChangeLog {
+  id                        String          @id @default(cuid())
+  merchantProfileId         String
+  merchantProfile           MerchantProfile @relation(fields: [merchantProfileId], references: [id])
+  previousDistributorId     String?
+  newDistributorId          String?
+  reason                    String
+  changedByPlatformUserId   String?
+  createdAt                 DateTime        @default(now())
+
+  @@index([merchantProfileId])
 }
 
 model User {
@@ -766,6 +780,7 @@ model ReplenishmentRequest {
   tenant      Tenant                     @relation(fields: [tenantId], references: [id])
   status      ReplenishmentRequestStatus @default(PENDING)
   note        String?
+  rejectionReason String?
   reviewedAt  DateTime?
   reviewedByPlatformUserId String?
   lines       ReplenishmentRequestLine[]

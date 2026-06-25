@@ -64,7 +64,7 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
   const rawParams = await searchParams;
   const query = parseQuery(rawParams);
 
-  const [commissionsRes, summaryRes, distributorsRes, profile] = await Promise.all([
+  const [commissionsRes, summaryRes, profile] = await Promise.all([
     fetchCommissions(token, query).catch(() => ({
       items: [],
       total: 0,
@@ -84,15 +84,9 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
       from: query.from ?? defaultDateRange().from,
       to: query.to ?? defaultDateRange().to,
     })),
-    apiFetch<PaginatedResponse<Distributor> | Distributor[]>(
-      '/merchant/distributors',
-      {},
-      token,
-    ).catch(() => [] as Distributor[]),
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
-  const distributors = asList(distributorsRes);
   const isEmpty = commissionsRes.items.length === 0;
 
   return (
@@ -102,7 +96,7 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
         description={t('description')}
         filters={
           <Suspense fallback={null}>
-            <CommissionsFilters distributors={distributors} />
+            <CommissionsFilters distributors={[]} />
           </Suspense>
         }
         emptyState={

@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { createHmac } from 'crypto';
 import {
   FulfillmentType,
   OrderStatus,
@@ -192,6 +193,14 @@ export class FulfillmentService {
   }
 
   buildPickupQrPayload(orderId: string, pickupCode: string): string {
-    return JSON.stringify({ orderId, code: pickupCode });
+    const payload: Record<string, string> = { orderId, code: pickupCode };
+    const secret = process.env.PICKUP_QR_SECRET;
+    if (secret) {
+      payload.sig = createHmac('sha256', secret)
+        .update(`${orderId}:${pickupCode}`)
+        .digest('hex')
+        .slice(0, 16);
+    }
+    return JSON.stringify(payload);
   }
 }

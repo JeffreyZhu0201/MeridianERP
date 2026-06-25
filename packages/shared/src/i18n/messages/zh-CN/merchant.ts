@@ -216,6 +216,19 @@ export const merchant = {
       total: '合计',
       date: '日期',
     },
+    tabs: {
+      all: '全部订单',
+      pickupPending: '待自提',
+    },
+    pickupPending: {
+      empty: '暂无待自提订单',
+      emptyHint: '已付款的自提订单将显示在此处，直至门店核销。',
+      verify: '核销自提',
+      codeHint: '取件码提示',
+    },
+    verifyPickup: {
+      failed: '核销失败',
+    },
   },
   distributors: {
     title: '分销商',

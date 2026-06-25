@@ -2,11 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type ReactNode } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import {
+  IconAddressBook,
   IconBuildingStore,
-  IconLayoutDashboard,
   IconCash,
+  IconChevronRight,
+  IconLayoutDashboard,
   IconPackage,
   IconReceipt,
   IconSettings,
@@ -16,6 +18,7 @@ import {
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { ErpShell } from '../frameworks/erp-shell';
+import { cn } from '../../lib/utils';
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -23,6 +26,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '../ui/sidebar';
 
 export interface AdminShellProps {
@@ -31,19 +37,51 @@ export interface AdminShellProps {
   onLogout?: () => void;
 }
 
-const navItems = [
-  { href: '/', key: 'dashboard' as const, icon: IconLayoutDashboard },
-  { href: '/merchants', key: 'merchants' as const, icon: IconBuildingStore },
-  { href: '/distributors', key: 'distributors' as const, icon: IconUsers },
-  { href: '/orders', key: 'orders' as const, icon: IconReceipt },
-  { href: '/allocations', key: 'allocations' as const, icon: IconPackage },
-  { href: '/withdrawals', key: 'withdrawals' as const, icon: IconCash },
-  { href: '/funds', key: 'funds' as const, icon: IconTruckDelivery },
-  { href: '/settlements', key: 'settlements' as const, icon: IconWallet },
-  { href: '/settings', key: 'settings' as const, icon: IconSettings },
+type NavChild = { href: string; labelKey: string };
+type NavItem = {
+  href: string;
+  key: string;
+  icon: typeof IconLayoutDashboard;
+  children?: NavChild[];
+};
+
+const navItems: NavItem[] = [
+  { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
+  { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
+  { href: '/distributors', key: 'distributors', icon: IconUsers },
+  { href: '/orders', key: 'orders', icon: IconReceipt },
+  { href: '/allocations', key: 'allocations', icon: IconPackage },
+  { href: '/replenishment', key: 'replenishment', icon: IconBuildingStore },
+  { href: '/withdrawals', key: 'withdrawals', icon: IconCash },
+  { href: '/funds', key: 'funds', icon: IconTruckDelivery },
+  { href: '/settlements', key: 'settlements', icon: IconWallet },
+  {
+    href: '/crm/contacts',
+    key: 'crm',
+    icon: IconAddressBook,
+    children: [
+      { href: '/crm/contacts', labelKey: 'crmContacts' },
+      { href: '/crm/companies', labelKey: 'crmCompanies' },
+      { href: '/crm/leads', labelKey: 'crmLeads' },
+    ],
+  },
+  { href: '/settings', key: 'settings', icon: IconSettings },
 ];
 
-function AdminNav({ pathname }: { pathname: string }) {
+function sectionPrefix(href: string): string {
+  if (href.startsWith('/crm')) return '/crm';
+  return href;
+}
+
+function AdminNav({
+  pathname,
+  openSections,
+  toggleSection,
+}: {
+  pathname: string;
+  openSections: Record<string, boolean>;
+  toggleSection: (key: string) => void;
+}) {
   const t = useTranslations('admin.nav');
   const tc = useTranslations('common');
 
@@ -52,9 +90,52 @@ function AdminNav({ pathname }: { pathname: string }) {
       <SidebarGroupLabel>{tc('platform')}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {navItems.map(({ href, key, icon: Icon }) => {
+          {navItems.map(({ href, key, icon: Icon, children }) => {
             const label = t(key);
-            const active = pathname === href || (href !== '/' && pathname.startsWith(href));
+            const prefix = sectionPrefix(href);
+            const active =
+              pathname === href ||
+              (prefix !== '/' && pathname.startsWith(prefix)) ||
+              (children?.some((c) => pathname === c.href || pathname.startsWith(c.href)) ?? false);
+
+            if (children?.length) {
+              const open = openSections[key] ?? active;
+              return (
+                <SidebarMenuItem key={key}>
+                  <SidebarMenuButton
+                    isActive={active}
+                    tooltip={label}
+                    onClick={() => toggleSection(key)}
+                    className="justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon stroke={1.5} />
+                      <span>{label}</span>
+                    </span>
+                    <IconChevronRight
+                      stroke={1.5}
+                      className={cn('size-4 transition-transform', open && 'rotate-90')}
+                    />
+                  </SidebarMenuButton>
+                  {open ? (
+                    <SidebarMenuSub>
+                      {children.map((child) => {
+                        const childActive =
+                          pathname === child.href || pathname.startsWith(`${child.href}/`);
+                        return (
+                          <SidebarMenuSubItem key={child.href}>
+                            <SidebarMenuSubButton asChild isActive={childActive}>
+                              <Link href={child.href}>{t(child.labelKey)}</Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  ) : null}
+                </SidebarMenuItem>
+              );
+            }
+
             return (
               <SidebarMenuItem key={href}>
                 <SidebarMenuButton isActive={active} tooltip={label} asChild>
@@ -76,6 +157,20 @@ export function AdminShell({ children, userEmail, onLogout }: AdminShellProps) {
   const pathname = usePathname();
   const t = useTranslations('admin');
   const tc = useTranslations('common');
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const initialOpen = useMemo(
+    () => ({
+      crm: pathname.startsWith('/crm'),
+    }),
+    [pathname],
+  );
+
+  const mergedOpen = { ...initialOpen, ...openSections };
+
+  function toggleSection(key: string) {
+    setOpenSections((prev) => ({ ...prev, [key]: !(prev[key] ?? initialOpen[key as keyof typeof initialOpen]) }));
+  }
 
   return (
     <ErpShell
@@ -88,7 +183,13 @@ export function AdminShell({ children, userEmail, onLogout }: AdminShellProps) {
           <span className="truncate font-semibold tracking-tight">{t('brand')}</span>
         </div>
       }
-      sidebar={<AdminNav pathname={pathname} />}
+      sidebar={
+        <AdminNav
+          pathname={pathname}
+          openSections={mergedOpen}
+          toggleSection={toggleSection}
+        />
+      }
       headerStart={<span className="text-sm font-medium text-muted-foreground">{tc('platform')}</span>}
       headerEnd={
         <>

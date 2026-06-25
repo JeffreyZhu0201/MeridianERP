@@ -36,6 +36,7 @@ export interface MerchantOrderListItem {
   tax: string | number;
   total: string | number;
   guestEmail: string | null;
+  pickupCode?: string | null;
   createdAt: string;
   updatedAt: string;
   customer: MerchantOrderCustomer | null;
@@ -96,6 +97,7 @@ export interface StoreOrderDetail extends StoreOrderListItem {
   subtotal: string | number;
   tax: string | number;
   pickupCode?: string | null;
+  pickupVerifiedAt?: string | null;
   deliveryAddress?: DeliveryAddress | null;
   shippedAt?: string | null;
   lines: MerchantOrderLine[];

@@ -20,8 +20,10 @@ export default async function AllocationsPage() {
   const locale = await getLocale();
   const t = await getTranslations('admin.allocations');
 
-  const [masterSkus, allocations, merchantsRes] = await Promise.all([
-    apiFetch<MasterSku[]>('/platform/allocations/master-skus', {}, token).catch(() => []),
+  const [masterSkusRes, allocations, merchantsRes] = await Promise.all([
+    apiFetch<{ data: MasterSku[] }>('/platform/allocations/master-skus', {}, token).catch(
+      () => ({ data: [] }),
+    ),
     apiFetch<AllocationOrder[]>('/platform/allocations', {}, token).catch(() => []),
     apiFetch<PaginatedResponse<MerchantListItem>>(
       `/platform/merchants?status=${OnboardingStatus.APPROVED}&limit=100`,
@@ -29,6 +31,8 @@ export default async function AllocationsPage() {
       token,
     ).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: 100 } })),
   ]);
+
+  const masterSkus = masterSkusRes.data ?? [];
 
   const approvedMerchants = merchantsRes.data
     .map((m) => {

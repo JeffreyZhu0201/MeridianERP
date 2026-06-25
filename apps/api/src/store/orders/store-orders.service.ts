@@ -57,7 +57,10 @@ export class StoreOrdersService {
       subtotal: Number(order.subtotal),
       tax: Number(order.tax),
       pickupCode:
-        order.fulfillmentType === FulfillmentType.PICKUP ? order.pickupCode : null,
+        order.fulfillmentType === FulfillmentType.PICKUP && !order.pickupVerifiedAt
+          ? order.pickupCode
+          : null,
+      pickupVerifiedAt: order.pickupVerifiedAt?.toISOString() ?? null,
       deliveryAddress: order.deliveryAddress as DeliveryAddress | null,
       shippedAt: order.shippedAt?.toISOString() ?? null,
       createdAt: order.createdAt.toISOString(),
@@ -83,6 +86,9 @@ export class StoreOrdersService {
     }
     if (order.fulfillmentType !== FulfillmentType.PICKUP) {
       throw new BadRequestException('Order is not a pickup order');
+    }
+    if (order.pickupVerifiedAt) {
+      throw new BadRequestException('Pickup already verified');
     }
     if (!order.pickupCode) {
       throw new BadRequestException('Pickup code not yet available');

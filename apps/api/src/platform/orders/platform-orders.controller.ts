@@ -32,6 +32,11 @@ export class PlatformOrdersController {
     );
   }
 
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.ordersService.findOne(id);
+  }
+
   @Post(':id/ship')
   @HttpCode(200)
   ship(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {

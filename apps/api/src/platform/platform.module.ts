@@ -9,7 +9,9 @@ import { PlatformSettingsModule } from './settings/platform-settings.module';
 import { PlatformDistributorsModule } from './distributors/platform-distributors.module';
 import { PlatformAllocationsModule } from './allocations/platform-allocations.module';
 import { PlatformWithdrawalsModule } from './withdrawals/platform-withdrawals.module';
+import { PlatformReplenishmentModule } from './replenishment/platform-replenishment.module';
 import { PlatformFundsModule } from './funds/platform-funds.module';
+import { PlatformCrmModule } from './crm/platform-crm.module';
 import { PlatformOrdersController } from './orders/platform-orders.controller';
 import { PlatformOrdersService } from './orders/platform-orders.service';
 import { PlatformSettlementsController } from './settlements/platform-settlements.controller';
@@ -26,6 +28,8 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
     PlatformAllocationsModule,
     PlatformWithdrawalsModule,
     PlatformFundsModule,
+    PlatformReplenishmentModule,
+    PlatformCrmModule,
     FulfillmentModule,
     AuthModule,
   ],

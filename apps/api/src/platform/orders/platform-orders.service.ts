@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { FulfillmentType } from '@prisma/client';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -57,5 +57,46 @@ export class PlatformOrdersService {
 
   async ship(orderId: string, platformUserId: string) {
     return this.fulfillmentService.shipDelivery(orderId, platformUserId);
+  }
+
+  async findOne(orderId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        tenant: {
+          select: {
+            id: true,
+            slug: true,
+            merchantProfile: { select: { businessName: true } },
+          },
+        },
+        lines: { include: { variant: { select: { sku: true } } } },
+      },
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return {
+      id: order.id,
+      status: order.status,
+      fulfillmentType: order.fulfillmentType,
+      currency: order.currency,
+      total: order.total,
+      guestEmail: order.guestEmail,
+      deliveryAddress: order.deliveryAddress,
+      createdAt: order.createdAt.toISOString(),
+      tenant: {
+        id: order.tenant.id,
+        slug: order.tenant.slug,
+        businessName: order.tenant.merchantProfile?.businessName ?? null,
+      },
+      lines: order.lines.map((line) => ({
+        id: line.id,
+        productName: line.productName,
+        variantName: line.variantName,
+        quantity: line.quantity,
+        skuCode: line.variant?.sku ?? null,
+      })),
+    };
   }
 }

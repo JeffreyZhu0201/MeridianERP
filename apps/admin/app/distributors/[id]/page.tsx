@@ -1,13 +1,30 @@
 import { notFound } from 'next/navigation';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
-import {
-  apiFetch,
-  type DistributorBranch,
-  type PlatformDistributor,
-} from '@/lib/api';
+import { apiFetch, type DistributorBranch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { DistributorDetailView } from './_components/distributor-detail';
+
+export interface DistributorDetailResponse {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  commissionRate: number;
+  commissionType: string;
+  isActive: boolean;
+  portalEnabled: boolean;
+  recruitedMerchantCount: number;
+  createdAt: string;
+  inviteCodes: Array<{
+    id: string;
+    code: string;
+    expiresAt: string | null;
+    revokedAt: string | null;
+    useCount: number;
+    url: string;
+  }>;
+}
 
 interface DistributorDetailPageProps {
   params: Promise<{ id: string }>;
@@ -19,15 +36,13 @@ export default async function DistributorDetailPage({ params }: DistributorDetai
 
   const { id } = await params;
 
-  let distributor: PlatformDistributor | undefined;
+  let distributor: DistributorDetailResponse | undefined;
   let branches: DistributorBranch[] = [];
   try {
-    const [list, branchList] = await Promise.all([
-      apiFetch<PlatformDistributor[]>('/platform/distributors', {}, token),
+    [distributor, branches] = await Promise.all([
+      apiFetch<DistributorDetailResponse>(`/platform/distributors/${id}`, {}, token),
       apiFetch<DistributorBranch[]>(`/platform/distributors/${id}/branches`, {}, token),
     ]);
-    distributor = list.find((d) => d.id === id);
-    branches = branchList;
   } catch {
     distributor = undefined;
   }

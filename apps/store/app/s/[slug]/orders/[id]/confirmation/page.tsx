@@ -68,7 +68,7 @@ export default async function OrderConfirmationPage({
         {order.fulfillmentType ? (
           <FulfillmentTypeBadge type={order.fulfillmentType} />
         ) : null}
-        <FulfillmentSummary order={order} />
+        <FulfillmentSummary slug={slug} order={order} token={token} />
         <div className="space-y-4 rounded-xl ring-1 ring-border p-4 text-sm">
           <p className="text-lg font-semibold tabular-nums">
             {t('confirmation.orderTotal', {

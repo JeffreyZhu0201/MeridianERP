@@ -14,8 +14,17 @@ export class PlatformAllocationsService {
     private readonly inventoryService: InventoryService,
   ) {}
 
-  async listMasterSkus() {
-    return this.prisma.masterSku.findMany({ orderBy: { skuCode: 'asc' } });
+  async listMasterSkus(page = 1, limit = 50) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await Promise.all([
+      this.prisma.masterSku.findMany({
+        skip,
+        take: limit,
+        orderBy: { skuCode: 'asc' },
+      }),
+      this.prisma.masterSku.count(),
+    ]);
+    return { data, meta: { total, page, limit } };
   }
 
   async createMasterSku(dto: {
@@ -38,15 +47,41 @@ export class PlatformAllocationsService {
     });
   }
 
-  async listAllocations(tenantId?: string) {
+  async updateMasterSku(
+    id: string,
+    dto: {
+      name?: string;
+      quantityOnHand?: number;
+      unitCost?: number;
+      wholesalePrice?: number;
+      retailPrice?: number;
+      isActive?: boolean;
+    },
+  ) {
+    const sku = await this.prisma.masterSku.findUnique({ where: { id } });
+    if (!sku) throw new NotFoundException('Master SKU not found');
+    return this.prisma.masterSku.update({
+      where: { id },
+      data: dto,
+    });
+  }
+
+  async listAllocations(tenantId?: string, status?: AllocationOrderStatus) {
     return this.prisma.allocationOrder.findMany({
-      where: tenantId ? { tenantId } : undefined,
+      where: {
+        ...(tenantId ? { tenantId } : {}),
+        ...(status ? { status } : {}),
+      },
       include: {
         tenant: { include: { merchantProfile: true } },
         lines: { include: { masterSku: true } },
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async listMerchantAllocations(tenantId: string, status?: AllocationOrderStatus) {
+    return this.listAllocations(tenantId, status ?? AllocationOrderStatus.ISSUED);
   }
 
   async createAllocation(
@@ -67,6 +102,9 @@ export class PlatformAllocationsService {
           create: lines.map((l) => {
             const sku = skuMap.get(l.masterSkuId);
             if (!sku) throw new NotFoundException('Master SKU not found');
+            if (!sku.isActive) {
+              throw new BadRequestException(`Master SKU ${sku.skuCode} is inactive`);
+            }
             return {
               masterSkuId: l.masterSkuId,
               quantity: l.quantity,
@@ -80,18 +118,43 @@ export class PlatformAllocationsService {
   }
 
   async issueAllocation(id: string, platformUserId: string) {
-    const order = await this.prisma.allocationOrder.findUnique({ where: { id } });
+    const order = await this.prisma.allocationOrder.findUnique({
+      where: { id },
+      include: { lines: { include: { masterSku: true } } },
+    });
     if (!order) throw new NotFoundException('Allocation not found');
     if (order.status !== AllocationOrderStatus.DRAFT) {
       throw new BadRequestException('Only draft allocations can be issued');
     }
-    return this.prisma.allocationOrder.update({
-      where: { id },
-      data: {
-        status: AllocationOrderStatus.ISSUED,
-        issuedAt: new Date(),
-        issuedByPlatformUserId: platformUserId,
-      },
+
+    for (const line of order.lines) {
+      if (line.masterSku.quantityOnHand < line.quantity) {
+        throw new BadRequestException(
+          `Insufficient HQ stock for ${line.masterSku.skuCode}: need ${line.quantity}, have ${line.masterSku.quantityOnHand}`,
+        );
+      }
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      for (const line of order.lines) {
+        await tx.masterSku.update({
+          where: { id: line.masterSkuId },
+          data: {
+            quantityOnHand: { decrement: line.quantity },
+            cumulativeShippedQty: { increment: line.quantity },
+          },
+        });
+      }
+
+      return tx.allocationOrder.update({
+        where: { id },
+        data: {
+          status: AllocationOrderStatus.ISSUED,
+          issuedAt: new Date(),
+          issuedByPlatformUserId: platformUserId,
+        },
+        include: { lines: { include: { masterSku: true } } },
+      });
     });
   }
 

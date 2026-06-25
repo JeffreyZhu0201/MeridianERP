@@ -1,8 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import type { DeliveryAddress, StoreOrderDetail } from '@meridian/shared';
 
+import { PickupFulfillmentCard } from './pickup-fulfillment-card';
+
 interface FulfillmentSummaryProps {
+  slug: string;
   order: StoreOrderDetail;
+  token: string;
 }
 
 function formatAddress(address: DeliveryAddress): string {
@@ -17,7 +21,7 @@ function formatAddress(address: DeliveryAddress): string {
     .join(' · ');
 }
 
-export async function FulfillmentSummary({ order }: FulfillmentSummaryProps) {
+export async function FulfillmentSummary({ slug, order, token }: FulfillmentSummaryProps) {
   const t = await getTranslations('store.confirmation');
 
   if (order.fulfillmentType === 'DELIVERY' && order.deliveryAddress) {
@@ -36,17 +40,8 @@ export async function FulfillmentSummary({ order }: FulfillmentSummaryProps) {
     );
   }
 
-  if (order.fulfillmentType === 'PICKUP' && order.pickupCode) {
-    return (
-      <div className="rounded-xl ring-1 ring-border p-4 text-center">
-        <p className="text-sm font-medium">{t('pickupTitle')}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t('pickupHint')}</p>
-        <p className="mt-4 text-xs text-muted-foreground">{t('pickupCodeLabel')}</p>
-        <p className="mt-1 font-mono text-3xl font-semibold tracking-[0.3em]">
-          {order.pickupCode}
-        </p>
-      </div>
-    );
+  if (order.fulfillmentType === 'PICKUP') {
+    return <PickupFulfillmentCard slug={slug} order={order} token={token} />;
   }
 
   return null;

@@ -1,10 +1,13 @@
+import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, EmptyState, ListPageFrame } from '@meridian/ui';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type WithdrawalRequest } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { WithdrawalsTable } from './_components/withdrawals-table';
+
+const CURRENCY = 'CNY';
 
 export default async function WithdrawalsPage() {
   const token = await getToken();
@@ -25,7 +28,11 @@ export default async function WithdrawalsPage() {
   }
 
   const formatMoney = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(value);
+    new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: CURRENCY,
+      minimumFractionDigits: 2,
+    }).format(value);
 
   const pendingTotal = withdrawals.reduce((sum, w) => sum + Number(w.amount), 0);
 
@@ -42,6 +49,15 @@ export default async function WithdrawalsPage() {
     <AdminShellWrapper>
       <div className="space-y-6">
         <BentoListHeader metrics={metrics} />
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
+          <p>{t('settlementHint')}</p>
+          <Link
+            href="/settlements"
+            className="inline-flex h-8 items-center rounded-md border border-input px-3 text-sm hover:bg-muted"
+          >
+            {t('goToSettlements')}
+          </Link>
+        </div>
         <ListPageFrame
           title={t('title')}
           description={t('description')}

@@ -37,9 +37,11 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
   const [submitting, setSubmitting] = useState(false);
 
   function formatMoney(value: string | number) {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-      Number(value),
-    );
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: 'CNY',
+      minimumFractionDigits: 2,
+    }).format(Number(value));
   }
 
   async function handleApprove(id: string) {

@@ -1,29 +1,33 @@
 'use client';
 
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@meridian/ui';
-
-import type { FundsSummary } from '@/lib/api';
+import type { PlatformFundsSummary } from '@meridian/shared';
 
 interface FundsSummaryCardsProps {
-  summary: FundsSummary;
+  summary: PlatformFundsSummary;
+  formatMoney: (value: string | number) => string;
 }
 
-export function FundsSummaryCards({ summary }: FundsSummaryCardsProps) {
-  const locale = useLocale();
+export function FundsSummaryCards({ summary, formatMoney }: FundsSummaryCardsProps) {
   const t = useTranslations('admin.funds');
 
-  const formatMoney = (value: string | number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(Number(value));
-
   const items = [
-    { label: t('gmv'), value: formatMoney(summary.gmvLast30Days) },
-    { label: t('wholesaleRevenue'), value: formatMoney(summary.wholesaleRevenueLast30Days) },
-    { label: t('commissionAccrued'), value: formatMoney(summary.commissionAccruedLast30Days) },
-    { label: t('commissionSettled'), value: formatMoney(summary.commissionSettledLast30Days) },
+    { label: t('gmv'), value: formatMoney(summary.gmv) },
+    { label: t('wholesaleRevenue'), value: formatMoney(summary.wholesaleRevenue) },
+    { label: t('commissionAccrued'), value: formatMoney(summary.commissionAccrued) },
+    { label: t('commissionSettled'), value: formatMoney(summary.commissionSettled) },
+    {
+      label: t('commissionLiability'),
+      value: formatMoney(summary.commissionLiability),
+    },
+    {
+      label: t('accruedAwaitingSettlement'),
+      value: formatMoney(summary.accruedAwaitingSettlement),
+    },
     { label: t('pendingWithdrawals'), value: formatMoney(summary.pendingWithdrawals) },
-    { label: t('orderCount'), value: summary.orderCountLast30Days },
-    { label: t('deliveryOrders'), value: summary.deliveryOrderCountLast30Days },
+    { label: t('orderCount'), value: summary.orderCount },
+    { label: t('deliveryOrders'), value: summary.deliveryOrderCount },
   ];
 
   return (

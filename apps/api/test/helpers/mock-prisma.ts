@@ -3078,6 +3078,181 @@ export function createMockPrisma() {
         return record;
       },
     },
+    masterSku: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      findFirst: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('msku'),
+        cumulativeShippedQty: 0,
+        isActive: true,
+        createdAt: now(),
+        updatedAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+      count: async () => 0,
+    },
+    allocationOrder: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      findFirst: async () => null,
+      create: async ({ data, include }: { data: Record<string, unknown>; include?: unknown }) => {
+        const record = {
+          id: nextId('alloc'),
+          status: 'DRAFT',
+          createdAt: now(),
+          updatedAt: now(),
+          lines: [],
+          ...data,
+        };
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+        include,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+        include?: unknown;
+      }) => ({ id: where.id, lines: [], ...data }),
+    },
+    allocationOrderLine: {
+      findMany: async () => [],
+      aggregate: async () => ({ _sum: { wholesalePrice: null } }),
+    },
+    replenishmentRequest: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      create: async ({ data, include }: { data: Record<string, unknown>; include?: unknown }) => ({
+        id: nextId('repl'),
+        status: 'PENDING',
+        lines: [],
+        createdAt: now(),
+        updatedAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+        include,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+        include?: unknown;
+      }) => ({ id: where.id, lines: [], ...data }),
+    },
+    replenishmentRequestLine: {
+      create: async () => ({}),
+    },
+    deliveryAllocationLedger: {
+      aggregate: async () => ({ _sum: { lineTotal: null } }),
+    },
+    withdrawalRequest: {
+      aggregate: async () => ({ _sum: { amount: null } }),
+      findMany: async () => [],
+      findFirst: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('wd'),
+        status: 'PENDING',
+        createdAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+    },
+    merchantRecruitInviteCode: {
+      findMany: async () => [],
+      findFirst: async () => null,
+      findUnique: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('inv'),
+        useCount: 0,
+        createdAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+    },
+    recruiterChangeLog: {
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('rcl'),
+        createdAt: now(),
+        ...data,
+      }),
+    },
+    platformCrmCompany: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('pcc'),
+        createdAt: now(),
+        updatedAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+      delete: async () => ({}),
+    },
+    platformCrmContact: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('pcct'),
+        createdAt: now(),
+        updatedAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+      delete: async () => ({}),
+    },
+    platformCrmLead: {
+      findMany: async () => [],
+      findUnique: async () => null,
+      create: async ({ data }: { data: Record<string, unknown> }) => ({
+        id: nextId('pcl'),
+        stage: 'NEW',
+        createdAt: now(),
+        updatedAt: now(),
+        ...data,
+      }),
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => ({ id: where.id, ...data }),
+      delete: async () => ({}),
+    },
     _seedPlatformAdmin: async (email: string, password: string, role: PlatformRole) => {
       await mock.platformUser.upsert({
         where: { email },
