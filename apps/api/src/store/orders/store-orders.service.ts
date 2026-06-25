@@ -1,6 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import type { StoreOrderDetail, StoreOrderListItem } from '@meridian/shared';
-import { OrderStatus } from '@meridian/shared';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import type { DeliveryAddress, StoreOrderDetail, StoreOrderListItem } from '@meridian/shared';
+import { FulfillmentType, OrderStatus } from '@prisma/client';
+import { OrderStatus as SharedOrderStatus } from '@meridian/shared';
+import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StoreTenantService } from '../common/store-tenant.service';
 
@@ -9,6 +11,7 @@ export class StoreOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
+    private readonly fulfillmentService: FulfillmentService,
   ) {}
 
   async listForCustomer(
@@ -23,7 +26,8 @@ export class StoreOrdersService {
     });
     return orders.map((order) => ({
       id: order.id,
-      status: order.status as OrderStatus,
+      status: order.status as SharedOrderStatus,
+      fulfillmentType: order.fulfillmentType,
       currency: order.currency,
       total: Number(order.total),
       createdAt: order.createdAt.toISOString(),
@@ -46,11 +50,16 @@ export class StoreOrdersService {
     }
     return {
       id: order.id,
-      status: order.status as OrderStatus,
+      status: order.status as SharedOrderStatus,
+      fulfillmentType: order.fulfillmentType,
       currency: order.currency,
       total: Number(order.total),
       subtotal: Number(order.subtotal),
       tax: Number(order.tax),
+      pickupCode:
+        order.fulfillmentType === FulfillmentType.PICKUP ? order.pickupCode : null,
+      deliveryAddress: order.deliveryAddress as DeliveryAddress | null,
+      shippedAt: order.shippedAt?.toISOString() ?? null,
       createdAt: order.createdAt.toISOString(),
       lineCount: order.lines.length,
       lines: order.lines.map((line) => ({
@@ -61,6 +70,30 @@ export class StoreOrdersService {
         unitPrice: Number(line.unitPrice),
         lineTotal: Number(line.lineTotal),
       })),
+    };
+  }
+
+  async getPickupToken(slug: string, customerId: string, orderId: string) {
+    const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, tenantId: tenant.id, customerId },
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    if (order.fulfillmentType !== FulfillmentType.PICKUP) {
+      throw new BadRequestException('Order is not a pickup order');
+    }
+    if (!order.pickupCode) {
+      throw new BadRequestException('Pickup code not yet available');
+    }
+    return {
+      orderId: order.id,
+      pickupCode: order.pickupCode,
+      qrPayload: this.fulfillmentService.buildPickupQrPayload(
+        order.id,
+        order.pickupCode,
+      ),
     };
   }
 }

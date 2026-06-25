@@ -1,8 +1,15 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
-import { apiFetch, asList, type Contact, type OnboardingProfile, type PaginatedResponse } from '@/lib/api';
+import {
+  apiFetch,
+  asList,
+  asListTotal,
+  type Contact,
+  type OnboardingProfile,
+  type PaginatedResponse,
+} from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { ContactsTable } from './_components/contacts-table';
 
@@ -18,10 +25,19 @@ export default async function ContactsPage() {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const contacts = asList(contactsRes);
+  const withCompany = contacts.filter((c) => c.companyId).length;
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')}>
-        <ContactsTable contacts={asList(contactsRes)} token={token} />
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: asListTotal(contactsRes) },
+            { title: t('company'), value: withCompany },
+          ]}
+        />
+        <ContactsTable contacts={contacts} token={token} />
       </ListPageFrame>
     </MerchantShellWrapper>
   );

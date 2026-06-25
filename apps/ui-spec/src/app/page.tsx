@@ -167,6 +167,7 @@ import {
 } from "lucide-react";
 
 import { ModeToggle } from "@/components/mode-toggle";
+import { Phase5FulfillmentShowcase } from "@/components/phase-5-fulfillment-showcase";
 
 export default function ComponentShowcase() {
   const [date, setDate] = React.useState<Date | undefined>(new Date());
@@ -698,12 +699,81 @@ export default function ComponentShowcase() {
         </div>
       </div>
 
+      {/* Bento Grid — portal dashboard reference */}
+      <section id="bento-grid" className="mt-16 flex flex-col gap-10 border-t border-border/50 pt-12">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Bento Grid / Dashboard</h2>
+          <p className="text-sm text-muted-foreground">
+            Asymmetric tiles for ERP dashboards. Portals use BentoGrid, BentoMetricTile, BentoChartTile from packages/ui.
+          </p>
+        </div>
+        <div className="grid auto-rows-min grid-cols-1 gap-4 md:grid-cols-4">
+          <Card className="md:col-span-1">
+            <CardHeader className="pb-2">
+              <CardDescription>Total merchants</CardDescription>
+              <CardTitle className="text-2xl tabular-nums">128</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="md:col-span-1">
+            <CardHeader className="pb-2">
+              <CardDescription>Orders (30d)</CardDescription>
+              <CardTitle className="text-2xl tabular-nums">1,247</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="md:col-span-2 md:row-span-2">
+            <CardHeader>
+              <CardTitle>Activity chart</CardTitle>
+              <CardDescription>Daily order count — BentoChartTile span-2</CardDescription>
+            </CardHeader>
+            <CardContent className="flex h-40 items-end gap-1 px-6 pb-6">
+              {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-t bg-primary/80 transition-colors"
+                  style={{ height: `${h}%` }}
+                />
+              ))}
+            </CardContent>
+          </Card>
+          <Card className="md:col-span-1">
+            <CardHeader className="pb-2">
+              <CardDescription>Revenue (30d)</CardDescription>
+              <CardTitle className="text-2xl tabular-nums">$84,320</CardTitle>
+            </CardHeader>
+          </Card>
+          <Card className="md:col-span-4">
+            <CardHeader>
+              <CardTitle>Recent records</CardTitle>
+              <CardDescription>Full-width table tile (col-span-4)</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>WDG-001</TableCell>
+                    <TableCell><Badge variant="secondary">Active</Badge></TableCell>
+                    <TableCell className="text-right tabular-nums">24</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Dark mode borders — regression reference for portal tokens */}
       <section id="dark-mode-borders" className="mt-16 flex flex-col gap-10 border-t border-border/50 pt-12">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight">Dark mode / Borders</h2>
           <p className="text-sm text-muted-foreground">
-            Toggle dark mode above. Borders use 8% white alpha hairlines; surfaces use ring-1 ring-foreground/10.
+            Toggle dark mode above. Borders use 8% white alpha hairlines; surfaces use ring-1 ring-border.
             Portals mirror these tokens via packages/ui/styles/globals.css.
           </p>
         </div>
@@ -712,7 +782,7 @@ export default function ComponentShowcase() {
           <Card>
             <CardHeader>
               <CardTitle>Card &amp; outline button</CardTitle>
-              <CardDescription>ring-1 ring-foreground/10 — no border + shadow stack.</CardDescription>
+              <CardDescription>ring-1 ring-border — no border + shadow stack.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap items-center gap-4">
               <Button variant="outline">Outline</Button>
@@ -753,7 +823,7 @@ export default function ComponentShowcase() {
               <CardDescription>border-border/50 hairline — ERP and Store shell headers.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-hidden rounded-lg ring-1 ring-foreground/10">
+              <div className="overflow-hidden rounded-lg ring-1 ring-border">
                 <div className="flex h-10 items-center border-b border-border/50 px-4 text-xs text-muted-foreground">
                   Header · LocaleToggle · ModeToggle
                 </div>
@@ -762,6 +832,18 @@ export default function ComponentShowcase() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      {/* Phase 5 — HQ branch channel / order fulfillment */}
+      <section id="phase-5-fulfillment" className="mt-16 flex flex-col gap-10 border-t border-border/50 pt-12">
+        <div>
+          <h2 className="text-2xl font-semibold tracking-tight">Phase 5 — Order fulfillment</h2>
+          <p className="text-sm text-muted-foreground">
+            HQ ↔ Branch channel: shared OrderListFrame, FulfillmentTypeBadge, PickupVerifyDialog,
+            DeliveryShipDialog. Propagate to @meridian/ui for admin, merchant, store portals.
+          </p>
+        </div>
+        <Phase5FulfillmentShowcase />
       </section>
 
       {/* shadcn blocks — page frameworks (portal reference) */}

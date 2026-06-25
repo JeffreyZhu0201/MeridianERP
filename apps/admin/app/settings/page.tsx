@@ -1,12 +1,12 @@
 import { getTranslations } from 'next-intl/server';
-import { SettingsPageFrame } from '@meridian/ui';
+import { FormPageFrame } from '@meridian/ui';
 import type { PlatformSettingsDto } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { ApiError, apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
-import { PlatformSettingsForm } from './_components/platform-settings-form';
+import { PlatformSettingsForm, PlatformSettingsPayments } from './_components/platform-settings-form';
 
 const DEFAULT_SETTINGS: PlatformSettingsDto = {
   id: 'singleton',
@@ -42,14 +42,20 @@ export default async function SettingsPage() {
 
   return (
     <AdminShellWrapper>
-      <SettingsPageFrame title={t('title')} description={t('description')}>
-        {loadError ? (
-          <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive" role="alert">
-            {loadError}
-          </p>
-        ) : null}
-        <PlatformSettingsForm settings={settings} token={token} readOnly={!!loadError} />
-      </SettingsPageFrame>
+      <div className="space-y-6">
+        <FormPageFrame title={t('title')} description={t('description')}>
+          {loadError ? (
+            <p
+              className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+              role="alert"
+            >
+              {loadError}
+            </p>
+          ) : null}
+          <PlatformSettingsForm settings={settings} token={token} readOnly={!!loadError} />
+        </FormPageFrame>
+        {!loadError ? <PlatformSettingsPayments settings={settings} /> : null}
+      </div>
     </AdminShellWrapper>
   );
 }

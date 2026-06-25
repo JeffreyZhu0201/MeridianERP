@@ -30,8 +30,11 @@ export class PlatformMerchantsController {
 
   @Post(':id/approve')
   @HttpCode(201)
-  approve(@Param('id') id: string) {
-    return this.platformMerchantsService.approve(id);
+  approve(
+    @Param('id') id: string,
+    @Body() dto: { recruitedByDistributorId?: string },
+  ) {
+    return this.platformMerchantsService.approve(id, dto);
   }
 
   @Post(':id/reject')

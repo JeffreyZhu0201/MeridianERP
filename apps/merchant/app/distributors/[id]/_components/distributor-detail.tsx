@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { DetailPageFrame } from '@meridian/ui';
+import { BentoDetailHero, DetailPageFrame } from '@meridian/ui';
 import type { DistributorPerformanceSummary, QrHistoryListResponse } from '@meridian/shared';
 
 import { type Binding, type Distributor } from '@/lib/api';
@@ -27,6 +27,14 @@ export function DistributorDetail({
   initialPerformance,
 }: DistributorDetailProps) {
   const t = useTranslations('merchant.distributors.detail');
+  const tOverview = useTranslations('merchant.distributors.overview');
+  const tPerf = useTranslations('merchant.distributors.performance');
+
+  function formatMoney(value: string | number): string {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
+      Number(value),
+    );
+  }
 
   return (
     <DetailPageFrame
@@ -34,6 +42,23 @@ export function DistributorDetail({
       backHref="/distributors"
       backLabel={t('backLabel')}
     >
+      <BentoDetailHero
+        metrics={[
+          { title: tOverview('bindings'), value: bindings.length },
+          {
+            title: tPerf('attributedOrders'),
+            value: initialPerformance?.attributedOrderCount ?? 0,
+          },
+          {
+            title: tPerf('orderRevenue'),
+            value: formatMoney(initialPerformance?.attributedOrderRevenue ?? 0),
+          },
+          {
+            title: tPerf('commissionAccrued'),
+            value: formatMoney(initialPerformance?.commissionAccrued ?? 0),
+          },
+        ]}
+      />
       <DistributorTabs
         overview={
           <OverviewPanel

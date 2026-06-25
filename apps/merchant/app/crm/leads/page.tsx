@@ -1,12 +1,14 @@
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { LeadStage } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import {
   apiFetch,
   asList,
+  asListTotal,
   type Contact,
   type Lead,
   type OnboardingProfile,
@@ -28,11 +30,24 @@ export default async function LeadsPage() {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const leads = asList(leadsRes);
+  const openLeads = leads.filter(
+    (lead) => lead.stage !== LeadStage.WON && lead.stage !== LeadStage.LOST,
+  ).length;
+  const tDash = await getTranslations('merchant.dashboard');
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: asListTotal(leadsRes) },
+            { title: tDash('openLeads'), value: openLeads },
+            { title: tDash('contacts'), value: asListTotal(contactsRes) },
+          ]}
+        />
         <Suspense>
-          <LeadsTable leads={asList(leadsRes)} contacts={asList(contactsRes)} token={token} />
+          <LeadsTable leads={leads} contacts={asList(contactsRes)} token={token} />
         </Suspense>
       </ListPageFrame>
     </MerchantShellWrapper>

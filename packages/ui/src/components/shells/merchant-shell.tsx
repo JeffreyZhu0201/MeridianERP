@@ -12,7 +12,8 @@ import {
   IconPackage,
   IconReceipt,
   IconSettings,
-  IconUsersGroup,
+  IconTruckDelivery,
+  IconWallet,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { ErpShell } from '../frameworks/erp-shell';
@@ -88,7 +89,8 @@ const mainNav: NavItem[] = [
     ],
   },
   { key: 'orders', href: '/orders', labelKey: 'orders', icon: IconReceipt },
-  { key: 'distributors', href: '/distributors', labelKey: 'distributors', icon: IconUsersGroup },
+  { key: 'funds', href: '/funds', labelKey: 'funds', icon: IconWallet },
+  { key: 'replenishment', href: '/replenishment', labelKey: 'replenishment', icon: IconTruckDelivery },
   { key: 'commissions', href: '/commissions', labelKey: 'commissions', icon: IconCoin },
   { key: 'settings', href: '/settings', labelKey: 'settings', icon: IconSettings },
 ];

@@ -1,4 +1,12 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { MerchantAuthGuard } from '../../auth/guards/merchant-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
@@ -12,6 +20,26 @@ export class MerchantOrdersController {
   @Get()
   findAll(@CurrentUser() user: AuthenticatedUser) {
     return this.ordersService.findAll(user.tenantId!);
+  }
+
+  @Get('pickup-pending')
+  listPickupPending(@CurrentUser() user: AuthenticatedUser) {
+    return this.ordersService.listPickupPending(user.tenantId!);
+  }
+
+  @Post(':id/verify-pickup')
+  @HttpCode(200)
+  verifyPickup(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Body() dto: { code: string },
+  ) {
+    return this.ordersService.verifyPickup(
+      user.tenantId!,
+      id,
+      dto.code,
+      user.userId,
+    );
   }
 
   @Get(':id')

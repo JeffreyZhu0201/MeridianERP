@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -40,6 +41,27 @@ export class MerchantAuthService {
       throw new ConflictException('Email already registered');
     }
 
+    let pendingRecruitInviteCode: string | null = null;
+    if (dto.inviteCode) {
+      const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
+        where: {
+          code: dto.inviteCode.toUpperCase(),
+          revokedAt: null,
+        },
+        include: { distributor: true },
+      });
+      if (!invite) {
+        throw new BadRequestException('Invalid invite code');
+      }
+      if (invite.expiresAt && invite.expiresAt < new Date()) {
+        throw new BadRequestException('Invite code has expired');
+      }
+      if (!invite.distributor.isActive || invite.distributor.tenantId !== null) {
+        throw new BadRequestException('Invite code is not valid for branch registration');
+      }
+      pendingRecruitInviteCode = invite.code;
+    }
+
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const contactEmail = dto.contactEmail ?? dto.email;
 
@@ -55,6 +77,7 @@ export class MerchantAuthService {
         contactEmail,
         contactPhone: dto.contactPhone ?? null,
         onboardingStatus: OnboardingStatus.DRAFT,
+        pendingRecruitInviteCode,
       },
     });
 

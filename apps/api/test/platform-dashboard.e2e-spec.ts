@@ -195,6 +195,11 @@ describe('Platform dashboard (e2e)', () => {
     expect(res.body.activeDistributors).toBe(3);
     expect(res.body.bindingsLast30Days).toBe(1);
     expect(res.body.commissionAccruedLast30Days).toBe('12.5');
+    expect(res.body.commissionSettledLast30Days).toBe('99');
+    expect(res.body.ordersLast30Days).toBe(2);
+    expect(res.body.orderRevenueLast30Days).toBe('150');
+    expect(Array.isArray(res.body.trend)).toBe(true);
+    expect(res.body.trend.length).toBeGreaterThan(0);
     expect(res.body.recentMerchants).toHaveLength(3);
     expect(res.body.recentMerchants[0].businessName).toBeDefined();
     expect(res.body.recentMerchants.length).toBeLessThanOrEqual(5);

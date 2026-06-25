@@ -35,7 +35,7 @@ function DropdownMenuContent({
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-content"
           className={cn(
-            'z-50 min-w-32 overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground ring-1 ring-foreground/10',
+            'z-50 min-w-32 overflow-hidden rounded-lg bg-popover p-1 text-popover-foreground ring-1 ring-border',
             className,
           )}
           {...props}

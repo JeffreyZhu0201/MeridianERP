@@ -1,10 +1,11 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import {
   apiFetch,
   asList,
+  asListTotal,
   type Category,
   type OnboardingProfile,
   type PaginatedResponse,
@@ -24,10 +25,19 @@ export default async function CategoriesPage() {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const categories = asList(categoriesRes);
+  const productCount = categories.reduce((sum, c) => sum + (c._count?.products ?? 0), 0);
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')}>
-        <CategoriesTable categories={asList(categoriesRes)} token={token} />
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: asListTotal(categoriesRes) },
+            { title: t('products'), value: productCount },
+          ]}
+        />
+        <CategoriesTable categories={categories} token={token} />
       </ListPageFrame>
     </MerchantShellWrapper>
   );

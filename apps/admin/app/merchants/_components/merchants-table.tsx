@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
@@ -16,26 +17,36 @@ import {
 import { OnboardingStatus } from '@meridian/shared';
 
 import { StatusBadge } from '@/components/status-badge';
-import { apiFetch, type MerchantListItem } from '@/lib/api';
+import { apiFetch, type MerchantListItem, type PlatformDistributor } from '@/lib/api';
 import { ApproveDialog } from './approve-dialog';
 import { RejectDialog } from './reject-dialog';
 
 interface MerchantsTableProps {
   merchants: MerchantListItem[];
   token: string;
+  distributors?: PlatformDistributor[];
 }
 
-export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
+export function MerchantsTable({ merchants, token, distributors = [] }: MerchantsTableProps) {
   const router = useRouter();
   const t = useTranslations('admin.merchants');
   const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
 
-  async function handleApprove(id: string) {
+  async function handleApprove(id: string, recruitedByDistributorId?: string) {
     setActionError('');
     try {
-      await apiFetch(`/platform/merchants/${id}/approve`, { method: 'POST' }, token);
+      await apiFetch(
+        `/platform/merchants/${id}/approve`,
+        {
+          method: 'POST',
+          body: JSON.stringify(
+            recruitedByDistributorId ? { recruitedByDistributorId } : {},
+          ),
+        },
+        token,
+      );
       setApproveId(null);
       router.refresh();
     } catch (err) {
@@ -59,17 +70,13 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
   }
 
   if (merchants.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">{t('emptyTable')}</p>
-      </div>
-    );
+    return <EmptyState title={t('emptyTable')} />;
   }
 
   return (
     <>
       {actionError ? <p className="mb-4 text-sm text-destructive">{actionError}</p> : null}
-      <div className="rounded-xl border">
+      <div className="rounded-xl ring-1 ring-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -126,7 +133,10 @@ export function MerchantsTable({ merchants, token }: MerchantsTableProps) {
       <ApproveDialog
         open={!!approveId}
         onOpenChange={(open) => !open && setApproveId(null)}
-        onConfirm={() => approveId && handleApprove(approveId)}
+        onConfirm={(recruitedByDistributorId) =>
+          approveId && handleApprove(approveId, recruitedByDistributorId)
+        }
+        distributors={distributors}
       />
       <RejectDialog
         open={!!rejectId}

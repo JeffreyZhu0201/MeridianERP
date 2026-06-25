@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getLocale, getMessages, getTimeZone } from 'next-intl/server';
 import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui';
 
-import { DistributorHeader } from '@/components/distributor-header';
+import { DistributorShellWrapper } from '@/components/distributor-shell-wrapper';
 import { getToken } from '@/lib/auth';
 
 import './globals.css';
@@ -27,8 +27,7 @@ export default async function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <PortalLocaleProvider locale={locale} messages={messages} timeZone={timeZone}>
           <PortalThemeProvider storageKey="meridian-theme-distributor">
-            {token ? <DistributorHeader /> : null}
-            <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+            {token ? <DistributorShellWrapper>{children}</DistributorShellWrapper> : children}
           </PortalThemeProvider>
         </PortalLocaleProvider>
       </body>

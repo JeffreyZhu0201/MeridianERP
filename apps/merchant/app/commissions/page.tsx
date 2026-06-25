@@ -1,6 +1,6 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
-import { EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui';
 import { LedgerStatus, type CommissionListQuery } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
@@ -18,8 +18,13 @@ import {
   fetchCommissions,
 } from '@/lib/commissions';
 import { CommissionsFilters } from './_components/commissions-filters';
-import { CommissionsSummaryCards } from './_components/commissions-summary-cards';
 import { CommissionsTable } from './_components/commissions-table';
+
+function formatMoney(value: string | number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
+    Number(value),
+  );
+}
 
 interface CommissionsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -50,7 +55,9 @@ function parseQuery(
 }
 
 export default async function CommissionsPage({ searchParams }: CommissionsPageProps) {
+  const locale = await getLocale();
   const t = await getTranslations('merchant.commissions');
+  const tSummary = await getTranslations('merchant.commissions.summary');
   const token = await getToken();
   if (!token) return null;
 
@@ -105,7 +112,17 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
         }
       >
         <div className="space-y-6">
-          <CommissionsSummaryCards summary={summaryRes} />
+          <BentoListHeader
+            metrics={[
+              { title: tSummary('accrued'), value: formatMoney(summaryRes.accruedTotal, locale) },
+              { title: tSummary('settled'), value: formatMoney(summaryRes.settledTotal, locale) },
+              {
+                title: tSummary('totalCommission'),
+                value: formatMoney(summaryRes.totalCommission, locale),
+              },
+              { title: tSummary('entries'), value: summaryRes.entryCount },
+            ]}
+          />
           <CommissionsTable items={commissionsRes.items} />
         </div>
       </ListPageFrame>

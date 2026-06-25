@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
-import { apiFetch, asList, type Contact, type Lead, type OnboardingProfile, type PaginatedResponse } from '@/lib/api';
+import { apiFetch, asList, asListTotal, type Contact, type Lead, type OnboardingProfile, type PaginatedResponse } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import type { CrmActivity } from '@meridian/shared';
 import { ActivitiesPanel } from './_components/activities-panel';
@@ -21,9 +21,18 @@ export default async function ActivitiesPage() {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const tDash = await getTranslations('merchant.dashboard');
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: activities.length },
+            { title: tDash('contacts'), value: asListTotal(contactsRes) },
+            { title: tDash('openLeads'), value: asListTotal(leadsRes) },
+          ]}
+        />
         <ActivitiesPanel
           activities={activities}
           contacts={asList(contactsRes)}

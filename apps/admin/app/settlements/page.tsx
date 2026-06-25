@@ -1,5 +1,5 @@
-import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import {
@@ -15,7 +15,11 @@ export default async function SettlementsPage() {
   const token = await getToken();
   if (!token) return null;
 
+  const locale = await getLocale();
   const t = await getTranslations('admin.settlements');
+
+  const formatMoney = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(value);
 
   const [batchesRes, ledgerRes] = await Promise.all([
     apiFetch<PaginatedResponse<SettlementBatch>>('/platform/settlements', {}, token).catch(
@@ -28,15 +32,36 @@ export default async function SettlementsPage() {
     ).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: 50 } })),
   ]);
 
+  const accruedTotal = ledgerRes.data.reduce((sum, entry) => sum + Number(entry.amount), 0);
+
+  const metrics = [
+    {
+      title: t('settlementBatches'),
+      value: batchesRes.meta.total,
+    },
+    {
+      title: t('accruedLedger'),
+      value: ledgerRes.meta.total,
+      description: t('entries', { count: ledgerRes.data.length }),
+    },
+    {
+      title: t('accruedCommissions'),
+      value: formatMoney(accruedTotal),
+    },
+  ];
+
   return (
     <AdminShellWrapper>
-      <ListPageFrame title={t('title')} description={t('description')}>
-        <SettlementsView
-          batches={batchesRes.data}
-          ledgerEntries={ledgerRes.data}
-          token={token}
-        />
-      </ListPageFrame>
+      <div className="space-y-6">
+        <BentoListHeader metrics={metrics} />
+        <ListPageFrame title={t('title')} description={t('description')}>
+          <SettlementsView
+            batches={batchesRes.data}
+            ledgerEntries={ledgerRes.data}
+            token={token}
+          />
+        </ListPageFrame>
+      </div>
     </AdminShellWrapper>
   );
 }

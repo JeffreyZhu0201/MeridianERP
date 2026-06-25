@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
+  BentoDetailHero,
   DetailPageFrame,
   Dialog,
   DialogCloseButton,
@@ -42,7 +43,9 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
     po.status === PurchaseOrderStatus.ORDERED ||
     po.status === PurchaseOrderStatus.PARTIALLY_RECEIVED;
 
+  const totalOrdered = po.lines.reduce((sum, l) => sum + l.quantityOrdered, 0);
   const totalReceived = po.lines.reduce((sum, l) => sum + l.quantityReceived, 0);
+  const totalRemaining = po.lines.reduce((sum, l) => sum + l.quantityRemaining, 0);
   const canCancel =
     (po.status === PurchaseOrderStatus.DRAFT || po.status === PurchaseOrderStatus.ORDERED) &&
     totalReceived === 0;
@@ -150,7 +153,16 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
       >
         {error && !receiveOpen ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <div className="rounded-xl border">
+        <BentoDetailHero
+          metrics={[
+            { title: t('ordered'), value: totalOrdered },
+            { title: t('received'), value: totalReceived },
+            { title: t('remaining'), value: totalRemaining },
+            { title: t('variantSku'), value: po.lines.length },
+          ]}
+        />
+
+        <div className="rounded-xl ring-1 ring-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -187,7 +199,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
           <h2 className="text-lg font-medium">{t('receiveHistory')}</h2>
           <div className="space-y-2">
             {po.receipts.map((receipt) => (
-              <div key={receipt.id} className="rounded-xl border p-4 text-sm">
+              <div key={receipt.id} className="rounded-xl ring-1 ring-border p-4 text-sm">
                 <p className="font-medium">
                   {t('receiptSummary', {
                     date: new Date(receipt.createdAt).toLocaleString(),

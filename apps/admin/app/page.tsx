@@ -1,6 +1,18 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { DashboardPageFrame, MetricCard, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
+import {
+  BentoChartTile,
+  BentoDashboardFrame,
+  BentoMetricTile,
+  BentoTile,
+  EmptyState,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@meridian/ui';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { StatusBadge } from '@/components/status-badge';
@@ -37,7 +49,7 @@ export default async function DashboardPage() {
 
   return (
     <AdminShellWrapper>
-      <DashboardPageFrame
+      <BentoDashboardFrame
         title={t('title')}
         alert={
           error ? (
@@ -53,30 +65,41 @@ export default async function DashboardPage() {
       >
         {stats ? (
           <>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              <MetricCard title={t('totalMerchants')} value={stats.totalMerchants} />
-              <MetricCard title={t('pendingMerchants')} value={stats.pendingReview} />
-              <MetricCard title={t('activeDistributors')} value={stats.activeDistributors} />
-              <MetricCard title={t('bindingsLast30Days')} value={stats.bindingsLast30Days} />
-              <MetricCard
-                title={t('commissionAccruedLast30Days')}
-                value={formatMoney(stats.commissionAccruedLast30Days, locale)}
-              />
-            </div>
-
-            <section className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-medium">{t('recentMerchants')}</h2>
-                <Link href="/merchants" className="text-sm text-primary hover:underline">
-                  {t('viewAll')}
-                </Link>
-              </div>
-              {stats.recentMerchants.length === 0 ? (
-                <div className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">
-                  {t('emptyMerchants')}
+            <BentoMetricTile title={t('totalMerchants')} value={stats.totalMerchants} />
+            <BentoMetricTile title={t('pendingMerchants')} value={stats.pendingReview} />
+            <BentoMetricTile title={t('activeDistributors')} value={stats.activeDistributors} />
+            <BentoMetricTile title={t('ordersLast30Days')} value={stats.ordersLast30Days} />
+            <BentoMetricTile
+              title={t('orderRevenueLast30Days')}
+              value={formatMoney(stats.orderRevenueLast30Days, locale)}
+            />
+            <BentoMetricTile title={t('bindingsLast30Days')} value={stats.bindingsLast30Days} />
+            <BentoMetricTile
+              title={t('commissionAccruedLast30Days')}
+              value={formatMoney(stats.commissionAccruedLast30Days, locale)}
+            />
+            <BentoMetricTile
+              title={t('commissionSettledLast30Days')}
+              value={formatMoney(stats.commissionSettledLast30Days, locale)}
+            />
+            <BentoChartTile
+              title={t('trendChart')}
+              colSpan={2}
+              rowSpan={2}
+              data={stats.trend}
+              series={[{ key: 'orderCount', label: 'Orders' }]}
+            />
+            <BentoTile colSpan={4}>
+              <div className="space-y-4 p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-medium">{t('recentMerchants')}</h2>
+                  <Link href="/merchants" className="text-sm text-primary hover:underline">
+                    {t('viewAll')}
+                  </Link>
                 </div>
-              ) : (
-                <div className="rounded-xl border">
+                {stats.recentMerchants.length === 0 ? (
+                  <EmptyState title={t('emptyMerchants')} />
+                ) : (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -110,12 +133,12 @@ export default async function DashboardPage() {
                       ))}
                     </TableBody>
                   </Table>
-                </div>
-              )}
-            </section>
+                )}
+              </div>
+            </BentoTile>
           </>
         ) : null}
-      </DashboardPageFrame>
+      </BentoDashboardFrame>
     </AdminShellWrapper>
   );
 }

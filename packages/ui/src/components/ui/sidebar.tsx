@@ -201,7 +201,7 @@ function Sidebar({
           side === 'right' &&
             'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
           'group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)]',
-          side === 'left' ? 'border-r' : 'border-l',
+          side === 'left' ? 'border-r border-sidebar-border/50' : 'border-l border-sidebar-border/50',
           className,
         )}
         {...props}
@@ -452,7 +452,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<'ul'>) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5 group-data-[collapsible=icon]:hidden',
+        'mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border/50 px-2.5 py-0.5 group-data-[collapsible=icon]:hidden',
         className,
       )}
       {...props}

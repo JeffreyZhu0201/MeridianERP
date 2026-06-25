@@ -77,7 +77,7 @@ describe('StoreCheckout (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com' })
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(201);
 
     expect(checkout.body.order.status).toBe('PENDING_PAYMENT');
@@ -98,14 +98,20 @@ describe('StoreCheckout (e2e)', () => {
     expect(merchantOrders.body[0].guestEmail).toBe('guest@example.com');
   });
 
-  it('accrues commission when cart has distributor', async () => {
+  it('accrues commission after pickup verify when branch has recruiter', async () => {
     const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
-    await prisma.cart.create({
+    const platformDist = await prisma.distributor.create({
       data: {
-        tenantId: tenant!.id,
-        sessionId,
-        distributorId,
+        tenantId: null,
+        name: 'HQ Channel',
+        commissionRate: new Prisma.Decimal(10),
+        commissionType: CommissionType.PERCENT,
+        isActive: true,
       },
+    });
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant!.id },
+      data: { recruitedByDistributorId: platformDist.id },
     });
 
     await request(app.getHttpServer())
@@ -117,11 +123,24 @@ describe('StoreCheckout (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com' })
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(201);
 
     await request(app.getHttpServer())
       .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .expect(200);
+
+    const paidOrder = await prisma.order.findUnique({
+      where: { id: checkout.body.order.id },
+      include: { commissionEntry: true },
+    });
+    expect(paidOrder?.pickupCode).toMatch(/^\d{6}$/);
+    expect(paidOrder?.commissionEntry).toBeNull();
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/merchant/orders/${checkout.body.order.id}/verify-pickup`)
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .send({ code: paidOrder!.pickupCode })
       .expect(200);
 
     const orderDetail = await request(app.getHttpServer())
@@ -130,7 +149,7 @@ describe('StoreCheckout (e2e)', () => {
       .expect(200);
 
     expect(orderDetail.body.commissionEntry).toMatchObject({
-      distributorId,
+      distributorId: platformDist.id,
       status: 'ACCRUED',
     });
     expect(Number(orderDetail.body.commissionEntry.amount)).toBe(5);
@@ -140,11 +159,11 @@ describe('StoreCheckout (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('X-Cart-Session', 'empty-session')
-      .send({ guestEmail: 'guest@example.com' })
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(400);
   });
 
-  it('decrements inventory on paid order', async () => {
+  it('decrements inventory on pickup verify', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/cart/items')
       .set('X-Cart-Session', sessionId)
@@ -154,11 +173,28 @@ describe('StoreCheckout (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com' })
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(201);
 
     await request(app.getHttpServer())
       .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .expect(200);
+
+    const paidOrder = await prisma.order.findUnique({
+      where: { id: checkout.body.order.id },
+    });
+
+    const productsAfterPay = await request(app.getHttpServer())
+      .get('/api/v1/merchant/products')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(productsAfterPay.body[0].variants[0].inventory).toBe(10);
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/merchant/orders/${checkout.body.order.id}/verify-pickup`)
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .send({ code: paidOrder!.pickupCode })
       .expect(200);
 
     const products = await request(app.getHttpServer())
@@ -187,7 +223,7 @@ describe('StoreCheckout (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com' })
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(400);
 
     expect(checkout.body.message).toMatch(/insufficient inventory/i);
@@ -200,60 +236,17 @@ describe('StoreCheckout (e2e)', () => {
     expect(products.body[0].variants[0].inventory).toBe(10);
   });
 
-  it('accrues commission after store customer bind claim (US-4.1)', async () => {
-    const qr = await request(app.getHttpServer())
+  it('rejects merchant distributor management (Phase 5)', async () => {
+    await request(app.getHttpServer())
       .post(`/api/v1/merchant/distributors/${distributorId}/qr`)
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({ bindType: 'CUSTOMER' })
-      .expect(201);
-
-    expect(qr.body.url).toContain('/s/acme-store/bind/');
-
-    const register = await request(app.getHttpServer())
-      .post('/api/v1/store/acme-store/auth/register')
-      .send({ email: 'bound@acme.test', password: 'password12' })
-      .expect(201);
+      .expect(403);
 
     await request(app.getHttpServer())
-      .post('/api/v1/store/acme-store/bindings/claim')
-      .set('Authorization', `Bearer ${register.body.accessToken}`)
-      .send({ token: qr.body.token })
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post('/api/v1/store/acme-store/cart/items')
-      .set('Authorization', `Bearer ${register.body.accessToken}`)
-      .send({ variantId, quantity: 2 })
-      .expect(201);
-
-    const cart = await request(app.getHttpServer())
-      .get('/api/v1/store/acme-store/cart')
-      .set('Authorization', `Bearer ${register.body.accessToken}`)
-      .expect(200);
-    expect(cart.body.distributorId).toBe(distributorId);
-
-    const checkout = await request(app.getHttpServer())
-      .post('/api/v1/store/acme-store/checkout')
-      .set('Authorization', `Bearer ${register.body.accessToken}`)
-      .send({})
-      .expect(201);
-
-    await request(app.getHttpServer())
-      .post(
-        `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
-      )
-      .expect(200);
-
-    const orderDetail = await request(app.getHttpServer())
-      .get(`/api/v1/merchant/orders/${checkout.body.order.id}`)
+      .post('/api/v1/merchant/distributors')
       .set('Authorization', `Bearer ${merchantToken}`)
-      .expect(200);
-
-    expect(orderDetail.body.distributorId).toBe(distributorId);
-    expect(orderDetail.body.commissionEntry).toMatchObject({
-      distributorId,
-      status: 'ACCRUED',
-    });
-    expect(Number(orderDetail.body.commissionEntry.amount)).toBe(10);
+      .send({ name: 'Blocked', commissionRate: 5 })
+      .expect(403);
   });
 });

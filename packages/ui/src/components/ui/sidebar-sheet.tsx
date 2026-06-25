@@ -29,8 +29,8 @@ function SidebarSheetContent({
         data-side={side}
         className={cn(
           'fixed z-50 flex h-full flex-col bg-sidebar text-sidebar-foreground shadow-lg transition ease-in-out',
-          side === 'left' && 'inset-y-0 left-0 border-r',
-          side === 'right' && 'inset-y-0 right-0 border-l',
+          side === 'left' && 'inset-y-0 left-0 border-r border-sidebar-border/50',
+          side === 'right' && 'inset-y-0 right-0 border-l border-sidebar-border/50',
           className,
         )}
         {...props}

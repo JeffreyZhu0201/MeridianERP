@@ -142,6 +142,7 @@ export interface PerformanceTrendPoint {
   orderCount: number;
   orderRevenue: string | number;
   commissionAccrued: string | number;
+  [key: string]: string | number;
 }
 
 /** Distributor performance dashboard (US-4.2). */
@@ -162,13 +163,17 @@ export interface DistributorPerformanceSummary {
   trend: PerformanceTrendPoint[];
 }
 
-/** Platform admin dashboard extension (US-4.5). */
+/** Platform admin dashboard extension (US-4.5 + Bento). */
 export interface PlatformDashboardStats {
   totalMerchants: number;
   pendingReview: number;
   activeDistributors: number;
   bindingsLast30Days: number;
   commissionAccruedLast30Days: string | number;
+  commissionSettledLast30Days: string | number;
+  ordersLast30Days: number;
+  orderRevenueLast30Days: string | number;
+  trend: PerformanceTrendPoint[];
   recentMerchants: Array<{
     id: string;
     businessName: string;

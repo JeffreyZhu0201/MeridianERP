@@ -1,5 +1,5 @@
 import type { BindType } from './enums.js';
-import type { CommissionListResponse, CommissionSummary } from './distributors.js';
+import type { CommissionListResponse, CommissionSummary, PerformanceTrendPoint } from './distributors.js';
 
 export interface DistributorLoginRequest {
   email: string;
@@ -31,13 +31,12 @@ export interface EnableDistributorPortalResponse {
 export interface DistributorDashboard {
   distributorId: string;
   distributorName: string;
-  tenantSlug: string;
-  bindingsCount: number;
-  bindingsMerchant: number;
-  bindingsCustomer: number;
+  branchCount: number;
   attributedOrderCount: number;
   attributedOrderRevenue: string | number;
+  availableBalance: string | number;
   commissionSummary: CommissionSummary;
+  trend: PerformanceTrendPoint[];
 }
 
 export interface DistributorBindingRow {

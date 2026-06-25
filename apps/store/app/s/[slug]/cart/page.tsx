@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
-import { Button, ListPageFrame } from '@meridian/ui';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { BentoListHeader, Button, EmptyState, ListPageFrame } from '@meridian/ui';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
@@ -12,10 +12,17 @@ interface CartPageProps {
   params: Promise<{ slug: string }>;
 }
 
+function formatMoney(value: string | number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
+    Number(value),
+  );
+}
+
 export default async function CartPage({ params }: CartPageProps) {
   const { slug } = await params;
   const token = await getToken();
   const cartSession = token ? undefined : await getServerCartSession(slug);
+  const locale = await getLocale();
   const t = await getTranslations('store');
 
   const cart = await apiFetch<Cart>(
@@ -29,21 +36,34 @@ export default async function CartPage({ params }: CartPageProps) {
 
   return (
     <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
-      <ListPageFrame
-        title={t('cart.title')}
-        emptyState={
-          isEmpty ? (
-            <div className="rounded-xl border border-dashed p-12 text-center">
-              <p className="text-muted-foreground">{t('cart.empty')}</p>
-              <Link href={`/s/${slug}`}>
-                <Button className="mt-4">{t('cart.continueShopping')}</Button>
-              </Link>
-            </div>
-          ) : undefined
-        }
-      >
-        {cart ? <CartView cart={cart} storeSlug={slug} token={token} /> : null}
-      </ListPageFrame>
+      <div className="space-y-6">
+        <BentoListHeader
+          metrics={[
+            { title: t('cart.qty'), value: cartCount },
+            {
+              title: t('cart.subtotal'),
+              value: cart ? formatMoney(cart.subtotal, locale) : formatMoney(0, locale),
+            },
+          ]}
+        />
+        <ListPageFrame
+          title={t('cart.title')}
+          emptyState={
+            isEmpty ? (
+              <EmptyState
+                title={t('cart.empty')}
+                action={
+                  <Link href={`/s/${slug}`}>
+                    <Button>{t('cart.continueShopping')}</Button>
+                  </Link>
+                }
+              />
+            ) : undefined
+          }
+        >
+          {cart ? <CartView cart={cart} storeSlug={slug} token={token} /> : null}
+        </ListPageFrame>
+      </div>
     </StoreShellWrapper>
   );
 }

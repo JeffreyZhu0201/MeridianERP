@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
-import { apiFetch, type MerchantDetail } from '@/lib/api';
+import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { MerchantDetailView } from './_components/merchant-detail';
 
@@ -16,15 +16,19 @@ export default async function MerchantDetailPage({ params }: MerchantDetailPageP
   const { id } = await params;
 
   let merchant: MerchantDetail;
+  let distributors: PlatformDistributor[] = [];
   try {
-    merchant = await apiFetch<MerchantDetail>(`/platform/merchants/${id}`, {}, token);
+    [merchant, distributors] = await Promise.all([
+      apiFetch<MerchantDetail>(`/platform/merchants/${id}`, {}, token),
+      apiFetch<PlatformDistributor[]>('/platform/distributors', {}, token).catch(() => []),
+    ]);
   } catch {
     notFound();
   }
 
   return (
     <AdminShellWrapper>
-      <MerchantDetailView merchant={merchant} token={token} />
+      <MerchantDetailView merchant={merchant} token={token} distributors={distributors} />
     </AdminShellWrapper>
   );
 }

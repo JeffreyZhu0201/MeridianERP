@@ -11,7 +11,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  BentoDetailHero,
   DetailPageFrame,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
@@ -22,16 +24,17 @@ import {
 import { OnboardingStatus } from '@meridian/shared';
 
 import { StatusBadge } from '@/components/status-badge';
-import { apiFetch, type MerchantDetail } from '@/lib/api';
+import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
 import { ApproveDialog } from '../../_components/approve-dialog';
 import { RejectDialog } from '../../_components/reject-dialog';
 
 interface MerchantDetailActionsProps {
   merchant: MerchantDetail;
   token: string;
+  distributors?: PlatformDistributor[];
 }
 
-export function MerchantDetailView({ merchant, token }: MerchantDetailActionsProps) {
+export function MerchantDetailView({ merchant, token, distributors = [] }: MerchantDetailActionsProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.merchants');
@@ -45,10 +48,19 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
     merchant.onboardingStatus === OnboardingStatus.SUBMITTED ||
     merchant.onboardingStatus === OnboardingStatus.UNDER_REVIEW;
 
-  async function handleApprove() {
+  async function handleApprove(recruitedByDistributorId?: string) {
     setError('');
     try {
-      await apiFetch(`/platform/merchants/${merchant.id}/approve`, { method: 'POST' }, token);
+      await apiFetch(
+        `/platform/merchants/${merchant.id}/approve`,
+        {
+          method: 'POST',
+          body: JSON.stringify(
+            recruitedByDistributorId ? { recruitedByDistributorId } : {},
+          ),
+        },
+        token,
+      );
       setApproveOpen(false);
       router.push('/merchants');
       router.refresh();
@@ -90,7 +102,7 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
         ) : merchant.tenantId ? (
           <Link
             href={`/inventory/tenants/${merchant.tenantId}`}
-            className="inline-flex h-9 items-center rounded-full border border-input bg-background px-4 text-sm font-medium hover:bg-accent"
+            className="inline-flex h-9 items-center rounded-full border border-border dark:border-border/40 bg-background px-4 text-sm font-medium hover:bg-accent"
           >
             {t('viewInventory')}
           </Link>
@@ -98,6 +110,15 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
       }
     >
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+      <BentoDetailHero
+        metrics={[
+          { title: td('contacts'), value: merchant.crmSummary.contacts },
+          { title: td('companies'), value: merchant.crmSummary.companies },
+          { title: td('leads'), value: merchant.crmSummary.leads },
+          { title: td('distributors'), value: merchant.distributors.length },
+        ]}
+      />
 
       {merchant.onboardingStatus === OnboardingStatus.REJECTED && merchant.rejectionReason ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">
@@ -143,29 +164,8 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
 
         <Card>
           <CardHeader>
-            <CardTitle>{td('crmSummary')}</CardTitle>
+            <CardTitle>{td('distributors')}</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-semibold">{merchant.crmSummary.contacts}</p>
-              <p className="text-xs text-muted-foreground">{td('contacts')}</p>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{merchant.crmSummary.companies}</p>
-              <p className="text-xs text-muted-foreground">{td('companies')}</p>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold">{merchant.crmSummary.leads}</p>
-              <p className="text-xs text-muted-foreground">{td('leads')}</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{td('distributors')}</CardTitle>
-        </CardHeader>
         <CardContent>
           {merchant.distributors.length > 0 ? (
             <Table>
@@ -201,17 +201,17 @@ export function MerchantDetailView({ merchant, token }: MerchantDetailActionsPro
               </TableBody>
             </Table>
           ) : (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              {td('noDistributors')}
-            </div>
+            <EmptyState title={td('noDistributors')} />
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
 
       <ApproveDialog
         open={approveOpen}
         onOpenChange={setApproveOpen}
         onConfirm={handleApprove}
+        distributors={distributors}
       />
       <RejectDialog open={rejectOpen} onOpenChange={setRejectOpen} onConfirm={handleReject} />
     </DetailPageFrame>

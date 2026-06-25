@@ -1,10 +1,11 @@
 import {
   CART_SESSION_HEADER,
   type BindVerifyResponse,
+  type PublishedStoreListResponse,
   type StoreClaimBindingResponse,
 } from '@meridian/shared';
 
-export type { BindVerifyResponse, StoreClaimBindingResponse };
+export type { BindVerifyResponse, PublishedStoreListResponse, StoreClaimBindingResponse };
 
 import { ensureCartSessionId } from './cart-session.client';
 

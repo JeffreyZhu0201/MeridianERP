@@ -4,10 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BindType, OrderStatus } from '@prisma/client';
+import { FulfillmentType, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { CommissionService } from '../../commission/commission.service';
+import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { InventoryService } from '../../inventory/inventory.service';
 import { PaymentService } from '../../payment/payment.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -36,6 +37,7 @@ export class StoreCheckoutService {
     private readonly emailQueue: EmailQueueService,
     private readonly inventoryService: InventoryService,
     private readonly inventoryQueue: InventoryQueueService,
+    private readonly fulfillmentService: FulfillmentService,
   ) {}
 
   async checkout(
@@ -66,23 +68,11 @@ export class StoreCheckoutService {
       throw new BadRequestException('Cart is empty');
     }
 
-    let distributorId = cart.distributorId;
-    if (!distributorId && user?.userId) {
-      const binding = await this.prisma.binding.findUnique({
-        where: {
-          bindableType_bindableId: {
-            bindableType: BindType.CUSTOMER,
-            bindableId: user.userId,
-          },
-        },
-      });
-      if (binding && binding.tenantId === tenant.id) {
-        distributorId = binding.distributorId;
-        await this.prisma.cart.update({
-          where: { id: cart.id },
-          data: { distributorId },
-        });
-      }
+    if (
+      dto.fulfillmentType === FulfillmentType.DELIVERY &&
+      !dto.deliveryAddress
+    ) {
+      throw new BadRequestException('deliveryAddress is required for delivery orders');
     }
 
     if (!user && !dto.guestEmail) {
@@ -93,9 +83,11 @@ export class StoreCheckoutService {
       if (!item.variant.isActive || !item.variant.product.isPublished) {
         throw new BadRequestException('Cart contains unavailable items');
       }
-      const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
-      if (sellable < item.quantity) {
-        throw new BadRequestException(`Insufficient inventory for ${item.variant.name}`);
+      if (dto.fulfillmentType === FulfillmentType.PICKUP) {
+        const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
+        if (sellable < item.quantity) {
+          throw new BadRequestException(`Insufficient inventory for ${item.variant.name}`);
+        }
       }
     }
 
@@ -110,8 +102,12 @@ export class StoreCheckoutService {
       data: {
         tenantId: tenant.id,
         customerId: user?.userId ?? null,
-        distributorId,
         status: OrderStatus.PENDING_PAYMENT,
+        fulfillmentType: dto.fulfillmentType,
+        deliveryAddress:
+          dto.fulfillmentType === FulfillmentType.DELIVERY && dto.deliveryAddress
+            ? (dto.deliveryAddress as unknown as Prisma.InputJsonValue)
+            : undefined,
         subtotal,
         tax,
         total,
@@ -208,8 +204,6 @@ export class StoreCheckoutService {
         data: { status: OrderStatus.PAID },
       });
 
-      await this.inventoryService.markOrderPaidAndDecrement(orderId, tx);
-
       if (order.customerId) {
         const cart = await tx.cart.findFirst({
           where: { tenantId: order.tenantId, customerId: order.customerId },
@@ -220,9 +214,9 @@ export class StoreCheckoutService {
       }
     });
 
-    await this.inventoryQueue.enqueueLowStockCheck({ tenantId: order.tenantId });
-
-    await this.commissionService.accrueOnPaid(orderId);
+    if (order.fulfillmentType === FulfillmentType.PICKUP) {
+      await this.fulfillmentService.generatePickupCodeForOrder(orderId);
+    }
 
     const confirmationEmail = order.guestEmail ?? order.customer?.email;
     if (confirmationEmail) {

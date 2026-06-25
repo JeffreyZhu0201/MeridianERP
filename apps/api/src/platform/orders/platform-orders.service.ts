@@ -1,13 +1,26 @@
 import { Injectable } from '@nestjs/common';
+import { FulfillmentType } from '@prisma/client';
+import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PlatformOrdersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly fulfillmentService: FulfillmentService,
+  ) {}
 
-  async findAll(page = 1, limit = 20, status?: string) {
+  async findAll(
+    page = 1,
+    limit = 20,
+    status?: string,
+    fulfillmentType?: string,
+  ) {
     const skip = (page - 1) * limit;
-    const where = status ? { status: status as never } : {};
+    const where: Record<string, unknown> = {};
+    if (status) where.status = status;
+    if (fulfillmentType) where.fulfillmentType = fulfillmentType;
+
     const [data, total] = await Promise.all([
       this.prisma.order.findMany({
         where,
@@ -21,7 +34,6 @@ export class PlatformOrdersService {
               merchantProfile: { select: { businessName: true } },
             },
           },
-          distributor: { select: { name: true } },
           lines: true,
           commissionEntry: true,
         },
@@ -41,5 +53,9 @@ export class PlatformOrdersService {
       })),
       meta: { total, page, limit },
     };
+  }
+
+  async ship(orderId: string, platformUserId: string) {
+    return this.fulfillmentService.shipDelivery(orderId, platformUserId);
   }
 }

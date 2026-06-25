@@ -49,6 +49,8 @@ describe('Merchant dashboard (e2e)', () => {
 
     expect(res.body.businessName).toBe('Demo Store');
     expect(typeof res.body.contactsCount).toBe('number');
+    expect(typeof res.body.ordersLast30Days).toBe('number');
+    expect(res.body.trend).toBeDefined();
     expect(Array.isArray(res.body.recentLeads)).toBe(true);
     expect(Array.isArray(res.body.recentActivity)).toBe(true);
   });

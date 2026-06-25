@@ -14,6 +14,15 @@ export class StoreOrdersController {
     return this.ordersService.listForCustomer(slug, user.userId);
   }
 
+  @Get(':id/pickup-token')
+  getPickupToken(
+    @Param('slug') slug: string,
+    @Param('id') id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    return this.ordersService.getPickupToken(slug, user.userId, id);
+  }
+
   @Get(':id')
   getOne(
     @Param('slug') slug: string,

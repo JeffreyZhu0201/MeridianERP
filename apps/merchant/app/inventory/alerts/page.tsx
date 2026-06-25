@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -26,6 +26,9 @@ export default async function AlertsPage() {
   const items = alertsRes.items;
   const t = await getTranslations('merchant.inventory.alerts');
 
+  const uniqueWarehouses = new Set(items.map((i) => i.warehouseId)).size;
+  const tWh = await getTranslations('merchant.inventory.warehouses');
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName} lowStockAlertCount={items.length}>
       <ListPageFrame
@@ -42,6 +45,13 @@ export default async function AlertsPage() {
           ) : undefined
         }
       >
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: items.length },
+            { title: t('onHand'), value: items.reduce((sum, i) => sum + i.quantityOnHand, 0) },
+            { title: tWh('title'), value: uniqueWarehouses },
+          ]}
+        />
         <Suspense>
           <LowStockAlertsTable items={items} />
         </Suspense>

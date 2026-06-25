@@ -1,11 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { DetailPageFrame } from '@meridian/ui';
+import { DetailPageFrame, FulfillmentTypeBadge } from '@meridian/ui';
 import type { StoreOrderDetail } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { FulfillmentSummary } from './_components/fulfillment-summary';
 import { PaymentStatusBanner } from './_components/payment-status-banner';
 
 interface OrderConfirmationPageProps {
@@ -64,7 +65,11 @@ export default async function OrderConfirmationPage({
         backLabel={t('confirmation.backAccount')}
       >
         <PaymentStatusBanner redirectStatus={redirectStatus} />
-        <div className="space-y-4 rounded-xl border p-4 text-sm">
+        {order.fulfillmentType ? (
+          <FulfillmentTypeBadge type={order.fulfillmentType} />
+        ) : null}
+        <FulfillmentSummary order={order} />
+        <div className="space-y-4 rounded-xl ring-1 ring-border p-4 text-sm">
           <p className="text-lg font-semibold tabular-nums">
             {t('confirmation.orderTotal', {
               amount: formatMoney(order.total, order.currency),

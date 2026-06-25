@@ -1,71 +1,95 @@
-import { getTranslations } from 'next-intl/server';
-import { DashboardPageFrame, MetricCard } from '@meridian/ui';
-
+import { getLocale, getTranslations } from 'next-intl/server';
 import {
-  apiFetch,
-  type DistributorDashboard,
-} from '@/lib/api';
+  BentoChartTile,
+  BentoDashboardFrame,
+  BentoMetricTile,
+} from '@meridian/ui';
+
+import { apiFetch, ApiError, type DistributorDashboard } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
+function formatMoney(value: string | number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
+    Number(value),
+  );
+}
+
+async function loadDashboard(
+  token: string,
+  loadFailedMessage: string,
+): Promise<{ dashboard: DistributorDashboard | null; error: string | null }> {
+  try {
+    const dashboard = await apiFetch<DistributorDashboard>('/distributor/me/dashboard', {}, token);
+    return { dashboard, error: null };
+  } catch (err) {
+    const message = err instanceof ApiError ? err.message : loadFailedMessage;
+    return { dashboard: null, error: message };
+  }
+}
+
 export default async function DashboardPage() {
-  const t = await getTranslations('distributor.dashboard');
   const token = await getToken();
   if (!token) return null;
 
-  let dashboard: DistributorDashboard | null = null;
-  let error: string | null = null;
-
-  try {
-    dashboard = await apiFetch<DistributorDashboard>('/distributor/me/dashboard', {}, token);
-  } catch (err) {
-    error = err instanceof Error ? err.message : t('loadError');
-  }
+  const locale = await getLocale();
+  const t = await getTranslations('distributor.dashboard');
+  const { dashboard, error } = await loadDashboard(token, t('loadError'));
 
   return (
-    <DashboardPageFrame
+    <BentoDashboardFrame
       title={
-        dashboard
-          ? t('welcome', { name: dashboard.distributorName })
-          : t('title')
+        dashboard ? t('welcome', { name: dashboard.distributorName }) : t('title')
       }
-      description={
-        dashboard
-          ? t('description', { tenant: dashboard.tenantSlug })
-          : undefined
-      }
+      description={dashboard ? t('description') : undefined}
       alert={
         error ? (
-          <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-            {error}
+          <div
+            className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm"
+            role="alert"
+          >
+            <p className="font-medium text-destructive">{t('loadError')}</p>
+            <p className="mt-1 text-muted-foreground">{error}</p>
           </div>
         ) : undefined
       }
     >
       {dashboard ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <MetricCard title={t('bindings')} value={dashboard.bindingsCount} />
-            <MetricCard title={t('bindingsMerchant')} value={dashboard.bindingsMerchant} />
-            <MetricCard title={t('bindingsCustomer')} value={dashboard.bindingsCustomer} />
-            <MetricCard title={t('attributedOrders')} value={dashboard.attributedOrderCount} />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <MetricCard
-              title={t('orderRevenue')}
-              value={`$${Number(dashboard.attributedOrderRevenue).toFixed(2)}`}
-            />
-            <MetricCard
-              title={t('commissionAccrued')}
-              value={`$${Number(dashboard.commissionSummary.accruedTotal).toFixed(2)}`}
-            />
-            <MetricCard
-              title={t('commissionSettled')}
-              value={`$${Number(dashboard.commissionSummary.settledTotal).toFixed(2)}`}
-            />
-          </div>
+          <BentoMetricTile title={t('branchCount')} value={dashboard.branchCount} />
+          <BentoMetricTile
+            title={t('availableBalance')}
+            value={formatMoney(dashboard.availableBalance, locale)}
+          />
+          <BentoMetricTile title={t('attributedOrders')} value={dashboard.attributedOrderCount} />
+          <BentoMetricTile
+            title={t('orderRevenue')}
+            value={formatMoney(dashboard.attributedOrderRevenue, locale)}
+          />
+          <BentoMetricTile
+            title={t('commissionAccrued')}
+            value={formatMoney(dashboard.commissionSummary.accruedTotal, locale)}
+          />
+          <BentoMetricTile
+            title={t('commissionSettled')}
+            value={formatMoney(dashboard.commissionSummary.settledTotal, locale)}
+          />
+          <BentoChartTile
+            title={t('trendChart')}
+            colSpan={2}
+            rowSpan={2}
+            data={dashboard.trend.map((point) => ({
+              date: point.date,
+              orderCount: point.orderCount,
+              orderRevenue: Number(point.orderRevenue),
+              commissionAccrued: Number(point.commissionAccrued),
+            }))}
+            series={[
+              { key: 'orderCount', label: t('attributedOrders') },
+              { key: 'commissionAccrued', label: t('commissionAccrued') },
+            ]}
+          />
         </>
       ) : null}
-    </DashboardPageFrame>
+    </BentoDashboardFrame>
   );
 }

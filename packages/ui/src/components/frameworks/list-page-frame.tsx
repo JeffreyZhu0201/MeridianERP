@@ -31,7 +31,7 @@ export function ListPageFrame({
       <PageHeader title={title} description={description} action={action} />
       {filters ? <div className="flex flex-wrap items-center gap-3">{filters}</div> : null}
       {isLoading ? (
-        <div className="space-y-3 rounded-md border p-4">
+        <div className="space-y-3 rounded-md ring-1 ring-border p-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <Skeleton key={i} className="h-10 w-full" />
           ))}

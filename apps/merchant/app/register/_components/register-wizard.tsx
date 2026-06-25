@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, AuthLayout, Input, Label } from '@meridian/ui';
 
 import { API_URL } from '@/lib/api';
@@ -12,6 +12,11 @@ type Step = 1 | 2 | 3;
 export function RegisterWizard() {
   const t = useTranslations('merchant.register');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteCode = useMemo(
+    () => searchParams.get('invite')?.trim().toUpperCase() || undefined,
+    [searchParams],
+  );
   const [step, setStep] = useState<Step>(1);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -63,6 +68,7 @@ export function RegisterWizard() {
           businessName: form.businessName,
           legalName: form.legalName || undefined,
           contactPhone: form.contactPhone || undefined,
+          inviteCode,
         }),
       });
 
@@ -88,6 +94,11 @@ export function RegisterWizard() {
   return (
     <AuthLayout subtitle={t('subtitle', { step })}>
       <div className="space-y-6">
+        {inviteCode ? (
+          <p className="rounded-lg bg-muted px-3 py-2 text-xs text-muted-foreground">
+            {t('inviteApplied')}: <span className="font-mono">{inviteCode}</span>
+          </p>
+        ) : null}
         {step === 1 ? (
           <div className="space-y-4">
             <div className="space-y-2">
@@ -156,7 +167,7 @@ export function RegisterWizard() {
 
         {step === 3 ? (
           <div className="space-y-4 text-sm">
-            <div className="rounded-lg border p-4 space-y-2">
+            <div className="rounded-lg ring-1 ring-border p-4 space-y-2">
               <p>
                 <span className="text-muted-foreground">{t('reviewEmail')}</span> {form.email}
               </p>

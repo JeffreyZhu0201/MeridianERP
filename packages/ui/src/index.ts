@@ -4,6 +4,7 @@ export { AdminShell, type AdminShellProps } from './components/shells/admin-shel
 export { ShellFrame, type ShellFrameProps } from './components/shells/shell-frame';
 export { MerchantShell, type MerchantShellProps } from './components/shells/merchant-shell';
 export { StoreShell, type StoreShellProps } from './components/shells/store-shell';
+export { DistributorShell, type DistributorShellProps } from './components/shells/distributor-shell';
 export { ErpShell, type ErpShellProps } from './components/frameworks/erp-shell';
 export {
   ListPageFrame,
@@ -25,6 +26,23 @@ export { ThemeProvider, ModeToggle, LocaleToggle, PortalThemeProvider, PortalLoc
 export { ProductCard, type ProductCardProps } from './components/product-card';
 export { CartDrawer, type CartDrawerItem, type CartDrawerProps } from './components/cart-drawer';
 export { MetricCard, type MetricCardProps } from './components/metric-card';
+export {
+  BentoGrid,
+  BentoTile,
+  BentoMetricTile,
+  BentoListHeader,
+  BentoDetailHero,
+  BentoChartTile,
+  BentoDashboardFrame,
+  type BentoGridProps,
+  type BentoTileProps,
+  type BentoMetricTileProps,
+  type BentoListHeaderProps,
+  type BentoDetailHeroProps,
+  type BentoChartTileProps,
+  type BentoChartSeries,
+  type BentoDashboardFrameProps,
+} from './components/bento';
 export { PageHeader, type PageHeaderProps } from './components/page-header';
 export { EmptyState, type EmptyStateProps } from './components/empty-state';
 export { PurchaseOrderStatusBadge } from './components/inventory/purchase-order-status-badge';
@@ -74,4 +92,25 @@ export {
   SidebarProvider,
   SidebarTrigger,
 } from './components/ui/sidebar';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+export {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from './components/ui/input-otp';
+export {
+  OrderListFrame,
+  FulfillmentTypeBadge,
+  PickupVerifyDialog,
+  DeliveryShipDialog,
+  type OrderListFrameProps,
+  type OrderListRow,
+  type OrderListTab,
+  type FulfillmentType,
+  type PickupVerifyDialogProps,
+  type DeliveryShipDialogProps,
+  type DeliveryShipLine,
+} from './components/orders';
 export { cn } from './lib/utils';
+export { surfaceRing, surfaceRingLg, shellDividerB, shellDividerT } from './lib/surfaces';

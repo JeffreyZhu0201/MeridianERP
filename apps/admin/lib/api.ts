@@ -1,5 +1,10 @@
 import type {
+  DistributorBranchSummary,
+  MasterSkuSummary,
+  MerchantRecruitInviteCodeResponse,
   PlatformDashboardStats,
+  PlatformDistributorSummary,
+  PlatformFundsSummary,
   PlatformMerchantDetail,
   PlatformRecentMerchant,
 } from '@meridian/shared';
@@ -70,12 +75,51 @@ export interface AuthResponse {
 export interface PlatformOrder {
   id: string;
   status: string;
+  fulfillmentType?: string;
   total: string | number;
   currency: string;
   guestEmail?: string;
   createdAt: string;
   tenant: { id: string; slug: string; businessName?: string };
   distributor?: { name: string };
+}
+
+export type PlatformDistributor = PlatformDistributorSummary;
+export type DistributorBranch = DistributorBranchSummary;
+export type MasterSku = MasterSkuSummary;
+export type FundsSummary = PlatformFundsSummary;
+export type RecruitInviteCode = MerchantRecruitInviteCodeResponse;
+
+export interface AllocationOrderLine {
+  id: string;
+  masterSkuId: string;
+  quantity: number;
+  wholesalePrice: string | number;
+  masterSku?: { skuCode: string; name: string };
+}
+
+export interface AllocationOrder {
+  id: string;
+  tenantId: string;
+  status: string;
+  note?: string | null;
+  issuedAt?: string | null;
+  confirmedAt?: string | null;
+  createdAt: string;
+  tenant?: { merchantProfile?: { businessName: string } };
+  lines: AllocationOrderLine[];
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  distributorId: string;
+  amount: string | number;
+  status: string;
+  note?: string | null;
+  rejectionReason?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  distributor: { name: string; email?: string | null };
 }
 
 export interface CommissionLedgerEntry {

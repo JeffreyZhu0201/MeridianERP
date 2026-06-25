@@ -21,7 +21,7 @@ export function ShellFrame({ sidebar, header, children, className }: ShellFrameP
 
   return (
     <div className={cn('flex min-h-svh w-full', className)}>
-      <aside className="hidden w-64 shrink-0 border-r bg-muted/30 md:block">{sidebar}</aside>
+      <aside className="hidden w-64 shrink-0 border-r border-border/50 bg-muted/30 md:block">{sidebar}</aside>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen} title="Navigation">
         <div className="p-3">{sidebar}</div>

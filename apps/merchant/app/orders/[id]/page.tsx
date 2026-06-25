@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import {
   Badge,
+  BentoDetailHero,
   DetailPageFrame,
   Table,
   TableBody,
@@ -53,26 +54,28 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
         backLabel={t('title')}
         badges={<Badge>{order.status}</Badge>}
       >
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-xl border p-4 text-sm">
-            <p className="text-muted-foreground">{t('customer')}</p>
-            <p className="mt-1 font-medium">
-              {order.customer?.email ?? order.guestEmail ?? t('guest')}
-            </p>
-          </div>
-          <div className="rounded-xl border p-4 text-sm">
-            <p className="text-muted-foreground">{t('distributor')}</p>
-            <p className="mt-1 font-medium">{order.distributor?.name ?? '—'}</p>
-          </div>
-          <div className="rounded-xl border p-4 text-sm">
-            <p className="text-muted-foreground">{t('total')}</p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              {formatMoney(order.total, order.currency)}
-            </p>
-          </div>
-        </div>
+        <BentoDetailHero
+          metrics={[
+            {
+              title: t('customer'),
+              value: order.customer?.email ?? order.guestEmail ?? t('guest'),
+            },
+            {
+              title: t('distributor'),
+              value: order.distributor?.name ?? '—',
+            },
+            {
+              title: t('total'),
+              value: formatMoney(order.total, order.currency),
+            },
+            {
+              title: t('qty'),
+              value: order.lines.reduce((sum, line) => sum + line.quantity, 0),
+            },
+          ]}
+        />
 
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

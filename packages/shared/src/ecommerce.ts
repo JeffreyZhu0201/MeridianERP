@@ -1,4 +1,6 @@
 import type { OrderStatus } from './enums.js';
+import type { FulfillmentType } from './phase-5-distribution.js';
+import type { DeliveryAddress } from './phase-5-fulfillment.js';
 
 /** localStorage key for guest cart session — scoped per store slug. */
 export const cartSessionStorageKey = (storeSlug: string): string =>
@@ -27,6 +29,8 @@ export interface MerchantOrderListItem {
   id: string;
   tenantId: string;
   status: OrderStatus;
+  fulfillmentType: FulfillmentType;
+  pickupVerifiedAt?: string | null;
   currency: string;
   subtotal: string | number;
   tax: string | number;
@@ -56,6 +60,8 @@ export interface MerchantOrderDetail extends MerchantOrderListItem {
 
 export interface CheckoutRequest {
   guestEmail?: string;
+  fulfillmentType?: FulfillmentType;
+  deliveryAddress?: DeliveryAddress;
 }
 
 export interface CheckoutResponse {
@@ -78,6 +84,7 @@ export interface CheckoutResponse {
 export interface StoreOrderListItem {
   id: string;
   status: OrderStatus;
+  fulfillmentType?: FulfillmentType;
   currency: string;
   total: string | number;
   createdAt: string;
@@ -88,5 +95,8 @@ export interface StoreOrderListItem {
 export interface StoreOrderDetail extends StoreOrderListItem {
   subtotal: string | number;
   tax: string | number;
+  pickupCode?: string | null;
+  deliveryAddress?: DeliveryAddress | null;
+  shippedAt?: string | null;
   lines: MerchantOrderLine[];
 }

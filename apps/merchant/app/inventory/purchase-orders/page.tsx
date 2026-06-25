@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -42,9 +42,20 @@ export default async function PurchaseOrdersPage({ searchParams }: PurchaseOrder
 
   const ordersPage = normalizeInventoryPage(ordersRes);
 
+  const openCount = ordersPage.items.filter(
+    (po) => po.status !== 'RECEIVED' && po.status !== 'CANCELLED',
+  ).length;
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: ordersPage.total },
+            { title: t('warehouse'), value: warehouses.length },
+            { title: t('status'), value: openCount },
+          ]}
+        />
         <Suspense>
           <PurchaseOrdersTable
             orders={ordersPage.items}

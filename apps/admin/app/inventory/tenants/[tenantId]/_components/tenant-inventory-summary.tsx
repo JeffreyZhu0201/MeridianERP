@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   Badge,
+  BentoDetailHero,
   Card,
   CardContent,
   DetailPageFrame,
-  MetricCard,
+  EmptyState,
   PurchaseOrderStatusBadge,
   StockAdjustmentReasonBadge,
   Table,
@@ -52,14 +53,16 @@ export function TenantInventorySummary({
         Read-only support view. Changes must be made by the merchant.
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard title="Warehouses" value={summary.warehouseCount} />
-        <MetricCard title="SKUs" value={summary.skuCount} />
-        <MetricCard title="Units on hand" value={summary.totalUnitsOnHand.toLocaleString()} />
-        <MetricCard title="Low stock" value={summary.lowStockCount} />
-      </div>
+      <BentoDetailHero
+        metrics={[
+          { title: 'Warehouses', value: summary.warehouseCount },
+          { title: 'SKUs', value: summary.skuCount },
+          { title: 'Units on hand', value: summary.totalUnitsOnHand.toLocaleString() },
+          { title: 'Low stock', value: summary.lowStockCount },
+        ]}
+      />
 
-      <div className="flex gap-2 border-b">
+      <div className="flex gap-2 border-b border-border/50">
         {(['overview', 'adjustments', 'purchase-orders'] as const).map((t) => (
           <Link
             key={t}
@@ -109,7 +112,7 @@ export function TenantInventorySummary({
       ) : null}
 
       {tab === 'adjustments' ? (
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -157,7 +160,7 @@ export function TenantInventorySummary({
       ) : null}
 
       {tab === 'purchase-orders' ? (
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

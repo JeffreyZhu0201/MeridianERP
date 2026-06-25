@@ -39,7 +39,7 @@ export function LocaleToggle({ portal, className }: LocaleToggleProps) {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="outline" size="icon" aria-label={t('label')}>
+            <Button variant="ghost" size="icon" aria-label={t('label')}>
               <IconLanguage className="size-[1.2rem]" stroke={1.5} />
             </Button>
           }

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { BindingsModule } from '../bindings/bindings.module';
 import { CommissionModule } from '../commission/commission.module';
+import { FulfillmentModule } from '../fulfillment/fulfillment.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { PaymentModule } from '../payment/payment.module';
 import { QueueModule } from '../queue/queue.module';
@@ -17,10 +18,12 @@ import { StoreCheckoutController } from './checkout/store-checkout.controller';
 import { StoreCheckoutService } from './checkout/store-checkout.service';
 import { StoreOrdersController } from './orders/store-orders.controller';
 import { StoreOrdersService } from './orders/store-orders.service';
+import { StoreStoresController } from './stores/store-stores.controller';
+import { StoreStoresService } from './stores/store-stores.service';
 import { StoreTenantService } from './common/store-tenant.service';
 
 @Module({
-  imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule],
+  imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule, FulfillmentModule],
   controllers: [
     StoreAuthController,
     StoreBindingsController,
@@ -28,6 +31,7 @@ import { StoreTenantService } from './common/store-tenant.service';
     StoreCartController,
     StoreCheckoutController,
     StoreOrdersController,
+    StoreStoresController,
   ],
   providers: [
     StoreTenantService,
@@ -37,6 +41,7 @@ import { StoreTenantService } from './common/store-tenant.service';
     StoreCartService,
     StoreCheckoutService,
     StoreOrdersService,
+    StoreStoresService,
   ],
   exports: [StoreTenantService, StoreAuthService],
 })

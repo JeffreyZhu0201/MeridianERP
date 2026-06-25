@@ -16,7 +16,7 @@ export function Badge({ className, variant = 'default', ...props }: BadgeProps) 
           'bg-primary/10 text-primary': variant === 'default',
           'bg-secondary text-secondary-foreground': variant === 'secondary',
           'bg-destructive/10 text-destructive': variant === 'destructive',
-          'border border-input text-foreground': variant === 'outline',
+          'border border-border text-foreground dark:border-border/40': variant === 'outline',
           'bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400': variant === 'success',
           'bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400': variant === 'warning',
         },

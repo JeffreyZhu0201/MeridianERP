@@ -17,12 +17,12 @@ export class DistributorAuthService {
     private readonly env: EnvService,
   ) {}
 
-  private signDistributorToken(distributorId: string, tenantId: string) {
+  private signDistributorToken(distributorId: string, tenantId: string | null) {
     return this.jwt.sign(
       {
         sub: distributorId,
         aud: 'distributor' as const,
-        tenantId,
+        tenantId: tenantId ?? undefined,
         roles: ['DISTRIBUTOR'],
       },
       { secret: this.env.getOrThrow('JWT_DISTRIBUTOR_SECRET') },
@@ -37,7 +37,7 @@ export class DistributorAuthService {
         isActive: true,
         ...(dto.tenantSlug
           ? { tenant: { slug: dto.tenantSlug } }
-          : {}),
+          : { tenantId: null }),
       },
       include: { tenant: true },
     });
@@ -74,7 +74,8 @@ export class DistributorAuthService {
         id: distributor.id,
         name: distributor.name,
         email: distributor.email!,
-        tenantSlug: distributor.tenant.slug,
+        tenantSlug: distributor.tenant?.slug ?? null,
+        isPlatformDistributor: distributor.tenantId === null,
       },
     };
   }

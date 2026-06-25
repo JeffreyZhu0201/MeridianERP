@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
@@ -67,18 +68,9 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
     }
   }
 
-  const accruedTotal = ledgerEntries.reduce((sum, e) => sum + Number(e.amount), 0);
-
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted-foreground">{t('accruedCommissions')}</p>
-          <p className="text-2xl font-semibold">{formatPrice(accruedTotal, locale)}</p>
-          <p className="text-xs text-muted-foreground">
-            {t('entries', { count: ledgerEntries.length })}
-          </p>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <Button onClick={handleExport} disabled={exporting || ledgerEntries.length === 0}>
           {exporting ? t('exporting') : t('export')}
         </Button>
@@ -89,11 +81,9 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
       <div className="space-y-3">
         <h2 className="text-lg font-medium">{t('settlementBatches')}</h2>
         {batches.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center">
-            <p className="text-muted-foreground">{t('emptyBatches')}</p>
-          </div>
+          <EmptyState title={t('emptyBatches')} />
         ) : (
-          <div className="rounded-xl border">
+          <div className="rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -133,11 +123,9 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
       <div className="space-y-3">
         <h2 className="text-lg font-medium">{t('accruedLedger')}</h2>
         {ledgerEntries.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center">
-            <p className="text-muted-foreground">{t('emptyLedger')}</p>
-          </div>
+          <EmptyState title={t('emptyLedger')} />
         ) : (
-          <div className="rounded-xl border">
+          <div className="rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>

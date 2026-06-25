@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -68,6 +68,13 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('totalSkus'), value: skuCount || stockPage.total },
+            { title: t('totalUnits'), value: totalUnits },
+            { title: t('lowStockCount'), value: alertsRes.items.length },
+          ]}
+        />
         <Suspense>
           <InventoryReportsTabs
             stockLevels={stockPage.items}

@@ -65,7 +65,7 @@ export function CartDrawer({
       ) : (
         <ul className="space-y-4">
           {items.map((item) => (
-            <li key={item.id} className="flex items-start justify-between gap-3 border-b pb-4">
+            <li key={item.id} className="flex items-start justify-between gap-3 border-b border-border/50 pb-4">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium">{item.productName}</p>
                 <p className="text-xs text-muted-foreground">{item.variantName}</p>

@@ -6,8 +6,12 @@ import { type ReactNode } from 'react';
 import {
   IconBuildingStore,
   IconLayoutDashboard,
+  IconCash,
+  IconPackage,
   IconReceipt,
   IconSettings,
+  IconTruckDelivery,
+  IconUsers,
   IconWallet,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -30,7 +34,11 @@ export interface AdminShellProps {
 const navItems = [
   { href: '/', key: 'dashboard' as const, icon: IconLayoutDashboard },
   { href: '/merchants', key: 'merchants' as const, icon: IconBuildingStore },
+  { href: '/distributors', key: 'distributors' as const, icon: IconUsers },
   { href: '/orders', key: 'orders' as const, icon: IconReceipt },
+  { href: '/allocations', key: 'allocations' as const, icon: IconPackage },
+  { href: '/withdrawals', key: 'withdrawals' as const, icon: IconCash },
+  { href: '/funds', key: 'funds' as const, icon: IconTruckDelivery },
   { href: '/settlements', key: 'settlements' as const, icon: IconWallet },
   { href: '/settings', key: 'settings' as const, icon: IconSettings },
 ];

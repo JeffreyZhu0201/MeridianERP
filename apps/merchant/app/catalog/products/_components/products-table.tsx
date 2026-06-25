@@ -134,14 +134,14 @@ export function ProductsTable({ products: initial, categories, token }: Products
       </div>
 
       {products.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-12 text-center">
+        <div className="rounded-xl ring-1 ring-border p-12 text-center">
           <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
             {t('emptyAction')}
           </Button>
         </div>
       ) : (
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -238,7 +238,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
               id="categoryId"
               value={form.categoryId}
               onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-              className="flex h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="flex h-9 w-full rounded-lg border border-border bg-background px-3 text-sm dark:border-border/40"
             >
               <option value="">{tCommon('none')}</option>
               {categories.map((cat) => (
@@ -253,7 +253,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
               type="checkbox"
               checked={form.isPublished}
               onChange={(e) => setForm({ ...form, isPublished: e.target.checked })}
-              className="size-4 rounded border-input"
+              className="size-4 rounded border border-border dark:border-border/40"
             />
             {t('published')}
           </label>

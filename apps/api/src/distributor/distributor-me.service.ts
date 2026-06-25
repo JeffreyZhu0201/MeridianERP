@@ -1,18 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BindType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import { LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
 import { DEFAULT_COMMISSION_WINDOW_DAYS } from '@meridian/shared';
 import type { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 import { parseDateRangeQuery } from '../common/date-range';
+import { buildOrderTrend } from '../common/dashboard-trend';
 import {
   decimalSumToString,
   mapCommissionStatementRow,
 } from '../merchant/commissions/commission-mappers';
 import { CommissionListQueryDto } from '../merchant/commissions/dto/commission-list-query.dto';
+import { PlatformWithdrawalsService } from '../platform/withdrawals/platform-withdrawals.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DistributorMeService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly withdrawalsService: PlatformWithdrawalsService,
+  ) {}
 
   private distributorId(user: AuthenticatedUser) {
     return user.userId;
@@ -22,11 +27,10 @@ export class DistributorMeService {
     const distributor = await this.prisma.distributor.findFirst({
       where: {
         id: this.distributorId(user),
-        tenantId: user.tenantId!,
         portalEnabled: true,
         isActive: true,
+        tenantId: null,
       },
-      include: { tenant: true },
     });
     if (!distributor) {
       throw new NotFoundException('Distributor not found');
@@ -50,50 +54,44 @@ export class DistributorMeService {
     const distributor = await this.loadDistributor(user);
     const range = this.defaultRangeQuery();
     const distributorId = distributor.id;
-    const tenantId = user.tenantId!;
     const boundAtFilter = { gte: range.from, lte: range.to };
+
+    const recruitedTenants = await this.prisma.merchantProfile.findMany({
+      where: { recruitedByDistributorId: distributorId },
+      select: { tenantId: true },
+    });
+    const tenantIds = recruitedTenants.map((m) => m.tenantId);
+
     const orderWhere = {
-      tenantId,
-      distributorId,
-      status: OrderStatus.PAID,
+      tenantId: { in: tenantIds },
+      status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },
       createdAt: boundAtFilter,
     };
     const ledgerWhere = {
-      tenantId,
       distributorId,
       createdAt: boundAtFilter,
       status: { not: LedgerStatus.VOID },
     };
 
     const [
-      bindingsMerchant,
-      bindingsCustomer,
+      branchCount,
       orderAgg,
       commissionAccruedAgg,
       commissionSettledAgg,
       entryCount,
+      trendOrders,
+      availableBalance,
     ] = await Promise.all([
-      this.prisma.binding.count({
-        where: {
-          tenantId,
-          distributorId,
-          bindableType: BindType.MERCHANT,
-          boundAt: boundAtFilter,
-        },
+      this.prisma.merchantProfile.count({
+        where: { recruitedByDistributorId: distributorId },
       }),
-      this.prisma.binding.count({
-        where: {
-          tenantId,
-          distributorId,
-          bindableType: BindType.CUSTOMER,
-          boundAt: boundAtFilter,
-        },
-      }),
-      this.prisma.order.aggregate({
-        where: orderWhere,
-        _count: { _all: true },
-        _sum: { total: true },
-      }),
+      tenantIds.length
+        ? this.prisma.order.aggregate({
+            where: orderWhere,
+            _count: { _all: true },
+            _sum: { total: true },
+          })
+        : Promise.resolve({ _count: { _all: 0 }, _sum: { total: null } }),
       this.prisma.commissionLedger.aggregate({
         where: { ...ledgerWhere, status: LedgerStatus.ACCRUED },
         _sum: { amount: true },
@@ -103,6 +101,17 @@ export class DistributorMeService {
         _sum: { amount: true },
       }),
       this.prisma.commissionLedger.count({ where: ledgerWhere }),
+      tenantIds.length
+        ? this.prisma.order.findMany({
+            where: orderWhere,
+            select: {
+              createdAt: true,
+              total: true,
+              commissionEntry: { select: { amount: true, status: true } },
+            },
+          })
+        : Promise.resolve([]),
+      this.withdrawalsService.getAvailableBalance(distributorId),
     ]);
 
     const accruedTotal = decimalSumToString(commissionAccruedAgg._sum.amount);
@@ -114,12 +123,10 @@ export class DistributorMeService {
     return {
       distributorId: distributor.id,
       distributorName: distributor.name,
-      tenantSlug: distributor.tenant.slug,
-      bindingsCount: bindingsMerchant + bindingsCustomer,
-      bindingsMerchant,
-      bindingsCustomer,
+      branchCount,
       attributedOrderCount: orderAgg._count._all,
       attributedOrderRevenue: decimalSumToString(orderAgg._sum.total),
+      availableBalance: availableBalance.toString(),
       commissionSummary: {
         accruedTotal,
         settledTotal,
@@ -128,7 +135,59 @@ export class DistributorMeService {
         from: range.fromIso,
         to: range.toIso,
       },
+      trend: buildOrderTrend(range.from, range.to, trendOrders),
     };
+  }
+
+  async listBranches(user: AuthenticatedUser) {
+    const distributor = await this.loadDistributor(user);
+    const windowStart = new Date();
+    windowStart.setUTCDate(windowStart.getUTCDate() - 30);
+
+    const merchants = await this.prisma.merchantProfile.findMany({
+      where: { recruitedByDistributorId: distributor.id },
+      include: { tenant: true },
+    });
+
+    return Promise.all(
+      merchants.map(async (m) => {
+        const agg = await this.prisma.order.aggregate({
+          where: {
+            tenantId: m.tenantId,
+            status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },
+            createdAt: { gte: windowStart },
+          },
+          _sum: { total: true },
+          _count: { _all: true },
+        });
+        return {
+          tenantId: m.tenantId,
+          merchantProfileId: m.id,
+          businessName: m.businessName,
+          slug: m.tenant.slug,
+          recruitedAt: m.recruitedAt?.toISOString() ?? null,
+          salesLast30Days: Number(agg._sum.total ?? 0),
+          orderCountLast30Days: agg._count._all,
+        };
+      }),
+    );
+  }
+
+  async listWithdrawals(user: AuthenticatedUser) {
+    const distributor = await this.loadDistributor(user);
+    return this.prisma.withdrawalRequest.findMany({
+      where: { distributorId: distributor.id },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createWithdrawal(
+    user: AuthenticatedUser,
+    amount: number,
+    note?: string,
+  ) {
+    const distributor = await this.loadDistributor(user);
+    return this.withdrawalsService.createRequest(distributor.id, amount, note);
   }
 
   async listCommissions(user: AuthenticatedUser, query: CommissionListQueryDto) {
@@ -143,7 +202,6 @@ export class DistributorMeService {
       : { status: { not: LedgerStatus.VOID } };
 
     const where: Prisma.CommissionLedgerWhereInput = {
-      tenantId: user.tenantId!,
       distributorId: distributor.id,
       createdAt: { gte: range.from, lte: range.to },
       ...statusFilter,
@@ -176,36 +234,6 @@ export class DistributorMeService {
       total,
       page,
       limit,
-    };
-  }
-
-  async listBindings(user: AuthenticatedUser) {
-    const distributor = await this.loadDistributor(user);
-
-    const [items, total] = await Promise.all([
-      this.prisma.binding.findMany({
-        where: {
-          tenantId: user.tenantId!,
-          distributorId: distributor.id,
-        },
-        orderBy: { boundAt: 'desc' },
-      }),
-      this.prisma.binding.count({
-        where: {
-          tenantId: user.tenantId!,
-          distributorId: distributor.id,
-        },
-      }),
-    ]);
-
-    return {
-      items: items.map((b) => ({
-        id: b.id,
-        bindableType: b.bindableType,
-        bindableId: b.bindableId,
-        boundAt: b.boundAt.toISOString(),
-      })),
-      total,
     };
   }
 }

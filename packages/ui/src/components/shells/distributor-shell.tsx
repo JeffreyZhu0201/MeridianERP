@@ -1,0 +1,82 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { type ReactNode } from 'react';
+import { useTranslations } from 'next-intl';
+import { LocaleToggle } from '../theme/locale-toggle';
+import { ModeToggle } from '../theme/mode-toggle';
+import { shellDividerB } from '../../lib/surfaces';
+import { cn } from '../../lib/utils';
+
+export interface DistributorShellProps {
+  children: ReactNode;
+  distributorName?: string;
+  onLogout?: () => void;
+}
+
+export function DistributorShell({
+  children,
+  distributorName,
+  onLogout,
+}: DistributorShellProps) {
+  const pathname = usePathname();
+  const t = useTranslations('distributor.nav');
+  const tc = useTranslations('common');
+
+  const navItems = [
+    { href: '/', label: t('dashboard'), exact: true },
+    { href: '/branches', label: t('branches') },
+    { href: '/commissions', label: t('commissions') },
+    { href: '/withdrawals', label: t('withdrawals') },
+  ];
+
+  return (
+    <div className="flex min-h-screen flex-col">
+      <header className={cn('sticky top-0 z-10 bg-background', shellDividerB)}>
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+          <div className="flex min-w-0 items-center gap-6">
+            <Link href="/" className="truncate text-lg font-semibold tracking-tight hover:text-primary">
+              {distributorName ?? t('portalTitle')}
+            </Link>
+            <nav className="hidden items-center gap-1 sm:flex" aria-label="Main">
+              {navItems.map((item) => {
+                const active = item.exact
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      'rounded-md px-3 py-1.5 text-sm transition-colors',
+                      active
+                        ? 'bg-muted font-medium text-foreground'
+                        : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <LocaleToggle portal="distributor" />
+            <ModeToggle />
+            {onLogout ? (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {tc('logout')}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+    </div>
+  );
+}

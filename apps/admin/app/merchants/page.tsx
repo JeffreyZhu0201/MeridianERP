@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui';
+import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
-import { apiFetch, type PaginatedResponse, type MerchantListItem } from '@/lib/api';
+import { apiFetch, type PaginatedResponse, type MerchantListItem, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { MerchantsFilters } from './_components/merchants-filters';
 import { MerchantsPagination } from './_components/merchants-pagination';
@@ -27,39 +28,80 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
 
   let merchants: MerchantListItem[] = [];
   let meta = { total: 0, page: 1, limit: 20 };
+  let distributors: PlatformDistributor[] = [];
   try {
-    const res = await apiFetch<PaginatedResponse<MerchantListItem>>(
-      `/platform/merchants?${query.toString()}`,
-      {},
-      token,
-    );
+    const [res, distRes] = await Promise.all([
+      apiFetch<PaginatedResponse<MerchantListItem>>(
+        `/platform/merchants?${query.toString()}`,
+        {},
+        token,
+      ),
+      apiFetch<PlatformDistributor[]>('/platform/distributors', {}, token),
+    ]);
     merchants = res.data;
     meta = res.meta;
+    distributors = distRes;
   } catch {
     merchants = [];
   }
 
+  const td = await getTranslations('admin.dashboard');
+  const tc = await getTranslations('common');
+  const statusFilter = params.status;
+  const statusLabel =
+    statusFilter && Object.values(OnboardingStatus).includes(statusFilter as OnboardingStatus)
+      ? t(`onboardingStatus.${statusFilter as OnboardingStatus}`)
+      : null;
+
+  const metrics = [
+    {
+      title: td('totalMerchants'),
+      value: meta.total,
+      description: statusLabel ? `${t('filterStatus')}: ${statusLabel}` : undefined,
+    },
+  ];
+
+  if (statusLabel) {
+    metrics.push({
+      title: statusLabel,
+      value: meta.total,
+      description: t('filterStatus'),
+    });
+  }
+
+  metrics.push({
+    title: tc('pageOf', {
+      page: meta.page,
+      total: Math.max(1, Math.ceil(meta.total / meta.limit)),
+    }),
+    value: merchants.length,
+    description: undefined,
+  });
+
   return (
     <AdminShellWrapper>
-      <ListPageFrame
-        title={t('title')}
-        description={t('description')}
-        filters={
+      <div className="space-y-6">
+        <BentoListHeader metrics={metrics} />
+        <ListPageFrame
+          title={t('title')}
+          description={t('description')}
+          filters={
+            <Suspense>
+              <MerchantsFilters />
+            </Suspense>
+          }
+          emptyState={
+            merchants.length === 0 ? (
+              <EmptyState title={t('empty')} description={t('emptyDescription')} />
+            ) : undefined
+          }
+        >
+          <MerchantsTable merchants={merchants} token={token} distributors={distributors} />
           <Suspense>
-            <MerchantsFilters />
+            <MerchantsPagination total={meta.total} page={meta.page} limit={meta.limit} />
           </Suspense>
-        }
-        emptyState={
-          merchants.length === 0 ? (
-            <EmptyState title={t('empty')} description={t('emptyDescription')} />
-          ) : undefined
-        }
-      >
-        <MerchantsTable merchants={merchants} token={token} />
-        <Suspense>
-          <MerchantsPagination total={meta.total} page={meta.page} limit={meta.limit} />
-        </Suspense>
-      </ListPageFrame>
+        </ListPageFrame>
+      </div>
     </AdminShellWrapper>
   );
 }

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch } from '@/lib/api';
@@ -49,9 +49,22 @@ export default async function StockPage({ searchParams }: StockPageProps) {
 
   const levelsPage = normalizeInventoryPage(levelsRes);
 
+  const lowStockCount = levelsPage.items.filter(
+    (l) =>
+      l.quantityOnHand <= (l.variant.reorderThreshold ?? settings.defaultReorderThreshold),
+  ).length;
+  const tDash = await getTranslations('merchant.dashboard');
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('sku'), value: levelsPage.total },
+            { title: t('warehouse'), value: warehouses.length },
+            { title: tDash('lowStock'), value: lowStockCount },
+          ]}
+        />
         <Suspense>
           <StockLevelsTable
             initialLevels={levelsPage.items}

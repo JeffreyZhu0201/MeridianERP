@@ -91,6 +91,31 @@ enum StockTransferStatus {
   CANCELLED
 }
 
+enum FulfillmentType {
+  PICKUP
+  DELIVERY
+}
+
+enum AllocationOrderStatus {
+  DRAFT
+  ISSUED
+  CONFIRMED
+  CANCELLED
+}
+
+enum ReplenishmentRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FULFILLED
+}
+
+enum WithdrawalRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model PlatformUser {
   id        String       @id @default(cuid())
   email     String       @unique
@@ -125,24 +150,34 @@ model Tenant {
   purchaseOrders    PurchaseOrder[]
   purchaseOrderReceipts PurchaseOrderReceipt[]
   stockTransfers    StockTransfer[]
+  allocationOrders  AllocationOrder[]
+  replenishmentRequests ReplenishmentRequest[]
+  deliveryAllocationLedgers DeliveryAllocationLedger[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
 
 model MerchantProfile {
-  id               String           @id @default(cuid())
-  tenantId         String           @unique
-  tenant           Tenant           @relation(fields: [tenantId], references: [id])
-  businessName     String
-  legalName        String?
-  contactEmail     String
-  contactPhone     String?
-  onboardingStatus OnboardingStatus @default(DRAFT)
-  rejectionReason  String?
-  submittedAt      DateTime?
-  reviewedAt       DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                        String           @id @default(cuid())
+  tenantId                  String           @unique
+  tenant                    Tenant           @relation(fields: [tenantId], references: [id])
+  businessName              String
+  legalName                 String?
+  contactEmail              String
+  contactPhone              String?
+  onboardingStatus          OnboardingStatus @default(DRAFT)
+  rejectionReason           String?
+  submittedAt               DateTime?
+  reviewedAt                DateTime?
+  recruitedByDistributorId  String?
+  recruitedByDistributor    Distributor?     @relation("RecruitedMerchants", fields: [recruitedByDistributorId], references: [id])
+  recruitedAt               DateTime?
+  pendingRecruitInviteCode  String?
+  storePublished            Boolean          @default(false)
+  createdAt                 DateTime         @default(now())
+  updatedAt                 DateTime         @updatedAt
+
+  @@index([recruitedByDistributorId])
 }
 
 model User {
@@ -227,28 +262,44 @@ model CrmActivity {
 }
 
 model Distributor {
-  id             String              @id @default(cuid())
-  tenantId       String
-  tenant         Tenant              @relation(fields: [tenantId], references: [id])
-  name           String
-  email          String?
-  phone          String?
-  passwordHash   String?
-  portalEnabled  Boolean             @default(false)
-  lastLoginAt    DateTime?
-  commissionRate Decimal             @db.Decimal(10, 4)
-  commissionType CommissionType      @default(PERCENT)
-  isActive       Boolean             @default(true)
-  qrCodes        DistributorQrCode[]
-  bindings       Binding[]
-  leads          CrmLead[]
-  orders         Order[]
-  carts          Cart[]
+  id                String                    @id @default(cuid())
+  tenantId          String?
+  tenant            Tenant?                   @relation(fields: [tenantId], references: [id])
+  name              String
+  email             String?
+  phone             String?
+  passwordHash      String?
+  portalEnabled     Boolean                   @default(false)
+  lastLoginAt       DateTime?
+  commissionRate    Decimal                   @db.Decimal(10, 4)
+  commissionType    CommissionType            @default(PERCENT)
+  isActive          Boolean                   @default(true)
+  qrCodes           DistributorQrCode[]
+  bindings          Binding[]
+  leads             CrmLead[]
+  orders            Order[]
+  carts             Cart[]
   commissionEntries CommissionLedger[]
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  recruitedMerchants MerchantProfile[]        @relation("RecruitedMerchants")
+  recruitInviteCodes MerchantRecruitInviteCode[]
+  withdrawalRequests WithdrawalRequest[]
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
 
   @@index([tenantId])
+}
+
+model MerchantRecruitInviteCode {
+  id            String      @id @default(cuid())
+  code          String      @unique
+  distributorId String
+  distributor   Distributor @relation(fields: [distributorId], references: [id])
+  revokedAt     DateTime?
+  expiresAt     DateTime?
+  useCount      Int         @default(0)
+  createdAt     DateTime    @default(now())
+
+  @@index([distributorId])
 }
 
 model DistributorQrCode {
@@ -335,26 +386,29 @@ model Product {
 }
 
 model ProductVariant {
-  id        String     @id @default(cuid())
-  productId String
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
-  sku       String
-  name      String
-  price     Decimal    @db.Decimal(12, 2)
-  inventory Int        @default(0)
+  id               String     @id @default(cuid())
+  productId        String
+  product          Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  masterSkuId      String?
+  masterSku        MasterSku? @relation(fields: [masterSkuId], references: [id])
+  sku              String
+  name             String
+  price            Decimal    @db.Decimal(12, 2)
+  inventory        Int        @default(0)
   reorderThreshold Int?
-  isActive  Boolean    @default(true)
-  cartItems CartItem[]
-  orderLines OrderLine[]
-  stockLevels StockLevel[]
-  adjustments StockAdjustment[]
+  isActive         Boolean    @default(true)
+  cartItems        CartItem[]
+  orderLines       OrderLine[]
+  stockLevels      StockLevel[]
+  adjustments      StockAdjustment[]
   purchaseOrderLines PurchaseOrderLine[]
   stockTransferLines StockTransferLine[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   @@unique([productId, sku])
   @@index([productId])
+  @@index([masterSkuId])
 }
 
 model Cart {
@@ -390,30 +444,40 @@ model CartItem {
 }
 
 model Order {
-  id                    String            @id @default(cuid())
-  tenantId              String
-  tenant                Tenant            @relation(fields: [tenantId], references: [id])
-  customerId            String?
-  customer              Customer?         @relation(fields: [customerId], references: [id])
-  distributorId         String?
-  distributor           Distributor?      @relation(fields: [distributorId], references: [id])
-  status                OrderStatus       @default(PENDING_PAYMENT)
-  currency              String            @default("USD")
-  subtotal              Decimal           @db.Decimal(12, 2)
-  tax                   Decimal           @default(0) @db.Decimal(12, 2)
-  total                 Decimal           @db.Decimal(12, 2)
-  guestEmail            String?
-  stripePaymentIntentId String?           @unique
-  lines                 OrderLine[]
-  commissionEntry       CommissionLedger?
-  createdAt             DateTime          @default(now())
-  updatedAt             DateTime          @updatedAt
+  id                         String            @id @default(cuid())
+  tenantId                   String
+  tenant                     Tenant            @relation(fields: [tenantId], references: [id])
+  customerId                 String?
+  customer                   Customer?         @relation(fields: [customerId], references: [id])
+  distributorId              String?
+  distributor                Distributor?      @relation(fields: [distributorId], references: [id])
+  status                     OrderStatus       @default(PENDING_PAYMENT)
+  fulfillmentType            FulfillmentType   @default(PICKUP)
+  currency                   String            @default("CNY")
+  subtotal                   Decimal           @db.Decimal(12, 2)
+  tax                        Decimal           @default(0) @db.Decimal(12, 2)
+  total                      Decimal           @db.Decimal(12, 2)
+  guestEmail                 String?
+  stripePaymentIntentId      String?           @unique
+  pickupCode                 String?           @unique
+  pickupVerifiedAt           DateTime?
+  pickupVerifiedByUserId     String?
+  deliveryAddress            Json?
+  shippedAt                  DateTime?
+  shippedByPlatformUserId    String?
+  lines                      OrderLine[]
+  commissionEntry            CommissionLedger?
+  deliveryAllocationLedgers  DeliveryAllocationLedger[]
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
 
   @@index([tenantId])
   @@index([customerId])
   @@index([status])
   @@index([distributorId])
   @@index([tenantId, distributorId, status, createdAt])
+  @@index([tenantId, fulfillmentType, status])
+  @@index([fulfillmentType, status])
 }
 
 model OrderLine {
@@ -647,4 +711,145 @@ model StockTransferLine {
   quantity   Int
 
   @@index([transferId])
+}
+
+model MasterSku {
+  id                   String                   @id @default(cuid())
+  skuCode              String                   @unique
+  name                 String
+  quantityOnHand       Int                      @default(0)
+  cumulativeShippedQty Int                      @default(0)
+  unitCost             Decimal                  @db.Decimal(12, 2)
+  wholesalePrice       Decimal                  @db.Decimal(12, 2)
+  retailPrice          Decimal                  @db.Decimal(12, 2)
+  isActive             Boolean                  @default(true)
+  variants             ProductVariant[]
+  allocationLines      AllocationOrderLine[]
+  replenishmentLines   ReplenishmentRequestLine[]
+  deliveryLedgers      DeliveryAllocationLedger[]
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @updatedAt
+}
+
+model AllocationOrder {
+  id                      String                @id @default(cuid())
+  tenantId                String
+  tenant                  Tenant                @relation(fields: [tenantId], references: [id])
+  status                  AllocationOrderStatus @default(DRAFT)
+  issuedAt                DateTime?
+  confirmedAt             DateTime?
+  issuedByPlatformUserId  String?
+  confirmedByUserId       String?
+  note                    String?
+  lines                   AllocationOrderLine[]
+  createdAt               DateTime              @default(now())
+  updatedAt               DateTime              @updatedAt
+
+  @@index([tenantId, status])
+}
+
+model AllocationOrderLine {
+  id                String          @id @default(cuid())
+  allocationOrderId String
+  allocationOrder   AllocationOrder @relation(fields: [allocationOrderId], references: [id], onDelete: Cascade)
+  masterSkuId       String
+  masterSku         MasterSku       @relation(fields: [masterSkuId], references: [id])
+  quantity          Int
+  wholesalePrice    Decimal         @db.Decimal(12, 2)
+
+  @@index([allocationOrderId])
+}
+
+model ReplenishmentRequest {
+  id          String                     @id @default(cuid())
+  tenantId    String
+  tenant      Tenant                     @relation(fields: [tenantId], references: [id])
+  status      ReplenishmentRequestStatus @default(PENDING)
+  note        String?
+  reviewedAt  DateTime?
+  reviewedByPlatformUserId String?
+  lines       ReplenishmentRequestLine[]
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  @@index([tenantId, status])
+}
+
+model ReplenishmentRequestLine {
+  id                     String               @id @default(cuid())
+  replenishmentRequestId String
+  replenishmentRequest   ReplenishmentRequest @relation(fields: [replenishmentRequestId], references: [id], onDelete: Cascade)
+  masterSkuId            String
+  masterSku              MasterSku            @relation(fields: [masterSkuId], references: [id])
+  quantity               Int
+
+  @@index([replenishmentRequestId])
+}
+
+model WithdrawalRequest {
+  id              String                  @id @default(cuid())
+  distributorId   String
+  distributor     Distributor             @relation(fields: [distributorId], references: [id])
+  amount          Decimal                 @db.Decimal(12, 2)
+  status          WithdrawalRequestStatus @default(PENDING)
+  note            String?
+  reviewedByPlatformUserId String?
+  rejectionReason String?
+  reviewedAt      DateTime?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  @@index([distributorId, status])
+}
+
+model DeliveryAllocationLedger {
+  id             String    @id @default(cuid())
+  orderId        String
+  order          Order     @relation(fields: [orderId], references: [id])
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id])
+  masterSkuId    String
+  masterSku      MasterSku @relation(fields: [masterSkuId], references: [id])
+  quantity       Int
+  wholesalePrice Decimal   @db.Decimal(12, 2)
+  lineTotal      Decimal   @db.Decimal(12, 2)
+  createdAt      DateTime  @default(now())
+
+  @@index([orderId])
+  @@index([tenantId])
+}
+
+model PlatformCrmCompany {
+  id        String             @id @default(cuid())
+  name      String
+  website   String?
+  contacts  PlatformCrmContact[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+}
+
+model PlatformCrmContact {
+  id         String              @id @default(cuid())
+  companyId  String?
+  company    PlatformCrmCompany? @relation(fields: [companyId], references: [id])
+  firstName  String
+  lastName   String
+  email      String?
+  phone      String?
+  leads      PlatformCrmLead[]
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+}
+
+model PlatformCrmLead {
+  id        String           @id @default(cuid())
+  contactId String?
+  contact   PlatformCrmContact? @relation(fields: [contactId], references: [id])
+  title     String
+  stage     LeadStage        @default(NEW)
+  source    String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([stage])
 }

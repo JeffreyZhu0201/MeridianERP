@@ -435,6 +435,16 @@ export class InventoryService {
     return variant.reorderThreshold ?? settings?.defaultReorderThreshold ?? 5;
   }
 
+  async applyQuantityDeltaInTx(
+    tx: TxClient,
+    tenantId: string,
+    warehouseId: string,
+    variantId: string,
+    delta: number,
+  ): Promise<StockMutationResult> {
+    return this.applyQuantityDelta(tx, tenantId, warehouseId, variantId, delta);
+  }
+
   private async applyQuantityDelta(
     tx: TxClient,
     tenantId: string,

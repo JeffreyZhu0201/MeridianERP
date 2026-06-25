@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile, type Product } from '@/lib/api';
@@ -57,9 +57,18 @@ export default async function AdjustmentsPage({ searchParams }: AdjustmentsPageP
 
   const historyPage = normalizeInventoryPage(historyRes);
 
+  const variantCount = productsToVariantOptions(productsRes).length;
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('history'), value: historyPage.total },
+            { title: t('warehouse'), value: warehouses.length },
+            { title: t('variant'), value: variantCount },
+          ]}
+        />
         <Suspense>
           <AdjustmentForm
             warehouses={warehouses}

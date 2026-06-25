@@ -129,6 +129,7 @@ describe('Distributor portal (e2e)', () => {
     expect(dashboard.body.bindingsCount).toBeGreaterThanOrEqual(1);
     expect(dashboard.body.attributedOrderCount).toBeGreaterThanOrEqual(1);
     expect(dashboard.body.commissionSummary.entryCount).toBeGreaterThanOrEqual(1);
+    expect(Array.isArray(dashboard.body.trend)).toBe(true);
 
     const commissions = await request(app.getHttpServer())
       .get('/api/v1/distributor/me/commissions')

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch } from '@/lib/api';
@@ -22,10 +22,21 @@ export default async function WarehousesPage() {
   ]);
 
   const t = await getTranslations('merchant.inventory.warehouses');
+  const tCommon = await getTranslations('common');
+
+  const activeCount = warehouses.filter((w) => w.isActive).length;
+  const defaultCount = warehouses.filter((w) => w.isDefault).length;
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: warehouses.length },
+            { title: tCommon('active'), value: activeCount },
+            { title: t('defaultBadge'), value: defaultCount },
+          ]}
+        />
         <Suspense>
           <WarehousesTable
             warehouses={warehouses}

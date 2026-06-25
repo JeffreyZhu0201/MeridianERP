@@ -35,16 +35,8 @@ export function OrdersTable({ orders }: OrdersTableProps) {
   const t = useTranslations('admin.orders');
   const locale = useLocale();
 
-  if (orders.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed p-12 text-center">
-        <p className="text-muted-foreground">{t('empty')}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-xl ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>

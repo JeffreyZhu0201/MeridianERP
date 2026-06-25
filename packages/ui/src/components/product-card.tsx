@@ -29,7 +29,7 @@ export function ProductCard({
     <Link
       href={href}
       className={cn(
-        'group flex flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md',
+        'group flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-border transition-shadow hover:shadow-md',
         className,
       )}
     >

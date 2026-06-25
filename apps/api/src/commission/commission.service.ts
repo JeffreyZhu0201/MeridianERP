@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommissionType, OrderStatus } from '@prisma/client';
+import { OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CommissionQueueService } from '../queue/commission-queue.service';
@@ -13,20 +13,36 @@ export class CommissionService {
     private readonly emailQueue: EmailQueueService,
   ) {}
 
-  async accrueOnPaid(orderId: string): Promise<void> {
+  /** @deprecated Phase 5 — commission accrues on FULFILLED, not PAID */
+  async accrueOnPaid(_orderId: string): Promise<void> {
+    return;
+  }
+
+  async accrueOnFulfilled(orderId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { commissionEntry: true },
     });
-    if (!order || order.status !== OrderStatus.PAID || !order.distributorId) {
+    if (!order || order.status !== OrderStatus.FULFILLED) {
       return;
     }
     if (order.commissionEntry) {
       return;
     }
 
+    const profile = await this.prisma.merchantProfile.findUnique({
+      where: { tenantId: order.tenantId },
+    });
+    if (!profile?.recruitedByDistributorId) {
+      return;
+    }
+
     const distributor = await this.prisma.distributor.findFirst({
-      where: { id: order.distributorId, tenantId: order.tenantId, isActive: true },
+      where: {
+        id: profile.recruitedByDistributorId,
+        tenantId: null,
+        isActive: true,
+      },
     });
     if (!distributor) {
       return;
@@ -66,10 +82,10 @@ export class CommissionService {
   calculateAmount(
     orderTotal: number,
     commissionRate: number,
-    commissionType: CommissionType,
+    commissionType: import('@prisma/client').CommissionType,
   ): Prisma.Decimal {
     const value =
-      commissionType === CommissionType.PERCENT
+      commissionType === 'PERCENT'
         ? orderTotal * (commissionRate / 100)
         : commissionRate;
     return new Prisma.Decimal(value.toFixed(2));

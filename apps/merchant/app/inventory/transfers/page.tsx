@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -43,11 +43,21 @@ export default async function TransfersPage({ searchParams }: TransfersPageProps
   ]);
 
   const t = await getTranslations('merchant.inventory.transfers');
+  const tWh = await getTranslations('merchant.inventory.warehouses');
   const transfersPage = normalizeInventoryPage(transfersRes);
+
+  const lineCount = transfersPage.items.reduce((sum, tr) => sum + tr.lines.length, 0);
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <ListPageFrame title={t('title')} description={t('description')}>
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: transfersPage.total },
+            { title: tWh('title'), value: warehouses.length },
+            { title: t('lineCount'), value: lineCount },
+          ]}
+        />
         <Suspense>
           <TransfersTable
             transfers={transfersPage.items}

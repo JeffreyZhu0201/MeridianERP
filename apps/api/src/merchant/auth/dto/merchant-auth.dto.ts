@@ -28,6 +28,11 @@ export class MerchantRegisterDto {
   @IsOptional()
   @IsString()
   contactPhone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  inviteCode?: string;
 }
 
 export class MerchantLoginDto {

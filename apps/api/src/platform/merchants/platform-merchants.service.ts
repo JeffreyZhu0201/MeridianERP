@@ -69,7 +69,7 @@ export class PlatformMerchantsService {
     return this.toPlatformMerchantDetail(profile, crmSummary, distributors);
   }
 
-  async approve(id: string) {
+  async approve(id: string, dto: { recruitedByDistributorId?: string } = {}) {
     const profile = await this.findProfileById(id);
     if (
       profile.onboardingStatus !== OnboardingStatus.SUBMITTED &&
@@ -77,6 +77,34 @@ export class PlatformMerchantsService {
     ) {
       throw new BadRequestException('Merchant cannot be approved in current status');
     }
+
+    let recruitedByDistributorId = dto.recruitedByDistributorId ?? null;
+    if (!recruitedByDistributorId && profile.pendingRecruitInviteCode) {
+      const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
+        where: {
+          code: profile.pendingRecruitInviteCode,
+          revokedAt: null,
+        },
+        include: { distributor: true },
+      });
+      if (invite?.distributor.tenantId === null && invite.distributor.isActive) {
+        recruitedByDistributorId = invite.distributorId;
+        await this.prisma.merchantRecruitInviteCode.update({
+          where: { id: invite.id },
+          data: { useCount: { increment: 1 } },
+        });
+      }
+    }
+
+    if (recruitedByDistributorId) {
+      const distributor = await this.prisma.distributor.findFirst({
+        where: { id: recruitedByDistributorId, tenantId: null, isActive: true },
+      });
+      if (!distributor) {
+        throw new BadRequestException('Invalid platform distributor for recruitment');
+      }
+    }
+
     const baseSlug = slugify(profile.businessName) || 'merchant';
     let slug = baseSlug;
     let suffix = 0;
@@ -91,6 +119,10 @@ export class PlatformMerchantsService {
           onboardingStatus: OnboardingStatus.APPROVED,
           reviewedAt: new Date(),
           rejectionReason: null,
+          storePublished: true,
+          recruitedByDistributorId,
+          recruitedAt: recruitedByDistributorId ? new Date() : null,
+          pendingRecruitInviteCode: null,
         },
       }),
       this.prisma.tenant.update({

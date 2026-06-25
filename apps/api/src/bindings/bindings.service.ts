@@ -52,7 +52,7 @@ export class BindingsService {
     }
 
     let tenantSlug: string | undefined;
-    if (qr.bindType === PrismaBindType.CUSTOMER) {
+    if (qr.bindType === PrismaBindType.CUSTOMER && qr.distributor.tenantId) {
       const tenant = await this.prisma.tenant.findUnique({
         where: { id: qr.distributor.tenantId },
       });
