@@ -90,7 +90,7 @@ export function InventorySettingsForm({
 export function StaffForbidden() {
   const t = useTranslations('merchant.inventory.settings');
   return (
-    <div className="rounded-xl border border-dashed p-12 text-center">
+    <div className="rounded-xl ring-1 ring-border p-12 text-center">
       <p className="text-muted-foreground">{t('forbidden')}</p>
       <Link
         href="/inventory/alerts"

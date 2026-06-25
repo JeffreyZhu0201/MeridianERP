@@ -2,7 +2,7 @@
   "name": "meridian-erp",
   "private": true,
   "scripts": {
-    "dev": "node -e \"console.error('\\nMeridianERP: start each service in its own terminal.\\n  rtk pnpm deps\\n  rtk pnpm dev:api\\n  rtk pnpm dev:admin | dev:merchant | dev:store | dev:distributor\\nSee README.md\\n')\" && exit 1",
+    "dev": "turbo dev --filter=@meridian/api --filter=@meridian/admin --filter=@meridian/merchant --filter=@meridian/store --filter=@meridian/distributor",
     "dev:admin": "pnpm --filter @meridian/admin dev",
     "dev:merchant": "pnpm --filter @meridian/merchant dev",
     "dev:store": "pnpm --filter @meridian/store dev",

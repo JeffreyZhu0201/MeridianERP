@@ -40,7 +40,7 @@ export function CommissionsTable({ items }: CommissionsTableProps) {
   }
 
   return (
-    <div className="rounded-xl border">
+    <div className="rounded-xl ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>

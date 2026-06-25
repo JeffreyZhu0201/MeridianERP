@@ -111,7 +111,7 @@ export function TransfersTable({
           }
         />
       ) : (
-        <div className="rounded-lg border">
+        <div className="rounded-lg ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

@@ -106,7 +106,7 @@ export function PurchaseOrdersTable({
       {orders.length === 0 ? (
         <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

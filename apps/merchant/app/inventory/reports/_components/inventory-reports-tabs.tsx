@@ -91,7 +91,7 @@ export function InventoryReportsTabs({
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2 border-b">
+      <div className="flex gap-2 border-b border-border/50">
         <button
           type="button"
           onClick={() => setTab('stock')}
@@ -130,7 +130,7 @@ export function InventoryReportsTabs({
               {t('exportCsv')}
             </Button>
           </div>
-          <div className="overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -188,7 +188,7 @@ export function InventoryReportsTabs({
               {t('exportCsv')}
             </Button>
           </div>
-          <div className="overflow-x-auto rounded-xl border">
+          <div className="overflow-x-auto rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>

@@ -81,7 +81,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-2">
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -139,7 +139,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
       </div>
 
       <div className="space-y-4 lg:sticky lg:top-20 lg:self-start">
-        <div className="rounded-xl border p-4">
+        <div className="rounded-xl ring-1 ring-border p-4">
           <div className="flex items-center justify-between text-sm font-medium">
             <span>{t('cart.subtotal')}</span>
             <span>{formatPrice(subtotal)}</span>

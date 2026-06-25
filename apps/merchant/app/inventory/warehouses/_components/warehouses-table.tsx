@@ -130,7 +130,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -230,7 +230,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
                 type="checkbox"
                 checked={form.isActive}
                 onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                className="size-4 rounded border-input"
+                className="size-4 rounded border border-border dark:border-border/40"
               />
               {tCommon('active')}
               {editing.isDefault && !form.isActive ? (

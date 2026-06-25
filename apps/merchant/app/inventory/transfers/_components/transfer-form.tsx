@@ -177,7 +177,7 @@ export function TransferForm({
           </div>
 
           {lines.map((line, index) => (
-            <div key={index} className="grid gap-3 rounded-lg border p-4 sm:grid-cols-[1fr_120px_auto]">
+            <div key={index} className="grid gap-3 rounded-lg ring-1 ring-border p-4 sm:grid-cols-[1fr_120px_auto]">
               <div className="space-y-2">
                 <Label htmlFor={`variant-${index}`}>{t('variant')}</Label>
                 <Select

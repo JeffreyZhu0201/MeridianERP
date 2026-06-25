@@ -31,24 +31,24 @@ export function MerchantsPagination({ total, page, limit }: MerchantsPaginationP
         {page > 1 ? (
           <Link
             href={hrefFor(page - 1)}
-            className="inline-flex h-8 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+            className="inline-flex h-8 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
           >
             {tc('previous')}
           </Link>
         ) : (
-          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-input px-3 text-xs opacity-50">
+          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-border dark:border-border/40 px-3 text-xs opacity-50">
             {tc('previous')}
           </span>
         )}
         {page < totalPages ? (
           <Link
             href={hrefFor(page + 1)}
-            className="inline-flex h-8 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+            className="inline-flex h-8 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
           >
             {tc('next')}
           </Link>
         ) : (
-          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-input px-3 text-xs opacity-50">
+          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-border dark:border-border/40 px-3 text-xs opacity-50">
             {tc('next')}
           </span>
         )}

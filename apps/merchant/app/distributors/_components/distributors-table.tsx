@@ -96,11 +96,11 @@ export function DistributorsTable({ distributors, token }: DistributorsTableProp
       </div>
 
       {distributors.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-12 text-center text-muted-foreground">
+        <div className="rounded-xl ring-1 ring-border p-12 text-center text-muted-foreground">
           {t('empty')}
         </div>
       ) : (
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

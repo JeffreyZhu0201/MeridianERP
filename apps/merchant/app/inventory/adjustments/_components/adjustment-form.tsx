@@ -316,7 +316,7 @@ export function AdjustmentsHistoryTable({
       {adjustments.length === 0 ? (
         <EmptyState title={t('emptyHistory')} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

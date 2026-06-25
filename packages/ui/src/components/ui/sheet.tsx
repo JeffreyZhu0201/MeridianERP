@@ -30,7 +30,7 @@ export function Sheet({ open, onOpenChange, title, children, footer }: SheetProp
       <div
         role="dialog"
         aria-modal
-        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background ring-1 ring-foreground/10"
+        className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background ring-1 ring-border"
       >
         <div className="flex items-center justify-between border-b border-border/50 px-6 py-4">
           <h2 className="text-lg font-medium">{title}</h2>

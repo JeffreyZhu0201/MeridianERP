@@ -128,7 +128,7 @@ export function QrHistoryTable({
         ) : items.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t('empty')}</p>
         ) : (
-          <div className="rounded-xl border">
+          <div className="rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>

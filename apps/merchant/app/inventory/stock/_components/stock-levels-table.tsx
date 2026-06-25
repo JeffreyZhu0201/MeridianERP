@@ -160,7 +160,7 @@ export function StockLevelsTable({
       {levels.length === 0 ? (
         <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
-        <div className="overflow-x-auto rounded-xl border">
+        <div className="overflow-x-auto rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -265,7 +265,7 @@ export function StockLevelsTable({
               type="checkbox"
               checked={useDefault}
               onChange={(e) => setUseDefault(e.target.checked)}
-              className="size-4 rounded border-input"
+              className="size-4 rounded border border-border dark:border-border/40"
             />
             {t('useDefaultThreshold')}（{defaultThreshold}）
           </label>

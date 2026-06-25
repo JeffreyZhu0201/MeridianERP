@@ -118,8 +118,8 @@ EOF
 |-----------|---------------|
 | PostgreSQL | **Prisma Postgres** (managed cloud) |
 | Redis | Local Docker (`pnpm deps`) |
-| NestJS API | Local (`rtk pnpm dev:api`) |
-| Next.js portals | Local — **one terminal each** (`rtk pnpm dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor`) |
+| NestJS API + portals | Local (`rtk pnpm dev` — all services via Turborepo) |
+| Single service | `rtk pnpm dev:api`, `dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor` |
 
 ### First-time setup
 
@@ -138,15 +138,11 @@ pnpm db:setup      # generate + migrate + seed
 
 ### Run locally (recommended)
 
-Open **one terminal per service**. Start API first.
-
 ```bash
-rtk pnpm dev:api
-rtk pnpm dev:admin
-rtk pnpm dev:merchant
-rtk pnpm dev:store
-rtk pnpm dev:distributor   # optional
+rtk pnpm dev
 ```
+
+Starts API + admin + merchant + store + distributor in one terminal (Turborepo). For a single app only, use `rtk pnpm dev:api`, `dev:admin`, etc.
 
 | Service | URL |
 |---------|-----|
@@ -156,7 +152,7 @@ rtk pnpm dev:distributor   # optional
 | Store | http://localhost:3003 |
 | Distributor | http://localhost:3005 |
 
-Do not append shell comments on the same line as `pnpm dev:*` — they break Next.js. Root `pnpm dev` prints a pointer to this section.
+Do not append shell comments on the same line as `pnpm dev:*` — they break Next.js.
 
 ### Full Docker stack (optional)
 

@@ -89,14 +89,14 @@ export function ContactsTable({ contacts: initial, token }: ContactsTableProps) 
       </div>
 
       {contacts.length === 0 ? (
-        <div className="rounded-xl border border-dashed p-12 text-center">
+        <div className="rounded-xl ring-1 ring-border p-12 text-center">
           <p className="text-muted-foreground">{t('empty')}</p>
           <Button className="mt-4" onClick={openCreate}>
             {t('emptyAction')}
           </Button>
         </div>
       ) : (
-        <div className="rounded-xl border">
+        <div className="rounded-xl ring-1 ring-border">
           <Table>
             <TableHeader>
               <TableRow>

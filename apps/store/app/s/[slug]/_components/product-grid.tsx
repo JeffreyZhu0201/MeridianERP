@@ -19,7 +19,7 @@ export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
 
   if (!products?.length) {
     return (
-      <div className="rounded-xl border border-dashed p-12 text-center">
+      <div className="rounded-xl ring-1 ring-border p-12 text-center">
         <p className="text-muted-foreground">{t('home.empty')}</p>
       </div>
     );

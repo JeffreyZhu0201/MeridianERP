@@ -30,7 +30,7 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border">
+    <div className="overflow-x-auto rounded-xl ring-1 ring-border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -68,13 +68,13 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
                 <div className="flex justify-end gap-2">
                   <Link
                     href={`/inventory/adjustments?variantId=${item.variantId}&warehouseId=${item.warehouseId}`}
-                    className="inline-flex min-h-9 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+                    className="inline-flex min-h-9 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
                     {tAdj('record')}
                   </Link>
                   <Link
                     href={`/inventory/purchase-orders/new?variantId=${item.variantId}`}
-                    className="inline-flex min-h-9 items-center rounded-full border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+                    className="inline-flex min-h-9 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
                     {t('reorder')}
                   </Link>

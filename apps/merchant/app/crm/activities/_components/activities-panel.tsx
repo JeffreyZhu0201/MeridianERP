@@ -104,7 +104,7 @@ export function ActivitiesPanel({
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
-      <form onSubmit={handleCreate} className="space-y-4 rounded-xl border p-4 lg:col-span-1 lg:h-fit">
+      <form onSubmit={handleCreate} className="space-y-4 rounded-xl ring-1 ring-border p-4 lg:col-span-1 lg:h-fit">
         <p className="text-sm font-medium">{t('logActivity')}</p>
         <div className="space-y-2">
           <Label htmlFor="activity-type">{t('type')}</Label>
@@ -167,7 +167,7 @@ export function ActivitiesPanel({
         {activities.length === 0 ? (
           <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
         ) : (
-          <div className="rounded-xl border">
+          <div className="rounded-xl ring-1 ring-border">
             <Table>
               <TableHeader>
                 <TableRow>
