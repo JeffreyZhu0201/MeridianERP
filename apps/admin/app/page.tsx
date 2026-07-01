@@ -138,6 +138,7 @@ export default async function DashboardPage() {
       >
         {stats ? (
           <>
+          
             <BentoMetricTile title={t('totalMerchants')} value={stats.totalMerchants} />
             <BentoMetricTile title={t('pendingMerchants')} value={stats.pendingReview} />
             <BentoMetricTile title={t('activeDistributors')} value={stats.activeDistributors} />

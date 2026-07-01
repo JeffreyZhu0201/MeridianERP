@@ -2,10 +2,10 @@
  * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
  * @Date: 2026-06-30 22:07:13
  * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
- * @LastEditTime: 2026-07-01 15:25:52
+ * @LastEditTime: 2026-07-01 17:23:08
  * @FilePath: /MeridianERP/apps/api/src/auth/guards/platform-auth.guard.ts
- * @Description: 
- * 
+ * @Description: Platform auth guard
+ * PlatformJwtStrategy -> PlatformAuthGuard -> PlatformController -> PlatformService
  * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
  */
 import { Injectable, ExecutionContext } from '@nestjs/common';
@@ -49,12 +49,12 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
  * @Public()  // 跳过认证
  * getPublicInfo() { ... }
  * ```
- *
  * @see PlatformJwtStrategy 实际的 JWT 验证策略
  * @see Public 公开端点装饰器
  */
+
 @Injectable()
-export class PlatformAuthGuard extends AuthGuard('platform-jwt') {
+export class PlatformAuthGuard extends AuthGuard('platform-jwt') { 
   constructor(private reflector: Reflector) {
     super();
   }

@@ -48,7 +48,13 @@ import { JwtPayload, AuthenticatedUser } from '../interfaces/jwt-payload.interfa
  * @see PlatformAuthGuard 使用此策略的守卫
  */
 @Injectable()
+/**
+ * @description: Platform JWT strategy
+ * - 验证平台管理员 JWT token
+* 注册后通过AuthGuard('platform-jwt')验证
+*/
 export class PlatformJwtStrategy extends PassportStrategy(Strategy, 'platform-jwt') {
+
   constructor(env: EnvService) {
     super({
       // 从 Authorization header 提取 Bearer token
