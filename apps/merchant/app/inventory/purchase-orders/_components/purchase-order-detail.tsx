@@ -225,7 +225,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
         title={t('receiveTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setReceiveOpen(false)} />
+            <DialogCloseButton onClose={() => setReceiveOpen(false)} />
             <Button onClick={handleReceive}>{t('confirmReceive')}</Button>
           </>
         }
@@ -278,7 +278,7 @@ export function PurchaseOrderDetail({ purchaseOrder: po, token }: PurchaseOrderD
         description={t('cancelDescription')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setCancelOpen(false)} />
+            <DialogCloseButton onClose={() => setCancelOpen(false)} />
             <Button variant="destructive" onClick={handleCancel}>
               {t('cancelPo')}
             </Button>

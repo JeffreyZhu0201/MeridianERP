@@ -2,6 +2,22 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateLeadDto, UpdateLeadStageDto } from '../dto/lead.dto';
 
+/**
+ * CRM 线索服务 (LeadsService)
+ *
+ * 负责商户的 CRM 销售线索管理。
+ *
+ * 功能：
+ * 1. 线索列表查询（包含联系人、经销商信息）
+ * 2. 线索详情查询
+ * 3. 创建线索
+ * 4. 更新线索阶段（NEW → QUALIFIED → ...）
+ * 5. 删除线索
+ *
+ * 线索阶段 (LeadStage)：NEW, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST
+ *
+ * 线索可关联到联系人（Contact）和经销商（Distributor）。
+ */
 @Injectable()
 export class LeadsService {
   constructor(private readonly prisma: PrismaService) {}

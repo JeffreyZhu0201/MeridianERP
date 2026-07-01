@@ -10,6 +10,22 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { MerchantCategoriesService } from './categories.service';
 import { CreateProductDto, UpdateProductDto } from './dto/catalog.dto';
 
+/**
+ * 商户商品服务 (MerchantProductsService)
+ *
+ * 负责商户商品（Product）和商品变体（ProductVariant）的 CRUD 操作。
+ *
+ * 功能：
+ * 1. 商品列表/详情查询
+ * 2. 创建商品（自动生成 slug，自动初始化库存）
+ * 3. 更新商品（支持更新变体列表）
+ * 4. 删除商品
+ *
+ * 业务逻辑：
+ * - 商品名称会转换为 slug，要求在租户内唯一
+ * - 创建商品时会自动初始化各仓库的库存记录
+ * - 更新变体时会先删除旧变体再创建新变体
+ */
 @Injectable()
 export class MerchantProductsService {
   constructor(

@@ -154,7 +154,7 @@ export function ContactsTable({
         title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setOpen(false)}>{tc('cancel')}</DialogCloseButton>
             <Button
               onClick={handleSave}
               disabled={saving || !form.firstName.trim() || !form.lastName.trim()}

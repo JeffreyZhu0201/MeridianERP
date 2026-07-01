@@ -1,8 +1,10 @@
 {
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "composite": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,

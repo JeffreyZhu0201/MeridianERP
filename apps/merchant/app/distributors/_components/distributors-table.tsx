@@ -145,7 +145,7 @@ export function DistributorsTable({ distributors, token }: DistributorsTableProp
         title={editing ? t('editTitle') : t('addTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setOpen(false)} />
+            <DialogCloseButton onClose={() => setOpen(false)} />
             <Button onClick={handleSave}>{tCommon('save')}</Button>
           </>
         }

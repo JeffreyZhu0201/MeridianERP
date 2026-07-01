@@ -7,6 +7,14 @@ import { PlatformCrmContactsService } from './platform-crm-contacts.service';
 import { PlatformCrmLeadsController } from './platform-crm-leads.controller';
 import { PlatformCrmLeadsService } from './platform-crm-leads.service';
 
+/**
+ * 平台 CRM 模块
+ *
+ * 提供平台级 CRM 功能，包括：
+ * - 公司管理
+ * - 联系人管理
+ * - 线索管理（含阶段流转校验）
+ */
 @Module({
   imports: [AuthModule],
   controllers: [

@@ -1,5 +1,7 @@
 # Phase 1 Foundation — Architecture
 
+> **See also:** [System Overview](./system-overview.md) — unified architecture diagrams, API module map, and full database ER / field reference.
+
 ## Overview
 
 Monolith NestJS API (`apps/api`) serves two Next.js portals (`apps/admin`, `apps/merchant`) in Phase 1. PostgreSQL stores tenant-scoped data; Redis handles cache and BullMQ job queues. Shared contracts live in `packages/shared`.

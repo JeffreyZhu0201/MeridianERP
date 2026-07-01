@@ -15,6 +15,18 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { CreateProductDto, UpdateProductDto } from './dto/catalog.dto';
 import { MerchantProductsService } from './products.service';
 
+/**
+ * 商户商品控制器 (MerchantProductsController)
+ *
+ * 提供商品管理的 RESTful API：
+ * - GET /merchant/products - 获取商品列表
+ * - GET /merchant/products/:id - 获取商品详情
+ * - POST /merchant/products - 创建商品
+ * - PATCH /merchant/products/:id - 更新商品
+ * - DELETE /merchant/products/:id - 删除商品
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/products')
 @UseGuards(MerchantAuthGuard)
 export class MerchantProductsController {

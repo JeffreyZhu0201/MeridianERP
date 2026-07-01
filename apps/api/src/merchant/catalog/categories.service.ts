@@ -13,6 +13,22 @@ import {
   UpdateProductDto,
 } from './dto/catalog.dto';
 
+/**
+ * 商户分类服务 (MerchantCategoriesService)
+ *
+ * 负责商户商品分类（Category）的 CRUD 操作。
+ *
+ * 功能：
+ * 1. 分类列表/详情查询（支持层级结构）
+ * 2. 创建分类（支持父子分类）
+ * 3. 更新分类名称和父分类
+ * 4. 删除分类
+ *
+ * 业务逻辑：
+ * - 分类名称转换为 slug，要求在租户内唯一
+ * - 支持树形结构（parentId 关联）
+ * - 更新分类时会级联更新 slug
+ */
 @Injectable()
 export class MerchantCategoriesService {
   constructor(private readonly prisma: PrismaService) {}

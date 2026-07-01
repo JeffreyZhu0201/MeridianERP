@@ -15,6 +15,18 @@ import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.int
 import { CreateContactDto, UpdateContactDto } from '../dto/contact.dto';
 import { ContactsService } from './contacts.service';
 
+/**
+ * CRM 联系人控制器 (ContactsController)
+ *
+ * 提供联系人管理的 RESTful API：
+ * - GET /merchant/contacts - 获取联系人列表
+ * - GET /merchant/contacts/:id - 获取联系人详情
+ * - POST /merchant/contacts - 创建联系人
+ * - PATCH /merchant/contacts/:id - 更新联系人
+ * - DELETE /merchant/contacts/:id - 删除联系人
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/contacts')
 @UseGuards(MerchantAuthGuard)
 export class ContactsController {

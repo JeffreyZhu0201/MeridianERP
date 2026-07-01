@@ -1,39 +1,123 @@
+/**
+ * @meridian/ui - MeridanERP 共享 UI 组件库
+ *
+ * 本模块统一导出所有 UI 组件、类型定义和工具函数，供各门户应用（admin、merchant、store、distributor）使用。
+ *
+ * 组件分类：
+ * - Shell 组件：页面布局框架（AdminShell、MerchantShell、StoreShell、DistributorShell）
+ * - 页面框架：ListPageFrame、DetailPageFrame、FormPageFrame 等
+ * - Bento 仪表盘：BentoGrid、BentoMetricTile、BentoChartTile 等
+ * - 订单组件：OrderListFrame、PickupVerifyDialog、DeliveryShipDialog
+ * - 主题组件：ThemeProvider、ModeToggle、LocaleToggle
+ * - UI 原语：Button、Input、Card、Table 等基于 shadcn/ui
+ *
+ * @example
+ * ```tsx
+ * import { AdminShell, ListPageFrame, Button, cn } from '@meridian/ui';
+ * ```
+ */
+
+// ============================================================
+// Shell 组件 - 页面布局骨架
+// ============================================================
+
+/** 认证页面布局 - 居中卡片样式（登录/注册页） */
 export { AuthLayout, type AuthLayoutProps } from './components/auth-layout';
+
+/** 平台管理员 Shell - 侧边栏导航 + 顶部工具栏 */
 export { AdminShell, type AdminShellProps } from './components/shells/admin-shell';
-/** @deprecated Use ErpShell instead */
+
+/**
+ * @deprecated 请使用 ErpShell 替代
+ * 旧版 Shell 框架组件，已废弃
+ */
 export { ShellFrame, type ShellFrameProps } from './components/shells/shell-frame';
+
+/** 商户分店 Shell - 侧边栏导航 + 低库存警告徽章 */
 export { MerchantShell, type MerchantShellProps } from './components/shells/merchant-shell';
+
+/** 商店前端 Shell - 商店选购页面布局（购物车、账户导航） */
 export { StoreShell, type StoreShellProps } from './components/shells/store-shell';
+
+/** 渠道经销商 Shell - 简洁顶部导航 */
 export { DistributorShell, type DistributorShellProps } from './components/shells/distributor-shell';
+
+/** 通用 ERP Shell - 基于 Sidebar 的现代布局框架（推荐使用） */
 export { ErpShell, type ErpShellProps } from './components/frameworks/erp-shell';
+
+// ============================================================
+// 页面框架组件 - 标准数据页面布局
+// ============================================================
+
 export {
-  ListPageFrame,
+  ListPageFrame,           /** 列表页框架：标题 + 筛选器 + 表格 */
   type ListPageFrameProps,
-  DetailPageFrame,
+  DetailPageFrame,         /** 详情页框架：面包屑 + 标题 + 操作按钮 */
   type DetailPageFrameProps,
-  FormPageFrame,
+  FormPageFrame,           /** 表单页框架：标题 + Card 包裹的表单 + 底部操作 */
   type FormPageFrameProps,
-  SettingsPageFrame,
+  SettingsPageFrame,       /** 设置页框架：堆叠式设置卡片 */
   type SettingsPageFrameProps,
-  BindPageFrame,
+  BindPageFrame,           /** 绑定页框架：居中状态卡片 */
   type BindPageFrameProps,
-  DashboardPageFrame,
+  DashboardPageFrame,      /** 仪表盘页框架：标题 + 指标网格 */
   type DashboardPageFrameProps,
-  AuthStatusFrame,
+  AuthStatusFrame,         /** 认证状态页框架：登录/入驻引导 */
   type AuthStatusFrameProps,
 } from './components/frameworks';
+
+// ============================================================
+// 主题与国际化组件
+// ============================================================
+
+/**
+ * 主题组件导出
+ * - ThemeProvider: 暗色模式支持（基于 next-themes）
+ * - ModeToggle: 明/暗/系统主题切换按钮
+ * - LocaleToggle: 中英文切换下拉菜单
+ * - PortalThemeProvider: 各门户专用主题 Provider
+ * - PortalLocaleProvider: 各门户专用国际化 Provider
+ * - AuthToolbar: 认证页工具栏（主题 + 语言切换）
+ */
 export { ThemeProvider, ModeToggle, LocaleToggle, PortalThemeProvider, PortalLocaleProvider, AuthToolbar } from './components/theme';
+
+// ============================================================
+// 业务组件
+// ============================================================
+
+/** 商品卡片 - 商店前端产品展示 */
 export { ProductCard, type ProductCardProps } from './components/product-card';
+
+/** 购物车抽屉 - 商店前端快速查看购物车 */
 export { CartDrawer, type CartDrawerItem, type CartDrawerProps } from './components/cart-drawer';
+
+/** 指标卡片 - 单值指标展示（用于仪表盘统计） */
 export { MetricCard, type MetricCardProps } from './components/metric-card';
+
+/** 页面标题 - 数据密集型后台统一页头 */
+export { PageHeader, type PageHeaderProps } from './components/page-header';
+
+/** 空状态 - 列表无数据时的占位提示 */
+export { EmptyState, type EmptyStateProps } from './components/empty-state';
+
+/** 采购单状态徽章 - DRAFT/ORDERED/PARTIALLY_RECEIVED/RECEIVED/CANCELLED */
+export { PurchaseOrderStatusBadge } from './components/inventory/purchase-order-status-badge';
+
+/** 库存调整原因徽章 - DAMAGE/COUNT_CORRECTION/RETURN/OTHER */
+export { StockAdjustmentReasonBadge } from './components/inventory/stock-adjustment-reason-badge';
+
+// ============================================================
+// Bento 仪表盘组件 - 网格化指标展示
+// ============================================================
+
 export {
-  BentoGrid,
-  BentoTile,
-  BentoMetricTile,
-  BentoListHeader,
-  BentoDetailHero,
-  BentoChartTile,
-  BentoDashboardFrame,
+  BentoGrid,               /** Bento 网格容器 - 自适应列数布局 */
+  BentoTile,               /** Bento 瓦片 - 可指定列跨度/行跨度 */
+  BentoMetricTile,         /** Bento 指标瓦片 - 标题 + 数值 + 描述 */
+  BentoListHeader,         /** Bento 列表头部指标条 */
+  BentoDetailHero,         /** Bento 详情页顶部指标组 */
+  BentoChartTile,          /** Bento 图表瓦片 - 柱状图展示 */
+  BentoDashboardFrame,     /** Bento 仪表盘框架 */
   type BentoGridProps,
   type BentoTileProps,
   type BentoMetricTileProps,
@@ -43,16 +127,48 @@ export {
   type BentoChartSeries,
   type BentoDashboardFrameProps,
 } from './components/bento';
-export { PageHeader, type PageHeaderProps } from './components/page-header';
-export { EmptyState, type EmptyStateProps } from './components/empty-state';
-export { PurchaseOrderStatusBadge } from './components/inventory/purchase-order-status-badge';
-export { StockAdjustmentReasonBadge } from './components/inventory/stock-adjustment-reason-badge';
+
+// ============================================================
+// 订单相关组件
+// ============================================================
+
+export {
+  OrderListFrame,          /** 订单列表框架 - 支持自提/配送筛选 */
+  FulfillmentTypeBadge,     /** 履约类型徽章 - PICKUP/DELIVERY */
+  PickupVerifyDialog,       /** 自提核销对话框 - 6 位码/二维码 */
+  DeliveryShipDialog,       /** 配送发货确认对话框 */
+  type OrderListFrameProps,
+  type OrderListRow,
+  type OrderListTab,
+  type FulfillmentType,
+  type PickupVerifyDialogProps,
+  type DeliveryShipDialogProps,
+  type DeliveryShipLine,
+} from './components/orders';
+
+// ============================================================
+// UI 原语组件（基于 shadcn/ui）
+// ============================================================
+
+/** 按钮组件 */
 export { Button, type ButtonProps } from './components/ui/button';
+
+/** 文本输入框 */
 export { Input } from './components/ui/input';
+
+/** 表单标签 */
 export { Label } from './components/ui/label';
+
+/** 多行文本输入 */
 export { Textarea } from './components/ui/textarea';
+
+/** 卡片组件 */
 export { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
+
+/** 徽章/标签组件 */
 export { Badge, type BadgeProps, type BadgeVariant } from './components/ui/badge';
+
+/** 表格组件 */
 export {
   Table,
   TableHeader,
@@ -61,11 +177,26 @@ export {
   TableHead,
   TableCell,
 } from './components/ui/table';
-export { Dialog, DialogCloseButton, Skeleton as DialogSkeleton } from './components/ui/dialog';
+
+/** 对话框组件 */
+export { Dialog, Skeleton as DialogSkeleton } from './components/ui/dialog';
+
+/** 对话框关闭按钮 */
+export { DialogCloseButton } from './components/ui/dialog-close-button';
+
+/** 侧边抽屉 */
 export { Sheet, SheetFooter } from './components/ui/sheet';
+
+/** 下拉选择框 */
 export { Select } from './components/ui/select';
+
+/** 骨架屏加载占位 */
 export { Skeleton } from './components/ui/skeleton';
+
+/** 分隔线 */
 export { Separator } from './components/ui/separator';
+
+/** 面包屑导航 */
 export {
   Breadcrumb,
   BreadcrumbList,
@@ -74,6 +205,8 @@ export {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from './components/ui/breadcrumb';
+
+/** 侧边栏组件 */
 export {
   Sidebar,
   SidebarContent,
@@ -92,25 +225,24 @@ export {
   SidebarProvider,
   SidebarTrigger,
 } from './components/ui/sidebar';
+
+/** 标签页组件 */
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs';
+
+/** OTP 一次性密码输入 */
 export {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
 } from './components/ui/input-otp';
-export {
-  OrderListFrame,
-  FulfillmentTypeBadge,
-  PickupVerifyDialog,
-  DeliveryShipDialog,
-  type OrderListFrameProps,
-  type OrderListRow,
-  type OrderListTab,
-  type FulfillmentType,
-  type PickupVerifyDialogProps,
-  type DeliveryShipDialogProps,
-  type DeliveryShipLine,
-} from './components/orders';
+
+// ============================================================
+// 工具函数与样式常量
+// ============================================================
+
+/** 类名合并工具（Tailwind CSS） */
 export { cn } from './lib/utils';
+
+/** 表面样式常量 */
 export { surfaceRing, surfaceRingLg, shellDividerB, shellDividerT } from './lib/surfaces';

@@ -197,7 +197,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
         title={editing ? t('edit') : t('add')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setDialogOpen(false)}>{tCommon('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setDialogOpen(false)}>{tCommon('cancel')}</DialogCloseButton>
             <Button onClick={handleSave} disabled={saving || !form.name.trim()}>
               {saving ? tCommon('loading') : tCommon('save')}
             </Button>
@@ -255,7 +255,7 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
         }
         footer={
           <>
-            <DialogCloseButton onClick={() => setDefaultDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setDefaultDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
             <Button onClick={() => defaultDialog && handleSetDefault(defaultDialog)}>
               {tCommon('confirm')}
             </Button>

@@ -1,5 +1,27 @@
 'use client';
 
+/**
+ * MerchantShell - 商户分店门户布局组件
+ *
+ * 提供商户分店（Merchant Portal）的标准页面布局，包含：
+ * - 可折叠侧边栏导航（CRM、目录、库存、订单、资金等）
+ * - 低库存警告徽章（显示在库存菜单上）
+ * - 顶部工具栏（商户名称、用户邮箱、退出按钮）
+ * - 暗色模式与国际化切换
+ *
+ * @example
+ * ```tsx
+ * <MerchantShell
+ *   businessName="星巴克 - 中关村店"
+ *   userEmail="manager@starbucks.test"
+ *   lowStockAlertCount={3}
+ *   onLogout={() => signOut()}
+ * >
+ *   <InventoryPage />
+ * </MerchantShell>
+ * ```
+ */
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useMemo, useState } from 'react';
@@ -31,6 +53,14 @@ import {
   SidebarMenuSubItem,
 } from '../ui/sidebar';
 
+/**
+ * MerchantShell 属性接口
+ * @param children - 页面内容
+ * @param businessName - 商户/分店名称（显示在侧边栏顶部）
+ * @param userEmail - 当前登录用户邮箱
+ * @param onLogout - 退出登录回调函数
+ * @param lowStockAlertCount - 低库存警告数量（显示在库存菜单上，红点徽章）
+ */
 export interface MerchantShellProps {
   children: ReactNode;
   businessName?: string;
@@ -39,7 +69,9 @@ export interface MerchantShellProps {
   lowStockAlertCount?: number;
 }
 
+/** 导航子项类型 - 支持徽章显示 */
 type NavChild = { href: string; labelKey: string; badge?: number };
+/** 导航项类型 - 一级菜单 */
 type NavItem = {
   key: string;
   href: string;
@@ -48,6 +80,19 @@ type NavItem = {
   children?: NavChild[];
 };
 
+/**
+ * 商户导航配置
+ * - dashboard: 首页/仪表盘
+ * - crm: 客户关系管理（Contacts/Companies/Leads/Activities）
+ * - catalog: 商品目录（Products/Categories）
+ * - inventory: 库存管理（Warehouses/Stock/Adjustments/Transfers/Alerts/PurchaseOrders/Reports/Settings）
+ * - orders: 订单管理
+ * - allocations: 配额管理
+ * - funds: 资金管理
+ * - replenishment: 补货请求
+ * - commissions: 佣金查看
+ * - settings: 商户设置
+ */
 const mainNav: NavItem[] = [
   { key: 'dashboard', href: '/', labelKey: 'dashboard', icon: IconLayoutDashboard },
   {

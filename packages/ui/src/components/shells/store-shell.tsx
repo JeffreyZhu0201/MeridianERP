@@ -1,5 +1,27 @@
 'use client';
 
+/**
+ * StoreShell - 商店前端消费者门户布局组件
+ *
+ * 提供消费者商店（Store Front）的标准页面布局，包含：
+ * - 顶部固定导航栏（商店名、购物车、用户账户）
+ * - 购物车数量徽章（显示在购物车图标上）
+ * - 底部页脚（Powered by MeridianERP）
+ * - 暗色模式与国际化切换
+ *
+ * @example
+ * ```tsx
+ * <StoreShell
+ *   storeSlug="starbucks-zhongguancun"
+ *   storeName="星巴克 - 中关村店"
+ *   cartCount={3}
+ *   userEmail="customer@example.com"
+ * >
+ *   <ProductCatalog />
+ * </StoreShell>
+ * ```
+ */
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode } from 'react';
@@ -10,6 +32,15 @@ import { ModeToggle } from '../theme/mode-toggle';
 import { shellDividerB, shellDividerT } from '../../lib/surfaces';
 import { cn } from '../../lib/utils';
 
+/**
+ * StoreShell 属性接口
+ * @param children - 页面内容（商品目录、购物车、账户页面等）
+ * @param storeSlug - 商店 URL slug（用于生成商店内链接）
+ * @param storeName - 商店显示名称
+ * @param cartCount - 购物车商品数量（显示徽章，超过 9 显示 9+）
+ * @param userEmail - 当前登录用户邮箱（未登录则显示登录链接）
+ * @param onLogout - 退出登录回调函数
+ */
 export interface StoreShellProps {
   children: ReactNode;
   storeSlug: string;

@@ -131,7 +131,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
         title={t('rejectTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setRejectId(null)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setRejectId(null)}>{tc('cancel')}</DialogCloseButton>
             <Button
               variant="destructive"
               onClick={handleReject}

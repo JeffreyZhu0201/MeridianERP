@@ -22,7 +22,8 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:store": "playwright test --project=store",
     "test:e2e:admin": "playwright test --project=admin",
-    "test:e2e:merchant": "playwright test --project=merchant"
+    "test:e2e:merchant": "playwright test --project=merchant",
+    "typecheck": "tsc -b --pretty"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

@@ -5,6 +5,17 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { AdjustmentListQueryDto } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
+/**
+ * 库存报表控制器 (MerchantInventoryReportsController)
+ *
+ * 提供库存相关报表 API：
+ * - GET /merchant/inventory/reports/stock - 库存报表
+ * - GET /merchant/inventory/reports/adjustments - 调整记录报表
+ * - GET /merchant/inventory/reports/export/stock - 导出库存 CSV
+ * - GET /merchant/inventory/reports/export/adjustments - 导出调整记录 CSV
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/inventory/reports')
 @UseGuards(MerchantAuthGuard)
 export class MerchantInventoryReportsController {

@@ -1,5 +1,21 @@
 'use client';
 
+/**
+ * AdminShell - 平台管理员门户布局组件
+ *
+ * 提供平台管理员（Admin Portal）的标准页面布局，包含：
+ * - 可折叠侧边栏导航（CRM、订单、配额、资金等）
+ * - 顶部工具栏（平台标识、用户邮箱、退出按钮）
+ * - 暗色模式与国际化切换
+ *
+ * @example
+ * ```tsx
+ * <AdminShell userEmail="admin@meridian.test" onLogout={() => signOut()}>
+ *   <DashboardContent />
+ * </AdminShell>
+ * ```
+ */
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode, useMemo, useState } from 'react';
@@ -31,13 +47,21 @@ import {
   SidebarMenuSubItem,
 } from '../ui/sidebar';
 
+/**
+ * AdminShell 属性接口
+ * @param children - 页面内容
+ * @param userEmail - 当前登录用户邮箱（显示在顶部工具栏）
+ * @param onLogout - 退出登录回调函数
+ */
 export interface AdminShellProps {
   children: ReactNode;
   userEmail?: string;
   onLogout?: () => void;
 }
 
+/** 导航子项类型 - 二级菜单项 */
 type NavChild = { href: string; labelKey: string };
+/** 导航项类型 - 一级菜单（可包含子菜单） */
 type NavItem = {
   href: string;
   key: string;
@@ -45,6 +69,20 @@ type NavItem = {
   children?: NavChild[];
 };
 
+/**
+ * 平台管理员导航配置
+ * - dashboard: 首页/仪表盘
+ * - merchants: 商户管理
+ * - distributors: 渠道经销商管理
+ * - orders: 订单管理
+ * - allocations: 配额分配
+ * - replenishment: 补货管理
+ * - withdrawals: 提现管理
+ * - funds: 资金管理
+ * - settlements: 结算管理
+ * - crm: CRM 客户管理（Contacts/Companies/Leads 子菜单）
+ * - settings: 系统设置
+ */
 const navItems: NavItem[] = [
   { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
   { href: '/merchants', key: 'merchants', icon: IconBuildingStore },

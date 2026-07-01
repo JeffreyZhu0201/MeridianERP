@@ -41,7 +41,7 @@ export function ApproveDialog({
       description={t('approveDescription')}
       footer={
         <>
-          <DialogCloseButton onClick={() => handleOpenChange(false)}>{tc('cancel')}</DialogCloseButton>
+          <DialogCloseButton onClose={() => handleOpenChange(false)}>{tc('cancel')}</DialogCloseButton>
           <Button onClick={handleConfirm}>{t('approve')}</Button>
         </>
       }

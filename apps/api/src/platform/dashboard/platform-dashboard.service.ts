@@ -6,10 +6,31 @@ import { dashboardWindowStart } from '../../common/date-range';
 import { buildOrderTrend } from '../../common/dashboard-trend';
 import { decimalSumToString } from '../../merchant/commissions/commission-mappers';
 
+/**
+ * 平台仪表盘服务 - 提供平台运营数据的汇总统计
+ *
+ * 功能范围：
+ * - 商户总数、待审核数统计
+ * - 活跃经销商数统计
+ * - 近30天绑定数统计
+ * - 佣金应计/已结统计
+ * - 订单数量和金额统计
+ * - 订单趋势数据
+ * - 最近入驻商户列表
+ *
+ * 数据时间范围：默认近30天（由 dashboardWindowStart() 定义）
+ */
 @Injectable()
 export class PlatformDashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * 获取平台仪表盘统计数据
+   *
+   * 返回平台运营的核心指标，用于管理后台仪表盘展示。
+   *
+   * @returns 平台仪表盘统计数据
+   */
   async getStats(): Promise<PlatformDashboardStats> {
     const windowStart = dashboardWindowStart();
     const windowEnd = new Date();

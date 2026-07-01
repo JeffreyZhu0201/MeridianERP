@@ -258,7 +258,7 @@ export function AllocationsView({
         title={t('createSku')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setSkuOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setSkuOpen(false)}>{tc('cancel')}</DialogCloseButton>
             <Button onClick={handleCreateSku} disabled={submitting || !skuCode || !skuName}>
               {t('form.submitSku')}
             </Button>
@@ -328,7 +328,7 @@ export function AllocationsView({
         title={t('createAllocation')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setAllocOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setAllocOpen(false)}>{tc('cancel')}</DialogCloseButton>
             <Button
               onClick={handleCreateAllocation}
               disabled={submitting || !tenantId || lines.length === 0}

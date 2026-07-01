@@ -14,6 +14,17 @@ import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.int
 import { CreateActivityDto } from '../dto/activity.dto';
 import { ActivitiesService } from './activities.service';
 
+/**
+ * CRM 活动控制器 (ActivitiesController)
+ *
+ * 提供活动记录的 RESTful API：
+ * - GET /merchant/activities - 获取活动列表
+ * - GET /merchant/activities/:id - 获取活动详情
+ * - POST /merchant/activities - 创建活动记录
+ * - DELETE /merchant/activities/:id - 删除活动记录
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/activities')
 @UseGuards(MerchantAuthGuard)
 export class ActivitiesController {

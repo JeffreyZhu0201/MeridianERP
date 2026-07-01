@@ -1,5 +1,30 @@
 'use client';
 
+/**
+ * PickupVerifyDialog - 自提核销对话框组件
+ *
+ * 用于商户验证消费者自提订单场景：
+ * - 显示订单信息（订单号、客户名称、总金额）
+ * - 支持 6 位数字验证码输入
+ * - 支持二维码扫描（通过 BarcodeDetector API）
+ * - 支持粘贴 JSON 格式的 QR payload
+ * - 支持文本文件上传解析
+ *
+ * @example
+ * ```tsx
+ * <PickupVerifyDialog
+ *   open={isOpen}
+ *   onOpenChange={setIsOpen}
+ *   orderId="order_abc123"
+ *   customerLabel="张三"
+ *   total="¥128.00"
+ *   onVerify={(code) => handleVerify(code)}
+ *   isSubmitting={isVerifying}
+ *   error={errorMessage}
+ * />
+ * ```
+ */
+
 import * as React from 'react';
 import { ScanLine } from 'lucide-react';
 
@@ -14,6 +39,17 @@ import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { cn } from '../../lib/utils';
 
+/**
+ * PickupVerifyDialog 属性接口
+ * @param open - 对话框是否打开
+ * @param onOpenChange - 对话框开关状态变化回调
+ * @param orderId - 订单 ID
+ * @param customerLabel - 客户名称
+ * @param total - 订单总金额
+ * @param onVerify - 确认核销回调（参数为 6 位验证码）
+ * @param isSubmitting - 是否正在提交（显示 loading 状态）
+ * @param error - 错误信息
+ */
 export interface PickupVerifyDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -25,11 +61,19 @@ export interface PickupVerifyDialogProps {
   error?: string;
 }
 
+/**
+ * 从 QR payload 中解析 6 位取货码
+ * 支持两种格式：
+ * 1. 纯 6 位数字：'123456'
+ * 2. JSON 格式：'{"orderId":"...","code":"123456"}'
+ */
 function parsePickupCodeFromQrPayload(raw: string): string | null {
   const trimmed = raw.trim();
+  // 格式 1：纯 6 位数字
   if (/^\d{6}$/.test(trimmed)) {
     return trimmed;
   }
+  // 格式 2：JSON 格式
   try {
     const data = JSON.parse(trimmed) as { code?: unknown; orderId?: unknown };
     if (typeof data.code === 'string' && /^\d{6}$/.test(data.code)) {
@@ -41,6 +85,11 @@ function parsePickupCodeFromQrPayload(raw: string): string | null {
   return null;
 }
 
+/**
+ * 从图片文件中解析取货码
+ * 使用 BarcodeDetector API（Chrome/Edge 支持）检测二维码
+ * 返回解析到的第一个 6 位取货码
+ */
 async function parsePickupCodeFromImageFile(file: File): Promise<string | null> {
   const BarcodeDetectorCtor = (
     globalThis as typeof globalThis & {
@@ -63,6 +112,12 @@ async function parsePickupCodeFromImageFile(file: File): Promise<string | null> 
   return null;
 }
 
+/**
+ * 自提核销对话框组件
+ * - 6 位 OTP 输入框 + 扫描二维码按钮
+ * - 支持粘贴 JSON payload 或上传 QR 图片
+ * - ESC 键关闭对话框
+ */
 export function PickupVerifyDialog({
   open,
   onOpenChange,
@@ -79,6 +134,7 @@ export function PickupVerifyDialog({
   const [scanError, setScanError] = React.useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // 关闭时重置所有状态
   React.useEffect(() => {
     if (!open) {
       setCode('');
@@ -88,6 +144,7 @@ export function PickupVerifyDialog({
     }
   }, [open]);
 
+  // ESC 键关闭对话框
   React.useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -97,6 +154,7 @@ export function PickupVerifyDialog({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [open, onOpenChange]);
 
+  /** 应用解析后的取货码 */
   function applyParsedCode(parsed: string | null, fallbackMessage: string) {
     if (parsed) {
       setCode(parsed);
@@ -107,6 +165,7 @@ export function PickupVerifyDialog({
     setScanError(fallbackMessage);
   }
 
+  /** 处理粘贴的 JSON payload */
   function handlePasteApply() {
     applyParsedCode(
       parsePickupCodeFromQrPayload(pasteValue),
@@ -114,6 +173,7 @@ export function PickupVerifyDialog({
     );
   }
 
+  /** 处理文件上传（支持文本文件和图片） */
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
@@ -121,6 +181,7 @@ export function PickupVerifyDialog({
 
     setScanError('');
 
+    // 文本文件：直接解析内容
     if (
       file.type.startsWith('text/') ||
       file.name.endsWith('.json') ||
@@ -134,6 +195,7 @@ export function PickupVerifyDialog({
       return;
     }
 
+    // 图片文件：使用 BarcodeDetector 解析二维码
     if (file.type.startsWith('image/')) {
       try {
         const parsed = await parsePickupCodeFromImageFile(file);

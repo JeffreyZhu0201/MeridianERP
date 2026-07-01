@@ -71,7 +71,7 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
         title={t('createTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setOpen(false)}>{tc('cancel')}</DialogCloseButton>
             <Button onClick={handleSubmit} disabled={submitting || !name.trim()}>
               {submitting ? t('form.submitting') : t('form.submit')}
             </Button>

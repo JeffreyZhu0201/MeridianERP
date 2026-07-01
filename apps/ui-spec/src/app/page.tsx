@@ -347,7 +347,7 @@ export default function ComponentShowcase() {
                 <Italic className="h-4 w-4" />
               </Toggle>
               
-              <ToggleGroup type="multiple">
+              <ToggleGroup multiple>
                 <ToggleGroupItem value="bold" aria-label="Toggle bold">
                   <Bold className="h-4 w-4" />
                 </ToggleGroupItem>

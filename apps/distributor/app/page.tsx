@@ -1,3 +1,20 @@
+/**
+ * 经销商门户首页 - 仪表盘页面
+ *
+ * 功能说明:
+ * - 展示经销商的核心业务指标（分店数、订单量、佣金收入等）
+ * - 显示可提现余额和累计佣金数据
+ * - 提供业务趋势图表，展示订单和佣金变化
+ *
+ * 使用场景:
+ * - 渠道经销商登录后首先看到的首页
+ * - 快速了解招募的分店业绩状况
+ * - 查看佣金收入和结算情况
+ *
+ * 数据来源:
+ * - 从 /distributor/me/dashboard API 获取经销商专属统计数据
+ * - 使用 distributor.dashboard i18n 命名空间
+ */
 import { getLocale, getTranslations } from 'next-intl/server';
 import {
   BentoChartTile,
@@ -8,17 +25,40 @@ import {
 import { apiFetch, ApiError, type DistributorDashboard } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
+/**
+ * 格式化货币金额显示
+ *
+ * @param value - 金额值，字符串或数字类型
+ * @param locale - 本地化标识符
+ * @returns 格式化后的货币字符串，如 "$1,234.56"
+ *
+ * 使用场景:
+ * - 可用余额、订单金额、佣金金额等货币数据展示
+ */
 function formatMoney(value: string | number, locale: string): string {
   return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
     Number(value),
   );
 }
 
+/**
+ * 加载经销商仪表盘数据
+ *
+ * @param token - 当前用户的 JWT 认证令牌
+ * @param loadFailedMessage - 加载失败时显示的默认错误消息（从 i18n 获取）
+ * @returns 包含仪表盘数据或错误信息的对象
+ *
+ * 职责:
+ * - 调用经销商 Dashboard API 获取最新业务指标
+ * - 统一处理 API 错误
+ * - 返回结构化数据供页面渲染使用
+ */
 async function loadDashboard(
   token: string,
   loadFailedMessage: string,
 ): Promise<{ dashboard: DistributorDashboard | null; error: string | null }> {
   try {
+    // 调用经销商个人仪表盘接口
     const dashboard = await apiFetch<DistributorDashboard>('/distributor/me/dashboard', {}, token);
     return { dashboard, error: null };
   } catch (err) {
@@ -27,6 +67,33 @@ async function loadDashboard(
   }
 }
 
+/**
+ * 经销商仪表盘页面主组件
+ *
+ * 页面布局:
+ * - BentoDashboardFrame: 仪表盘网格布局组件
+ *
+ * 核心功能:
+ * 1. 指标卡片（BentoMetricTile）- 展示 7 个关键指标:
+ *    - branchCount: 招募的分店总数
+ *    - availableBalance: 当前可提现余额
+ *    - attributedOrderCount: 归因订单总数（通过绑定关系产生的订单）
+ *    - attributedOrderRevenue: 归因订单总金额
+ *    - commissionSummary.accruedTotal: 累计应计佣金
+ *    - commissionSummary.settledTotal: 累计已结算佣金
+ *
+ * 2. 趋势图表（BentoChartTile）
+ *    - 展示订单数量、订单金额、佣金应计的变化趋势
+ *    - 支持多条数据系列对比分析
+ *
+ * 3. 欢迎信息
+ *    - 显示经销商名称（从 dashboard.distributorName 获取）
+ *    - 提供简短的业务描述
+ *
+ * 错误处理:
+ * - API 调用失败时显示红色告警框，包含错误详情
+ * - 数据加载中不渲染指标区域
+ */
 export default async function DashboardPage() {
   const token = await getToken();
   if (!token) return null;

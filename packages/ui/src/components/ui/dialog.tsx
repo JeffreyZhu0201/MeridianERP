@@ -2,7 +2,6 @@
 
 import { type ReactNode, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { Button } from './button';
 
 export interface DialogProps {
   open: boolean;
@@ -46,20 +45,6 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         {footer ? <div className="mt-6 flex justify-end gap-2">{footer}</div> : null}
       </div>
     </div>
-  );
-}
-
-export function DialogCloseButton({
-  onClick,
-  children = 'Cancel',
-}: {
-  onClick: () => void;
-  children?: ReactNode;
-}) {
-  return (
-    <Button type="button" variant="outline" onClick={onClick}>
-      {children}
-    </Button>
   );
 }
 

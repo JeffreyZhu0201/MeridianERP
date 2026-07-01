@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/ui" },
+    { "path": "apps/api" },
+    { "path": "apps/admin" },
+    { "path": "apps/merchant" },
+    { "path": "apps/store" },
+    { "path": "apps/distributor" },
+    { "path": "apps/ui-spec" }
+  ]
+}

@@ -1,5 +1,25 @@
 'use client';
 
+/**
+ * 库存水位表组件
+ *
+ * 功能说明:
+ * - 展示商品在各仓库的当前库存数量
+ * - 支持按仓库筛选库存数据
+ * - 支持搜索商品名称或 SKU
+ * - 库存低于阈值时显示低库存警告
+ * - 商户所有者可以编辑库存预警阈值
+ *
+ * 使用场景:
+ * - 商户员工查看当前库存情况
+ * - 识别低库存商品，及时补货
+ * - 设置商品级别的库存预警阈值
+ *
+ * 组件特性:
+ * - 客户端组件，支持实时交互和状态管理
+ * - 使用 URL 搜索参数同步筛选状态（可分享链接）
+ * - 300ms 防抖搜索，避免频繁 API 调用
+ */
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
@@ -23,15 +43,69 @@ import type { StockLevelWithDetails, Warehouse } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
+/**
+ * StockLevelsTable 组件 Props
+ *
+ * @property initialLevels - 初始加载的库存水位数据（SSR/SSG 传入）
+ * @property initialTotal - 初始数据总数（用于分页）
+ * @property warehouses - 仓库列表，用于下拉筛选
+ * @property token - 用户认证令牌（用于调用更新阈值的 API）
+ * @property isOwner - 当前用户是否为店主（决定是否显示编辑阈值按钮）
+ * @property defaultThreshold - 默认库存预警阈值（当商品未设置自定义阈值时使用）
+ *
+ * StockLevelWithDetails 类型包含:
+ * - id: 库存记录 ID
+ * - quantityOnHand: 当前在库数量
+ * - variantId: 商品变体 ID
+ * - variant: 商品变体详情（名称、SKU、预警阈值等）
+ * - warehouse: 所属仓库信息
+ */
 interface StockLevelsTableProps {
+  /** 初始库存水位数据数组 */
   initialLevels: StockLevelWithDetails[];
+  /** 数据总数（用于分页计算） */
   initialTotal: number;
+  /** 仓库列表，用于按仓库筛选 */
   warehouses: Warehouse[];
+  /** JWT 认证令牌，用于更新阈值的 API 调用 */
   token: string;
+  /** 是否为店主角色（决定是否显示编辑阈值入口） */
   isOwner: boolean;
+  /** 默认库存预警阈值（当商品未设置自定义阈值时） */
   defaultThreshold: number;
 }
 
+/**
+ * 库存水位表组件
+ *
+ * 核心功能:
+ * 1. 仓库筛选
+ *    - 下拉选择仓库，筛选该仓库的库存数据
+ *    - 空值表示查看所有仓库
+ *
+ * 2. 商品搜索
+ *    - 支持按商品名称或 SKU 搜索
+ *    - 300ms 防抖，避免每次输入都触发搜索
+ *
+ * 3. 库存状态显示
+ *    - outOfStock: 库存为 0，显示红色警告
+ *    - lowStock: 库存 <= 预警阈值，显示黄色警告
+ *    - 正常库存不显示任何 Badge
+ *
+ * 4. 阈值编辑（仅店主）
+ *    - 点击编辑按钮打开阈值设置对话框
+ *    - 支持使用默认阈值（恢复商品的自定义阈值为空）
+ *    - 或设置自定义阈值数值
+ *
+ * 5. 分页导航
+ *    - 当 total > 20 时显示分页按钮
+ *    - 支持上一页/下一页切换
+ *
+ * 状态管理:
+ * - 使用 React useState 管理本地状态
+ * - 通过 router.push 更新 URL 参数，触发 Next.js 重新渲染
+ * - 组件重新挂载时通过 useEffect 同步 initialLevels
+ */
 export function StockLevelsTable({
   initialLevels,
   initialTotal,
@@ -254,7 +328,7 @@ export function StockLevelsTable({
         title={t('editThreshold')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setThresholdDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setThresholdDialog(null)}>{tCommon('cancel')}</DialogCloseButton>
             <Button onClick={saveThreshold}>{tCommon('save')}</Button>
           </>
         }

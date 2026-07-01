@@ -1,10 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { mergeProps } from "@base-ui/react/merge-props"
+import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -88,20 +90,32 @@ function InputGroupButton({
   type = "button",
   variant = "ghost",
   size = "xs",
+  render,
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size" | "type"> &
-  VariantProps<typeof inputGroupButtonVariants> & {
+}: useRender.ComponentProps<"button"> &
+  VariantProps<typeof inputGroupButtonVariants> &
+  VariantProps<typeof buttonVariants> & {
     type?: "button" | "submit" | "reset"
   }) {
-  return (
-    <Button
-      type={type}
-      data-size={size}
-      variant={variant}
-      className={cn(inputGroupButtonVariants({ size }), className)}
-      {...props}
-    />
-  )
+  return useRender({
+    defaultTagName: "button",
+    props: mergeProps<"button">(
+      {
+        type,
+        className: cn(
+          buttonVariants({ variant }),
+          inputGroupButtonVariants({ size }),
+          className
+        ),
+      },
+      props
+    ),
+    render,
+    state: {
+      slot: "input-group-button",
+      size,
+    },
+  })
 }
 
 function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {

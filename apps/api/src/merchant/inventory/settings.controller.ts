@@ -5,6 +5,15 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { UpdateInventorySettingsDto } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
+/**
+ * 库存设置控制器 (MerchantInventorySettingsController)
+ *
+ * 提供库存设置 API：
+ * - GET /merchant/inventory/settings - 获取库存设置
+ * - PATCH /merchant/inventory/settings - 更新库存设置
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/inventory/settings')
 @UseGuards(MerchantAuthGuard)
 export class MerchantInventorySettingsController {

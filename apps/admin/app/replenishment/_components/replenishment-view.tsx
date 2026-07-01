@@ -126,7 +126,7 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
         title={t('rejectTitle')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setRejectId(null)}>{tc('cancel')}</DialogCloseButton>
+            <DialogCloseButton onClose={() => setRejectId(null)}>{tc('cancel')}</DialogCloseButton>
             <Button
               variant="destructive"
               onClick={handleReject}

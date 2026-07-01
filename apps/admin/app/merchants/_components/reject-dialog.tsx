@@ -28,7 +28,7 @@ export function RejectDialog({ open, onOpenChange, onConfirm }: RejectDialogProp
       description={t('rejectDescription')}
       footer={
         <>
-          <DialogCloseButton onClick={handleClose}>{tc('cancel')}</DialogCloseButton>
+          <DialogCloseButton onClose={handleClose}>{tc('cancel')}</DialogCloseButton>
           <Button
             variant="destructive"
             disabled={!reason.trim()}

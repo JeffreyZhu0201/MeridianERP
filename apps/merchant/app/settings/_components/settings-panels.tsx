@@ -386,7 +386,7 @@ export function SettingsPanels({ settings, team, isOwner, token }: SettingsPanel
         description={t('inviteDescription')}
         footer={
           <>
-            <DialogCloseButton onClick={() => setInviteOpen(false)} />
+            <DialogCloseButton onClose={() => setInviteOpen(false)} />
             <Button type="submit" form="invite-staff-form" disabled={inviteSaving}>
               {inviteSaving ? tCommon('creating') : t('createAccount')}
             </Button>

@@ -15,6 +15,18 @@ import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.int
 import { CreateLeadDto, UpdateLeadStageDto } from '../dto/lead.dto';
 import { LeadsService } from './leads.service';
 
+/**
+ * CRM 线索控制器 (LeadsController)
+ *
+ * 提供线索管理的 RESTful API：
+ * - GET /merchant/leads - 获取线索列表
+ * - GET /merchant/leads/:id - 获取线索详情
+ * - POST /merchant/leads - 创建线索
+ * - PATCH /merchant/leads/:id/stage - 更新线索阶段
+ * - DELETE /merchant/leads/:id - 删除线索
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/leads')
 @UseGuards(MerchantAuthGuard)
 export class LeadsController {

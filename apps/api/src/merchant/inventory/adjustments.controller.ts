@@ -19,6 +19,17 @@ import {
 } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
+/**
+ * 库存调整控制器 (MerchantAdjustmentsController)
+ *
+ * 提供库存调整相关 API：
+ * - POST /merchant/inventory/adjustments - 创建库存调整
+ * - GET /merchant/inventory/adjustments - 查询调整记录
+ * - GET /merchant/inventory/alerts/low-stock - 低库存预警
+ * - PATCH /merchant/inventory/variants/:variantId/reorder-threshold - 更新重订货阈值
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/inventory')
 @UseGuards(MerchantAuthGuard)
 export class MerchantAdjustmentsController {

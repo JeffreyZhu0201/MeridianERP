@@ -1,5 +1,21 @@
 'use client';
 
+/**
+ * DistributorShell - 渠道经销商门户布局组件
+ *
+ * 提供渠道经销商（Distributor Portal）的标准页面布局，包含：
+ * - 顶部导航栏（经销商名称、仪表盘/分店/佣金/提现）
+ * - 简洁的单层导航结构
+ * - 暗色模式与国际化切换
+ *
+ * @example
+ * ```tsx
+ * <DistributorShell distributorName="北京总代理" onLogout={() => signOut()}>
+ *   <Dashboard />
+ * </DistributorShell>
+ * ```
+ */
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode } from 'react';
@@ -9,6 +25,12 @@ import { ModeToggle } from '../theme/mode-toggle';
 import { shellDividerB } from '../../lib/surfaces';
 import { cn } from '../../lib/utils';
 
+/**
+ * DistributorShell 属性接口
+ * @param children - 页面内容
+ * @param distributorName - 经销商名称（显示在导航栏左侧）
+ * @param onLogout - 退出登录回调函数
+ */
 export interface DistributorShellProps {
   children: ReactNode;
   distributorName?: string;

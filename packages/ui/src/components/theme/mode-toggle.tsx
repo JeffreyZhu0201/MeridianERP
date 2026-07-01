@@ -1,5 +1,22 @@
 'use client';
 
+/**
+ * ModeToggle - 主题切换下拉菜单组件
+ *
+ * 提供明/暗/系统主题切换功能：
+ * - 点击太阳图标打开下拉菜单
+ * - 支持切换到 Light、Dark、System 三种模式
+ * - 使用 next-themes 的 useTheme hook 管理主题
+ * - 图标根据当前主题动态变化
+ *
+ * @example
+ * ```tsx
+ * <ModeToggle />
+ * // 或带自定义样式
+ * <ModeToggle className="ml-auto" />
+ * ```
+ */
+
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
@@ -13,10 +30,19 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
+/**
+ * ModeToggle 属性接口
+ * @param className - 自定义样式类名
+ */
 export interface ModeToggleProps {
   className?: string;
 }
 
+/**
+ * 主题切换下拉菜单
+ * - 触发器显示太阳/月亮图标（根据当前主题）
+ * - 下拉菜单包含 Light、Dark、System 三个选项
+ */
 export function ModeToggle({ className }: ModeToggleProps) {
   const { setTheme } = useTheme();
   const t = useTranslations('common.theme');
@@ -27,7 +53,9 @@ export function ModeToggle({ className }: ModeToggleProps) {
         <DropdownMenuTrigger
           render={
             <Button variant="ghost" size="icon" className="relative">
+              {/* 太阳图标 - 亮色模式下显示 */}
               <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              {/* 月亮图标 - 暗色模式下显示 */}
               <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span className="sr-only">{t('toggle')}</span>
             </Button>

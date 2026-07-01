@@ -1,3 +1,13 @@
+/*
+ * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @Date: 2026-06-24 20:41:08
+ * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @LastEditTime: 2026-06-27 13:25:37
+ * @FilePath: /MeridianERP/apps/store/middleware.ts
+ * @Description: 
+ * 
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ */
 import { NextResponse, type NextRequest } from 'next/server';
 
 const AUTH_COOKIE = 'store_token';

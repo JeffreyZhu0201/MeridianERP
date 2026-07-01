@@ -15,6 +15,18 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { MerchantCategoriesService } from './categories.service';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/catalog.dto';
 
+/**
+ * 商户分类控制器 (MerchantCategoriesController)
+ *
+ * 提供商品分类管理的 RESTful API：
+ * - GET /merchant/categories - 获取分类列表
+ * - GET /merchant/categories/:id - 获取分类详情
+ * - POST /merchant/categories - 创建分类
+ * - PATCH /merchant/categories/:id - 更新分类
+ * - DELETE /merchant/categories/:id - 删除分类
+ *
+ * 所有接口需要商户认证 (MerchantAuthGuard)
+ */
 @Controller('merchant/categories')
 @UseGuards(MerchantAuthGuard)
 export class MerchantCategoriesController {
