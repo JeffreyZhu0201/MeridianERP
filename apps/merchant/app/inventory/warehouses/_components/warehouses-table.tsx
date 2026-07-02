@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -144,7 +145,11 @@ export function WarehousesTable({ warehouses: initial, token, isOwner }: Warehou
             <TableBody>
               {warehouses.map((warehouse) => (
                 <TableRow key={warehouse.id}>
-                  <TableCell className="font-medium">{warehouse.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/inventory/warehouses/${warehouse.id}`} className="hover:underline">
+                      {warehouse.name}
+                    </Link>
+                  </TableCell>
                   <TableCell className="max-w-xs truncate text-muted-foreground">
                     {warehouse.address ?? '—'}
                   </TableCell>
