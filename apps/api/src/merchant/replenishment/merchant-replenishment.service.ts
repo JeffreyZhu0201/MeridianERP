@@ -1,20 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
-/**
- * 商户补货请求服务 (MerchantReplenishmentService)
- *
- * 负责商户向总部发起补货请求的管理。
- *
- * 功能：
- * 1. 补货请求列表查询（包含明细和主 SKU 信息）
- * 2. 创建补货请求
- * 3. 查询可用主 SKU（总部主商品列表）
- *
- * 业务场景：
- * 商户库存不足时，可向总部发起补货请求，
- * 请求会包含所需商品（MasterSku）和数量。
- */
 @Injectable()
 export class MerchantReplenishmentService {
   constructor(private readonly prisma: PrismaService) {}

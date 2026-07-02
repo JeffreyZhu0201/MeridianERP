@@ -19,21 +19,6 @@ import {
 } from './dto/team-member.dto';
 import { MerchantSettingsService } from './merchant-settings.service';
 
-/**
- * 商户团队控制器 (MerchantTeamController)
- *
- * 提供商户团队成员管理 API：
- * - GET /merchant/team - 获取团队成员列表
- * - POST /merchant/team - 创建团队成员（仅业主）
- * - PATCH /merchant/team/:id - 更新团队成员（仅业主）
- * - DELETE /merchant/team/:id - 删除团队成员（仅业主）
- *
- * 额外权限：创建/更新/删除操作需要 MerchantOwnerGuard
- *
- * 限制：
- * - 不能修改自己的账号
- * - 不能删除业主账号
- */
 @Controller('merchant/team')
 @UseGuards(MerchantAuthGuard)
 export class MerchantTeamController {

@@ -10,15 +10,9 @@
  */
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
-/**
- * 平台管理员登录 DTO
- */
 export class PlatformLoginDto {
-  /** 管理员邮箱 */
   @IsEmail()
   email!: string;
-
-  /** 密码（最小6个字符） */
   @IsString()
   @MinLength(6)
   password!: string;

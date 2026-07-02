@@ -12,17 +12,6 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { MerchantOrdersService } from './merchant-orders.service';
 
-/**
- * 商户订单控制器 (MerchantOrdersController)
- *
- * 提供订单管理 API：
- * - GET /merchant/orders - 获取订单列表
- * - GET /merchant/orders/:id - 获取订单详情
- * - GET /merchant/orders/pickup-pending - 获取待自提订单列表
- * - POST /merchant/orders/:id/verify-pickup - 核销自提订单
- *
- * 所有接口需要商户认证 (MerchantAuthGuard)
- */
 @Controller('merchant/orders')
 @UseGuards(MerchantAuthGuard)
 export class MerchantOrdersController {

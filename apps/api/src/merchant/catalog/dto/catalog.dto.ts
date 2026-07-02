@@ -10,27 +10,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-/**
- * 商品目录 DTO 定义
- *
- * CreateCategoryDto / UpdateCategoryDto - 分类创建和更新
- * - name: 分类名称
- * - parentId: 父分类ID（可选，用于构建层级分类）
- *
- * ProductVariantDto - 商品变体
- * - sku: 库存单位编码
- * - name: 变体名称（如颜色、尺寸）
- * - price: 售价
- * - inventory: 初始库存（可选）
- * - isActive: 是否启用（可选）
- *
- * CreateProductDto / UpdateProductDto - 商品创建和更新
- * - name: 商品名称
- * - description: 商品描述（可选）
- * - categoryId: 分类ID（可选）
- * - isPublished: 是否发布（可选）
- * - variants: 变体列表
- */
 export class CreateCategoryDto {
   @IsString()
   @MinLength(1)

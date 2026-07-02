@@ -1,19 +1,3 @@
-/**
- * 商户模块 (MerchantModule)
- *
- * 这是商户（B端）业务的核心模块，聚合了商户门户所需的所有功能子模块。
- * 商户可以是工厂总部或分店，负责管理商品目录、库存、订单、CRM、佣金、经销商等业务。
- *
- * 主要子模块：
- * - AuthModule: 商户用户认证（登录/注册）
- * - InventoryModule / MerchantInventoryModule: 库存管理
- * - CommissionsModule: 经销商佣金账本
- * - MerchantDashboardModule: 商户仪表盘统计
- * - MerchantSettingsModule: 商户设置和团队管理
- * - FulfillmentModule: 订单履约（自提/配送）
- * - PlatformAllocationsModule: 总部配额分配
- * - PlatformFundsModule: 资金结算
- */
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';

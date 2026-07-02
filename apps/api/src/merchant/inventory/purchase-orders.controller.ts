@@ -20,24 +20,6 @@ import {
 } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
-/**
- * 采购订单控制器 (MerchantPurchaseOrdersController)
- *
- * 提供采购订单管理 API：
- * - GET /merchant/inventory/purchase-orders - 获取采购订单列表
- * - POST /merchant/inventory/purchase-orders - 创建采购订单
- * - GET /merchant/inventory/purchase-orders/:id - 获取采购订单详情
- * - PATCH /merchant/inventory/purchase-orders/:id - 更新采购订单（仅草稿状态）
- * - POST /merchant/inventory/purchase-orders/:id/submit - 提交采购订单
- * - POST /merchant/inventory/purchase-orders/:id/cancel - 取消采购订单
- * - POST /merchant/inventory/purchase-orders/:id/receive - 采购入库
- *
- * 订单状态流转：
- * DRAFT → ORDERED → PARTIALLY_RECEIVED → RECEIVED
- *                    ↘ CANCELLED ↙
- *
- * 所有接口需要商户认证 (MerchantAuthGuard)
- */
 @Controller('merchant/inventory/purchase-orders')
 @UseGuards(MerchantAuthGuard)
 export class MerchantPurchaseOrdersController {

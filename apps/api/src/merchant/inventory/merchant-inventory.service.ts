@@ -17,8 +17,6 @@ import { MerchantInventoryReportsService } from './merchant-inventory-reports.se
 import { MerchantPurchaseOrdersService } from './merchant-purchase-orders.service';
 import { MerchantStockService } from './merchant-stock.service';
 import { MerchantWarehousesService } from './merchant-warehouses.service';
-
-/** Facade preserving existing controller entry points while delegating to subdomain services. */
 @Injectable()
 export class MerchantInventoryService {
   constructor(

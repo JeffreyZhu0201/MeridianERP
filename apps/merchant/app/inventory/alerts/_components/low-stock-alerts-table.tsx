@@ -17,8 +17,6 @@ import type { LowStockAlertItem } from '@meridian/shared';
 interface LowStockAlertsTableProps {
   items: LowStockAlertItem[];
 }
-
-/** 低库存预警表格：支持跳转调整与新建采购单 */
 export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
   const t = useTranslations('merchant.inventory.alerts');
   const tStock = useTranslations('merchant.inventory.stock');

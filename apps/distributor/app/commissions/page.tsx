@@ -1,26 +1,3 @@
-/**
- * 经销商佣金账本页面
- *
- * 功能说明:
- * - 展示经销商的佣金收入明细记录
- * - 按状态（应计/已结算/已作废）分类显示佣金
- * - 统计累计应计佣金和累计已结算佣金
- * - 支持查看每条佣金记录对应的订单信息
- *
- * 使用场景:
- * - 经销商查看通过绑定关系获得的佣金收入
- * - 核对佣金计算是否正确
- * - 申请佣金提现
- *
- * 数据来源:
- * - 佣金账本: /distributor/me/commissions API
- * - 使用 distributor.commissions i18n 命名空间
- *
- * 佣金类型说明:
- * - 应计佣金 (ACCRUED): 订单完成后应计入但尚未结算的佣金
- * - 已结算佣金 (SETTLED): 已完成结算可以提现的佣金
- * - 已作废佣金 (VOID): 因订单退款等原因被撤销的佣金
- */
 import { getLocale, getTranslations } from 'next-intl/server';
 import {
   Badge,
@@ -43,54 +20,12 @@ import {
 } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
-/**
- * 佣金状态对应的 Badge 样式映射
- *
- * LedgerStatus 枚举值:
- * - ACCRUED: 应计佣金（订单完成后应计入，等待结算）
- * - SETTLED: 已结算佣金（已打款/可提现）
- * - VOID: 已作废佣金（因退款等原因被撤销）
- *
- * 样式含义:
- * - warning: 黄色警告色，表示待处理状态
- * - success: 绿色成功色，表示已完成
- * - destructive: 红色危险色，表示已作废
- */
 const statusVariant: Record<string, 'default' | 'warning' | 'success' | 'destructive'> = {
   [LedgerStatus.ACCRUED]: 'warning',
   [LedgerStatus.SETTLED]: 'success',
   [LedgerStatus.VOID]: 'destructive',
 };
 
-/**
- * 佣金账本页面主组件
- *
- * 页面布局:
- * - 独立的 div 容器（无 Shell Wrapper，由父级提供）
- * - BentoListHeader: 顶部指标卡片区域
- * - ListPageFrame: 列表页面框架
- *
- * 核心功能:
- * 1. 指标卡片
- *    - title: 佣金记录总数
- *    - amount: 累计总佣金（应计 + 已结算）
- *    - commissionAccrued: 累计应计佣金
- *    - commissionSettled: 累计已结算佣金
- *
- * 2. 佣金表格
- *    - orderReference: 关联的订单编号（点击可查看订单详情）
- *    - amount: 佣金金额
- *    - status: 佣金状态（应计/已结算/已作废）
- *    - createdAt: 佣金记录创建时间
- *
- * 3. 状态统计计算
- *    - accruedTotal: 通过筛选 LedgerStatus.ACCRUED 累加
- *    - settledTotal: 通过筛选 LedgerStatus.SETTLED 累加
- *
- * 错误处理:
- * - API 调用失败显示错误提示，但仍显示页面框架
- * - 数据为空时显示空状态
- */
 export default async function CommissionsPage() {
   const locale = await getLocale();
   const t = await getTranslations('distributor.commissions');

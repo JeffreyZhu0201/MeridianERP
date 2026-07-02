@@ -18,8 +18,6 @@ interface TransfersPageProps {
     page?: string;
   }>;
 }
-
-/** 商户端 — 库存调拨列表 */
 export default async function TransfersPage({ searchParams }: TransfersPageProps) {
   const token = await getToken();
   if (!token) return null;

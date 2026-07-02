@@ -14,10 +14,6 @@ function generatePickupCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-/**
- * Coordinates pickup verification and HQ delivery shipping.
- * Both paths mark orders fulfilled and trigger commission accrual after inventory side effects succeed.
- */
 @Injectable()
 export class FulfillmentService {
   constructor(
@@ -25,8 +21,6 @@ export class FulfillmentService {
     private readonly inventoryService: InventoryService,
     private readonly commissionService: CommissionService,
   ) {}
-
-  /** Assigns a unique 6-digit pickup code; retries on unique constraint conflict. */
   async generatePickupCodeForOrder(orderId: string): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt++) {
       const code = generatePickupCode();
@@ -37,7 +31,6 @@ export class FulfillmentService {
         });
         return code;
       } catch (err) {
-        // P2002: 违反唯一约束（pickupCode 已存在）
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === 'P2002'
@@ -62,11 +55,6 @@ export class FulfillmentService {
       orderBy: { createdAt: 'desc' },
     });
   }
-
-  /**
-   * Pickup verification: PAID pickup orders only; deducts default-warehouse variant stock.
-   * Commission accrues after the transaction succeeds.
-   */
   async verifyPickup(
     tenantId: string,
     orderId: string,
@@ -94,10 +82,7 @@ export class FulfillmentService {
     if (order.pickupCode !== code) {
       throw new BadRequestException('Invalid pickup code');
     }
-
-    // 事务处理：更新订单 + 扣减库存
     await this.prisma.$transaction(async (tx) => {
-      // 更新订单状态为已履约
       await tx.order.update({
         where: { id: orderId },
         data: {
@@ -106,19 +91,14 @@ export class FulfillmentService {
           pickupVerifiedByUserId: actorUserId,
         },
       });
-
-      // 获取默认仓库
       const defaultWarehouse = await tx.warehouse.findFirst({
         where: { tenantId, isDefault: true },
       });
       if (!defaultWarehouse) {
         throw new ConflictException('Default warehouse not configured');
       }
-
-      // 扣减每个订单行的门店 Variant 库存
       for (const line of order.lines) {
         if (!line.variantId) continue;
-        // 扣减库存（负数）
         await this.inventoryService.applyQuantityDeltaInTx(
           tx,
           tenantId,
@@ -126,23 +106,15 @@ export class FulfillmentService {
           line.variantId,
           -line.quantity,
         );
-        // 同步缓存
         await this.inventoryService.syncVariantInventoryCache(
           line.variantId,
           tx,
         );
       }
     });
-
-    // 触发佣金计算（订单完成后应计佣金）
     await this.commissionService.accrueOnFulfilled(orderId);
     return { orderId, status: OrderStatus.FULFILLED };
   }
-
-  /**
-   * HQ delivery shipment: deducts Master SKU stock and writes DeliveryAllocationLedger.
-   * Commission accrues after the transaction succeeds.
-   */
   async shipDelivery(orderId: string, platformUserId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -160,10 +132,7 @@ export class FulfillmentService {
     if (order.shippedAt) {
       throw new ConflictException('Order already shipped');
     }
-
-    // 事务处理：更新订单 + 扣减 Master SKU + 创建台账
     await this.prisma.$transaction(async (tx) => {
-      // 更新订单状态为已履约
       await tx.order.update({
         where: { id: orderId },
         data: {
@@ -172,8 +141,6 @@ export class FulfillmentService {
           shippedByPlatformUserId: platformUserId,
         },
       });
-
-      // 处理每个订单行
       for (const line of order.lines) {
         const masterSkuId = line.variant?.masterSkuId;
         if (!masterSkuId) {
@@ -181,16 +148,12 @@ export class FulfillmentService {
             `Variant ${line.variantName} is not linked to master SKU`,
           );
         }
-
-        // 检查 Master SKU 库存是否充足
         const masterSku = await tx.masterSku.findUnique({
           where: { id: masterSkuId },
         });
         if (!masterSku || masterSku.quantityOnHand < line.quantity) {
           throw new BadRequestException('Insufficient master SKU inventory');
         }
-
-        // 扣减 Master SKU 库存
         await tx.masterSku.update({
           where: { id: masterSkuId },
           data: {
@@ -198,8 +161,6 @@ export class FulfillmentService {
             cumulativeShippedQty: { increment: line.quantity },
           },
         });
-
-        // 创建配送台账记录（用于佣金计算）
         const wholesalePrice = masterSku.wholesalePrice;
         const lineTotal = new Prisma.Decimal(
           (Number(wholesalePrice) * line.quantity).toFixed(2),
@@ -216,18 +177,13 @@ export class FulfillmentService {
         });
       }
     });
-
-    // 触发佣金计算
     await this.commissionService.accrueOnFulfilled(orderId);
     return { orderId, status: OrderStatus.FULFILLED };
   }
-
-  /** JSON payload for pickup QR; optional HMAC sig when PICKUP_QR_SECRET is set. */
   buildPickupQrPayload(orderId: string, pickupCode: string): string {
     const payload: Record<string, string> = { orderId, code: pickupCode };
     const secret = process.env.PICKUP_QR_SECRET;
     if (secret) {
-      // 添加 HMAC 签名防伪
       payload.sig = createHmac('sha256', secret)
         .update(`${orderId}:${pickupCode}`)
         .digest('hex')

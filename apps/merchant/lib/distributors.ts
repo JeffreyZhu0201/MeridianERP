@@ -24,8 +24,6 @@ export async function fetchQrHistory(
     token,
   );
 }
-
-/** Authenticated PNG download via blob (US-4.4). */
 export async function downloadQrPng(
   distributorId: string,
   qrId: string,

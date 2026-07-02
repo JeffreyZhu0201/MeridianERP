@@ -17,16 +17,6 @@ import {
 } from './dto/inventory.dto';
 import { MerchantTransfersService } from './transfers.service';
 
-/**
- * 库存调拨控制器 (MerchantTransfersController)
- *
- * 提供库存调拨 API：
- * - POST /merchant/inventory/transfers - 创建调拨单
- * - GET /merchant/inventory/transfers - 获取调拨单列表
- * - GET /merchant/inventory/transfers/:id - 获取调拨单详情
- *
- * 所有接口需要商户认证 (MerchantAuthGuard)
- */
 @Controller('merchant/inventory')
 @UseGuards(MerchantAuthGuard)
 export class MerchantTransfersController {

@@ -2,18 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateCompanyDto, UpdateCompanyDto } from '../dto/company.dto';
 
-/**
- * CRM 企业服务 (CompaniesService)
- *
- * 负责商户的 CRM 企业（公司）管理。
- *
- * 功能：
- * 1. 企业列表查询
- * 2. 企业详情查询
- * 3. 创建企业
- * 4. 更新企业信息
- * 5. 删除企业
- */
 @Injectable()
 export class CompaniesService {
   constructor(private readonly prisma: PrismaService) {}

@@ -12,8 +12,6 @@ interface InventorySettingsFormProps {
   defaultReorderThreshold: number;
   token: string;
 }
-
-/** 默认补货阈值表单 */
 export function InventorySettingsForm({
   defaultReorderThreshold: initial,
   token,

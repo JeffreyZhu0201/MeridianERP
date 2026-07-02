@@ -5,15 +5,6 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { StockLevelListQueryDto } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
-/**
- * 库存水平控制器 (MerchantStockLevelsController)
- *
- * 提供库存水平查询 API：
- * - GET /merchant/inventory/stock-levels - 获取库存水平列表（分页、筛选）
- * - GET /merchant/inventory/stock-levels/summary - 获取库存汇总
- *
- * 所有接口需要商户认证 (MerchantAuthGuard)
- */
 @Controller('merchant/inventory/stock-levels')
 @UseGuards(MerchantAuthGuard)
 export class MerchantStockLevelsController {

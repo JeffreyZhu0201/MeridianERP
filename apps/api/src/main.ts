@@ -5,7 +5,6 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
-  // 允许各前端门户从浏览器直连 API（登录、注册等客户端 fetch）
   app.enableCors({
     origin: [
       process.env.ADMIN_APP_URL ?? 'http://localhost:3000',

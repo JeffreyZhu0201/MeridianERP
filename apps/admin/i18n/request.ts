@@ -17,11 +17,6 @@ import {
   localeCookieName,
 } from '@meridian/shared';
 
-/**
- * @description: 获取请求配置
- * @param {*} async
- * @return {Promise<NextIntlConfig>}
- */
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   const raw = cookieStore.get(localeCookieName('admin'))?.value;

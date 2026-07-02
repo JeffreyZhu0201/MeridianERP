@@ -54,8 +54,7 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - Continue UI consistency cleanup across shared states and portal surfaces.
 - Keep `docs/architecture/system-overview.md` current with shipped schema and module changes.
 - Add feature-specific PRD, architecture, and design docs before new feature implementation.
-- Simplify repeated frontend API/auth/layout patterns and large mixed-responsibility components.
-- Simplify backend pagination/list/date helpers and large inventory/distributor/fulfillment services.
+- Next.js production build still fails on some portals with `createContext is not a function` during page-data collection (pre-existing).
 
 ## References
 

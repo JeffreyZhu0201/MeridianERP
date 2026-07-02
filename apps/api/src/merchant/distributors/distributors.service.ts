@@ -27,28 +27,6 @@ import * as QRCode from 'qrcode';
 
 const DEFAULT_EXPIRES_IN_DAYS = 7;
 
-/**
- * 经销商服务 (DistributorsService)
- *
- * 负责商户的渠道经销商管理功能。
- *
- * 功能：
- * 1. 经销商列表/详情查询
- * 2. 创建/更新/删除经销商
- * 3. 开通经销商门户访问（设置密码）
- * 4. 生成绑定二维码（用于招募商户绑定）
- * 5. 查询二维码历史记录
- * 6. 下载二维码 PNG 图片
- * 7. 查询经销商业绩统计
- *
- * 注意：Phase 5 起，经销商管理已迁移至平台管理员
- *
- * 绑定类型 (BindType)：
- * - MERCHANT: 绑定商户
- * - CUSTOMER: 绑定消费者
- *
- * @constant DEFAULT_EXPIRES_IN_DAYS 默认二维码有效期（7天）
- */
 @Injectable()
 export class DistributorsService {
   constructor(

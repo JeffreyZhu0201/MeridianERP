@@ -14,17 +14,6 @@ import {
 } from '@nestjs/common';
 import { MerchantAuthGuard } from '../../auth/guards/merchant-auth.guard';
 
-/**
- * 经销商控制器 (DistributorsController)
- *
- * 提供经销商管理 API。
- *
- * 注意：Phase 5 起，所有经销商管理接口已禁用，
- * 经销商管理已迁移至平台管理员（Platform Admin）。
- * 调用任何接口都会返回 403 Forbidden。
- *
- * 路径前缀：/merchant/distributors
- */
 @Controller('merchant/distributors')
 @UseGuards(MerchantAuthGuard)
 export class DistributorsController {

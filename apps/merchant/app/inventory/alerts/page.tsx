@@ -10,8 +10,6 @@ import { getTranslations } from 'next-intl/server';
 import type { LowStockAlertItem } from '@meridian/shared';
 
 import { LowStockAlertsTable } from './_components/low-stock-alerts-table';
-
-/** 商户端 — 低库存预警列表 */
 export default async function AlertsPage() {
   const token = await getToken();
   if (!token) return null;

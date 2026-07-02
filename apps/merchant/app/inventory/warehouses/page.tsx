@@ -10,8 +10,6 @@ import type { OnboardingProfile } from '@/lib/api';
 import type { Warehouse } from '@meridian/shared';
 
 import { WarehousesTable } from './_components/warehouses-table';
-
-/** 商户端 — 仓库列表页（服务端拉取仓库数据） */
 export default async function WarehousesPage() {
   const token = await getToken();
   if (!token) return null;

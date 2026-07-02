@@ -12,20 +12,11 @@ import type { AppLocale } from './config.js';
 import { enMessages } from './messages/en/index.js';
 import { zhCNMessages } from './messages/zh-CN/index.js';
 
-/**
- * @description: Catalogs for the given locale
- * @return {*}
- */
 const catalogs = {
   en: enMessages,
   'zh-CN': zhCNMessages,
 } satisfies Record<AppLocale, typeof enMessages | typeof zhCNMessages>;
 
-/**
- * @description: Load messages for the given locale
- * @param {AppLocale} locale
- * @return {*}
- */
 export function loadMessages(locale: AppLocale) {
   return catalogs[locale];
 }

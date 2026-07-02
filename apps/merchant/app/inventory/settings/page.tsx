@@ -9,8 +9,6 @@ import {
   InventorySettingsForm,
   StaffForbidden,
 } from './_components/inventory-settings-form';
-
-/** 商户端 — 租户级库存参数（仅主账号可编辑） */
 export default async function InventorySettingsPage() {
   const token = await getToken();
   if (!token) return null;

@@ -14,23 +14,6 @@ import {
   StockTransferListQueryDto,
 } from './dto/inventory.dto';
 
-/**
- * 库存调拨服务 (MerchantTransfersService)
- *
- * 负责商户仓库间的库存调拨操作。
- *
- * 功能：
- * 1. 创建调拨单（同时完成调拨，状态直接为 COMPLETED）
- * 2. 调拨单列表查询（支持源/目标仓库筛选）
- * 3. 调拨单详情查询
- *
- * 业务逻辑：
- * - 调拨时自动更新源仓库和目标仓库的库存水平
- * - 调拨完成后自动触发低库存检查
- * - 源仓库和目标仓库不能相同
- *
- * 调拨单状态：目前仅支持 COMPLETED（已完成）
- */
 @Injectable()
 export class MerchantTransfersService {
   constructor(

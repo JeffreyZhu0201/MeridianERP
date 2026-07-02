@@ -8,11 +8,6 @@ export const metadata: Metadata = {
   description: 'Platform administration portal',
 };
 
-/**
- * @description: 根布局
- * @param {*} children
- * @return {React.ReactNode}
- */
 export default async function RootLayout({
   children,
 }: {

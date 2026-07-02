@@ -23,8 +23,6 @@ interface AdjustmentsPageProps {
     variantId?: string;
   }>;
 }
-
-/** 商户端 — 库存调整录入与历史查询 */
 export default async function AdjustmentsPage({ searchParams }: AdjustmentsPageProps) {
   const token = await getToken();
   if (!token) return null;

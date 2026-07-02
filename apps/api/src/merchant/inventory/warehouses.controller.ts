@@ -14,18 +14,6 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { CreateWarehouseDto, UpdateWarehouseDto } from './dto/inventory.dto';
 import { MerchantInventoryService } from './merchant-inventory.service';
 
-/**
- * 仓库管理控制器 (MerchantWarehousesController)
- *
- * 提供仓库管理 API：
- * - GET /merchant/inventory/warehouses - 获取仓库列表
- * - GET /merchant/inventory/warehouses/:id - 获取仓库详情
- * - POST /merchant/inventory/warehouses - 创建仓库
- * - PATCH /merchant/inventory/warehouses/:id - 更新仓库
- * - POST /merchant/inventory/warehouses/:id/set-default - 设置默认仓库
- *
- * 所有接口需要商户认证 (MerchantAuthGuard)
- */
 @Controller('merchant/inventory/warehouses')
 @UseGuards(MerchantAuthGuard)
 export class MerchantWarehousesController {

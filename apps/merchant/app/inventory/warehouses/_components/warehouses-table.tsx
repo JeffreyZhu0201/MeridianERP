@@ -29,8 +29,6 @@ interface WarehousesTableProps {
   token: string;
   isOwner: boolean;
 }
-
-/** 仓库列表与新建/编辑/设默认交互 */
 export function WarehousesTable({ warehouses: initial, token, isOwner }: WarehousesTableProps) {
   const router = useRouter();
   const [warehouses, setWarehouses] = useState(initial);

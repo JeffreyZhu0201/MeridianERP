@@ -6,12 +6,6 @@ import { AdminShell } from '@meridian/ui';
 
 import { AUTH_COOKIE } from '@/lib/api';
 
-/**
- * @description: AdminShellWrapper is the wrapper for the admin shell
- * @param {React.ReactNode} children
- * @param {string} userEmail
- * @return {React.ReactNode}
- */
 export function AdminShellWrapper({
   children,
   userEmail,

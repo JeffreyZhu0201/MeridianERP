@@ -13,8 +13,6 @@ interface MerchantJwtPayload {
   roles?: string[];
   role?: string;
 }
-
-/** Decode JWT payload for UI hints (not verified — API enforces auth). */
 export function decodeMerchantToken(token: string): MerchantJwtPayload | null {
   try {
     const payload = token.split('.')[1];

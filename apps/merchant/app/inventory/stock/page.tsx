@@ -16,8 +16,6 @@ import type { InventoryPaginated } from '@/lib/inventory';
 interface StockPageProps {
   searchParams: Promise<{ warehouseId?: string; q?: string; page?: string }>;
 }
-
-/** 商户端 — 按仓库查看 SKU 在库数量 */
 export default async function StockPage({ searchParams }: StockPageProps) {
   const token = await getToken();
   if (!token) return null;

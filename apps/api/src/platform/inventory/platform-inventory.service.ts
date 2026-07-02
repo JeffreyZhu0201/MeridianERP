@@ -3,17 +3,6 @@ import { Prisma } from '@prisma/client';
 import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
-/**
- * 平台库存服务 - 提供跨租户的库存查看功能
- *
- * 功能范围：
- * - 查看商户租户的库存汇总（仓库、SKU、低库存统计）
- * - 查询库存调整记录
- * - 查询采购订单
- *
- * 注意：此服务主要用于平台管理员查看商户库存，
- * 不直接处理库存变动（变动由商户自身服务处理）
- */
 @Injectable()
 export class PlatformInventoryService {
   constructor(
@@ -21,18 +10,7 @@ export class PlatformInventoryService {
     private readonly inventory: InventoryService,
   ) {}
 
-  /**
-   * 获取商户库存汇总
-   *
-   * 汇总信息包括：
-   * - 仓库数量和详细信息
-   * - SKU 种类数
-   * - 库存总单位数
-   * - 低库存商品数量（低于各自阈值）
-   *
-   * @param tenantId - 商户租户 ID
-   * @returns 库存汇总（租户不存在返回 null）
-   */
+  
   async getTenantSummary(tenantId: string) {
     await this.inventory.migrateTenantInventory(tenantId);
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
@@ -93,15 +71,7 @@ export class PlatformInventoryService {
     };
   }
 
-  /**
-   * 查询库存调整记录
-   *
-   * @param tenantId - 商户租户 ID
-   * @param limit - 返回数量上限（默认50，最大100）
-   * @param from - 起始日期（可选，ISO 格式）
-   * @param to - 结束日期（可选，ISO 格式）
-   * @returns 库存调整记录分页列表
-   */
+  
   async listAdjustments(
     tenantId: string,
     limit = 50,
@@ -139,14 +109,7 @@ export class PlatformInventoryService {
     };
   }
 
-  /**
-   * 查询采购订单列表
-   *
-   * @param tenantId - 商户租户 ID
-   * @param status - 可选，按状态筛选
-   * @param limit - 返回数量上限（默认50，最大100）
-   * @returns 采购订单分页列表
-   */
+  
   async listPurchaseOrders(tenantId: string, status?: string, limit = 50) {
     const where: Prisma.PurchaseOrderWhereInput = { tenantId };
     if (status) {

@@ -16,29 +16,6 @@ import {
   UpdateTeamMemberDto,
 } from './dto/team-member.dto';
 
-/**
- * 商户设置服务 (MerchantSettingsService)
- *
- * 负责商户设置和团队成员的管理。
- *
- * 功能模块：
- *
- * 【设置管理】
- * - 获取商户设置（包含资料、商店URL、Stripe模式）
- * - 更新商户设置（仅业主）
- *
- * 【团队管理】
- * - 团队成员列表
- * - 创建团队成员（仅业主，角色为 MERCHANT_STAFF）
- * - 更新团队成员密码（仅业主）
- * - 删除团队成员（仅业主，不能删除自己或业主账号）
- *
- * 权限控制：
- * - assertOwner: 验证用户具有 MERCHANT_OWNER 角色
- *
- * Stripe 模式判断：
- * - isMockMode() 返回 true 表示使用模拟支付
- */
 @Injectable()
 export class MerchantSettingsService {
   constructor(

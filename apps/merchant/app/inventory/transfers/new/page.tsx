@@ -13,8 +13,6 @@ import { productsToPoVariantOptions } from '@/lib/product-variants';
 interface NewTransferPageProps {
   searchParams: Promise<{ variantId?: string }>;
 }
-
-/** 商户端 — 新建库存调拨 */
 export default async function NewTransferPage({ searchParams }: NewTransferPageProps) {
   const token = await getToken();
   if (!token) return null;

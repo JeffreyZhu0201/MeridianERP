@@ -13,17 +13,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { draftSlug } from '../../common/utils/slug.util';
 import { MerchantLoginDto, MerchantRegisterDto } from './dto/merchant-auth.dto';
 
-/**
- * 商户认证服务 (MerchantAuthService)
- *
- * 负责商户用户的注册、登录和 JWT Token 签发。
- *
- * 业务逻辑：
- * 1. 注册时创建商户租户（Tenant）和商户资料（MerchantProfile），状态为 DRAFT（草稿）
- * 2. 支持邀请码注册（通过 distributor 招募链接）
- * 3. 登录时验证邮箱密码，账户状态必须为 APPROVED 才能登录
- * 4. 所有 Token 使用 JWT_MERCHANT_SECRET 签发，受众为 'merchant'
- */
 @Injectable()
 export class MerchantAuthService {
   constructor(

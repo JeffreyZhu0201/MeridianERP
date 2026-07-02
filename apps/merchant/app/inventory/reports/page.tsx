@@ -14,8 +14,6 @@ import { InventoryReportsTabs } from './_components/inventory-reports-tabs';
 interface ReportsPageProps {
   searchParams: Promise<{ tab?: string; from?: string; to?: string }>;
 }
-
-/** 商户端 — 库存汇总与调整报表 */
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const token = await getToken();
   if (!token) return null;

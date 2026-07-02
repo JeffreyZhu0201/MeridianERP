@@ -1,8 +1,6 @@
 import { cartSessionStorageKey } from '@meridian/shared';
 
 import { cartSessionCookieName } from './cart-session.shared';
-
-/** Client: get or create cart session and sync to cookie for SSR. */
 export function ensureCartSessionId(storeSlug: string): string {
   const storageKey = cartSessionStorageKey(storeSlug);
   let id = localStorage.getItem(storageKey);

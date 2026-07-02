@@ -11,19 +11,10 @@
 export const locales = ['en', 'zh-CN'] as const;
 export type AppLocale = (typeof locales)[number]; // AppLocale is the type of the locale
 
-/**
- * @description: Default locale
- * @type {AppLocale}
- */
 export const defaultLocale: AppLocale = 'en';
 
 export type PortalId = 'admin' | 'merchant' | 'store' | 'distributor'; // PortalId is the type of the portal
 
-/**
- * @description: Locale cookie name
- * @param {PortalId} portal
- * @return {string}
- */
 export function localeCookieName(portal: PortalId): string {
   return `meridian_locale_${portal}`;
 }

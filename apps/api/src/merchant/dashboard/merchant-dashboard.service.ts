@@ -11,21 +11,6 @@ import { decimalSumToString } from '../commissions/commission-mappers';
 
 const RECENT_ACTIVITY_DAYS = 7;
 
-/**
- * 商户仪表盘服务 (MerchantDashboardService)
- *
- * 负责聚合商户经营数据的统计和展示。
- *
- * 数据维度：
- * 1. 基础统计 - 联系人数量、开放线索数、活跃经销商数、近期绑定数
- * 2. 订单统计 - 近N天订单数、营业额
- * 3. 佣金统计 - 近N天应计佣金总额
- * 4. 库存预警 - 低库存商品数量
- * 5. 趋势数据 - 每日订单数和营业额趋势
- * 6. 最近动态 - 最近7天的绑定、佣金、订单事件
- *
- * @param days 统计周期，默认30天
- */
 @Injectable()
 export class MerchantDashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -156,16 +141,7 @@ export class MerchantDashboardService {
     };
   }
 
-  /**
-   * 统计低库存商品数量
-   * @param tenantId 租户ID
-   * @returns 库存数量低于重订货阈值的商品变体数量
-   *
-   * 低库存判定规则：
-   * - 使用商品的 reorderThreshold（重订货阈值）
-   * - 如无设定则使用租户默认阈值（默认5）
-   * - 仅统计默认仓库的库存
-   */
+  
   private async countLowStock(tenantId: string): Promise<number> {
     const settings = await this.prisma.tenantInventorySettings.findUnique({
       where: { tenantId },
@@ -187,19 +163,7 @@ export class MerchantDashboardService {
     }).length;
   }
 
-  /**
-   * 构建最近活动事件列表
-   *
-   * 合并三种事件类型，按时间倒序排列：
-   * - binding.created: 新的经销商绑定
-   * - commission.accrued: 佣金应计
-   * - order.paid: 订单支付
-   *
-   * @param bindings 绑定事件列表
-   * @param commissions 佣金事件列表
-   * @param orders 订单事件列表
-   * @returns 合并后的活动事件数组
-   */
+  
   private buildRecentActivity(
     bindings: Array<{
       distributorId: string;

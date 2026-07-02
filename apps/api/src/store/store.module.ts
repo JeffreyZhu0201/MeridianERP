@@ -1,20 +1,3 @@
-/**
- * StoreModule - 商店前端模块
- *
- * 该模块是商店消费者（Customer）角色的后端核心模块，提供以下功能：
- * - 用户认证：注册、登录、JWT 令牌签发
- * - 购物车：增删改查购物车商品
- * - 商品目录：浏览商品和商品详情
- * - 订单管理：查看订单列表、订单详情、自提二维码
- * - 结账流程：创建订单、模拟支付、支付成功回调
- * - 经销商绑定：消费者绑定到特定经销商
- * - 商店列表：获取已审批的商户商店列表
- *
- * 认证策略：使用独立的 JWT_STORE_SECRET 签发 'store' 受众的 JWT
- * 多租户：通过 slug 参数隔离不同商户的数据
- *
- * @module store
- */
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { BindingsModule } from '../bindings/bindings.module';

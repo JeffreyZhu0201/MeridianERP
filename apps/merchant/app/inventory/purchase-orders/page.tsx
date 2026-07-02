@@ -14,8 +14,6 @@ import { PurchaseOrdersTable } from './_components/purchase-orders-table';
 interface PurchaseOrdersPageProps {
   searchParams: Promise<{ status?: string; warehouseId?: string; page?: string }>;
 }
-
-/** 商户端 — 采购订单列表 */
 export default async function PurchaseOrdersPage({ searchParams }: PurchaseOrdersPageProps) {
   const token = await getToken();
   if (!token) return null;

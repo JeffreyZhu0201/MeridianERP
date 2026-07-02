@@ -1,6 +1,4 @@
 import { Logger } from '@nestjs/common';
-
-/** Dev mail transport — logs outbound email payloads via Nest Logger. */
 export class ConsoleMailTransport {
   private readonly logger = new Logger(ConsoleMailTransport.name);
 
