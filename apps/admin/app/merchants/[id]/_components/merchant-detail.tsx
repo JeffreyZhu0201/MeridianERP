@@ -13,13 +13,19 @@ import {
   CardTitle,
   BentoDetailHero,
   DetailPageFrame,
+  Dialog,
+  DialogCloseButton,
   EmptyState,
+  Input,
+  Label,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Textarea,
 } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
@@ -42,6 +48,10 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
   const tc = useTranslations('common');
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [recruiterOpen, setRecruiterOpen] = useState(false);
+  const [recruiterId, setRecruiterId] = useState('');
+  const [recruiterReason, setRecruiterReason] = useState('');
+  const [updatingRecruiter, setUpdatingRecruiter] = useState(false);
   const [error, setError] = useState('');
 
   const canReview =
@@ -82,6 +92,32 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('rejectFailed'));
+    }
+  }
+
+  async function handleUpdateRecruiter() {
+    if (!recruiterId.trim() || !recruiterReason.trim()) return;
+    setUpdatingRecruiter(true);
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/merchants/${merchant.id}/recruiter`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            recruitedByDistributorId: recruiterId || null,
+            reason: recruiterReason,
+          }),
+        },
+        token,
+      );
+      setRecruiterOpen(false);
+      setRecruiterReason('');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('updateRecruiterFailed'));
+    } finally {
+      setUpdatingRecruiter(false);
     }
   }
 
@@ -126,6 +162,22 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
           <p className="mt-1">{merchant.rejectionReason}</p>
         </div>
       ) : null}
+
+      {merchant.onboardingStatus === OnboardingStatus.APPROVED && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>{td('updateRecruiter')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4 text-sm text-muted-foreground">
+              {td('updateRecruiterDescription')}
+            </p>
+            <Button variant="outline" onClick={() => setRecruiterOpen(true)}>
+              {td('updateRecruiter')}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -214,6 +266,50 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
         distributors={distributors}
       />
       <RejectDialog open={rejectOpen} onOpenChange={setRejectOpen} onConfirm={handleReject} />
+      <Dialog
+        open={recruiterOpen}
+        onOpenChange={setRecruiterOpen}
+        title={td('updateRecruiter')}
+        footer={
+          <>
+            <DialogCloseButton onClose={() => setRecruiterOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <Button
+              onClick={handleUpdateRecruiter}
+              disabled={updatingRecruiter || !recruiterReason.trim()}
+            >
+              {updatingRecruiter ? tc('saving') : tc('save')}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="recruiter-dist">{td('recruiter')}</Label>
+            <Select
+              id="recruiter-dist"
+              value={recruiterId}
+              onChange={(e) => setRecruiterId(e.target.value)}
+            >
+              <option value="">{td('noRecruiter')}</option>
+              {distributors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="recruiter-reason">{td('reason')}</Label>
+            <Textarea
+              id="recruiter-reason"
+              value={recruiterReason}
+              onChange={(e) => setRecruiterReason(e.target.value)}
+              rows={3}
+              placeholder={td('reasonPlaceholder')}
+            />
+          </div>
+        </div>
+      </Dialog>
     </DetailPageFrame>
   );
 }

@@ -33,14 +33,17 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
   const t = useTranslations('admin.replenishment');
   const tc = useTranslations('common');
   const [error, setError] = useState('');
+  const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleApprove(id: string) {
+  async function handleApprove() {
+    if (!approveId) return;
     setError('');
     try {
-      await apiFetch(`/platform/replenishment/${id}/approve`, { method: 'POST' }, token);
+      await apiFetch(`/platform/replenishment/${approveId}/approve`, { method: 'POST' }, token);
+      setApproveId(null);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('approveFailed'));
@@ -106,7 +109,7 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" onClick={() => handleApprove(req.id)}>
+                    <Button size="sm" onClick={() => setApproveId(req.id)}>
                       {t('approve')}
                     </Button>
                     <Button size="sm" variant="destructive" onClick={() => setRejectId(req.id)}>
@@ -119,6 +122,24 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
           </TableBody>
         </Table>
       </div>
+
+      <Dialog
+        open={!!approveId}
+        onOpenChange={(open) => !open && setApproveId(null)}
+        title={t('approveTitle')}
+        footer={
+          <>
+            <DialogCloseButton onClose={() => setApproveId(null)}>{tc('cancel')}</DialogCloseButton>
+            <Button onClick={handleApprove} disabled={submitting}>
+              {t('approve')}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          {t('approveConfirm')}
+        </p>
+      </Dialog>
 
       <Dialog
         open={!!rejectId}

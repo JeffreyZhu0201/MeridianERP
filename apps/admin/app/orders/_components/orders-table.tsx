@@ -31,6 +31,11 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   REFUNDED: 'destructive',
 };
 
+const fulfillmentVariant: Record<string, 'default' | 'secondary'> = {
+  DELIVERY: 'default',
+  PICKUP: 'secondary',
+};
+
 export function OrdersTable({ orders }: OrdersTableProps) {
   const t = useTranslations('admin.orders');
   const locale = useLocale();
@@ -44,6 +49,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
             <TableHead>{t('columns.merchant')}</TableHead>
             <TableHead>{t('columns.customer')}</TableHead>
             <TableHead>{t('columns.distributor')}</TableHead>
+            <TableHead>{t('columns.fulfillment')}</TableHead>
             <TableHead>{t('columns.status')}</TableHead>
             <TableHead className="text-right">{t('columns.total')}</TableHead>
             <TableHead>{t('columns.date')}</TableHead>
@@ -58,6 +64,15 @@ export function OrdersTable({ orders }: OrdersTableProps) {
               </TableCell>
               <TableCell>{order.guestEmail ?? '—'}</TableCell>
               <TableCell>{order.distributor?.name ?? '—'}</TableCell>
+              <TableCell>
+                {order.fulfillmentType ? (
+                  <Badge variant={fulfillmentVariant[order.fulfillmentType] ?? 'secondary'}>
+                    {order.fulfillmentType === 'DELIVERY' ? t('fulfillmentDelivery') : t('fulfillmentPickup')}
+                  </Badge>
+                ) : (
+                  '—'
+                )}
+              </TableCell>
               <TableCell>
                 <Badge variant={statusVariant[order.status] ?? 'secondary'}>
                   {order.status.replace('_', ' ')}

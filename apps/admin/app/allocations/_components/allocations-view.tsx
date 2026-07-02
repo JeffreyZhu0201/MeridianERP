@@ -55,6 +55,7 @@ export function AllocationsView({
   const t = useTranslations('admin.allocations');
   const tc = useTranslations('common');
   const [skuOpen, setSkuOpen] = useState(false);
+  const [skuEditOpen, setSkuEditOpen] = useState(false);
   const [allocOpen, setAllocOpen] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -65,6 +66,14 @@ export function AllocationsView({
   const [unitCost, setUnitCost] = useState('');
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
+
+  // Edit SKU state
+  const [editSku, setEditSku] = useState<MasterSku | null>(null);
+  const [editSkuName, setEditSkuName] = useState('');
+  const [editOnHand, setEditOnHand] = useState('');
+  const [editUnitCost, setEditUnitCost] = useState('');
+  const [editWholesalePrice, setEditWholesalePrice] = useState('');
+  const [editRetailPrice, setEditRetailPrice] = useState('');
 
   const [tenantId, setTenantId] = useState(merchants[0]?.tenantId ?? '');
   const [note, setNote] = useState('');
@@ -146,6 +155,44 @@ export function AllocationsView({
     }
   }
 
+  function openEditSku(sku: MasterSku) {
+    setEditSku(sku);
+    setEditSkuName(sku.name);
+    setEditOnHand(String(sku.quantityOnHand));
+    setEditUnitCost(String(sku.unitCost));
+    setEditWholesalePrice(String(sku.wholesalePrice));
+    setEditRetailPrice(String(sku.retailPrice));
+    setSkuEditOpen(true);
+  }
+
+  async function handleUpdateSku() {
+    if (!editSku) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/allocations/master-skus/${editSku.id}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            name: editSkuName,
+            quantityOnHand: Number(editOnHand),
+            unitCost: Number(editUnitCost),
+            wholesalePrice: Number(editWholesalePrice),
+            retailPrice: Number(editRetailPrice),
+          }),
+        },
+        token,
+      );
+      setSkuEditOpen(false);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('editSkuFailed'));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -170,6 +217,7 @@ export function AllocationsView({
                     <TableHead className="text-right">{t('skuColumns.onHand')}</TableHead>
                     <TableHead className="text-right">{t('skuColumns.wholesale')}</TableHead>
                     <TableHead className="text-right">{t('skuColumns.retail')}</TableHead>
+                    <TableHead className="text-right">{t('skuColumns.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -180,6 +228,11 @@ export function AllocationsView({
                       <TableCell className="text-right tabular-nums">{sku.quantityOnHand}</TableCell>
                       <TableCell className="text-right">{formatMoney(sku.wholesalePrice)}</TableCell>
                       <TableCell className="text-right">{formatMoney(sku.retailPrice)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" onClick={() => openEditSku(sku)}>
+                          {tc('edit')}
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -316,6 +369,79 @@ export function AllocationsView({
                 step="0.01"
                 value={retailPrice}
                 onChange={(e) => setRetailPrice(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog
+        open={skuEditOpen}
+        onOpenChange={setSkuEditOpen}
+        title={t('editSku')}
+        footer={
+          <>
+            <DialogCloseButton onClose={() => setSkuEditOpen(false)}>{tc('cancel')}</DialogCloseButton>
+            <Button onClick={handleUpdateSku} disabled={submitting || !editSkuName}>
+              {t('form.submitSku')}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          {editSku && (
+            <p className="text-sm text-muted-foreground font-mono">{editSku.skuCode}</p>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="edit-sku-name">{t('form.skuName')}</Label>
+            <Input
+              id="edit-sku-name"
+              value={editSkuName}
+              onChange={(e) => setEditSkuName(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-sku-onhand">{t('form.onHand')}</Label>
+              <Input
+                id="edit-sku-onhand"
+                type="number"
+                min="0"
+                value={editOnHand}
+                onChange={(e) => setEditOnHand(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-sku-cost">{t('form.unitCost')}</Label>
+              <Input
+                id="edit-sku-cost"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editUnitCost}
+                onChange={(e) => setEditUnitCost(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-sku-wholesale">{t('form.wholesalePrice')}</Label>
+              <Input
+                id="edit-sku-wholesale"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editWholesalePrice}
+                onChange={(e) => setEditWholesalePrice(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-sku-retail">{t('form.retailPrice')}</Label>
+              <Input
+                id="edit-sku-retail"
+                type="number"
+                min="0"
+                step="0.01"
+                value={editRetailPrice}
+                onChange={(e) => setEditRetailPrice(e.target.value)}
               />
             </div>
           </div>

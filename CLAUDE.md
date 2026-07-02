@@ -332,6 +332,66 @@ export class CreateOrderDto {
 - 数据获取：Server Component 中 fetch 并转发 cookies
 - Mutation：server actions 或带 toast 反馈的 client fetch
 
+## 开发规范
+
+### Git 工作流
+
+分支模型: `main` → `develop` → `feature/*`
+
+```bash
+# 创建新功能分支
+rtk git checkout develop && rtk git pull
+rtk git checkout -b feature/<scope>-<name>
+
+# PR 前检查
+rtk pnpm --filter @meridian/api test:e2e
+rtk pnpm test:e2e
+rtk rtk tsc
+rtk rtk build
+
+# 提交 PR
+rtk gh pr create --base develop --title "feat: <description>"
+```
+
+PR 模板:
+```markdown
+## Summary
+- …
+
+## Docs
+- docs/prd/...
+- docs/architecture/...
+- docs/design/...
+
+## Test plan
+- [ ] P0 criterion 1
+```
+
+### UI 组件规范
+
+**任何 UI 工作前必须先阅读 `packages/ui/src/index.ts`**
+
+组件层级（从高到低）:
+1. `packages/ui/src/components/ui/` — shadcn/ui 原语组件（根）
+2. `packages/ui/src/components/shells/` — 门户 Shell 布局
+3. `packages/ui/src/components/frameworks/` — 页面框架模板
+4. `packages/ui/src/components/bento/` — Dashboard Bento 网格
+5. `packages/ui/src/components/orders/` — 订单相关组件
+
+**新组件规则**: 先加到 `packages/ui/src/components/ui/`，再传播到门户 apps
+
+可用原语组件: Button, Input, Card, Dialog, Sheet, Select, Table, Sidebar, Tabs, Badge, Alert, Accordion, Popover, Tooltip, Calendar, Chart, Combobox, Command, ContextMenu, DataTable, etc.
+
+### 代码命名规范
+
+| 类型 | 规范 | 示例 |
+|------|------|------|
+| 文件名 | kebab-case | `order-service.ts` |
+| 类名 | PascalCase | `OrderService` |
+| 函数名 | camelCase | `getOrderById` |
+| 常量 | SCREAMING_SNAKE | `MAX_RETRY_COUNT` |
+| API 路由 | kebab-case | `/merchant/orders` |
+
 ---
 
 ## CI/CD

@@ -32,6 +32,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
   const t = useTranslations('admin.withdrawals');
   const tc = useTranslations('common');
   const [error, setError] = useState('');
+  const [approveId, setApproveId] = useState<string | null>(null);
   const [rejectId, setRejectId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -44,10 +45,12 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
     }).format(Number(value));
   }
 
-  async function handleApprove(id: string) {
+  async function handleApprove() {
+    if (!approveId) return;
     setError('');
     try {
-      await apiFetch(`/platform/withdrawals/${id}/approve`, { method: 'POST' }, token);
+      await apiFetch(`/platform/withdrawals/${approveId}/approve`, { method: 'POST' }, token);
+      setApproveId(null);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('approveFailed'));
@@ -107,7 +110,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="sm" onClick={() => handleApprove(withdrawal.id)}>
+                    <Button size="sm" onClick={() => setApproveId(withdrawal.id)}>
                       {t('approve')}
                     </Button>
                     <Button
@@ -124,6 +127,24 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
           </TableBody>
         </Table>
       </div>
+
+      <Dialog
+        open={!!approveId}
+        onOpenChange={(open) => !open && setApproveId(null)}
+        title={t('approveTitle')}
+        footer={
+          <>
+            <DialogCloseButton onClose={() => setApproveId(null)}>{tc('cancel')}</DialogCloseButton>
+            <Button onClick={handleApprove} disabled={submitting}>
+              {t('approve')}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-muted-foreground">
+          {t('approveConfirm')}
+        </p>
+      </Dialog>
 
       <Dialog
         open={!!rejectId}
