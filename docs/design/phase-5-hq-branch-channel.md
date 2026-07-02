@@ -3,7 +3,7 @@
 **Apps:** `apps/admin`, `apps/merchant`, `apps/distributor`, `apps/store`  
 **PRD:** `docs/prd/phase-5-distribution-and-allocation.md`  
 **Architecture:** `docs/architecture/phase-5-distribution-and-allocation.md`  
-**Showcase:** `apps/ui-spec/src/app/page.tsx` → **Phase 5 — Order fulfillment**  
+**Showcase:** `packages/ui` order and fulfillment components  
 **Version:** 1.0 · 2025-06-25
 
 ## Design read
@@ -63,7 +63,7 @@ Factory → channel partner → branch store → consumer. Data-dense ERP surfac
 
 ## Shared composites (`@meridian/ui`)
 
-Propagate from ui-spec showcase (`apps/ui-spec/src/components/`).
+Propagate from shared `packages/ui` components.
 
 | Component | Location (target) | Showcase |
 |-----------|-------------------|----------|

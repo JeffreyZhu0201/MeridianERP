@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
 **Status:** Approved for implementation  
-**Depends on:** Phase 1–4 portals, `apps/ui-spec`, `packages/ui`, Phase 5 US-5.1 (store picker slice)
+**Depends on:** Phase 1–4 portals, `packages/ui`, Phase 5 US-5.1 (store picker slice)
 
 ## Problem
 
@@ -20,7 +20,7 @@ All four portals use uniform metric grids (`sm:grid-cols-2 lg:grid-cols-5`) and 
 
 ## Scope
 
-- **49 portal pages** across `admin`, `merchant`, `store`, `distributor` (excluding `apps/ui-spec`)
+- **49 portal pages** across `admin`, `merchant`, `store`, `distributor` (excluding non-production showcases)
 - **Bento Grid** layout primitives in ui-spec → `packages/ui`
 - **API extensions** for single-fetch dashboards + `GET /store/stores`
 - **US-5.1** store picker at `apps/store` `/`

@@ -1,0 +1,37 @@
+---
+description: MeridianERP core operating rules, RTK commands, workflow gates, and project map
+alwaysApply: true
+---
+
+# MeridianERP Core
+
+## Commands
+
+- Prefix every terminal command with `rtk`, including each command in `&&`, `|`, or `;` chains.
+- Skip `rtk` only for interactive TUIs such as `vim`, `less`, or auth login flows, or when the user asks for raw output.
+- Common commands: `rtk pnpm dev`, `rtk pnpm dev:api`, `rtk pnpm deps`, `rtk pnpm db:setup`, `rtk pnpm typecheck`, `rtk pnpm lint`, `rtk pnpm build`, `rtk pnpm test:e2e`, `rtk git status`, `rtk git diff`, `rtk git log --oneline -5`.
+
+## Project Map
+
+- Apps: `apps/admin` at 3000, `apps/api` at 3001, `apps/merchant` at 3002, `apps/store` at 3003, `apps/distributor` at 3005.
+- Shared contracts: `packages/shared` as `@meridian/shared`.
+- Shared UI: `packages/ui` as `@meridian/ui`.
+- Database: PostgreSQL via Prisma in `apps/api/prisma`.
+- Jobs and cache: Redis and BullMQ.
+- Current product state: `docs/PRODUCT.md`.
+- Deep architecture: `docs/architecture/system-overview.md`.
+
+## Workflow
+
+- New feature order: product-manager PRD, architect API/contracts, ui-designer screens, frontend/backend implementation, test-engineer verification, devops shipping, GitHub PR.
+- Do not implement a feature before `docs/prd/<feature>.md` and `docs/architecture/<feature>.md` exist, unless the user explicitly asks for a small maintenance edit.
+- UI work also needs `docs/design/<feature>.md` when it changes screens or shared components.
+- Each phase writes a handoff to `docs/handoffs/<feature>-<phase>.md` using `docs/handoffs/README.md`.
+
+## GitHub
+
+- Branch from `develop`; feature PRs target `develop`; production releases flow `develop` to `main`.
+- Branch names: `feature/<scope>-<name>`, `fix/<scope>-<name>`, `hotfix/<scope>-<name>`, `chore/<name>`.
+- Never commit directly to `main` or `develop`; never force-push protected branches.
+- Do not commit unless the user explicitly asks.
+- PRs need Summary, Docs, and Test plan sections mapped to P0 acceptance criteria.

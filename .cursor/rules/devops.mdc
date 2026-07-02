@@ -1,0 +1,14 @@
+---
+description: MeridianERP Docker, environment, CI, and deployment conventions
+globs: docker/**,**/Dockerfile*,docker-compose*.yml,.github/**,.env.example
+alwaysApply: false
+---
+
+# DevOps
+
+- Local default: `rtk pnpm deps` for Redis, then `rtk pnpm dev` for API and portals.
+- Optional full stack: `rtk docker compose -f docker/docker-compose.yml --profile dev up --build`.
+- Document every required environment variable in `.env.example`; never commit `.env` files.
+- Dockerfiles use multi-stage builds, pinned base images, non-root runtime users, and health checks for long-running services.
+- GitHub Actions should run lint, tests, and build for PRs to `develop` and `main`.
+- Build Docker images only after merge or release workflow requirements are clear.

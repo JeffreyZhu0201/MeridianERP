@@ -4,7 +4,7 @@
 **Last updated:** 2025-06-25  
 **Status:** Ready for implementation  
 **PRD:** `docs/prd/bento-ui-redesign.md` (US-B1–US-B5)  
-**Depends on:** Phase 1–4 portals, `apps/ui-spec`, `packages/ui`, platform dashboard (Slice 4), distributor performance trend (Slice 3)
+**Depends on:** Phase 1–4 portals, `packages/ui`, platform dashboard (Slice 4), distributor performance trend (Slice 3)
 
 ## Overview
 
@@ -37,7 +37,7 @@ Shared contracts: `packages/shared/src/distributors.ts` (platform + trend types)
 
 ### Workflow
 
-1. Add showcase section to `apps/ui-spec/src/app/page.tsx` (Bento grid examples: dashboard KPI + chart span-2, list header tiles, detail hero).
+1. Add shared bento examples/components to `packages/ui` (dashboard KPI + chart span-2, list header tiles, detail hero).
 2. Copy primitives to `packages/ui/src/components/bento/` and `packages/ui/src/components/ui/chart.tsx` (from ui-spec).
 3. Portal pages consume `@meridian/ui` only — never import ui-spec directly.
 

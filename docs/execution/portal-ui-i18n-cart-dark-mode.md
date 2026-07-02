@@ -95,11 +95,11 @@ Light mode tokens unchanged.
 - Components: `packages/ui/src/components/ui/*`, shells in `packages/ui/src/components/shells/`
 - Portal Tailwind: `apps/{admin,merchant,store,distributor}/tailwind.config.ts` — `hsl(var(--border) / <alpha-value>)`
 - Design reference: `docs/design/dark-mode-borders.md`
-- Showcase: `apps/ui-spec` → section **Dark mode / Borders**
+- Reference: `packages/ui` dark-mode tokens and border components
 
 ### Verify
 
-1. `rtk pnpm --filter @meridian/ui-spec dev` (or open ui-spec if running)
+1. `rtk pnpm --filter @meridian/ui build`
 2. Toggle dark mode on showcase page
 3. Check: cards, outline buttons, table rows, shell header divider — borders read as subtle hairlines, not bright gray boxes
 4. Repeat on admin (`/login`) and merchant portals

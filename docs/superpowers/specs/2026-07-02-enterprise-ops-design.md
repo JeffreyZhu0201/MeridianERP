@@ -540,5 +540,5 @@ export * from './events/webhook.events';
 | 文档 | 路径 |
 |------|------|
 | 架构设计 | `docs/architecture/phase-5-distribution-and-allocation.md` |
-| NestJS 模式 | `.cursor/rules/nestjs-backend.mdc` |
-| 前端组件规范 | `.cursor/rules/ui-spec.mdc` |
+| NestJS 模式 | `.cursor/rules/backend.mdc` |
+| 前端组件规范 | `.cursor/rules/ui.mdc` |

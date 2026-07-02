@@ -78,14 +78,14 @@ AuthLayout
 | Incrementally wrap legacy `<aside>` in existing shells | **Reject** — leaves duplicate collapse/mobile logic; does not achieve dashboard-01 structure |
 | **Copy `sidebar.tsx` + dependencies from ui-spec → `packages/ui`, then refactor shells** | **Accept** |
 
-**Rationale:** Matches `.cursor/rules/ui-spec.mdc` workflow (ui-spec first, propagate to `packages/ui`). Single consumption layer for all portals.
+**Rationale:** Matches `.cursor/rules/ui.mdc`: `packages/ui` is the single consumption layer for all portals.
 
 #### Files to copy/adapt from ui-spec
 
 | Source | Target |
 |--------|--------|
-| `apps/ui-spec/src/components/ui/sidebar.tsx` | `packages/ui/src/components/ui/sidebar.tsx` |
-| `apps/ui-spec/src/hooks/use-mobile.ts` | `packages/ui/src/hooks/use-mobile.ts` |
+| `packages/ui/src/components/ui/sidebar.tsx` | `packages/ui/src/components/ui/sidebar.tsx` |
+| `packages/ui/src/hooks/use-mobile.ts` | `packages/ui/src/hooks/use-mobile.ts` |
 
 **Additional primitives** (if not already in `packages/ui`): `Separator`, `Tooltip`, `Skeleton` — mirror ui-spec APIs.
 
@@ -470,7 +470,7 @@ None introduced. Guest cart session is client-side localStorage only — not Red
 
 | # | Decision | Choice | Rationale |
 |---|----------|--------|-----------|
-| ADR-1 | Sidebar source for portals | Copy ui-spec `sidebar.tsx` → `packages/ui` | ui-spec is not a runtime dependency; established propagate workflow |
+| ADR-1 | Sidebar source for portals | Use `packages/ui` `sidebar.tsx` | `packages/ui` is the runtime dependency and canonical component source |
 | ADR-2 | Shell refactor strategy | Full SidebarProvider restructure (not incremental wrap) | Achieves dashboard-01 structure; avoids dual collapse implementations |
 | ADR-3 | Guest cart session storage | `localStorage` per slug + `X-Cart-Session` header | PRD requirement; aligns with API `GuestCartGuard` / header extraction; no cookie sync for MVP |
 | ADR-4 | Guest cart on RSC pages | Client hydration via `GuestCartLoader` | localStorage unavailable server-side |

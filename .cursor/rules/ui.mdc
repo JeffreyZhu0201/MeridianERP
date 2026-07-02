@@ -1,0 +1,37 @@
+---
+description: MeridianERP UI system, packages/ui policy, tokens, accessibility, and screen specs
+globs: apps/admin/**,apps/merchant/**,apps/store/**,apps/distributor/**,packages/ui/**,docs/design/**
+alwaysApply: false
+---
+
+# UI System
+
+## Source Of Truth
+
+- Use `packages/ui` for shells, layouts, shared components, and shadcn/ui primitives.
+- Read `packages/ui/src/index.ts` before UI work to confirm exported components.
+- Read matching files in `packages/ui/src/components/ui/<name>.tsx` before using a primitive.
+- Add missing primitives or shared compositions to `packages/ui` before portal adoption.
+- Do not use Figma MCP or block implementation on Figma node IDs.
+
+## Visual Standards
+
+- Typography: Geist Sans via `--font-sans`; Geist Mono via `--font-mono`; ERP body text defaults to `text-sm`.
+- Colors: shadcn CSS variables from `packages/ui/styles/globals.css`; do not invent one-off hex colors.
+- Density: compact admin screens, `py-4` sections, sticky table headers, skeleton loaders for tables.
+- Icons: use the icon family already established by `packages/ui`; do not mix icon sets inside one surface.
+- Dark mode: support light and dark from first implementation.
+
+## Portal Shells
+
+- `apps/admin`: `AdminShell`.
+- `apps/merchant`: `MerchantShell`.
+- `apps/store`: `StoreShell`.
+- `apps/distributor`: `DistributorShell`.
+
+## Accessibility
+
+- Target WCAG 2.1 AA contrast.
+- Use semantic HTML, visible labels, keyboard navigation, visible focus states, and text plus color for status.
+- Mobile bind and checkout flows need 44px minimum touch targets.
+- Honor `prefers-reduced-motion` for transitions.

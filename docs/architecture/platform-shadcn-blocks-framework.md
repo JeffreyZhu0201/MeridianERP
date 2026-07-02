@@ -31,7 +31,7 @@ UI-only initiative: introduce a **three-layer component stack** (ui-spec → `pa
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ apps/ui-spec          Source of truth + showcase examples   │
+│ packages/ui           Source of truth + shared components     │
 │  src/app/page.tsx     Framework sections per FW-* ID        │
 │  src/components/ui/   Primitives (sidebar, card, table…)    │
 └──────────────────────────────┬──────────────────────────────┘
@@ -56,7 +56,7 @@ UI-only initiative: introduce a **three-layer component stack** (ui-spec → `pa
 
 ### Layer rules
 
-1. **ui-spec first** — Any primitive or framework pattern missing from `apps/ui-spec/src/app/page.tsx` is added there before `packages/ui` or portal adoption (`.cursor/rules/ui-spec.mdc`).
+1. **packages/ui first** — Any primitive or framework pattern missing from `packages/ui` is added there before portal adoption (`.cursor/rules/ui.mdc`).
 2. **Single consumption path** — Portals import from `@meridian/ui` only; they never import `apps/ui-spec`.
 3. **Feature logic stays in apps** — Data fetching, mutations, Zod forms, and route params remain in portal `app/` and `components/`; frameworks own **chrome only** (spacing, headers, cards, loading/empty slots).
 4. **Propagate primitives** — When ui-spec adds or changes a primitive API, update the matching file under `packages/ui/src/components/ui/` in the same PR series.
@@ -358,7 +358,7 @@ export interface AuthLayoutProps {
 | `apps/admin` | `app/layout.tsx`, `app/login/`, `app/(shell)/**` | Wire theme; wrap list/detail/settings routes in frames |
 | `apps/merchant` | `app/layout.tsx`, auth routes, `app/(authenticated)/**` | Same; nested nav config stays in `MerchantShell` |
 | `apps/store` | `app/layout.tsx`, `app/s/[slug]/**`, `components/store-shell-wrapper.tsx` | `StoreShellFrame`; auth/bind/checkout frames |
-| `apps/ui-spec` | `src/app/page.tsx`, new showcase sections | Demonstrate every FW-* before portal merge |
+| `packages/ui` | shared framework components and exports | Provide every FW-* before portal merge |
 | `packages/ui` | `components/frameworks/`, `components/theme/`, `components/ui/sidebar.tsx` | Shared composites and primitives |
 
 **NestJS (`apps/api`):** No changes.
@@ -396,7 +396,7 @@ export interface AuthLayoutProps {
 
 ### Phase 0 — ui-spec showcase (gate for all portal work)
 
-Add sections to `apps/ui-spec/src/app/page.tsx` (or dedicated route group `/showcase/frameworks` if page grows too large):
+Add shared framework components and examples to `packages/ui`:
 
 | Section | Demonstrates |
 |---------|--------------|
@@ -531,8 +531,8 @@ apps/*/app/globals.css                    # ensure sidebar tokens if not importi
 ### ui-spec
 
 ```
-apps/ui-spec/src/app/page.tsx             # framework showcase sections
-apps/ui-spec/src/app/layout.tsx           # reference ThemeProvider wiring (already correct)
+packages/ui/src/index.ts                    # framework exports
+packages/ui/src/components/theme/           # theme provider wiring
 ```
 
 ---
@@ -573,4 +573,4 @@ apps/ui-spec/src/app/layout.tsx           # reference ThemeProvider wiring (alre
 | Gap-closure PRD | `docs/prd/platform-ui-blocks-and-gaps.md` |
 | Prior shell architecture | `docs/architecture/platform-ui-blocks-and-gaps.md` |
 | Design system | `docs/design/design-system.md` |
-| UI spec rules | `.cursor/rules/ui-spec.mdc` |
+| UI spec rules | `.cursor/rules/ui.mdc` |

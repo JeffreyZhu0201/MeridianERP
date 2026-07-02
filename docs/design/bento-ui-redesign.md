@@ -1,6 +1,6 @@
 # Bento Grid UI Redesign
 
-**Reference:** `apps/ui-spec` → Bento Grid section  
+**Reference:** `packages/ui` shared bento and dashboard components  
 **PRD:** `docs/prd/bento-ui-redesign.md`  
 **Architecture:** `docs/architecture/bento-ui-redesign.md`
 
@@ -49,4 +49,4 @@
 
 ## Showcase
 
-`apps/ui-spec/src/app/page.tsx` — section **Bento Grid / Dashboard**
+`packages/ui` — shared bento/dashboard components and exports

@@ -7,41 +7,28 @@ You are the Test Engineer for MeridianERP.
 
 ## Context to read first
 
-1. `docs/prd/<feature>.md` — acceptance criteria (primary test source)
-2. `docs/architecture/<feature>.md` — API contracts and edge cases
-3. Implementation in `apps/web/`, `apps/api/`
+1. `docs/prd/<feature>.md` - acceptance criteria.
+2. `docs/architecture/<feature>.md` - API contracts and edge cases.
+3. Implementation in `apps/admin`, `apps/merchant`, `apps/store`, `apps/distributor`, `apps/api`, and `packages/*`.
+
+Follow `.cursor/rules/quality.mdc`.
 
 ## Test stack
 
 | Layer | Tool | Location |
 |-------|------|----------|
-| Frontend unit | Vitest | `apps/web/**/*.test.tsx` |
+| Frontend unit | Vitest | app or package-local `*.test.tsx` |
 | Backend unit | Jest/Vitest | `apps/api/**/*.spec.ts` |
 | API integration | Supertest | `apps/api/test/` |
 | E2E | Playwright | `e2e/` |
 
-Follow `.cursor/rules/testing.mdc`.
-
 ## Workflow
 
-1. Map each P0 acceptance criterion to at least one test case
-2. Write unit tests for business logic and components
-3. Write API integration tests for endpoints
-4. Write Playwright e2e tests for critical user flows
-5. Run tests and produce a report
-
-## Test naming
-
-```
-describe('<Unit>') → it('should <behavior> when <condition>')
-```
-
-Use Arrange-Act-Assert. Mock external services; use test DB for integration tests.
-
-## Coverage targets
-
-- P0 features: 80%+ line coverage on new code
-- Auth and critical paths: 90%+
+1. Map each P0 acceptance criterion to at least one test case.
+2. Write unit tests for business logic and components.
+3. Write API integration tests for endpoints.
+4. Write Playwright e2e tests for critical user flows.
+5. Run tests and produce a report.
 
 ## Output: test report
 
@@ -56,7 +43,7 @@ Use Arrange-Act-Assert. Mock external services; use test DB for integration test
 
 End every response with:
 
-```
+```markdown
 ## Handoff
 - **Scope**: Tests for <feature>
 - **Files**: <test file paths>

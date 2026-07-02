@@ -4,7 +4,7 @@
 **Last updated:** 2025-06-25  
 **PRD:** [platform-ui-blocks-and-gaps.md](../prd/platform-ui-blocks-and-gaps.md)  
 **Architecture:** [platform-ui-blocks-and-gaps.md](../architecture/platform-ui-blocks-and-gaps.md)  
-**UI spec:** `apps/ui-spec/` (no Figma)
+**UI spec:** `packages/ui` (no Figma)
 
 ## Overview
 
@@ -15,9 +15,9 @@ Two coordinated UI workstreams:
 | **A — Blocks refresh** | `AuthLayout` (login-03), upgraded `AdminShell` / `MerchantShell` (dashboard-01 Featured) | admin, merchant, store (auth only) |
 | **B — Gap closure** | Merchant orders list + detail, CRM activities timeline + global log | merchant |
 
-**Tokens:** `apps/ui-spec/src/app/globals.css` — `--primary`, `--muted`, `--sidebar-*`, Geist sans/mono.  
+**Tokens:** `packages/ui/styles/globals.css` — `--primary`, `--muted`, `--sidebar-*`, Geist sans/mono.  
 **Density:** `text-sm` body, compact tables, sticky headers per [design-system.md](./design-system.md).  
-**Icons:** `@tabler/icons-react` stroke 1.5 in shells; `lucide-react` acceptable in ui-spec-aligned primitives.
+**Icons:** `@tabler/icons-react` stroke 1.5 in shells; `lucide-react` acceptable in `packages/ui`-aligned primitives.
 
 ---
 
@@ -105,7 +105,7 @@ CRM
 
 ### Component mapping
 
-| Element | ui-spec / packages |
+| Element | packages/ui |
 |---------|-------------------|
 | Viewport | `div.min-h-svh.bg-muted` |
 | Center stack | `div.flex.flex-col.items-center.justify-center.gap-6.p-6` |
@@ -116,7 +116,7 @@ CRM
 | Form fields | `Form`, `FormField`, `FormLabel`, `FormControl`, `FormMessage`, `Input`, `Button` |
 | Primary CTA | `Button variant="default"` full width (`className="w-full"`) |
 | Footer links | `Button variant="link"` or `text-sm` anchor |
-| Theme toggle | `ModeToggle` pattern from `apps/ui-spec/src/components/mode-toggle.tsx` — `DropdownMenu` + `Button variant="outline" size="icon"` |
+| Theme toggle | `ModeToggle` pattern from `packages/ui/src/components/theme/` — `DropdownMenu` + `Button variant="outline" size="icon"` |
 | Inline errors | `FormMessage` or `p.text-sm.text-destructive` |
 
 ### Per-portal content
@@ -180,7 +180,7 @@ CRM
 ## A2. Upgraded shells (dashboard-01 Featured)
 
 **Reference:** [shadcn dashboard-01](https://ui.shadcn.com/blocks/dashboard#dashboard-01) Featured layout.  
-**Primitives:** Copy `SidebarProvider` stack from `apps/ui-spec/src/components/ui/sidebar.tsx` → `packages/ui`.
+**Primitives:** Copy `SidebarProvider` stack from `packages/ui/src/components/ui/sidebar.tsx` → `packages/ui`.
 
 ### Wireframe
 
@@ -523,4 +523,4 @@ Used on contact and lead detail pages. Optional reuse on global activities page.
 | Phase 1 merchant wireframes | `docs/design/phase-1-merchant.md` |
 | Phase 1 admin wireframes | `docs/design/phase-1-admin.md` |
 | Design system | `docs/design/design-system.md` |
-| UI spec showcase | `apps/ui-spec/src/app/page.tsx` |
+| UI exports | `packages/ui/src/index.ts` |

@@ -31,7 +31,7 @@ flowchart TB
     Merchant["Merchant Branch\n:3002"]
     Store["Consumer Store\n:3003"]
     Distributor["Distributor Portal\n:3005"]
-    UISpec["UI Spec Showcase\n:3004"]
+    UIRef["packages/ui\nshared UI"]
   end
 
   subgraph packages [Shared Packages]
@@ -57,7 +57,7 @@ flowchart TB
   Merchant --> UI
   Store --> UI
   Distributor --> UI
-  UISpec -.->|design reference| UI
+  UIRef --> UI
 
   Admin -->|Bearer JWT| API
   Merchant -->|Bearer JWT| API
@@ -77,15 +77,15 @@ flowchart TB
 | API | `@meridian/api` | 3001 | All portals |
 | Merchant | `@meridian/merchant` | 3002 | Branch staff |
 | Store | `@meridian/store` | 3003 | End customers |
-| UI Spec | `@meridian/ui-spec` | 3004 | Design reference (not production) |
+| UI reference | `@meridian/ui` | packages/ui | Shared components and design tokens |
 | Distributor | `@meridian/distributor` | 3005 | Channel partners |
 
 ### Key decisions
 
-- **Monorepo:** pnpm workspaces + Turborepo; `pnpm dev` runs API + all portals.
+- **Monorepo:** pnpm workspaces + Turborepo; `rtk pnpm dev` runs API + all portals.
 - **Docker Compose:** postgres, redis, api, admin, merchant, store (`docker/docker-compose.yml`); distributor runs locally only.
 - **Redis:** BullMQ job broker only; `@nestjs/cache-manager` is not wired.
-- **Contracts:** DTOs and enums in `packages/shared`; UI patterns canonical in `apps/ui-spec`.
+- **Contracts:** DTOs and enums in `packages/shared`; UI patterns canonical in `packages/ui`.
 
 ---
 

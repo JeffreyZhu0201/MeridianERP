@@ -1,198 +1,50 @@
 # MeridianERP Execution Guide
 
-How to build MeridianERP using the Cursor agent workflow.
+## Phase Order
 
-## Agent Phase Order
+Every new feature follows this order unless the user explicitly asks for a small maintenance edit:
 
-Every feature follows this sequence. Do not skip phases.
+1. `product-manager` writes or updates `docs/prd/<feature>.md`.
+2. `architect` writes or updates `docs/architecture/<feature>.md` and shared contracts.
+3. `ui-designer` writes or updates `docs/design/<feature>.md` for UI changes.
+4. `nextjs-frontend` and `nestjs-backend` implement after contracts exist.
+5. `test-engineer` verifies P0 acceptance criteria.
+6. `devops-engineer` handles Docker, environment, or CI changes when needed.
+7. GitHub shipping opens a PR from a feature branch into `develop`.
 
-```
-1. product-manager  → docs/prd/<feature>.md
-2. architect         → docs/architecture/<feature>.md + packages/shared types
-3. ui-designer       → docs/design/<feature>.md + apps/ui-spec constraints
-4. nextjs-frontend + nestjs-backend (parallel, after API contracts exist)
-5. test-engineer     → tests + report
-6. devops-engineer   → Docker/CI updates
-7. GitHub            → PR to develop, CI green, merge feature branch
-```
+Core workflow behavior lives in `.cursor/rules/core.mdc`.
 
-Orchestration rules: `.cursor/rules/workflow-orchestration.mdc` and `.cursor/rules/github-workflow.mdc` (always on).
+## Required Artifacts
 
-**Git branching:** `feature/*` → `develop` → `main`. See [git-workflow.md](git-workflow.md).
+Before feature implementation:
 
-**Handoffs:** Each phase ends with a Handoff saved to `docs/handoffs/<feature>-<phase>.md`. Template: [handoffs/README.md](handoffs/README.md).
+- `docs/prd/<feature>.md` with P0/P1/P2 stories and Given/When/Then acceptance criteria.
+- `docs/architecture/<feature>.md` with API contracts, data model, module boundaries, jobs, caching, and ADRs.
+- `docs/design/<feature>.md` when screens or shared UI change.
+- `packages/shared` contracts before frontend and backend run in parallel.
 
-## Phase Gates
+Doc templates and expectations live in `.cursor/rules/planning-docs.mdc`.
 
-Before writing application code for a feature:
+## Rule Map
 
-- [ ] PRD exists with P0 acceptance criteria (Given/When/Then)
-- [ ] Architecture doc exists with Prisma models and API contracts
-- [ ] Design doc exists with screen specs and component mapping
-- [ ] Shared types defined in `packages/shared`
+| Rule | Scope |
+|---|---|
+| `.cursor/rules/core.mdc` | RTK, project map, workflow gates, branch and PR rules |
+| `.cursor/rules/ui.mdc` | `packages/ui`, design tokens, accessibility, screen specs |
+| `.cursor/rules/frontend.mdc` | Next.js App Router implementation |
+| `.cursor/rules/backend.mdc` | NestJS, Prisma, tenancy, shared contracts |
+| `.cursor/rules/planning-docs.mdc` | PRD, architecture, and design docs |
+| `.cursor/rules/quality.mdc` | TypeScript, naming, imports, tests |
+| `.cursor/rules/devops.mdc` | Docker, env, CI, deployment |
 
-**Phase 1 foundation docs (pre-approved):**
+## Handoffs
 
-| Doc | Path |
-|-----|------|
-| Master spec | `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md` |
-| PRD | `docs/prd/phase-1-foundation.md` |
-| Architecture | `docs/architecture/phase-1-foundation.md` |
-| Design system | `docs/design/design-system.md` |
-| Admin wireframes | `docs/design/phase-1-admin.md` |
-| Merchant wireframes | `docs/design/phase-1-merchant.md` |
-| Implementation plan | `docs/superpowers/plans/2025-06-24-phase-1-foundation.md` |
-
-## Invoking Subagents
-
-Example prompts:
-
-```
-Use the product-manager subagent to draft a PRD for inventory management (Phase 3).
-
-Use the architect subagent to design inventory based on docs/prd/inventory.md.
-
-Use the ui-designer subagent to implement the merchants list per docs/design/phase-1-admin.md.
-
-Use nextjs-frontend and nestjs-backend subagents in parallel to implement CRM per docs/architecture/phase-1-foundation.md.
-
-Use test-engineer to validate Phase 1 against docs/prd/phase-1-foundation.md.
-
-Use devops-engineer to set up Docker Compose for the monorepo.
-```
-
-## Cursor Rules Reference
-
-| Rule | Scope | Purpose |
-|------|-------|---------|
-| `workflow-orchestration.mdc` | Always | Phase order, handoffs |
-| `tech-stack.mdc` | Always | Monorepo layout, stack |
-| `design-system.mdc` | Always | Fonts, colors, tokens |
-| `erp-domain.mdc` | apps/**, packages/shared/** | Tenancy, CRM, distributors |
-| `code-standards.mdc` | **/*.{ts,tsx} | Naming, patterns, commits |
-| `ui-design.mdc` | apps/admin/**, apps/merchant/** | shadcn, Figma sync |
-| `nextjs-frontend.mdc` | apps/admin/**, apps/merchant/** | App Router patterns |
-| `nestjs-backend.mdc` | apps/api/** | NestJS, Prisma, BullMQ |
-| `testing.mdc` | **/*.spec.ts, e2e/** | Test standards |
-| `devops-docker.mdc` | docker/**, Dockerfile* | Containers, CI |
-| `github-workflow.mdc` | Always | Branches, PRs, CI gates, `gh` CLI |
+Each phase writes a handoff to `docs/handoffs/<feature>-<phase>.md`. Use `docs/handoffs/README.md` for the template.
 
 ## GitHub Shipping
 
-After local phases complete, follow `github-workflow.mdc`:
+Use `.cursor/rules/core.mdc` for branch naming, PR targets, CI expectations, and commit policy. Feature PRs target `develop`; releases flow from `develop` to `main`.
 
-1. Create branch: `feat/<scope>-<name>` or `fix/<scope>-<name>`
-2. Ensure PRD, architecture, and design docs are referenced in the PR
-3. Push and open PR with `gh`:
+## Current Status
 
-```bash
-git push -u origin HEAD
-gh pr create --title "feat: short description" --body "$(cat <<'EOF'
-## Summary
-- ...
-
-## Docs
-- docs/prd/...
-- docs/architecture/...
-
-## Test plan
-- [ ] P0 criterion 1
-- [ ] P0 criterion 2
-EOF
-)"
-```
-
-4. Monitor checks: `gh pr checks`
-5. Merge only when lint, test, and build are green
-
-## Local Development (after scaffold)
-
-### Prerequisites
-
-- Node.js 20+, pnpm 9+, Docker Desktop (Redis)
-- Prisma Postgres database ([console.prisma.io](https://console.prisma.io))
-
-### Architecture
-
-| Component | Where it runs |
-|-----------|---------------|
-| PostgreSQL | **Prisma Postgres** (managed cloud) |
-| Redis | Local Docker (`pnpm deps`) |
-| NestJS API + portals | Local (`rtk pnpm dev` — all services via Turborepo) |
-| Single service | `rtk pnpm dev:api`, `dev:admin`, `dev:merchant`, `dev:store`, `dev:distributor` |
-
-### First-time setup
-
-```bash
-cp .env.example .env
-pnpm install
-pnpm --filter @meridian/shared build
-
-# Provision Prisma Postgres
-cd apps/api && npx prisma init --db
-# Paste DATABASE_URL + DIRECT_DATABASE_URL into root .env
-
-pnpm deps          # Redis only
-pnpm db:setup      # generate + migrate + seed
-```
-
-### Run locally (recommended)
-
-```bash
-rtk pnpm dev
-```
-
-Starts API + admin + merchant + store + distributor in one terminal (Turborepo). For a single app only, use `rtk pnpm dev:api`, `dev:admin`, etc.
-
-| Service | URL |
-|---------|-----|
-| API | http://localhost:3001 |
-| Admin | http://localhost:3000 |
-| Merchant | http://localhost:3002 |
-| Store | http://localhost:3003 |
-| Distributor | http://localhost:3005 |
-
-Do not append shell comments on the same line as `pnpm dev:*` — they break Next.js.
-
-### Full Docker stack (optional)
-
-For CI or production-like integration testing:
-
-```bash
-docker compose -f docker/docker-compose.yml --profile dev up --build
-```
-
-### Tests
-
-```bash
-pnpm test                    # all unit tests
-pnpm --filter @meridian/api test:e2e   # API integration
-pnpm test:e2e                # Playwright e2e
-```
-
-## Definition of Done (per feature)
-
-- [ ] All P0 acceptance criteria pass (manual or automated)
-- [ ] Unit tests for business logic
-- [ ] API integration tests for endpoints
-- [ ] UI matches design doc wireframes
-- [ ] No TypeScript errors, linter clean
-- [ ] Handoff block written with files touched and open questions
-
-## Definition of Done (Phase 1)
-
-- [ ] Super admin can log in, list merchants, approve/reject
-- [ ] Merchant can register, submit, log in after approval
-- [ ] CRM CRUD works tenant-scoped
-- [ ] Distributor CRUD + QR generation works
-- [ ] QR bind flow creates binding + auto-lead
-- [ ] Docker Compose brings full stack up
-- [ ] All P0 tests pass
-
-## Project Phases
-
-| Phase | Scope | Status |
-|-------|-------|--------|
-| 1 | Auth, CRM, onboarding, distributor QR | **Current** |
-| 2 | E-commerce store, catalog, commission settlement | Planned |
-| 3 | Inventory, reports, advanced ERP | Planned |
+Phase 1-5 are complete. Current product status and active open work live in `docs/PRODUCT.md`.

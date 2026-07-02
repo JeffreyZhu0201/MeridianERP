@@ -1,0 +1,30 @@
+---
+description: MeridianERP NestJS, Prisma, tenancy, and shared contract conventions
+globs: apps/api/**,packages/shared/**
+alwaysApply: false
+---
+
+# Backend
+
+## NestJS
+
+- One domain module per business area under `apps/api/src/<domain>`.
+- Controllers stay thin; services own business logic.
+- DTOs live in `dto/` and validate inputs with `class-validator` or shared Zod schemas.
+- Export API enums, DTO types, and schemas from `packages/shared` before frontend integration.
+
+## Prisma And Tenancy
+
+- Use `PrismaService`; avoid raw SQL unless the architecture doc explains why.
+- Merchant-owned records require `tenantId` and tenant-scoped queries.
+- Guards and interceptors derive tenant scope from JWT claims.
+- Platform cross-tenant access must be explicit and auditable.
+- Do not leak another tenant's existence through errors; use generic not-found responses.
+
+## Domain Invariants
+
+- Merchant onboarding states: `DRAFT`, `SUBMITTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`.
+- Login is blocked until merchant approval.
+- CRM pipeline stages: `NEW`, `QUALIFIED`, `WON`, `LOST`.
+- Distributor commission settings use decimal-safe money math.
+- Queue processors use BullMQ with explicit queue names and retry policy in architecture docs.

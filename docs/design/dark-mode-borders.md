@@ -1,6 +1,6 @@
 # Dark Mode Borders
 
-**Reference:** `apps/ui-spec/src/components/ui/` (canonical)  
+**Reference:** `packages/ui/src/components/ui/` (canonical)  
 **Tokens:** `packages/ui/styles/globals.css`  
 **Date:** 2025-06-25
 
@@ -47,4 +47,4 @@ Tailwind maps these via `hsl(var(--border) / <alpha-value>)` in portal `tailwind
 
 ## Showcase
 
-Regression reference: **Dark mode / Borders** section in `apps/ui-spec/src/app/page.tsx`.
+Regression reference: shared dark-mode and border primitives in `packages/ui`.

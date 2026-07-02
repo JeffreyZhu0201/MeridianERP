@@ -1,0 +1,23 @@
+---
+description: MeridianERP PRD, architecture, and design document conventions
+globs: docs/prd/**,docs/architecture/**,docs/design/**,packages/shared/**
+alwaysApply: false
+---
+
+# Planning Docs
+
+## PRD
+
+Write PRDs to `docs/prd/<feature>.md` with: Problem, Users, User Stories, Non-Goals, Success Metrics, and Open Questions.
+
+User stories must include P0, P1, or P2 priority and testable Given/When/Then acceptance criteria.
+
+## Architecture
+
+Write architecture docs to `docs/architecture/<feature>.md` with: Overview, API Contracts, Data Model, Module Boundaries, Async Jobs, Caching, and ADRs.
+
+Shared contracts go in `packages/shared` before frontend and backend implementation begin in parallel.
+
+## Design
+
+Write screen specs to `docs/design/<feature>.md` when UI changes. Map every screen to `packages/ui` components and include empty, loading, error, success, and responsive states.

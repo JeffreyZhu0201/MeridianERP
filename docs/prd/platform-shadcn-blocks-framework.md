@@ -4,11 +4,11 @@
 **Last updated:** 2025-06-25  
 **Status:** Discovery complete — ready for architecture  
 **Supersedes (framework scope):** [platform-ui-blocks-and-gaps.md](./platform-ui-blocks-and-gaps.md) Workstream A  
-**Related:** [platform-ui-blocks-and-gaps.md](./platform-ui-blocks-and-gaps.md) (gap closure Workstream B), [design-system.md](../design/design-system.md), `.cursor/rules/ui-spec.mdc`
+**Related:** [platform-ui-blocks-and-gaps.md](./platform-ui-blocks-and-gaps.md) (gap closure Workstream B), [design-system.md](../design/design-system.md), `.cursor/rules/ui.mdc`
 
 ## Problem
 
-MeridianERP runs three portals (`apps/admin`, `apps/merchant`, `apps/store`) with **42 routed pages** but **no consistent page-framework system**. Shells use a lightweight `ShellFrame` that does not match shadcn [dashboard-01](https://ui.shadcn.com/blocks/dashboard#dashboard-01) Featured or [sidebar-03](https://ui.shadcn.com/blocks/sidebar#sidebar-03) patterns; list, detail, form, and settings pages each invent local layout. Auth uses partial [login-03](https://ui.shadcn.com/blocks/login#login-03) via `AuthLayout`, but **none of the portals wire `ThemeProvider` or `ModeToggle`** even though `apps/ui-spec` already demonstrates light/dark/system theming.
+MeridianERP runs three portals (`apps/admin`, `apps/merchant`, `apps/store`) with **42 routed pages** but **no consistent page-framework system**. Shells use a lightweight `ShellFrame` that does not match shadcn [dashboard-01](https://ui.shadcn.com/blocks/dashboard#dashboard-01) Featured or [sidebar-03](https://ui.shadcn.com/blocks/sidebar#sidebar-03) patterns; list, detail, form, and settings pages each invent local layout. Auth uses partial [login-03](https://ui.shadcn.com/blocks/login#login-03) via `AuthLayout`, but **none of the portals wire `ThemeProvider` or `ModeToggle`** even though shared theming belongs in `packages/ui`.
 
 Operators and merchants expect a cohesive ERP product: the same sidebar behavior, page chrome, table density, and theme control on every screen. Store customers expect trustworthy auth and readable catalog flows that respect their theme preference. Without a defined framework layer, every new route risks visual drift and duplicated layout code.
 
@@ -29,7 +29,7 @@ This initiative defines **reusable page frameworks** mapped to shadcn blocks, ro
 
 ## Framework taxonomy
 
-Reusable composites live in `packages/ui` (and are showcased in `apps/ui-spec` **before** portal rollout per ui-spec rules).
+Reusable composites live in `packages/ui` and are exported before portal rollout per UI rules.
 
 | Framework ID | shadcn block reference | ui-spec anchor | Use for |
 |--------------|------------------------|----------------|---------|
@@ -121,14 +121,14 @@ Reusable composites live in `packages/ui` (and are showcased in `apps/ui-spec` *
 
 | ID | Story | Priority | Acceptance Criteria |
 |----|-------|----------|---------------------|
-| **US-T1** | As any portal user, I want to switch between light, dark, and system theme so that the UI matches my environment and preference | **P0** | **Given** `ThemeProvider` wraps each portal root layout with `attribute="class"`, `defaultTheme="system"`, and `enableSystem`, **When** I load any page, **Then** the initial theme resolves from system preference without flash of wrong theme (suppress hydration warning pattern per next-themes). **Given** I am on an auth page (admin/merchant/store login or register) or inside a portal shell, **When** I open the theme control, **Then** I can choose Light, Dark, or System and the entire page updates using CSS variables from `apps/ui-spec` globals. **Given** I select Dark, **When** I navigate to another route in the same portal, **Then** dark mode persists for the session. **Given** form fields, tables, and sidebar in either theme, **When** audited, **Then** text/background contrast meets WCAG 2.1 AA. |
+| **US-T1** | As any portal user, I want to switch between light, dark, and system theme so that the UI matches my environment and preference | **P0** | **Given** `ThemeProvider` wraps each portal root layout with `attribute="class"`, `defaultTheme="system"`, and `enableSystem`, **When** I load any page, **Then** the initial theme resolves from system preference without flash of wrong theme (suppress hydration warning pattern per next-themes). **Given** I am on an auth page (admin/merchant/store login or register) or inside a portal shell, **When** I open the theme control, **Then** I can choose Light, Dark, or System and the entire page updates using CSS variables from `packages/ui/styles/globals.css`. **Given** I select Dark, **When** I navigate to another route in the same portal, **Then** dark mode persists for the session. **Given** form fields, tables, and sidebar in either theme, **When** audited, **Then** text/background contrast meets WCAG 2.1 AA. |
 | **US-T2** | As a user who prefers reduced motion, I want theme and shell transitions to respect accessibility settings | P1 | **Given** `prefers-reduced-motion: reduce`, **When** I toggle theme or collapse the ERP sidebar, **Then** decorative transitions are disabled or minimized per design-system rules. |
 
 ### Framework library (shared)
 
 | ID | Story | Priority | Acceptance Criteria |
 |----|-------|----------|---------------------|
-| **US-F0** | As a frontend engineer, I want documented page frameworks in `packages/ui` so that new routes compose from blocks instead of one-off layouts | **P0** | **Given** the framework taxonomy in this PRD, **When** I implement a new list page, **Then** I use `PageHeader` + list framework wrapper (or documented equivalent) inside the portal shell without copying layout markup from another route. **Given** `apps/ui-spec`, **When** a framework pattern is missing from the showcase, **Then** the showcase is updated first before portal adoption (ui-spec rule). |
+| **US-F0** | As a frontend engineer, I want documented page frameworks in `packages/ui` so that new routes compose from blocks instead of one-off layouts | **P0** | **Given** the framework taxonomy in this PRD, **When** I implement a new list page, **Then** I use `PageHeader` + list framework wrapper (or documented equivalent) inside the portal shell without copying layout markup from another route. **Given** `packages/ui`, **When** a framework pattern is missing, **Then** the shared component or primitive is added there before portal adoption. |
 | **US-F-SHELL** | As an ERP portal user (admin or merchant), I want a dashboard-01 / sidebar-03 shell so that navigation is consistent and collapsible | **P0** | **Given** I am authenticated in admin or merchant, **When** any shell-wrapped route loads, **Then** the layout uses `SidebarProvider`, collapsible `Sidebar` (sidebar-03 submenus for merchant groups), `SidebarInset`, and a header with `SidebarTrigger` and **US-T1** theme toggle. **Given** mobile viewport, **When** I open navigation, **Then** sidebar appears in a sheet with focus trap. **Given** nested nav (CRM, Catalog, Inventory), **When** my route is under that section, **Then** the group is expanded and the active item highlighted. |
 
 ### Admin frameworks (`apps/admin`)
@@ -168,7 +168,7 @@ Reusable composites live in `packages/ui` (and are showcased in `apps/ui-spec` *
 
 | ID | Story | Priority | Acceptance Criteria |
 |----|-------|----------|---------------------|
-| **US-F-SPEC** | As a designer or engineer, I want every framework represented in ui-spec before portal rollout | **P0** | **Given** this PRD's framework IDs, **When** implementation starts, **Then** `apps/ui-spec/src/app/page.tsx` (or dedicated showcase sections) documents ERP shell, list, detail, form, settings, store header, bind card, and auth with `ModeToggle` — each cited in design docs. |
+| **US-F-SPEC** | As a designer or engineer, I want every framework represented in ui-spec before portal rollout | **P0** | **Given** this PRD's framework IDs, **When** implementation starts, **Then** `packages/ui` exports ERP shell, list, detail, form, settings, store header, bind card, and auth patterns with theme support — each cited in design docs. |
 
 ---
 
@@ -221,7 +221,7 @@ Implementation is **blocked** on ui-spec for any framework not yet demonstrated.
 | FW-AUTH | login-03 composition (may elevate existing AuthLayout example) |
 | ModeToggle + ThemeProvider | Already in ui-spec — export pattern documented for `packages/ui` |
 
-Propagate primitives from `apps/ui-spec/src/components/ui/` to `packages/ui` without API drift.
+Keep primitives in `packages/ui/src/components/ui/` without API drift.
 
 ---
 
@@ -248,7 +248,7 @@ Propagate primitives from `apps/ui-spec/src/components/ui/` to `packages/ui` wit
 |----------|------|
 | Prior UI blocks PRD (gap closure) | `docs/prd/platform-ui-blocks-and-gaps.md` |
 | Design spec (route map) | `docs/design/platform-ui-blocks-and-gaps.md` |
-| UI spec rules | `.cursor/rules/ui-spec.mdc` |
+| UI spec rules | `.cursor/rules/ui.mdc` |
 | Design system | `docs/design/design-system.md` |
-| ui-spec showcase | `apps/ui-spec/src/app/page.tsx` |
+| UI exports | `packages/ui/src/index.ts` |
 | Existing shells | `packages/ui/src/components/shells/`, `auth-layout.tsx` |

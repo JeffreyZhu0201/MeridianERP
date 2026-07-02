@@ -4,7 +4,7 @@
 **Last updated:** 2025-06-25  
 **Status:** Design complete — ready for architecture + ui-spec showcase  
 **PRD:** [platform-shadcn-blocks-framework.md](../prd/platform-shadcn-blocks-framework.md)  
-**Canonical UI:** `apps/ui-spec/src/app/page.tsx`, `globals.css`, `mode-toggle.tsx`  
+**Canonical UI:** `packages/ui/src/index.ts`, `packages/ui/src/components/ui/`, `packages/ui/styles/globals.css`  
 **shadcn blocks:** [dashboard-01](https://ui.shadcn.com/blocks/dashboard#dashboard-01), [sidebar-03](https://ui.shadcn.com/blocks/sidebar#sidebar-03), [login-03](https://ui.shadcn.com/blocks/login#login-03)
 
 ---
@@ -312,11 +312,11 @@ Wrap each app root layout:
 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 ```
 
-Pattern from `apps/ui-spec/src/components/theme-provider.tsx`. Use `suppressHydrationWarning` on `<html>` per next-themes.
+Pattern from `packages/ui/src/components/theme/theme-provider.tsx`. Use `suppressHydrationWarning` on `<html>` per next-themes.
 
 ### ModeToggle component
 
-Copy API from `apps/ui-spec/src/components/mode-toggle.tsx`:
+Copy API from the `packages/ui` theme toggle pattern:
 
 - `Button variant="outline" size="icon"`
 - `DropdownMenu` with Light / Dark / System
@@ -344,7 +344,7 @@ Export from `packages/ui` as `ModeToggle` (re-export or thin wrapper).
 
 ## Light / dark token usage
 
-Source of truth: `apps/ui-spec/src/app/globals.css`. Portals import equivalent tokens via `packages/ui/styles/globals.css` (must stay in sync).
+Source of truth: `packages/ui/styles/globals.css`.
 
 ### Semantic tokens (use Tailwind classes, not raw oklch)
 
@@ -468,7 +468,7 @@ Source of truth: `apps/ui-spec/src/app/globals.css`. Portals import equivalent t
 
 ## New ui-spec showcase sections
 
-Add to `apps/ui-spec/src/app/page.tsx` as full-width **framework** sections (below primitive grid or new `Frameworks` anchor). Each section must render in light/dark via existing `ThemeProvider` + page-level `ModeToggle`.
+Add framework examples and shared components to `packages/ui`; each surface must render in light/dark via the shared theme provider and mode toggle.
 
 | Priority | Section ID | Framework | Builds from existing showcase |
 |----------|------------|-----------|-------------------------------|
@@ -490,7 +490,7 @@ Add to `apps/ui-spec/src/app/page.tsx` as full-width **framework** sections (bel
 1. Add `id` anchors per section for design-doc deep links (`#framework-list-page`).
 2. Framework sections use `min-h` preview containers; ERP shell section should be `h-[600px]` bordered preview.
 3. Propagate each framework to `packages/ui` only after its showcase section merges.
-4. Run `rtk pnpm --filter @meridian/ui-spec dev` to verify light/dark before portal rollout.
+4. Run `rtk pnpm --filter @meridian/ui build` and portal previews to verify light/dark before rollout.
 
 ---
 
@@ -552,10 +552,10 @@ Add to `apps/ui-spec/src/app/page.tsx` as full-width **framework** sections (bel
 
 | Path | Role |
 |------|------|
-| `apps/ui-spec/src/app/page.tsx` | Showcase (extend with framework sections) |
-| `apps/ui-spec/src/app/globals.css` | Tokens |
-| `apps/ui-spec/src/components/mode-toggle.tsx` | Theme control reference |
-| `apps/ui-spec/src/components/ui/sidebar.tsx` | sidebar-03 primitives |
+| `packages/ui/src/index.ts` | Shared exports for framework components |
+| `packages/ui/styles/globals.css` | Tokens |
+| `packages/ui/src/components/theme/` | Theme provider and controls |
+| `packages/ui/src/components/ui/sidebar.tsx` | sidebar-03 primitives |
 | `packages/ui/src/components/shells/*` | Shells to migrate |
 | `packages/ui/src/components/auth-layout.tsx` | FW-AUTH base |
 | `packages/ui/src/components/page-header.tsx` | FW-LIST/DETAIL/FORM chrome |

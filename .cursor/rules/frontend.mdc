@@ -1,0 +1,17 @@
+---
+description: MeridianERP Next.js App Router frontend conventions
+globs: apps/admin/**,apps/merchant/**,apps/store/**,apps/distributor/**,packages/ui/**
+alwaysApply: false
+---
+
+# Frontend
+
+- Use Next.js App Router in `app/` only.
+- Prefer Server Components; add `'use client'` only for forms, local state, dialogs, scanners, and browser APIs.
+- Import shared types and schemas from `@meridian/shared`.
+- Import shared UI from `@meridian/ui`; colocate feature-only components near routes in `_components` or app-local `components`.
+- Fetch in Server Components with cookies forwarded to the API; use client fetch or server actions for mutations with user feedback.
+- Use React Hook Form plus Zod schemas from `@meridian/shared` for forms when schemas exist.
+- Middleware protects portal routes using the portal-specific auth cookie; keep JWT audiences separate.
+- Use Tailwind utilities and design tokens; no inline styles for normal layout or colors.
+- Empty, loading, error, and success states must match `packages/ui` patterns.

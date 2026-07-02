@@ -1,7 +1,7 @@
 # Platform Settings — UI Design
 
 **Framework:** `SettingsPageFrame` (FW-SETTINGS)  
-**Reference:** `apps/ui-spec` Form Controls + Card sections
+**Reference:** `packages/ui` form controls and card components
 
 ## Merchant `/settings`
 

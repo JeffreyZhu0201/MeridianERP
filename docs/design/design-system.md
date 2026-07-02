@@ -239,8 +239,8 @@ Full-width centered card, max-w-md, large touch targets (min-h-11 buttons).
 ### Install commands
 
 ```bash
-npx shadcn@latest init
-npx shadcn@latest add button card badge table form input select textarea dialog sheet sidebar skeleton sonner dropdown-menu tabs separator avatar
+rtk npx shadcn@latest init
+rtk npx shadcn@latest add button card badge table form input select textarea dialog sheet sidebar skeleton sonner dropdown-menu tabs separator avatar
 ```
 
 ---
@@ -288,6 +288,6 @@ npx shadcn@latest add button card badge table form input select textarea dialog 
 
 ## UI spec
 
-Canonical component library: `apps/ui-spec/` (`@meridian/ui-spec`).  
-Agents read `apps/ui-spec/src/app/page.tsx` and `src/components/ui/` before designing or implementing UI.  
+Canonical component library: `packages/ui` (`@meridian/ui`). Agents read `packages/ui/src/index.ts`, `packages/ui/src/components/ui/`, and `packages/ui/styles/globals.css` before designing or implementing UI.
+
 Do not use Figma for this repo.

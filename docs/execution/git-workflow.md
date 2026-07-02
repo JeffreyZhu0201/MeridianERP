@@ -1,6 +1,6 @@
 # Git & PR Workflow
 
-MeridianERP uses **main / develop / feature** branching. Rule source: `.cursor/rules/github-workflow.mdc`.
+MeridianERP uses **main / develop / feature** branching. Rule source: `.cursor/rules/core.mdc`.
 
 ## Branch model
 
@@ -43,17 +43,17 @@ rtk gh pr create --base develop --title "feat: inventory module"
 ### Local checks before PR
 
 ```bash
-pnpm --filter @meridian/api test:e2e
-pnpm test:e2e:store
-pnpm build
+rtk pnpm --filter @meridian/api test:e2e
+rtk pnpm test:e2e:store
+rtk pnpm build
 ```
 
 ### Playwright debug
 
 ```bash
-pnpm dev
-pnpm test:e2e:ui
-pnpm test:e2e:debug -- e2e/phase-2-store.spec.ts
+rtk pnpm dev
+rtk pnpm test:e2e:ui
+rtk pnpm test:e2e:debug -- e2e/phase-2-store.spec.ts
 ```
 
 ## PR template

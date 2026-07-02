@@ -7,7 +7,7 @@
 
 ## Problem
 
-MeridianERP portals have diverged from the established design system and shadcn block patterns. Auth screens lack a consistent visual language across admin, merchant, and store; portal shells use a legacy layout that does not match the `apps/ui-spec` sidebar primitive or the dashboard-01 Featured shell pattern. In parallel, several P0/P1 integration gaps block core flows documented in [platform-overview.md](./platform-overview.md): storefront checkout and guest cart are broken, admin merchant rejection fails on an API contract mismatch, and merchant-facing order and CRM activity surfaces were never wired despite working APIs.
+MeridianERP portals have diverged from the established design system and shadcn block patterns. Auth screens lack a consistent visual language across admin, merchant, and store; portal shells use a legacy layout that does not match the shared `packages/ui` sidebar primitive or the dashboard-01 Featured shell pattern. In parallel, several P0/P1 integration gaps block core flows documented in [platform-overview.md](./platform-overview.md): storefront checkout and guest cart are broken, admin merchant rejection fails on an API contract mismatch, and merchant-facing order and CRM activity surfaces were never wired despite working APIs.
 
 This initiative delivers two coordinated workstreams: a UI refresh that raises visual and structural consistency without rebranding, and targeted gap closure that unblocks Phase 1 US-7 and Phase 2 checkout/orders for real end-to-end use.
 
@@ -25,7 +25,7 @@ This initiative delivers two coordinated workstreams: a UI refresh that raises v
 
 ## Workstream A — shadcn Blocks UI Refresh
 
-Align portal auth and shell layouts with shadcn block references while preserving MeridianERP tokens (Geist, blue primary, ERP density) and sourcing sidebar behavior from `apps/ui-spec`.
+Align portal auth and shell layouts with shadcn block references while preserving MeridianERP tokens (Geist, blue primary, ERP density) and sourcing sidebar behavior from `packages/ui`.
 
 **Reference patterns (visual/structural, not pixel copies):**
 
@@ -38,8 +38,8 @@ Align portal auth and shell layouts with shadcn block references while preservin
 
 | ID | Story | Priority | Acceptance Criteria |
 |----|-------|----------|---------------------|
-| US-A1 | As any portal user, I want auth pages with a consistent login-03-style layout so that sign-in feels professional and on-brand | P0 | **Given** I open an unauthenticated auth route (admin `/login`, merchant `/login` or `/register`, store `/s/[slug]/login` or `/register`), **When** the page renders, **Then** I see a muted full-viewport background, a centered brand mark (MeridianERP wordmark or tenant/store name where applicable), and a compact form card with primary CTA. **Given** light or dark theme, **When** I toggle theme on auth pages that expose it, **Then** contrast meets WCAG 2.1 AA using existing CSS variables from `apps/ui-spec`. |
-| US-A2 | As a platform admin, I want the admin portal shell to follow the dashboard-01 Featured sidebar pattern so that navigation matches modern ERP expectations | P0 | **Given** I am authenticated in `apps/admin`, **When** any shell-wrapped page loads, **Then** the layout uses `SidebarProvider`, a collapsible sidebar built from `apps/ui-spec` sidebar primitives, `SidebarInset` for main content, and a site header with `SidebarTrigger`. **Given** the sidebar is collapsed, **When** I expand it, **Then** nav labels and submenus are readable without layout shift breaking the main content area. |
+| US-A1 | As any portal user, I want auth pages with a consistent login-03-style layout so that sign-in feels professional and on-brand | P0 | **Given** I open an unauthenticated auth route (admin `/login`, merchant `/login` or `/register`, store `/s/[slug]/login` or `/register`), **When** the page renders, **Then** I see a muted full-viewport background, a centered brand mark (MeridianERP wordmark or tenant/store name where applicable), and a compact form card with primary CTA. **Given** light or dark theme, **When** I toggle theme on auth pages that expose it, **Then** contrast meets WCAG 2.1 AA using existing CSS variables from `packages/ui/styles/globals.css`. |
+| US-A2 | As a platform admin, I want the admin portal shell to follow the dashboard-01 Featured sidebar pattern so that navigation matches modern ERP expectations | P0 | **Given** I am authenticated in `apps/admin`, **When** any shell-wrapped page loads, **Then** the layout uses `SidebarProvider`, a collapsible sidebar built from `packages/ui` sidebar primitives, `SidebarInset` for main content, and a site header with `SidebarTrigger`. **Given** the sidebar is collapsed, **When** I expand it, **Then** nav labels and submenus are readable without layout shift breaking the main content area. |
 | US-A3 | As a merchant user, I want the merchant portal shell upgraded to the same Featured shell pattern so that CRM, catalog, inventory, and orders feel like one product | P0 | **Given** I am authenticated in `apps/merchant`, **When** any shell-wrapped page loads, **Then** `MerchantShell` matches US-A2 structural pattern (SidebarProvider, collapsible sidebar with submenus where nav groups exist, SidebarInset, header with SidebarTrigger). **Given** nested nav (e.g. Inventory → Warehouses, Purchase Orders), **When** I open a submenu, **Then** the active route is highlighted and submenu state persists across navigation within the session. |
 | US-A4 | As a merchant applicant, I want the registration wizard inside the same auth visual language so that onboarding feels continuous with login | P1 | **Given** I am on merchant `/register`, **When** I progress through wizard steps, **Then** the outer auth frame (muted bg, brand mark, card container) remains stable while only the inner form step content changes. **Given** validation errors on a step, **When** I submit, **Then** errors appear inline within the card without breaking the auth layout. |
 | US-A5 | As a store customer, I want store login and register pages to match portal auth styling so that the storefront feels trustworthy | P1 | **Given** I visit `/s/[slug]/login` or `/s/[slug]/register`, **When** the page renders, **Then** it follows US-A1 auth layout and displays the store/merchant display name in the brand area. **Given** I complete registration, **When** I am redirected, **Then** I land on the intended post-auth route without auth layout regressions. |
@@ -125,7 +125,7 @@ Close documented cross-cutting gaps (G-1, G-5, G-6, G-10, G-11) from [platform-o
 |----------|------|
 | Platform overview & gap register | `docs/prd/platform-overview.md` |
 | Design system | `docs/design/design-system.md` |
-| UI spec (sidebar primitive) | `apps/ui-spec/src/components/ui/sidebar.tsx` |
+| UI sidebar primitive | `packages/ui/src/components/ui/sidebar.tsx` |
 | Phase 1 US-7 (activities) | `docs/prd/phase-1-foundation.md` |
 | Phase 2 checkout gaps | `docs/prd/phase-2-ecommerce.md` |
 | Admin wireframes | `docs/design/phase-1-admin.md` |

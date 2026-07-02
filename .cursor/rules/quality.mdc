@@ -1,0 +1,16 @@
+---
+description: MeridianERP TypeScript, naming, imports, errors, and test quality rules
+globs: **/*.{ts,tsx},**/*.{spec,test}.{ts,tsx},e2e/**
+alwaysApply: false
+---
+
+# Quality
+
+- TypeScript stays strict; avoid `any`; use `unknown` plus guards when needed.
+- Files use kebab-case; classes PascalCase; functions camelCase; constants SCREAMING_SNAKE_CASE; API paths kebab-case.
+- Import order: external packages, `@meridian/*`, then relative imports.
+- Backend errors must be consistent and must not expose production stack traces.
+- Frontend errors use inline validation for forms and toast or alert feedback for transient failures.
+- Tests map each P0 acceptance criterion to at least one unit, API integration, or Playwright case.
+- Backend unit tests live near API code; API integration tests live in `apps/api/test`; Playwright tests live in `e2e`.
+- Test names use `describe('<Unit>')` and `it('should <behavior> when <condition>')`.
