@@ -136,7 +136,7 @@ export {
 // ============================================================
 
 /** 按钮组件 */
-export { Button, type ButtonProps } from './components/ui/button';
+export { Button, buttonVariants, type ButtonProps } from './components/ui/button';
 
 /** 文本输入框 */
 export { Input } from './components/ui/input';

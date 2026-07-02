@@ -19,6 +19,12 @@ type Id = string;
 let idCounter = 0;
 const nextId = (prefix: string) => `${prefix}_${++idCounter}`;
 
+type MockCreateInput<
+  T,
+  OmitKeys extends keyof T,
+  OptionalKeys extends keyof T = never,
+> = Omit<T, OmitKeys | OptionalKeys> & Partial<Pick<T, OptionalKeys>>;
+
 export function createMockPrisma() {
   const platformUsers = new Map<Id, PlatformUserRecord>();
   const tenants = new Map<Id, TenantRecord>();
@@ -86,6 +92,10 @@ export function createMockPrisma() {
     rejectionReason: string | null;
     submittedAt: Date | null;
     reviewedAt: Date | null;
+    recruitedByDistributorId: string | null;
+    recruitedAt: Date | null;
+    pendingRecruitInviteCode: string | null;
+    storePublished: boolean;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -145,7 +155,7 @@ export function createMockPrisma() {
 
   interface DistributorRecord {
     id: Id;
-    tenantId: Id;
+    tenantId: Id | null;
     name: string;
     email: string | null;
     phone: string | null;
@@ -483,8 +493,11 @@ export function createMockPrisma() {
     return result;
   };
 
-  const attachOrder = (order: OrderRecord, include?: Record<string, unknown>) => {
-    const result: Record<string, unknown> = { ...order };
+  const attachOrder = (
+    order: OrderRecord,
+    include?: Record<string, unknown>,
+  ): OrderRecord & Record<string, unknown> => {
+    const result: OrderRecord & Record<string, unknown> = { ...order };
     if (include?.lines) {
       const linesInclude = include.lines as { include?: { variant?: boolean } };
       result.lines = [...orderLines.values()]
@@ -535,8 +548,8 @@ export function createMockPrisma() {
   const attachCommissionEntry = (
     entry: CommissionLedgerRecord,
     include?: Record<string, unknown>,
-  ) => {
-    const result: Record<string, unknown> = { ...entry };
+  ): CommissionLedgerRecord & Record<string, unknown> => {
+    const result: CommissionLedgerRecord & Record<string, unknown> = { ...entry };
     if (include?.distributor) {
       result.distributor = distributors.get(entry.distributorId);
     }
@@ -903,7 +916,7 @@ export function createMockPrisma() {
   };
 
   const runTransaction = async <T>(
-    arg: ((tx: typeof mock) => Promise<T>) | Promise<unknown>[],
+    arg: ((tx: any) => Promise<T>) | Promise<unknown>[],
   ): Promise<T | unknown[]> => {
     if (typeof arg === 'function') {
       return arg(mock);
@@ -935,7 +948,7 @@ export function createMockPrisma() {
           for (const [field, cond] of Object.entries(clause)) {
             const c = cond as { contains?: string; mode?: string };
             if (c.contains) {
-              const value = String((p as Record<string, unknown>)[field] ?? '').toLowerCase();
+              const value = String((p as unknown as Record<string, unknown>)[field] ?? '').toLowerCase();
               if (!value.includes(c.contains.toLowerCase())) return false;
             }
           }
@@ -1026,13 +1039,34 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<MerchantProfileRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: MockCreateInput<
+          MerchantProfileRecord,
+          'id' | 'createdAt' | 'updatedAt',
+          | 'legalName'
+          | 'contactPhone'
+          | 'rejectionReason'
+          | 'submittedAt'
+          | 'reviewedAt'
+          | 'recruitedByDistributorId'
+          | 'recruitedAt'
+          | 'pendingRecruitInviteCode'
+          | 'storePublished'
+        >;
       }) => {
         const record: MerchantProfileRecord = {
+          ...data,
           id: nextId('mp'),
+          legalName: data.legalName ?? null,
+          contactPhone: data.contactPhone ?? null,
+          rejectionReason: data.rejectionReason ?? null,
+          submittedAt: data.submittedAt ?? null,
+          reviewedAt: data.reviewedAt ?? null,
+          recruitedByDistributorId: data.recruitedByDistributorId ?? null,
+          recruitedAt: data.recruitedAt ?? null,
+          pendingRecruitInviteCode: data.pendingRecruitInviteCode ?? null,
+          storePublished: data.storePublished ?? false,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         merchantProfiles.set(record.id, record);
         profileByTenant.set(record.tenantId, record.id);
@@ -1228,7 +1262,7 @@ export function createMockPrisma() {
           if (select.email) row.email = record.email;
           if (select.role) row.role = record.role;
           if (select.createdAt) row.createdAt = record.createdAt;
-          return row;
+          return row as unknown as UserRecord;
         }
         return record;
       },
@@ -1272,13 +1306,14 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<CrmCompanyRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: MockCreateInput<CrmCompanyRecord, 'id' | 'createdAt' | 'updatedAt', 'website'>;
       }) => {
         const record: CrmCompanyRecord = {
+          ...data,
           id: nextId('co'),
+          website: data.website ?? null,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         companies.set(record.id, record);
         return record;
@@ -1307,13 +1342,20 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<CrmContactRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: MockCreateInput<
+          CrmContactRecord,
+          'id' | 'createdAt' | 'updatedAt',
+          'companyId' | 'email' | 'phone'
+        >;
       }) => {
         const record: CrmContactRecord = {
+          ...data,
           id: nextId('ct'),
+          companyId: data.companyId ?? null,
+          email: data.email ?? null,
+          phone: data.phone ?? null,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         contacts.set(record.id, record);
         return record;
@@ -1341,16 +1383,21 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<CrmLeadRecord, 'id' | 'createdAt' | 'updatedAt' | 'stage'> & {
-          stage?: LeadStage;
-        };
+        data: MockCreateInput<
+          CrmLeadRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'stage',
+          'contactId' | 'source' | 'distributorId' | 'stage'
+        >;
       }) => {
         const record: CrmLeadRecord = {
+          ...data,
           id: nextId('lead'),
           stage: data.stage ?? LeadStage.NEW,
+          contactId: data.contactId ?? null,
+          source: data.source ?? null,
+          distributorId: data.distributorId ?? null,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         leads.set(record.id, record);
         return record;
@@ -1439,7 +1486,7 @@ export function createMockPrisma() {
         }
         if (where?.tenant?.slug) {
           items = items.filter((d) => {
-            const tenant = tenants.get(d.tenantId);
+            const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
             return tenant?.slug === where.tenant!.slug;
           });
         }
@@ -1460,7 +1507,7 @@ export function createMockPrisma() {
         if (include?.tenant) {
           return items.map((d) => ({
             ...d,
-            tenant: tenants.get(d.tenantId) ?? null,
+            tenant: d.tenantId ? (tenants.get(d.tenantId) ?? null) : null,
           }));
         }
         return items;
@@ -1501,7 +1548,7 @@ export function createMockPrisma() {
         }
         if (where.tenant?.slug) {
           items = items.filter((d) => {
-            const tenant = tenants.get(d.tenantId);
+            const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
             return tenant?.slug === where.tenant!.slug;
           });
         }
@@ -1515,26 +1562,28 @@ export function createMockPrisma() {
           return { ...distributor, qrCodes: codes };
         }
         if (include?.tenant) {
-          return { ...distributor, tenant: tenants.get(distributor.tenantId) ?? null };
+          return {
+            ...distributor,
+            tenant: distributor.tenantId ? (tenants.get(distributor.tenantId) ?? null) : null,
+          };
         }
         return distributor;
       },
       create: async ({
         data,
       }: {
-        data: Omit<
+        data: MockCreateInput<
           DistributorRecord,
-          'id' | 'createdAt' | 'updatedAt' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt'
-        > & {
-          isActive?: boolean;
-          passwordHash?: string | null;
-          portalEnabled?: boolean;
-          lastLoginAt?: Date | null;
-        };
+          'id' | 'createdAt' | 'updatedAt' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt',
+          'tenantId' | 'email' | 'phone' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt'
+        >;
       }) => {
         const record: DistributorRecord = {
           ...data,
           id: nextId('dist'),
+          tenantId: data.tenantId ?? null,
+          email: data.email ?? null,
+          phone: data.phone ?? null,
           isActive: data.isActive ?? true,
           passwordHash: data.passwordHash ?? null,
           portalEnabled: data.portalEnabled ?? false,
@@ -1571,10 +1620,10 @@ export function createMockPrisma() {
         data: Omit<DistributorQrCodeRecord, 'id' | 'createdAt'>;
       }) => {
         const record: DistributorQrCodeRecord = {
+          ...data,
           id: nextId('qr'),
           createdAt: now(),
-          revokedAt: null,
-          ...data,
+          revokedAt: data.revokedAt ?? null,
         };
         qrCodes.set(record.id, record);
         qrByToken.set(record.token, record.id);
@@ -1830,14 +1879,14 @@ export function createMockPrisma() {
         if (variants?.create) {
           for (const v of variants.create) {
             const variant: ProductVariantRecord = {
+              ...v,
               id: nextId('var'),
               productId: record.id,
               createdAt: now(),
               updatedAt: now(),
               inventory: v.inventory ?? 0,
-              reorderThreshold: null,
+              reorderThreshold: v.reorderThreshold ?? null,
               isActive: v.isActive ?? true,
-              ...v,
             };
             productVariants.set(variant.id, variant);
           }
@@ -1970,11 +2019,11 @@ export function createMockPrisma() {
       }) => {
         for (const item of data) {
           const record: ProductVariantRecord = {
+            ...item,
             id: nextId('var'),
             createdAt: now(),
             updatedAt: now(),
-            reorderThreshold: null,
-            ...item,
+            reorderThreshold: item.reorderThreshold ?? null,
           };
           productVariants.set(record.id, record);
         }
@@ -2003,7 +2052,7 @@ export function createMockPrisma() {
         if (typeof data.inventory === 'number') {
           inventory = data.inventory;
         } else if (data.inventory && typeof data.inventory === 'object' && 'decrement' in data.inventory) {
-          inventory -= data.inventory.decrement;
+          inventory -= (data.inventory as { decrement: number }).decrement;
         }
         const updated = {
           ...existing,
@@ -2060,13 +2109,13 @@ export function createMockPrisma() {
         data: Omit<TenantSettingsRecord, 'createdAt' | 'updatedAt'>;
       }) => {
         const record: TenantSettingsRecord = {
+          ...data,
           createdAt: now(),
           updatedAt: now(),
-          defaultCommissionRate: null,
-          defaultCommissionType: null,
-          notifyOnBinding: true,
-          notifyOnCommission: true,
-          ...data,
+          defaultCommissionRate: data.defaultCommissionRate ?? null,
+          defaultCommissionType: data.defaultCommissionType ?? null,
+          notifyOnBinding: data.notifyOnBinding ?? true,
+          notifyOnCommission: data.notifyOnCommission ?? true,
         };
         tenantSettings.set(record.tenantId, record);
         return record;
@@ -2100,13 +2149,13 @@ export function createMockPrisma() {
           return updated;
         }
         const record: TenantSettingsRecord = {
+          ...create,
           createdAt: now(),
           updatedAt: now(),
-          defaultCommissionRate: null,
-          defaultCommissionType: null,
-          notifyOnBinding: true,
-          notifyOnCommission: true,
-          ...create,
+          defaultCommissionRate: create.defaultCommissionRate ?? null,
+          defaultCommissionType: create.defaultCommissionType ?? null,
+          notifyOnBinding: create.notifyOnBinding ?? true,
+          notifyOnCommission: create.notifyOnCommission ?? true,
         };
         tenantSettings.set(record.tenantId, record);
         return record;
@@ -2131,12 +2180,12 @@ export function createMockPrisma() {
           return updated;
         }
         const record: PlatformSettingsRecord = {
-          platformName: 'MeridianERP',
-          supportEmail: null,
-          distributorPortalEnabled: true,
-          emailQueueEnabled: true,
-          updatedAt: now(),
           ...create,
+          platformName: create.platformName ?? 'MeridianERP',
+          supportEmail: create.supportEmail ?? null,
+          distributorPortalEnabled: create.distributorPortalEnabled ?? true,
+          emailQueueEnabled: create.emailQueueEnabled ?? true,
+          updatedAt: now(),
         };
         platformSettings.set(record.id, record);
         return record;
@@ -2205,13 +2254,13 @@ export function createMockPrisma() {
         data: Omit<WarehouseRecord, 'id' | 'createdAt' | 'updatedAt'>;
       }) => {
         const record: WarehouseRecord = {
+          ...data,
           id: nextId('wh'),
           createdAt: now(),
           updatedAt: now(),
           address: data.address ?? null,
           isDefault: data.isDefault ?? false,
           isActive: data.isActive ?? true,
-          ...data,
         };
         warehouses.set(record.id, record);
         return record;
@@ -2474,11 +2523,11 @@ export function createMockPrisma() {
       }) => {
         const { lines, ...poData } = data;
         const record: PurchaseOrderRecord = {
+          ...poData,
           id: nextId('po'),
           createdAt: now(),
           updatedAt: now(),
           orderedAt: poData.orderedAt ?? null,
-          ...poData,
         };
         purchaseOrders.set(record.id, record);
         if (lines?.create) {
@@ -2636,13 +2685,13 @@ export function createMockPrisma() {
         include?: Record<string, unknown>;
       }) => {
         const record: CartRecord = {
+          ...data,
           id: nextId('cart'),
           createdAt: now(),
           updatedAt: now(),
           customerId: data.customerId ?? null,
           sessionId: data.sessionId ?? null,
           distributorId: data.distributorId ?? null,
-          ...data,
         };
         carts.set(record.id, record);
         return attachCart(record, include);
@@ -2792,9 +2841,18 @@ export function createMockPrisma() {
         data,
         include,
       }: {
-        data: Omit<OrderRecord, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'currency'> & {
-          status?: OrderStatus;
-          currency?: string;
+        data: MockCreateInput<
+          OrderRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'status' | 'currency',
+          | 'customerId'
+          | 'guestEmail'
+          | 'stripePaymentIntentId'
+          | 'distributorId'
+          | 'status'
+          | 'currency'
+          | 'createdAt'
+          | 'updatedAt'
+        > & {
           lines?: {
             create: Array<Omit<OrderLineRecord, 'id' | 'orderId'>>;
           };
@@ -2803,16 +2861,16 @@ export function createMockPrisma() {
       }) => {
         const { lines, ...orderData } = data;
         const record: OrderRecord = {
+          ...orderData,
           id: nextId('ord'),
           status: orderData.status ?? OrderStatus.PENDING_PAYMENT,
           currency: orderData.currency ?? 'USD',
-          createdAt: now(),
-          updatedAt: now(),
-          stripePaymentIntentId: null,
+          createdAt: orderData.createdAt ?? now(),
+          updatedAt: orderData.updatedAt ?? now(),
+          stripePaymentIntentId: orderData.stripePaymentIntentId ?? null,
           guestEmail: orderData.guestEmail ?? null,
           distributorId: orderData.distributorId ?? null,
           customerId: orderData.customerId ?? null,
-          ...orderData,
         };
         orders.set(record.id, record);
         if (lines?.create) {
@@ -2941,18 +2999,20 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<CommissionLedgerRecord, 'id' | 'createdAt' | 'updatedAt' | 'settledAt' | 'settlementBatchId'> & {
-          status?: LedgerStatus;
-        };
+        data: MockCreateInput<
+          CommissionLedgerRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'settledAt' | 'settlementBatchId',
+          'status' | 'createdAt' | 'updatedAt'
+        >;
       }) => {
         const record: CommissionLedgerRecord = {
+          ...data,
           id: nextId('cl'),
           settlementBatchId: null,
           settledAt: null,
           status: data.status ?? LedgerStatus.ACCRUED,
-          createdAt: now(),
-          updatedAt: now(),
-          ...data,
+          createdAt: data.createdAt ?? now(),
+          updatedAt: data.updatedAt ?? now(),
         };
         commissionLedgers.set(record.id, record);
         return record;
@@ -2992,13 +3052,16 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<SettlementBatchRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: Omit<SettlementBatchRecord, 'id' | 'createdAt' | 'updatedAt' | 'exportedAt'> & {
+          exportedAt?: Date | null;
+        };
       }) => {
         const record: SettlementBatchRecord = {
+          ...data,
           id: nextId('sb'),
+          exportedAt: data.exportedAt ?? null,
           createdAt: now(),
           updatedAt: now(),
-          ...data,
         };
         settlementBatches.set(record.id, record);
         return record;
