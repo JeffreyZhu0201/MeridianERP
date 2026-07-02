@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
+import { Badge, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
 import type { MerchantOrderListItem } from '@meridian/shared';
 
 interface OrdersTableProps {
@@ -31,10 +31,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
 
   if (orders.length === 0) {
     return (
-      <div className="rounded-xl ring-1 ring-border p-12 text-center">
-        <p className="text-muted-foreground">{t('empty')}</p>
-        <p className="mt-1 text-xs text-muted-foreground">{t('emptyHint')}</p>
-      </div>
+      <EmptyState title={t('empty')} description={t('emptyHint')} />
     );
   }
 

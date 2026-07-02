@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { ProductCard } from '@meridian/ui';
+import { EmptyState, ProductCard } from '@meridian/ui';
 
 import type { Product } from '@/lib/api';
 
@@ -18,11 +18,7 @@ export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
   const t = await getTranslations('store');
 
   if (!products?.length) {
-    return (
-      <div className="rounded-xl ring-1 ring-border p-12 text-center">
-        <p className="text-muted-foreground">{t('home.empty')}</p>
-      </div>
-    );
+    return <EmptyState title={t('home.empty')} />;
   }
 
   return (

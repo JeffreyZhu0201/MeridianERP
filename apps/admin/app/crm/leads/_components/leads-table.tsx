@@ -9,6 +9,7 @@ import {
   Button,
   Dialog,
   DialogCloseButton,
+  EmptyState,
   Input,
   Label,
   Select,
@@ -155,9 +156,7 @@ export function LeadsTable({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-xl ring-1 ring-border p-12 text-center text-muted-foreground">
-          {t('empty')}
-        </div>
+        <EmptyState title={t('empty')} />
       ) : (
         <div className="rounded-xl ring-1 ring-border">
           <Table>

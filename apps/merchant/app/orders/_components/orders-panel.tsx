@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import {
   Button,
+  EmptyState,
   OrderListFrame,
   PickupVerifyDialog,
   Tabs,
@@ -106,10 +107,7 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
             rows={allRows}
             showTabs
             emptyState={
-              <div className="rounded-xl ring-1 ring-border p-12 text-center">
-                <p className="text-muted-foreground">{t('table.empty')}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t('table.emptyHint')}</p>
-              </div>
+              <EmptyState title={t('table.empty')} description={t('table.emptyHint')} />
             }
             renderRowAction={(row) => (
               <Link
@@ -129,10 +127,7 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
             showMetaColumn
             metaColumnLabel={t('pickupPending.codeHint')}
             emptyState={
-              <div className="rounded-xl ring-1 ring-border p-12 text-center">
-                <p className="text-muted-foreground">{t('pickupPending.empty')}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t('pickupPending.emptyHint')}</p>
-              </div>
+              <EmptyState title={t('pickupPending.empty')} description={t('pickupPending.emptyHint')} />
             }
             renderRowAction={(row) => (
               <Button

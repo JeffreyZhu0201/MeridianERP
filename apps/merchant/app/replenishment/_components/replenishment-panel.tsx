@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  EmptyState,
   Input,
   Label,
   Select,
@@ -150,10 +151,7 @@ export function ReplenishmentPanel({ requests, skus, token }: ReplenishmentPanel
       ) : null}
 
       {requests.length === 0 ? (
-        <div className="rounded-xl ring-1 ring-border p-12 text-center">
-          <p className="text-muted-foreground">{t('emptyTitle')}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t('emptyDescription')}</p>
-        </div>
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
         <div className="rounded-xl ring-1 ring-border">
           <Table>

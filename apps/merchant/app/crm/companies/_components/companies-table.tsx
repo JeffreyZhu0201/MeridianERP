@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
   Button,
+  EmptyState,
   Input,
   Label,
   Sheet,
@@ -79,12 +80,7 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
       </div>
 
       {companies.length === 0 ? (
-        <div className="rounded-xl ring-1 ring-border p-12 text-center">
-          <p className="text-muted-foreground">{t('empty')}</p>
-          <Button className="mt-4" onClick={openCreate}>
-            {t('emptyAction')}
-          </Button>
-        </div>
+        <EmptyState title={t('empty')} action={<Button onClick={openCreate}>{t('emptyAction')}</Button>} />
       ) : (
         <div className="rounded-xl ring-1 ring-border">
           <Table>

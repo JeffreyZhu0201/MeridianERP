@@ -6,6 +6,7 @@ import { useState } from 'react';
 import {
   Badge,
   Button,
+  EmptyState,
   Input,
   Label,
   Table,
@@ -110,10 +111,7 @@ export function WithdrawalsPanel({
       </form>
 
       {withdrawals.length === 0 ? (
-        <div className="rounded-xl ring-1 ring-border p-12 text-center">
-          <p className="text-muted-foreground">{t('emptyTitle')}</p>
-          <p className="mt-1 text-xs text-muted-foreground">{t('emptyDescription')}</p>
-        </div>
+        <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
       ) : (
         <div className="rounded-xl ring-1 ring-border">
           <Table>

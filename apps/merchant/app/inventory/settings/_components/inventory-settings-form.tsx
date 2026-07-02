@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@meridian/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, EmptyState, Input, Label } from '@meridian/ui';
 
 import { apiFetch } from '@/lib/api';
 
@@ -90,14 +90,16 @@ export function InventorySettingsForm({
 export function StaffForbidden() {
   const t = useTranslations('merchant.inventory.settings');
   return (
-    <div className="rounded-xl ring-1 ring-border p-12 text-center">
-      <p className="text-muted-foreground">{t('forbidden')}</p>
-      <Link
-        href="/inventory/alerts"
-        className="mt-4 inline-flex min-h-11 items-center text-sm text-primary hover:underline"
-      >
-        返回低库存预警
-      </Link>
-    </div>
+    <EmptyState
+        title={t('forbidden')}
+        action={
+          <Link
+            href="/inventory/alerts"
+            className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
+          >
+            返回低库存预警
+          </Link>
+        }
+      />
   );
 }
