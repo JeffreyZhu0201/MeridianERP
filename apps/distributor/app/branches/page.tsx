@@ -32,24 +32,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  formatMoney,
 } from '@meridian/ui';
 import type { DistributorBranchSummary } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-
-/**
- * 格式化货币金额显示
- *
- * @param value - 金额值，字符串或数字类型
- * @param locale - 本地化标识符
- * @returns 格式化后的货币字符串
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 分店列表页面主组件

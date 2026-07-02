@@ -31,6 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  formatMoney,
 } from '@meridian/ui';
 import { LeadStage, type MerchantDashboardStats } from '@meridian/shared';
 
@@ -59,22 +60,6 @@ const stageVariant: Record<string, 'default' | 'warning' | 'success' | 'destruct
   [LeadStage.WON]: 'success',
   [LeadStage.LOST]: 'destructive',
 };
-
-/**
- * 格式化货币金额显示
- *
- * @param value - 金额值，字符串或数字类型
- * @param locale - 本地化标识符
- * @returns 格式化后的货币字符串，如 "$1,234.56"
- *
- * 使用场景:
- * - 订单金额、佣金收入、资金余额等货币数据展示
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 商户仪表盘页面主组件

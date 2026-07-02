@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Card, CardContent, CardHeader, CardTitle, MetricCard } from '@meridian/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, MetricCard, formatMoney } from '@meridian/ui';
 import type { DistributorPerformanceSummary } from '@meridian/shared';
 
 import { dateRangeForPreset, fetchDistributorPerformance } from '@/lib/commissions';
@@ -11,12 +11,6 @@ interface PerformancePanelProps {
   distributorId: string;
   token: string;
   initialPerformance?: DistributorPerformanceSummary | null;
-}
-
-function formatMoney(value: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
 }
 
 function formatShortDate(iso: string): string {

@@ -19,7 +19,7 @@
  * - 使用 merchant.orders i18n 命名空间
  */
 import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, formatMoney, ListPageFrame } from '@meridian/ui';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -96,10 +96,7 @@ export default async function OrdersPage() {
             { title: t('table.status'), value: paidCount },
             {
               title: t('table.total'),
-              value: new Intl.NumberFormat(undefined, {
-                style: 'currency',
-                currency: 'USD',
-              }).format(revenueTotal),
+              value: formatMoney(revenueTotal),
             },
           ]}
         />

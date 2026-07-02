@@ -22,7 +22,7 @@
  */
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, Button, EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
@@ -38,15 +38,6 @@ import { CartView } from './_components/cart-view';
  */
 interface CartPageProps {
   params: Promise<{ slug: string }>;
-}
-
-/**
- * 格式化货币金额显示
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
 }
 
 /**

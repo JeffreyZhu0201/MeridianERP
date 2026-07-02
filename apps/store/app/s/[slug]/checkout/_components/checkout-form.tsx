@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Button, Input, Label } from '@meridian/ui';
+import { Button, formatMoney, Input, Label } from '@meridian/ui';
 import type { CheckoutResponse, DeliveryAddress, FulfillmentType } from '@meridian/shared';
 
 import { apiFetch, storePath, type Cart } from '@/lib/api';
@@ -14,12 +14,6 @@ interface CheckoutFormProps {
   storeSlug: string;
   cart: Cart | null;
   token?: string;
-}
-
-function formatPrice(price: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(price),
-  );
 }
 
 const emptyAddress: DeliveryAddress = {
@@ -118,7 +112,7 @@ export function CheckoutForm({ storeSlug, cart, token }: CheckoutFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-xl ring-1 ring-border p-4">
         <p className="text-sm font-medium">{t('checkout.orderSummary')}</p>
-        <p className="mt-1 text-2xl font-semibold">{formatPrice(subtotal)}</p>
+        <p className="mt-1 text-2xl font-semibold">{formatMoney(subtotal)}</p>
         <p className="text-xs text-muted-foreground">
           {t('checkout.items', { count: cart.items.length })}
         </p>

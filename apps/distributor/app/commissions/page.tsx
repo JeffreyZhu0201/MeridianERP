@@ -33,6 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  formatMoney,
 } from '@meridian/ui';
 import { LedgerStatus } from '@meridian/shared';
 
@@ -60,19 +61,6 @@ const statusVariant: Record<string, 'default' | 'warning' | 'success' | 'destruc
   [LedgerStatus.SETTLED]: 'success',
   [LedgerStatus.VOID]: 'destructive',
 };
-
-/**
- * 格式化货币金额显示
- *
- * @param value - 金额值，字符串或数字类型
- * @param locale - 本地化标识符
- * @returns 格式化后的货币字符串
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 佣金账本页面主组件

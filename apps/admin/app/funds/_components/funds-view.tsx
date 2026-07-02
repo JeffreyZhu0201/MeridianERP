@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@meridian/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, formatMoney, Input, Label } from '@meridian/ui';
 import type { PlatformFundsSummary } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
@@ -27,15 +27,7 @@ export function FundsView({ initialSummary, token }: FundsViewProps) {
   const [from, setFrom] = useState(searchParams.get('from')?.slice(0, 10) ?? '');
   const [to, setTo] = useState(searchParams.get('to')?.slice(0, 10) ?? '');
 
-  const formatMoney = useCallback(
-    (value: string | number) =>
-      new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: CURRENCY,
-        minimumFractionDigits: 2,
-      }).format(Number(value)),
-    [locale],
-  );
+  const formatCNY = (value: string | number) => formatMoney(value, CURRENCY, locale);
 
   async function applyRange() {
     setLoading(true);
@@ -97,7 +89,7 @@ export function FundsView({ initialSummary, token }: FundsViewProps) {
         {t('period', { from: summary.from, to: summary.to })}
       </p>
 
-      <FundsSummaryCards summary={summary} formatMoney={formatMoney} />
+      <FundsSummaryCards summary={summary} formatMoney={formatCNY} />
 
       {summary.accruedAwaitingSettlement != null &&
       Number(summary.accruedAwaitingSettlement) > 0 ? (
@@ -105,7 +97,7 @@ export function FundsView({ initialSummary, token }: FundsViewProps) {
           <CardContent className="flex flex-wrap items-center justify-between gap-4 py-4">
             <p className="text-sm">
               {t('accruedHint', {
-                amount: formatMoney(summary.accruedAwaitingSettlement),
+                amount: formatCNY(summary.accruedAwaitingSettlement),
               })}
             </p>
             <Link
@@ -129,7 +121,7 @@ export function FundsView({ initialSummary, token }: FundsViewProps) {
                 <div
                   key={point.date}
                   className="group flex flex-1 flex-col items-center gap-1"
-                  title={`${point.date}: ${formatMoney(point.amount)}`}
+                  title={`${point.date}: ${formatCNY(point.amount)}`}
                 >
                   <div
                     className="w-full min-h-[2px] rounded-sm bg-primary/80 transition-colors group-hover:bg-primary"

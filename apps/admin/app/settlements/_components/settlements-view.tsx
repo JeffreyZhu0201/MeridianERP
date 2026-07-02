@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   EmptyState,
+  formatMoney,
   Table,
   TableBody,
   TableCell,
@@ -21,12 +22,6 @@ interface SettlementsViewProps {
   batches: SettlementBatch[];
   ledgerEntries: CommissionLedgerEntry[];
   token: string;
-}
-
-function formatPrice(price: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(price),
-  );
 }
 
 function formatDate(iso: string, locale: string): string {
@@ -144,7 +139,7 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
                     <TableCell className="font-mono text-xs">
                       {entry.order.id.slice(0, 8)}…
                     </TableCell>
-                    <TableCell className="text-right">{formatPrice(entry.amount, locale)}</TableCell>
+                    <TableCell className="text-right">{formatMoney(entry.amount, 'USD', locale)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDate(entry.createdAt, locale)}
                     </TableCell>

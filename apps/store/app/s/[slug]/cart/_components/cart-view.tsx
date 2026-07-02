@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Button,
+  formatMoney,
   Table,
   TableBody,
   TableCell,
@@ -20,12 +21,6 @@ interface CartViewProps {
   cart: Cart;
   storeSlug: string;
   token?: string;
-}
-
-function formatPrice(price: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(price),
-  );
 }
 
 export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
@@ -119,7 +114,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    {formatPrice(Number(item.variant.price) * item.quantity)}
+                    {formatMoney(Number(item.variant.price) * item.quantity)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -142,7 +137,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
         <div className="rounded-xl ring-1 ring-border p-4">
           <div className="flex items-center justify-between text-sm font-medium">
             <span>{t('cart.subtotal')}</span>
-            <span>{formatPrice(subtotal)}</span>
+            <span>{formatMoney(subtotal)}</span>
           </div>
           <Link href={`/s/${storeSlug}/checkout`} className="mt-4 block">
             <Button className="w-full" size="lg">

@@ -30,7 +30,7 @@
  */
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
-import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, EmptyState, ListPageFrame, formatMoney } from '@meridian/ui';
 import { LedgerStatus, type CommissionListQuery } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
@@ -49,15 +49,6 @@ import {
 } from '@/lib/commissions';
 import { CommissionsFilters } from './_components/commissions-filters';
 import { CommissionsTable } from './_components/commissions-table';
-
-/**
- * 格式化货币金额显示
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 页面 Props 类型定义

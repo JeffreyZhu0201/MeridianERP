@@ -13,6 +13,7 @@ import {
   BentoDetailHero,
   DetailPageFrame,
   EmptyState,
+  formatMoney,
   Input,
   Label,
   Select,
@@ -55,11 +56,11 @@ export function DistributorDetailView({
   const [commissionType, setCommissionType] = useState(distributor.commissionType);
   const [isActive, setIsActive] = useState(distributor.isActive);
 
+  const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
+
   const commissionLabel =
     distributor.commissionType === 'FIXED'
-      ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'CNY' }).format(
-          Number(distributor.commissionRate),
-        )
+      ? formatCNY(distributor.commissionRate)
       : `${Number(distributor.commissionRate)}%`;
 
   async function handleInviteCode() {
@@ -152,14 +153,6 @@ export function DistributorDetailView({
     await navigator.clipboard.writeText(invite.url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
-
-  function formatMoney(value: string | number) {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: 'CNY',
-      minimumFractionDigits: 2,
-    }).format(Number(value));
   }
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { BentoDetailHero, DetailPageFrame } from '@meridian/ui';
+import { BentoDetailHero, DetailPageFrame, formatMoney } from '@meridian/ui';
 import type { DistributorPerformanceSummary, QrHistoryListResponse } from '@meridian/shared';
 
 import { type Binding, type Distributor } from '@/lib/api';
@@ -29,12 +29,6 @@ export function DistributorDetail({
   const t = useTranslations('merchant.distributors.detail');
   const tOverview = useTranslations('merchant.distributors.overview');
   const tPerf = useTranslations('merchant.distributors.performance');
-
-  function formatMoney(value: string | number): string {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
-      Number(value),
-    );
-  }
 
   return (
     <DetailPageFrame

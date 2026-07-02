@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   EmptyState,
+  formatMoney,
   Input,
   Label,
   Table,
@@ -74,9 +75,7 @@ export function WithdrawalsPanel({
         <p className="text-sm text-muted-foreground">
           {t('availableBalance')}:{' '}
           <span className="font-medium text-foreground tabular-nums">
-            {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
-              availableBalance,
-            )}
+            {formatMoney(availableBalance)}
           </span>
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -127,9 +126,7 @@ export function WithdrawalsPanel({
               {withdrawals.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="tabular-nums font-medium">
-                    {new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(
-                      Number(row.amount),
-                    )}
+                    {formatMoney(row.amount)}
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusVariant(row.status)}>{row.status}</Badge>

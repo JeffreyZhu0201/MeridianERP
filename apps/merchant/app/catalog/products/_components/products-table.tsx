@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   EmptyState,
+  formatMoney,
   Input,
   Label,
   Sheet,
@@ -122,12 +123,6 @@ export function ProductsTable({ products: initial, categories, token }: Products
     router.refresh();
   }
 
-  function formatPrice(price: string | number): string {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-      Number(price),
-    );
-  }
-
   return (
     <>
       <div className="flex justify-end">
@@ -158,7 +153,7 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     <TableCell>{product.name}</TableCell>
                     <TableCell className="font-mono text-xs">{product.slug}</TableCell>
                     <TableCell>{product.category?.name ?? '—'}</TableCell>
-                    <TableCell>{variant ? formatPrice(variant.price) : '—'}</TableCell>
+                    <TableCell>{variant ? formatMoney(variant.price) : '—'}</TableCell>
                     <TableCell className="text-right font-mono text-sm tabular-nums">
                       {variant ? variant.inventory : '—'}
                     </TableCell>

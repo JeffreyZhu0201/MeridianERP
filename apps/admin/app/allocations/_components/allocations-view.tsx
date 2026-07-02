@@ -13,6 +13,7 @@ import {
   Dialog,
   DialogCloseButton,
   EmptyState,
+  formatMoney,
   Input,
   Label,
   Select,
@@ -80,12 +81,6 @@ export function AllocationsView({
   const [lineSkuId, setLineSkuId] = useState(masterSkus[0]?.id ?? '');
   const [lineQty, setLineQty] = useState('1');
   const [lines, setLines] = useState<Array<{ masterSkuId: string; quantity: number }>>([]);
-
-  function formatMoney(value: string | number) {
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-      Number(value),
-    );
-  }
 
   async function handleCreateSku() {
     setSubmitting(true);

@@ -7,6 +7,7 @@ import {
   Button,
   cn,
   DeliveryShipDialog,
+  formatMoney,
   OrderListFrame,
   type OrderListRow,
 } from '@meridian/ui';
@@ -18,10 +19,6 @@ interface OrdersViewProps {
   orders: PlatformOrder[];
   token: string;
   activeTab: 'all' | 'delivery';
-}
-
-function formatPrice(price: string | number, currency: string, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(price));
 }
 
 function formatDate(iso: string, locale: string): string {
@@ -52,7 +49,7 @@ function toRow(order: PlatformOrder, locale: string): OrderListRow {
     customerLabel: order.guestEmail ?? '—',
     status: order.status,
     fulfillmentType: (order.fulfillmentType ?? 'PICKUP') as OrderListRow['fulfillmentType'],
-    total: formatPrice(order.total, order.currency, locale),
+    total: formatMoney(order.total, order.currency, locale),
     createdAt: formatDate(order.createdAt, locale),
   };
 }

@@ -19,7 +19,7 @@
  * - 使用 admin.allocations i18n 命名空间
  */
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
@@ -104,8 +104,6 @@ export default async function AllocationsPage() {
     .filter((m): m is { id: string; businessName: string; tenantId: string } => m !== null);
 
   const draftCount = allocations.filter((a) => a.status === 'DRAFT').length;
-  const formatMoney = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(value);
 
   const metrics: Array<{ title: string; value: number | string; description?: string }> = [
     { title: t('masterSkus'), value: masterSkus.length },

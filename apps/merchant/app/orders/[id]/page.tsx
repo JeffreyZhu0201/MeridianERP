@@ -10,6 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  formatMoney,
 } from '@meridian/ui';
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
@@ -18,10 +19,6 @@ import type { MerchantOrderDetail } from '@meridian/shared';
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-function formatMoney(value: string | number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(value));
 }
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {

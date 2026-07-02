@@ -1,16 +1,12 @@
 'use client';
 
 import { useLocale, useTranslations } from 'next-intl';
-import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
+import { Badge, formatMoney, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
 
 import type { PlatformOrder } from '@/lib/api';
 
 interface OrdersTableProps {
   orders: PlatformOrder[];
-}
-
-function formatPrice(price: string | number, currency: string, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(price));
 }
 
 function formatDate(iso: string, locale: string): string {
@@ -79,7 +75,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                {formatPrice(order.total, order.currency, locale)}
+                {formatMoney(order.total, order.currency, locale)}
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">
                 {formatDate(order.createdAt, locale)}

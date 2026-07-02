@@ -2,17 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
+import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui';
 import { CommissionType, LedgerStatus, type CommissionStatementRow } from '@meridian/shared';
 
 interface CommissionsTableProps {
   items: CommissionStatementRow[];
-}
-
-function formatMoney(value: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
 }
 
 function formatDate(iso: string): string {

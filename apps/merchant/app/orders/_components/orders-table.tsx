@@ -2,15 +2,11 @@
 
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Badge, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@meridian/ui';
+import { Badge, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui';
 import type { MerchantOrderListItem } from '@meridian/shared';
 
 interface OrdersTableProps {
   orders: MerchantOrderListItem[];
-}
-
-function formatMoney(value: string | number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(value));
 }
 
 function formatDate(iso: string): string {

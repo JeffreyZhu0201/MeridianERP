@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { BentoListHeader, Button, Input, Label, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, formatMoney, Input, Label, ListPageFrame } from '@meridian/ui';
 import type { MerchantFundsSummary } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
@@ -30,12 +30,7 @@ export function MerchantFundsPanel({
   const [from, setFrom] = useState(searchParams.get('from')?.slice(0, 10) ?? '');
   const [to, setTo] = useState(searchParams.get('to')?.slice(0, 10) ?? '');
 
-  const formatMoney = (value: string | number) =>
-    new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: CURRENCY,
-      minimumFractionDigits: 2,
-    }).format(Number(value));
+  const formatCNY = (value: string | number) => formatMoney(value, CURRENCY, locale);
 
   async function applyRange() {
     setLoading(true);
@@ -94,17 +89,17 @@ export function MerchantFundsPanel({
 
         <BentoListHeader
           metrics={[
-            { title: t('salesGmv'), value: formatMoney(summary.salesGmv) },
-            { title: t('allocationCost'), value: formatMoney(summary.allocationCost) },
+            { title: t('salesGmv'), value: formatCNY(summary.salesGmv) },
+            { title: t('allocationCost'), value: formatCNY(summary.allocationCost) },
             {
               title: t('deliveryAllocationCost'),
-              value: formatMoney(summary.deliveryAllocationCost),
+              value: formatCNY(summary.deliveryAllocationCost),
             },
             {
               title: t('payableCommission'),
-              value: formatMoney(summary.payableCommission),
+              value: formatCNY(summary.payableCommission),
             },
-            { title: t('netPosition'), value: formatMoney(summary.netPosition) },
+            { title: t('netPosition'), value: formatCNY(summary.netPosition) },
           ]}
         />
       </div>

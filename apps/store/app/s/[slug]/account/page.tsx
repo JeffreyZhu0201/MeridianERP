@@ -5,6 +5,7 @@ import {
   Badge,
   BentoListHeader,
   EmptyState,
+  formatMoney,
   ListPageFrame,
   Table,
   TableBody,
@@ -21,10 +22,6 @@ import { getToken } from '@/lib/auth';
 
 interface AccountPageProps {
   params: Promise<{ slug: string }>;
-}
-
-function formatMoney(value: string | number, locale: string, currency = 'USD'): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value));
 }
 
 export default async function AccountPage({ params }: AccountPageProps) {

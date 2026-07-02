@@ -13,6 +13,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  formatMoney,
   type OrderListRow,
 } from '@meridian/ui';
 import type { FulfillmentType, MerchantOrderListItem } from '@meridian/shared';
@@ -24,10 +25,6 @@ interface OrdersPanelProps {
   orders: MerchantOrderListItem[];
   pickupPending: MerchantOrderListItem[];
   token: string;
-}
-
-function formatMoney(value: string | number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(value));
 }
 
 function formatDate(iso: string): string {

@@ -8,6 +8,7 @@ import {
   Button,
   Dialog,
   DialogCloseButton,
+  formatMoney,
   Input,
   Label,
   Table,
@@ -37,13 +38,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
   const [rejectReason, setRejectReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  function formatMoney(value: string | number) {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: 'CNY',
-      minimumFractionDigits: 2,
-    }).format(Number(value));
-  }
+  const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
 
   async function handleApprove() {
     if (!approveId) return;
@@ -97,7 +92,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
               <TableRow key={withdrawal.id}>
                 <TableCell className="font-medium">{withdrawal.distributor.name}</TableCell>
                 <TableCell className="text-right tabular-nums">
-                  {formatMoney(withdrawal.amount)}
+                  {formatCNY(withdrawal.amount)}
                 </TableCell>
                 <TableCell className="max-w-[200px] truncate text-muted-foreground">
                   {withdrawal.note ?? '—'}

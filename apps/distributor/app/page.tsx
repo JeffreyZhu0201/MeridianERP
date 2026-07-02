@@ -20,26 +20,11 @@ import {
   BentoChartTile,
   BentoDashboardFrame,
   BentoMetricTile,
+  formatMoney,
 } from '@meridian/ui';
 
 import { apiFetch, ApiError, type DistributorDashboard } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-
-/**
- * 格式化货币金额显示
- *
- * @param value - 金额值，字符串或数字类型
- * @param locale - 本地化标识符
- * @returns 格式化后的货币字符串，如 "$1,234.56"
- *
- * 使用场景:
- * - 可用余额、订单金额、佣金金额等货币数据展示
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 加载经销商仪表盘数据

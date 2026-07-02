@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Button, Select } from '@meridian/ui';
+import { Button, formatMoney, Select } from '@meridian/ui';
 
 import { apiFetch, storePath, type Product } from '@/lib/api';
 
@@ -11,12 +11,6 @@ interface ProductDetailProps {
   product: Product;
   storeSlug: string;
   token?: string;
-}
-
-function formatPrice(price: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(price),
-  );
 }
 
 export function ProductDetail({ product, storeSlug, token }: ProductDetailProps) {
@@ -69,7 +63,7 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
             >
               {activeVariants.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.name} — {formatPrice(v.price)}
+                  {v.name} — {formatMoney(v.price)}
                 </option>
               ))}
             </Select>
@@ -78,7 +72,7 @@ export function ProductDetail({ product, storeSlug, token }: ProductDetailProps)
 
         {selected ? (
           <div className="space-y-1">
-            <p className="text-2xl font-semibold">{formatPrice(selected.price)}</p>
+            <p className="text-2xl font-semibold">{formatMoney(selected.price)}</p>
             <p className="text-sm text-muted-foreground">
               {selected.inventory <= 0
                 ? t('product.outOfStock')

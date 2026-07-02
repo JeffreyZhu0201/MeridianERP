@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   EmptyState,
+  formatMoney,
   ListPageFrame,
   Table,
   TableBody,
@@ -42,12 +43,7 @@ export function AllocationsPanel({ allocations, token }: AllocationsPanelProps) 
   const [error, setError] = useState('');
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
-  const formatMoney = (value: string | number) =>
-    new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: 'CNY',
-      minimumFractionDigits: 2,
-    }).format(Number(value));
+  const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
 
   async function handleConfirm(id: string) {
     setConfirmingId(id);
@@ -95,7 +91,7 @@ export function AllocationsPanel({ allocations, token }: AllocationsPanelProps) 
                         </div>
                       ))}
                     </TableCell>
-                    <TableCell className="tabular-nums">{formatMoney(total)}</TableCell>
+                    <TableCell className="tabular-nums">{formatCNY(total)}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">{order.status}</Badge>
                     </TableCell>

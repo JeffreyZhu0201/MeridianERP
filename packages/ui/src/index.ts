@@ -381,3 +381,6 @@ export { cn } from './lib/utils';
 
 /** 表面样式常量 */
 export { surfaceRing, surfaceRingLg, shellDividerB, shellDividerT } from './lib/surfaces';
+
+/** 格式化工具函数 */
+export { formatMoney, formatDate, formatDateTime } from './lib/format';

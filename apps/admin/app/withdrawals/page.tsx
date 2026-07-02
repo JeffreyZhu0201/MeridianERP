@@ -23,7 +23,7 @@
  */
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, Button, EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type WithdrawalRequest } from '@/lib/api';
@@ -81,20 +81,13 @@ export default async function WithdrawalsPage() {
     withdrawals = [];
   }
 
-  const formatMoney = (value: number) =>
-    new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: CURRENCY,
-      minimumFractionDigits: 2,
-    }).format(value);
-
   const pendingTotal = withdrawals.reduce((sum, w) => sum + Number(w.amount), 0);
 
   const metrics = [
     { title: t('title'), value: withdrawals.length },
     {
       title: t('columns.amount'),
-      value: formatMoney(pendingTotal),
+      value: formatMoney(pendingTotal, CURRENCY, locale),
       description: t('description'),
     },
   ];

@@ -1,17 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { MetricCard } from '@meridian/ui';
+import { MetricCard, formatMoney } from '@meridian/ui';
 import type { CommissionSummary } from '@meridian/shared';
 
 interface CommissionsSummaryCardsProps {
   summary: CommissionSummary;
-}
-
-function formatMoney(value: string | number): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
 }
 
 export function CommissionsSummaryCards({ summary }: CommissionsSummaryCardsProps) {

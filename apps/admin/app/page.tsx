@@ -29,29 +29,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  formatMoney,
 } from '@meridian/ui';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { StatusBadge } from '@/components/status-badge';
 import { apiFetch, ApiError, type DashboardStats } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-
-/**
- * 格式化货币金额显示
- *
- * @param value - 金额值，可以是字符串或数字类型
- * @param locale - 本地化标识符，用于确定数字格式和货币符号
- * @returns 格式化后的货币字符串，如 "$1,234.56"
- *
- * 使用场景:
- * - 用于展示订单金额、佣金金额等各种资金数据
- * - 自动处理金额的千分位分隔和小数位
- */
-function formatMoney(value: string | number, locale: string): string {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD' }).format(
-    Number(value),
-  );
-}
 
 /**
  * 加载仪表盘统计数据

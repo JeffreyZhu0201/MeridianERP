@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { DetailPageFrame, FulfillmentTypeBadge } from '@meridian/ui';
+import { DetailPageFrame, FulfillmentTypeBadge, formatMoney } from '@meridian/ui';
 import type { StoreOrderDetail } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
@@ -12,10 +12,6 @@ import { PaymentStatusBanner } from './_components/payment-status-banner';
 interface OrderConfirmationPageProps {
   params: Promise<{ slug: string; id: string }>;
   searchParams: Promise<{ redirect_status?: string; payment_intent?: string }>;
-}
-
-function formatMoney(value: string | number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(value));
 }
 
 export default async function OrderConfirmationPage({
