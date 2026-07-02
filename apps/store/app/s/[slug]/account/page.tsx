@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import {
-  Badge,
+import { Badge,
   BentoListHeader,
   EmptyState,
   formatMoney,
@@ -12,8 +11,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from '@meridian/ui';
+  TableRow, } from '@meridian/ui/server';
 import type { StoreOrderListItem } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';

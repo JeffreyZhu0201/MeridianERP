@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { BentoDashboardFrame } from '@meridian/ui';
+import { BentoDashboardFrame } from '@meridian/ui/server';
 
 import { StorePicker } from './_components/store-picker';
 

@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import {
-  BentoListHeader,
+import { BentoListHeader,
   EmptyState,
   ListPageFrame,
   Table,
@@ -9,8 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  formatMoney,
-} from '@meridian/ui';
+  formatMoney, } from '@meridian/ui/server';
 import type { DistributorBranchSummary } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';

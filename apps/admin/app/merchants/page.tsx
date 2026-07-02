@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
 import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';

@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { IconClock } from '@tabler/icons-react';
-import { AuthStatusFrame, Badge } from '@meridian/ui';
+import { AuthStatusFrame, Badge } from '@meridian/ui/server';
 
 export default async function OnboardingPendingPage({
   searchParams,

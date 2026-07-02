@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { FormPageFrame } from '@meridian/ui';
+import { FormPageFrame } from '@meridian/ui/server';
 import type { PlatformSettingsDto } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';

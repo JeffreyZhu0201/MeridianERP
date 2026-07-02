@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { EmptyState, ProductCard } from '@meridian/ui';
+import { EmptyState, ProductCard } from '@meridian/ui/server';
 
 import type { Product } from '@/lib/api';
 

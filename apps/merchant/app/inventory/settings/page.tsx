@@ -1,5 +1,5 @@
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
-import { SettingsPageFrame } from '@meridian/ui';
+import { SettingsPageFrame } from '@meridian/ui/server';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken, isMerchantOwner } from '@/lib/auth';
 import { getTranslations } from 'next-intl/server';

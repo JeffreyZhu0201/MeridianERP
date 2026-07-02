@@ -1,5 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';

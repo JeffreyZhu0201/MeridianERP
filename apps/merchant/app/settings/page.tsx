@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { SettingsPageFrame } from '@meridian/ui';
+import { SettingsPageFrame } from '@meridian/ui/server';
 import type { MerchantSettingsDto, TeamMember } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';

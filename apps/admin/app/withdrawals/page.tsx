@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type WithdrawalRequest } from '@/lib/api';

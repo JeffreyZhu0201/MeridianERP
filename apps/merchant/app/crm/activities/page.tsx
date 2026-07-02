@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, asList, asListTotal, type Contact, type Lead, type OnboardingProfile, type PaginatedResponse } from '@/lib/api';

@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { DetailPageFrame, FulfillmentTypeBadge, formatMoney } from '@meridian/ui';
+import { DetailPageFrame, FulfillmentTypeBadge, formatMoney } from '@meridian/ui/server';
 import type { StoreOrderDetail } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';

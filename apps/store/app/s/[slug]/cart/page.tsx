@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui/server';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';

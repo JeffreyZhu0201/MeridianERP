@@ -1,6 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import {
-  Badge,
+import { Badge,
   BentoListHeader,
   EmptyState,
   ListPageFrame,
@@ -10,8 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  formatMoney,
-} from '@meridian/ui';
+  formatMoney, } from '@meridian/ui/server';
 import { LedgerStatus } from '@meridian/shared';
 
 import {

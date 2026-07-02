@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Badge, Button, DetailPageFrame } from '@meridian/ui';
+import { Badge, Button, DetailPageFrame } from '@meridian/ui/server';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart, type Product } from '@/lib/api';

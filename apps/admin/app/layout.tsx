@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getLocale, getMessages, getTimeZone } from 'next-intl/server';
-import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui';
+import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui/portal-providers';
 import './globals.css';
 
 export const metadata: Metadata = {

@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
-import { BentoListHeader, EmptyState, ListPageFrame, formatMoney } from '@meridian/ui';
+import { BentoListHeader, EmptyState, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import { LedgerStatus, type CommissionListQuery } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';

@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { ListPageFrame } from '@meridian/ui/server';
 import type { MasterSkuSummary, ReplenishmentRequestSummary } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';

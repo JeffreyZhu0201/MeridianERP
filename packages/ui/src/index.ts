@@ -1,20 +1,5 @@
 /**
  * @meridian/ui - MeridanERP 共享 UI 组件库
- *
- * 本模块统一导出所有 UI 组件、类型定义和工具函数，供各门户应用（admin、merchant、store、distributor）使用。
- *
- * 组件分类：
- * - Shell 组件：页面布局框架（AdminShell、MerchantShell、StoreShell、DistributorShell）
- * - 页面框架：ListPageFrame、DetailPageFrame、FormPageFrame 等
- * - Bento 仪表盘：BentoGrid、BentoMetricTile、BentoChartTile 等
- * - 订单组件：OrderListFrame、PickupVerifyDialog、DeliveryShipDialog
- * - 主题组件：ThemeProvider、ModeToggle、LocaleToggle
- * - UI 原语：Button、Input、Card、Table 等基于 shadcn/ui
- *
- * @example
- * ```tsx
- * import { AdminShell, ListPageFrame, Button, cn } from '@meridian/ui';
- * ```
  */
 
 // ============================================================

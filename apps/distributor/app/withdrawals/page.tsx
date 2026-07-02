@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui';
+import { ListPageFrame } from '@meridian/ui/server';
 import type { DistributorDashboard, WithdrawalRequestRow } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';

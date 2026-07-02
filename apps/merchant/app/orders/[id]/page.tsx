@@ -1,7 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import {
-  Badge,
+import { Badge,
   BentoDetailHero,
   DetailPageFrame,
   Table,
@@ -10,8 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  formatMoney,
-} from '@meridian/ui';
+  formatMoney, } from '@meridian/ui/server';
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken } from '@/lib/auth';

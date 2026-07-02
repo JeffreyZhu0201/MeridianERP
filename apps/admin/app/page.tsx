@@ -1,19 +1,7 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import {
-  BentoChartTile,
-  BentoDashboardFrame,
-  BentoMetricTile,
-  BentoTile,
-  EmptyState,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  formatMoney,
-} from '@meridian/ui';
+import { BentoDashboardFrame, BentoMetricTile, BentoTile, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui/server';
+import { BentoChartTile } from '@meridian/ui/client-widgets';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { StatusBadge } from '@/components/status-badge';

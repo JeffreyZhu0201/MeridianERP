@@ -1,5 +1,4 @@
-import {
-  Button,
+import { Button,
   Card,
   CardContent,
   CardHeader,
@@ -11,8 +10,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from '@meridian/ui';
+  TableRow, } from '@meridian/ui/server';
 
 import type { MasterSku } from '@/lib/api';
 

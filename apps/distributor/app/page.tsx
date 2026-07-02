@@ -1,10 +1,6 @@
 import { getLocale, getTranslations } from 'next-intl/server';
-import {
-  BentoChartTile,
-  BentoDashboardFrame,
-  BentoMetricTile,
-  formatMoney,
-} from '@meridian/ui';
+import { BentoDashboardFrame, BentoMetricTile, formatMoney } from '@meridian/ui/server';
+import { BentoChartTile } from '@meridian/ui/client-widgets';
 
 import { apiFetch, ApiError, type DistributorDashboard } from '@/lib/api';
 import { getToken } from '@/lib/auth';

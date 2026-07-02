@@ -1,5 +1,4 @@
-import {
-  Badge,
+import { Badge,
   Button,
   Card,
   CardContent,
@@ -12,8 +11,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from '@meridian/ui';
+  TableRow, } from '@meridian/ui/server';
 
 import type { AllocationOrder } from '@/lib/api';
 

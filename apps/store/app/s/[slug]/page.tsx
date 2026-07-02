@@ -1,11 +1,9 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import {
-  BentoDashboardFrame,
+import { BentoDashboardFrame,
   BentoMetricTile,
   BentoTile,
-  EmptyState,
-} from '@meridian/ui';
+  EmptyState, } from '@meridian/ui/server';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart, type Product } from '@/lib/api';

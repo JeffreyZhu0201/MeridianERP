@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import type { PlatformCrmCompany } from '@meridian/shared';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch } from '@/lib/api';

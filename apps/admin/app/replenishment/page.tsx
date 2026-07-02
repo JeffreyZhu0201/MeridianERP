@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch } from '@/lib/api';

@@ -1,20 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import {
-  Badge,
-  BentoChartTile,
-  BentoDashboardFrame,
-  BentoMetricTile,
-  BentoTile,
-  EmptyState,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  formatMoney,
-} from '@meridian/ui';
+import { Badge, BentoDashboardFrame, BentoMetricTile, BentoTile, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui/server';
+import { BentoChartTile } from '@meridian/ui/client-widgets';
 import { LeadStage, type MerchantDashboardStats } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
