@@ -1,3 +1,13 @@
+/*
+ * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @Date: 2026-06-24 20:41:08
+ * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @LastEditTime: 2026-07-02 00:23:54
+ * @FilePath: /MeridianERP/apps/admin/app/globals.css
+ * @Description: 
+ * 
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ */
 @import '@meridian/ui/globals.css';
 
 @tailwind base;

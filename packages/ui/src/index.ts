@@ -238,6 +238,141 @@ export {
 } from './components/ui/input-otp';
 
 // ============================================================
+// 新增 UI 原语组件（shadcn/ui 完整集合）
+// ============================================================
+
+/** 手风琴展开组件 */
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './components/ui/accordion';
+
+/** 警告提示组件 */
+export { Alert, AlertTitle, AlertDescription } from './components/ui/alert';
+
+/** 警告对话框 */
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './components/ui/alert-dialog';
+
+/** 头像组件 */
+export { Avatar, AvatarImage, AvatarFallback } from './components/ui/avatar';
+
+/** 日历组件 */
+export {
+  Calendar,
+  CalendarHeader,
+  CalendarHeading,
+  CalendarNav,
+  CalendarPrevButton,
+  CalendarNextButton,
+  CalendarGrid,
+  CalendarHead,
+  CalendarRow,
+  CalendarHeadCell,
+  CalendarBody,
+  CalendarCell,
+} from './components/ui/calendar';
+
+/** 图表组件（recharts 封装） */
+export { Chart, ChartContainer } from './components/ui/chart';
+
+/** 复选框组件 */
+export { Checkbox } from './components/ui/checkbox';
+
+/** 可折叠组件 */
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from './components/ui/collapsible';
+
+/** 组合框/下拉搜索 */
+export { Combobox, type ComboboxProps } from './components/ui/combobox';
+
+/** 命令面板/搜索框 */
+export {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from './components/ui/command';
+
+/** 右键菜单 */
+export {
+  ContextMenu,
+  ContextMenuTrigger,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuCheckboxItem,
+  ContextMenuRadioItem,
+  ContextMenuLabel,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuGroup,
+  ContextMenuPortal,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuRadioGroup,
+} from './components/ui/context-menu';
+
+/** 悬浮卡片 */
+export { HoverCard, HoverCardTrigger, HoverCardContent } from './components/ui/hover-card';
+
+/** 输入框组 */
+export { InputGroup, InputGroupAddon } from './components/ui/input-group';
+
+/** 菜单栏 */
+export { Menubar, MenubarTrigger, MenubarContent, MenubarItem, MenubarSeparator } from './components/ui/menubar';
+
+/** 分页组件 */
+export {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from './components/ui/pagination';
+
+/** 弹出框 */
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './components/ui/popover';
+
+/** 进度条 */
+export { Progress } from './components/ui/progress';
+
+/** 单选组 */
+export { RadioGroup, RadioGroupItem } from './components/ui/radio-group';
+
+/** 可调整尺寸面板 */
+export { ResizablePanel, ResizablePanelGroup, ResizableHandle } from './components/ui/resizable';
+
+/** 滚动区域 */
+export { ScrollArea, ScrollBar } from './components/ui/scroll-area';
+
+/** 滑块 */
+export { Slider } from './components/ui/slider';
+
+/** 烤面包/通知组件 */
+export { Toaster } from './components/ui/sonner';
+
+/** 开关组件 */
+export { Switch } from './components/ui/switch';
+
+/** 切换按钮 */
+export { Toggle, toggleVariants } from './components/ui/toggle';
+
+/** 切换按钮组 */
+export { ToggleGroup, ToggleGroupItem, toggleGroupVariants } from './components/ui/toggle-group';
+
+// ============================================================
 // 工具函数与样式常量
 // ============================================================
 

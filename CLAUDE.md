@@ -29,7 +29,7 @@ rtk pnpm dev:admin        # 仅管理门户 (端口 3000)
 rtk pnpm dev:merchant     # 仅商户门户 (端口 3002)
 rtk pnpm dev:store        # 仅商店前端 (端口 3003)
 rtk pnpm dev:distributor  # 仅经销商门户 (端口 3005)
-rtk pnpm dev:ui-spec      # UI 组件展示 (端口 3004)
+rtk pnpm dev:ui-spec      # UI 组件展示 (端口 3004，已废弃，使用 packages/ui)
 ```
 
 ### 数据库
@@ -199,18 +199,14 @@ interface JwtPayload {
 
 ## 前端架构
 
-### ⚠️ UI Spec 优先规则
+### ⚠️ UI 组件优先规则
 
-**任何 UI 工作前必须先读 ui-spec**（`.cursor/rules/ui-spec.mdc`）：
+**任何 UI 工作前参考 packages/ui**（`.cursor/rules/ui-spec.mdc`）：
 
-1. 打开 `apps/ui-spec/src/app/page.tsx` 找到最接近的展示示例
-2. 对应查看 `apps/ui-spec/src/components/ui/<name>.tsx` 的 props 和 variants
-3. 在 `packages/ui` 或门户 apps 中通过**镜像**该示例实现，不自己发明模式
-4. 新模式先加到 ui-spec，再传播到 `packages/ui` 和门户 apps
-
-```bash
-rtk pnpm --filter @meridian/ui-spec dev  # http://localhost:3004
-```
+1. 查看 `packages/ui/src/components/ui/` 中的 shadcn/ui 原语组件
+2. 对应查看 `packages/ui/src/components/ui/<name>.tsx` 的 props 和 variants
+3. 在 `packages/ui` 或门户 apps 中实现，遵循 shadcn/ui 模式
+4. 新组件先加到 `packages/ui/src/components/ui/`，再传播到门户 apps
 
 ### Shell 组件模式
 每个门户使用对应 Shell 组件包裹页面：
@@ -297,7 +293,7 @@ docker compose -f docker/docker-compose.yml --profile dev up --build
 ### 关键规则
 
 - **No implementation without PRD and architecture doc** — 每个功能需要 `docs/prd/<feature>.md` 和 `docs/architecture/<feature>.md`
-- **UI Spec first** — 任何 UI 工作前，先读 `apps/ui-spec/src/app/page.tsx` 找最接近的组件示例；新模式先加到 ui-spec 再传播到 `packages/ui`
+- **UI Spec first** — 任何 UI 工作前，先参考 `packages/ui/src/components/ui/` 中的 shadcn/ui 组件；新组件先加到 `packages/ui` 再传播到门户 apps
 - **Shared types first** — API 共享类型先导出到 `packages/shared`，前端才能集成
 - **Phase gate** — `develop → main` 合并需要 phase gate，不只是 CI green
 - **End-of-phase Handoff block** 格式：

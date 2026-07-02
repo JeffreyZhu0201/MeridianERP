@@ -35,16 +35,15 @@ alwaysApply: false
 
 ## UI spec (mandatory before any UI work)
 
-1. Read `apps/ui-spec/src/app/page.tsx` and identify the **closest component example** for each screen (table, form, dialog, auth layout, etc.).
-2. Read matching files in `apps/ui-spec/src/components/ui/`.
+1. Reference shadcn/ui components in `packages/ui/src/components/ui/` for each screen (table, form, dialog, auth layout, etc.).
+2. Read matching files in `packages/ui/src/components/ui/`.
 3. Follow `.cursor/rules/ui-spec.mdc` — do not use Figma.
-4. Run `rtk pnpm --filter @meridian/ui-spec dev` when composition is unclear.
 
-Mirror primitive APIs from ui-spec into `packages/ui` or app `components/ui/`.
+Use primitive APIs from `packages/ui` or app `components/ui/`.
 
 ## Rules
 
 - Import shared types from `@meridian/shared`
 - No inline styles; Tailwind utilities only
-- Match `docs/design/` wireframes and ui-spec tokens
+- Match `docs/design/` wireframes and packages/ui design tokens
 - Skeleton loaders for tables, not spinners

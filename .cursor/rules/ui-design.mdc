@@ -1,6 +1,6 @@
 ---
-description: UI design, shadcn patterns, and apps/ui-spec constraint policy
-globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**,apps/ui-spec/**
+description: UI design, shadcn patterns, and packages/ui component policy
+globs: apps/admin/**,apps/merchant/**,apps/store/**,packages/ui/**,docs/design/**
 alwaysApply: false
 ---
 
@@ -8,17 +8,17 @@ alwaysApply: false
 
 ## UI spec (mandatory)
 
-- **Source of truth:** `apps/ui-spec/` — see `.cursor/rules/ui-spec.mdc`
-- **Component examples:** `apps/ui-spec/src/app/page.tsx` — every new page must map to a showcase pattern before coding
-- **Primitives:** `apps/ui-spec/src/components/ui/` — mirror APIs in `packages/ui` or app `components/ui/`
+- **Source of truth:** `packages/ui/` — see `.cursor/rules/ui-spec.mdc`
+- **Component examples:** `packages/ui/src/components/ui/` — shadcn/ui primitives with props and variants
+- **Primitives:** `packages/ui/src/components/ui/` — mirror APIs in `packages/ui` or app `components/ui/`
 - **Do not use Figma** for design or implementation in this repo
 
 ## Design system
 
-- Reference: `docs/design/design-system.md`, `.cursor/rules/design-system.mdc`, `apps/ui-spec/src/app/globals.css`
-- shadcn/ui primitives: mirror `apps/ui-spec/src/components/ui/` in `packages/ui` or app `components/ui/`
+- Reference: `docs/design/design-system.md`, `.cursor/rules/design-system.mdc`, `packages/ui/styles/globals.css`
+- shadcn/ui primitives: use `packages/ui/src/components/ui/` in `packages/ui` or app `components/ui/`
 - Extend via composition, not forked copies of shadcn source
-- Design tokens via ui-spec CSS variables
+- Design tokens via packages/ui CSS variables
 - No inline styles; use Tailwind utility classes
 
 ## Portal layouts
@@ -34,8 +34,8 @@ Wireframes: `docs/design/phase-1-admin.md`, `docs/design/phase-1-merchant.md`
 ## Design doc policy
 
 - Screen specs live in `docs/design/<feature>.md`
-- Map each element to a **ui-spec showcase example** and component (e.g. `Table` section in `page.tsx`, `Dialog` from `alert-dialog` showcase)
-- Token or primitive changes: update `apps/ui-spec` showcase first, then portal code
+- Map each element to a **shadcn/ui component** from `packages/ui` (e.g. `Table`, `Dialog`, `AlertDialog`, `Badge`)
+- Token or primitive changes: update `packages/ui` components first, then portal code
 
 ## Accessibility
 

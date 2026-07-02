@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   description: 'Platform administration portal',
 };
 
+/**
+ * @description: 根布局
+ * @param {*} children
+ * @return {React.ReactNode}
+ */
 export default async function RootLayout({
   children,
 }: {
@@ -20,8 +25,13 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
+        {/* PortalLocaleProvider is the provider for the locale */}
         <PortalLocaleProvider locale={locale} messages={messages} timeZone={timeZone}>
-          <PortalThemeProvider storageKey="meridian-theme-admin">{children}</PortalThemeProvider>
+          {/* PortalThemeProvider is the provider for the theme */}
+          <PortalThemeProvider storageKey="meridian-theme-admin">
+            {/* Children is the content of the layout */}
+            {children}
+          </PortalThemeProvider>
         </PortalLocaleProvider>
       </body>
     </html>

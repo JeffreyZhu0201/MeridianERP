@@ -11,10 +11,9 @@ alwaysApply: true
 apps/admin/      # Super admin ERP (Next.js + shadcn)
 apps/merchant/   # Merchant portal (Next.js + shadcn)
 apps/store/      # E-commerce (Next.js, Phase 2)
-apps/ui-spec/    # Canonical UI showcase — reference for all frontend work
 apps/api/        # NestJS API
 packages/shared/ # DTOs, types, Zod schemas, enums
-packages/ui/     # Shared shadcn shells, layout, data-table
+packages/ui/     # Shared shadcn shells, layout, data-table, UI primitives
 docker/          # Compose, Dockerfiles
 docs/prd/        # Product requirements
 docs/architecture/
@@ -27,7 +26,7 @@ docs/execution/  # Agent workflow and runbooks
 - **Language**: TypeScript strict mode everywhere
 - **Package manager**: pnpm workspaces + Turborepo
 - **Frontend**: Next.js App Router, shadcn/ui, Tailwind CSS v4
-- **UI spec**: `apps/ui-spec/` — canonical component showcase; all portal UI must reference it (see `.cursor/rules/ui-spec.mdc`)
+- **UI components**: `packages/ui/` — shadcn/ui primitives and shared components; all portal UI uses these (see `.cursor/rules/ui-spec.mdc`)
 - **Backend**: NestJS modules/controllers/services
 - **Database**: PostgreSQL via Prisma (`apps/api/prisma/`)
 - **Cache**: Redis via `@nestjs/cache-manager`
@@ -51,6 +50,6 @@ docs/execution/  # Agent workflow and runbooks
 
 - Platform spec: `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md`
 - Phase 1 plan: `docs/superpowers/plans/2025-06-24-phase-1-foundation.md`
-- **UI component showcase:** `apps/ui-spec/src/app/page.tsx` (see `.cursor/rules/ui-spec.mdc`)
+- **UI components:** `packages/ui/src/components/ui/` (see `.cursor/rules/ui-spec.mdc`)
 - Design system: `docs/design/design-system.md`
 - Execution guide: `docs/execution/README.md`
