@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { LedgerStatus, Prisma } from '@prisma/client';
 import { parseDateRangeQuery } from '../../common/date-range';
+import { createListResponse } from '../../common/list-response';
+import { getPagination } from '../../common/pagination';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   decimalSumToString,
@@ -79,17 +81,6 @@ import { CommissionSummaryQueryDto } from './dto/commission-summary-query.dto';
 export class CommissionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private paginate(page = 1, limit = 20) {
-    const safePage = Math.max(1, page);
-    const safeLimit = Math.min(100, Math.max(1, limit));
-    return {
-      skip: (safePage - 1) * safeLimit,
-      take: safeLimit,
-      page: safePage,
-      limit: safeLimit,
-    };
-  }
-
   private buildLedgerWhere(
     tenantId: string,
     query: CommissionListQueryDto | CommissionSummaryQueryDto,
@@ -109,7 +100,7 @@ export class CommissionsService {
 
   async list(tenantId: string, query: CommissionListQueryDto) {
     const range = parseDateRangeQuery(query);
-    const { skip, take, page, limit } = this.paginate(query.page, query.limit);
+    const { skip, take, page, limit } = getPagination(query);
     const where = this.buildLedgerWhere(tenantId, query, range);
 
     const [rows, total] = await Promise.all([
@@ -134,12 +125,12 @@ export class CommissionsService {
       this.prisma.commissionLedger.count({ where }),
     ]);
 
-    return {
-      items: rows.map(mapCommissionStatementRow),
+    return createListResponse(
+      rows.map(mapCommissionStatementRow),
       total,
       page,
       limit,
-    };
+    );
   }
 
   async summary(tenantId: string, query: CommissionSummaryQueryDto) {

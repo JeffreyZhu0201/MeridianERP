@@ -10,7 +10,7 @@
 
 - **Files**:
   - `docs/prd/phase-5-distribution-and-allocation.md` (new)
-  - `docs/prd/platform-overview.md` (Phase 5 roadmap + links)
+  - `docs/PRODUCT.md` (Phase 5 roadmap + links)
 
 - **Open questions for architect** (must resolve in architecture doc):
 

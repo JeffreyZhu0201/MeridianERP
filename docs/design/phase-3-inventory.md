@@ -6,28 +6,6 @@
 **Architecture:** `docs/architecture/phase-3-inventory.md`  
 **Design system:** `docs/design/design-system.md`
 
-## Figma
-
-- **File:** [MeridianERP Merchant Inventory](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF/MeridianERP-Merchant-Inventory)
-- **Sync:** `generate_figma_design` from `http://localhost:3002/inventory/warehouses` (需已登录商户端)
-- **MVP deliverable:** Markdown wireframes below remain reference; Figma frames updated on UI polish passes.
-
-| Frame | Node ID | React route |
-|-------|---------|-------------|
-| Warehouses list | [1:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=1-2) | `/inventory/warehouses` |
-| Stock levels | [5:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=5-2) | `/inventory/stock` |
-| Adjustments | TBD | `/inventory/adjustments` |
-| Low-stock alerts | [10:2](https://www.figma.com/design/LJUdvPOlGByhN4QFdR5wxF?node-id=10-2) | `/inventory/alerts` |
-| Purchase orders list | TBD | `/inventory/purchase-orders` |
-| Purchase order detail | TBD | `/inventory/purchase-orders/[id]` |
-| Receive goods dialog | TBD | `/inventory/purchase-orders/[id]` (modal) |
-| Inventory reports | TBD | `/inventory/reports` |
-| Inventory settings | TBD | `/inventory/settings` |
-| Catalog variant (sellable qty) | TBD | `/catalog/products` (Sheet) |
-| Admin tenant inventory | TBD | `/inventory/tenants/[tenantId]` |
-
----
-
 ## Navigation
 
 ### Merchant portal — Inventory section

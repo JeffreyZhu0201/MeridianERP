@@ -286,6 +286,12 @@ rtk npx shadcn@latest add button card badge table form input select textarea dia
 
 ---
 
+## Shared UI Maintenance
+
+Prefer shared `packages/ui` components for repeated states such as `EmptyState`, `Alert`, `Tabs`, table surfaces, page frames, bento/dashboard cards, and fulfillment/order composites. Portal code should compose these pieces instead of reimplementing local variants.
+
+---
+
 ## UI spec
 
 Canonical component library: `packages/ui` (`@meridian/ui`). Agents read `packages/ui/src/index.ts`, `packages/ui/src/components/ui/`, and `packages/ui/styles/globals.css` before designing or implementing UI.

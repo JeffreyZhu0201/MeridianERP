@@ -22,7 +22,7 @@ export function StoreShellWrapper({
   const router = useRouter();
 
   function handleLogout() {
-    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
+    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
     router.push(`/s/${storeSlug}/login`);
     router.refresh();
   }

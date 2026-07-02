@@ -234,7 +234,7 @@ AI Agent 模块嵌入 Admin 后台，运营人员通过自然语言查询业务�
 
 | 文档类型 | 文档名 | 路径 |
 |----------|--------|------|
-| 平台概述 | Platform Overview | `docs/prd/platform-overview.md` |
+| 平台概述 | Platform Overview | `docs/PRODUCT.md` |
 | 系统架构 | System Overview | `docs/architecture/system-overview.md` |
 | 功能报告 | Phase 5 功能报告 | `docs/reports/功能报告.md` |
 | AI 诊断设计 | AI Diagnosis Agent Design Spec | `docs/superpowers/specs/2026-06-30-ai-diagnosis-agent-design.md` |
@@ -244,4 +244,4 @@ AI Agent 模块嵌入 Admin 后台，运营人员通过自然语言查询业务�
 | Phase 4 PRD | 渠道增强 | `docs/prd/phase-4-distributor-enhancements.md` |
 | Phase 5 PRD | 配额与履约 | `docs/prd/phase-5-distribution-and-allocation.md` |
 | 执行指南 | Execution Guide | `docs/execution/README.md` |
-| Git 工作流 | Git & PR Workflow | `docs/execution/git-workflow.md` |
+| Git 工作流 | Git & PR Workflow | `.cursor/rules/core.mdc` |

@@ -37,6 +37,22 @@ Doc templates and expectations live in `.cursor/rules/planning-docs.mdc`.
 | `.cursor/rules/quality.mdc` | TypeScript, naming, imports, tests |
 | `.cursor/rules/devops.mdc` | Docker, env, CI, deployment |
 
+## Document Ownership
+
+| Topic | Canonical source |
+|---|---|
+| Human startup | `README.md` |
+| Current product state | `docs/PRODUCT.md` |
+| System architecture | `docs/architecture/system-overview.md` |
+| UI system | `docs/design/design-system.md` and `packages/ui` |
+| Historical context | `docs/archive/`, `docs/handoffs/`, `docs/superpowers/` |
+
+Keep entrypoints short. Move superseded long-form material to `docs/archive/` and leave a pointer at the original path when existing links may depend on it.
+
+## Simplification Work
+
+Code simplification should preserve behavior. Start with shared helpers and docs/rules, then split large files by responsibility. Run `rtk pnpm typecheck` after each phase and focused tests for touched domains.
+
 ## Handoffs
 
 Each phase writes a handoff to `docs/handoffs/<feature>-<phase>.md`. Use `docs/handoffs/README.md` for the template.

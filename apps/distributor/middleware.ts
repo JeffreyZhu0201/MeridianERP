@@ -5,9 +5,7 @@ const PUBLIC_PATHS = ['/login', '/logout'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublic = PUBLIC_PATHS.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
+  const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const token = request.cookies.get(AUTH_COOKIE)?.value;
 
   if (!isPublic && !token) {

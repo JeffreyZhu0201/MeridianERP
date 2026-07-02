@@ -20,7 +20,7 @@ export function MerchantShellWrapper({
   const router = useRouter();
 
   function handleLogout() {
-    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
+    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
     router.push('/login');
     router.refresh();
   }

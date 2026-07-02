@@ -1,6 +1,6 @@
 # Phase 2 E-commerce — Product Requirements
 
-**Status:** API complete · Store UI ~60% · Merchant catalog done · See [platform overview](./platform-overview.md)
+**Status:** API complete · Store UI ~60% · Merchant catalog done · See [platform overview](../PRODUCT.md)
 
 ## Implementation Status (2025-06-25)
 
@@ -112,6 +112,6 @@ Merchants approved in Phase 1 need a consumer-facing storefront to sell products
 
 | Document | Path |
 |----------|------|
-| Platform overview | `docs/prd/platform-overview.md` |
+| Platform overview | `docs/PRODUCT.md` |
 | Architecture | `docs/architecture/phase-2-ecommerce.md` |
 | Store wireframes | `docs/design/phase-2-store.md` |

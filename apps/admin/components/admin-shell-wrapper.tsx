@@ -1,13 +1,3 @@
-/*
- * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
- * @Date: 2026-06-25 20:56:10
- * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
- * @LastEditTime: 2026-07-02 15:03:20
- * @FilePath: /MeridianERP/apps/admin/components/admin-shell-wrapper.tsx
- * @Description: AdminShellWrapper is the wrapper for the admin shell
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
- */
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -32,7 +22,7 @@ export function AdminShellWrapper({
   const router = useRouter();
 
   function handleLogout() {
-    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0`;
+    document.cookie = `${AUTH_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
     router.push('/login');
     router.refresh();
   }

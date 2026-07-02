@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
-**Status:** Ready for implementation  
+**Status:** Implemented; retained as UI architecture reference  
 **PRD:** `docs/prd/bento-ui-redesign.md` (US-B1–US-B5)  
 **Depends on:** Phase 1–4 portals, `packages/ui`, platform dashboard (Slice 4), distributor performance trend (Slice 3)
 
@@ -579,4 +579,4 @@ Document in service comments; implement when load testing warrants — consisten
 - **Scope:** Architecture for Bento UI redesign — component contracts, extended dashboard APIs, store picker endpoint, aggregation helper, module map, ADRs, caching deferral.
 - **Files:** `docs/architecture/bento-ui-redesign.md`; shared contract targets: `packages/shared/src/distributors.ts`, `packages/shared/src/merchant-dashboard.ts`, `packages/shared/src/distributor-portal.ts`, `packages/shared/src/store.ts` (new).
 - **Open questions:** (1) Platform chart default series — orders vs revenue primary tab? (2) Store picker search — client filter vs server `?q=` (default client-side for Slice 1). (3) `BentoDashboardFrame` vs rename existing `DashboardPageFrame` — recommend keep both during migration.
-- **Next agents:** **ui-designer** (ui-spec Bento showcase + `docs/design/bento-ui-redesign.md`); **nextjs-frontend** + **nestjs-backend** in parallel after shared types land.
+- **Current reference:** `docs/design/bento-ui-redesign.md` and `packages/ui` contain the shipped UI direction.

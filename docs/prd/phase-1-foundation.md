@@ -1,6 +1,6 @@
 # Phase 1 Foundation — Product Requirements
 
-**Status:** API complete · Admin/Merchant UI ~85% · See [platform overview](./platform-overview.md)
+**Status:** API complete · Admin/Merchant UI ~85% · See [platform overview](../PRODUCT.md)
 
 ## Implementation Status (2025-06-25)
 
@@ -97,7 +97,7 @@ Platform operators need a multi-tenant system to onboard merchants, manage distr
 
 | Document | Path |
 |----------|------|
-| Platform overview | `docs/prd/platform-overview.md` |
+| Platform overview | `docs/PRODUCT.md` |
 | Architecture | `docs/architecture/phase-1-foundation.md` |
 | Admin wireframes | `docs/design/phase-1-admin.md` |
 | Merchant wireframes | `docs/design/phase-1-merchant.md` |

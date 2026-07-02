@@ -1,47 +1,17 @@
 /**
- * 绑定模块控制器 - BindingsController
- *
- * ═══════════════════════════════════════════════════════════════════════════════
- * 模块概述
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * 本控制器提供绑定相关的 HTTP 接口，供前端调用。
- *
- * ═══════════════════════════════════════════════════════════════════════════════
- * API 端点一览
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- *   方法   │ 路由                    │ 认证            │ 功能
- *   ───────┼─────────────────────────┼─────────────────┼────────────────────
- *   GET    │ /bindings/verify/:token │ Public          │ 验证绑定令牌
- *   POST   │ /bindings/claim        │ MerchantAuthGuard│ 商户认领绑定
- *
- * ═══════════════════════════════════════════════════════════════════════════════
- * 认证说明
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * - verify()：公开接口，无需认证
- *   用于二维码扫描后的初始验证，前端需要先确认令牌有效再展示绑定确认页
- *
- * - claimMerchant()：需要商户身份认证
- *   要求请求携带有效的 merchant_token cookie
- *
- * ═══════════════════════════════════════════════════════════════════════════════
- * 消费者绑定
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * 注意：消费者绑定不走本控制器！
- *
- * 消费者绑定使用商店前端的专用接口：
- * - GET  /store/:slug/bind/verify/:token  （公开）
- * - POST /store/:slug/bind/claim         （需要 store_token）
- *
- * 这是因为消费者属于商店租户，而非商户租户，需要独立的认证体系。
- *
- * ═══════════════════════════════════════════════════════════════════════════════
+ * Public token verification and merchant-side binding claim endpoints.
+ * Customer binding uses store-specific endpoints because it has a separate auth realm.
  */
 
-import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { MerchantAuthGuard } from '../auth/guards/merchant-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';

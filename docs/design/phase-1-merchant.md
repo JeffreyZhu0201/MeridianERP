@@ -4,26 +4,6 @@
 **Port:** 3002  
 **Shell:** `MerchantShell`
 
-## Figma
-
-- File: TBD (create on first implementation via ui-designer)
-- Frames: see table below
-
-| Frame | Node ID | React route |
-|-------|---------|-------------|
-| Register | TBD | `/register` |
-| Login | TBD | `/login` |
-| Onboarding pending | TBD | `/onboarding/pending` |
-| Dashboard | TBD | `/` |
-| Contacts list | TBD | `/crm/contacts` |
-| Companies list | TBD | `/crm/companies` |
-| Leads list | TBD | `/crm/leads` |
-| Distributors list | TBD | `/distributors` |
-| Distributor detail + QR | TBD | `/distributors/[id]` |
-| Bind page | TBD | `/bind/[token]` |
-
----
-
 ## Screen Specifications
 
 ### Register (`/register`)

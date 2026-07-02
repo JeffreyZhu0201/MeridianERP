@@ -14,3 +14,14 @@ alwaysApply: false
 - Tests map each P0 acceptance criterion to at least one unit, API integration, or Playwright case.
 - Backend unit tests live near API code; API integration tests live in `apps/api/test`; Playwright tests live in `e2e`.
 - Test names use `describe('<Unit>')` and `it('should <behavior> when <condition>')`.
+
+## Readability And Simplification
+
+- Prefer small, linear functions with clear domain names over generic clever helpers.
+- Split files when one file owns multiple independent responsibilities such as API calls, tables, dialogs, forms, and mappers.
+- Extract shared helpers only when at least two call sites become simpler and the helper name matches the domain.
+- Delete dead code, unused compatibility shims, stale comments, and generated-style headers when touching a file.
+- Comments should explain business intent, invariants, or non-obvious side effects; do not narrate obvious TypeScript.
+- Keep React components focused on rendering and local interaction; move formatting, query-string, and API helpers out of JSX-heavy files.
+- Keep NestJS controllers thin and services readable; extract mappers, pagination, date-range, and include/select helpers from large services.
+- Avoid preserving compatibility for unshipped branch-only behavior; replace it cleanly.

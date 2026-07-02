@@ -3,11 +3,11 @@
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
 **Status:** Discovery complete — ready for architecture  
-**Related:** [platform-overview.md](./platform-overview.md), [design-system.md](../design/design-system.md), [phase-1-foundation.md](./phase-1-foundation.md), [phase-2-ecommerce.md](./phase-2-ecommerce.md)
+**Related:** [PRODUCT.md](../PRODUCT.md), [design-system.md](../design/design-system.md), [phase-1-foundation.md](./phase-1-foundation.md), [phase-2-ecommerce.md](./phase-2-ecommerce.md)
 
 ## Problem
 
-MeridianERP portals have diverged from the established design system and shadcn block patterns. Auth screens lack a consistent visual language across admin, merchant, and store; portal shells use a legacy layout that does not match the shared `packages/ui` sidebar primitive or the dashboard-01 Featured shell pattern. In parallel, several P0/P1 integration gaps block core flows documented in [platform-overview.md](./platform-overview.md): storefront checkout and guest cart are broken, admin merchant rejection fails on an API contract mismatch, and merchant-facing order and CRM activity surfaces were never wired despite working APIs.
+MeridianERP portals have diverged from the established design system and shadcn block patterns. Auth screens lack a consistent visual language across admin, merchant, and store; portal shells use a legacy layout that does not match the shared `packages/ui` sidebar primitive or the dashboard-01 Featured shell pattern. In parallel, several P0/P1 integration gaps block core flows documented in [PRODUCT.md](../PRODUCT.md): storefront checkout and guest cart are broken, admin merchant rejection fails on an API contract mismatch, and merchant-facing order and CRM activity surfaces were never wired despite working APIs.
 
 This initiative delivers two coordinated workstreams: a UI refresh that raises visual and structural consistency without rebranding, and targeted gap closure that unblocks Phase 1 US-7 and Phase 2 checkout/orders for real end-to-end use.
 
@@ -49,7 +49,7 @@ Align portal auth and shell layouts with shadcn block references while preservin
 
 ## Workstream B — Platform Gap Closure
 
-Close documented cross-cutting gaps (G-1, G-5, G-6, G-10, G-11) from [platform-overview.md](./platform-overview.md). Scope is UI/API contract alignment and net-new merchant surfaces for existing APIs — not new backend capabilities.
+Close documented cross-cutting gaps (G-1, G-5, G-6, G-10, G-11) from [PRODUCT.md](../PRODUCT.md). Scope is UI/API contract alignment and net-new merchant surfaces for existing APIs — not new backend capabilities.
 
 ### User Stories — Workstream B
 
@@ -123,7 +123,7 @@ Close documented cross-cutting gaps (G-1, G-5, G-6, G-10, G-11) from [platform-o
 
 | Document | Path |
 |----------|------|
-| Platform overview & gap register | `docs/prd/platform-overview.md` |
+| Platform overview & gap register | `docs/PRODUCT.md` |
 | Design system | `docs/design/design-system.md` |
 | UI sidebar primitive | `packages/ui/src/components/ui/sidebar.tsx` |
 | Phase 1 US-7 (activities) | `docs/prd/phase-1-foundation.md` |

@@ -13,7 +13,7 @@ Phase 3 (UI spec) complete. Screen specifications, ASCII wireframes, shadcn comp
 - 9 merchant inventory routes (+ PO new/detail sub-routes)
 - 1 admin support route (`/inventory/tenants/[tenantId]`)
 - Catalog product Sheet: read-only sellable quantity with link to inventory
-- Figma frames deferred — markdown wireframes authoritative until implementation sync
+- Markdown wireframes authoritative for implementation reference
 
 ## Files
 
@@ -75,7 +75,7 @@ Phase 3 (UI spec) complete. Screen specifications, ASCII wireframes, shadcn comp
 | Adjustments layout | Form card above history table on same page |
 | Sellable qty in catalog | Read-only; remove from save payload |
 | Admin inventory | Tabbed read-only view; no platform write actions |
-| Figma | TBD — sync after first implemented screen |
+| Design source | Markdown wireframes and packages/ui |
 
 ## Open questions
 
@@ -85,4 +85,4 @@ None — architecture ADRs and PRD resolved. RBAC reflected in UI (owner-only wa
 
 **nextjs-frontend** — Implement routes per `docs/design/phase-3-inventory.md`, extend `MerchantShell` nav, update `ProductsTable` sellable field, build admin tenant inventory page. Coordinate with **nestjs-backend** on `@meridian/shared` inventory types and API paths.
 
-**Optional follow-up:** ui-designer to push implemented screens to Figma via `figma-generate-design` and backfill node IDs in design doc.
+**Optional follow-up:** ui-designer to keep markdown wireframes aligned with implemented screens.

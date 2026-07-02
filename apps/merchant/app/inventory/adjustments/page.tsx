@@ -9,10 +9,8 @@ import { getTranslations } from 'next-intl/server';
 import { buildInventoryQuery, emptyInventoryPage, normalizeInventoryPage, type InventoryPaginated } from '@/lib/inventory';
 import type { StockAdjustmentWithDetails, Warehouse } from '@meridian/shared';
 
-import {
-  AdjustmentForm,
-  AdjustmentsHistoryTable,
-} from './_components/adjustment-form';
+import { AdjustmentForm } from './_components/adjustment-form';
+import { AdjustmentsHistoryTable } from './_components/adjustments-history-table';
 import { productsToVariantOptions } from '@/lib/product-variants';
 
 interface AdjustmentsPageProps {

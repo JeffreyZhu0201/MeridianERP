@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, StockTransferStatus } from '@prisma/client';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
+import { getPagination } from '../../common/pagination';
 import { InventoryService } from '../../inventory/inventory.service';
 import { InventoryQueueService } from '../../queue/inventory-queue.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -38,17 +39,13 @@ export class MerchantTransfersService {
     private readonly inventoryQueue: InventoryQueueService,
   ) {}
 
-  private paginate(page = 1, limit = 20) {
-    const safePage = Math.max(1, page);
-    const safeLimit = Math.min(100, Math.max(1, limit));
-    return { skip: (safePage - 1) * safeLimit, take: safeLimit, page: safePage, limit: safeLimit };
-  }
-
   async createTransfer(user: AuthenticatedUser, dto: CreateStockTransferDto) {
     const tenantId = user.tenantId!;
 
     if (dto.fromWarehouseId === dto.toWarehouseId) {
-      throw new BadRequestException('Source and destination warehouses must differ');
+      throw new BadRequestException(
+        'Source and destination warehouses must differ',
+      );
     }
 
     await this.inventory.migrateTenantInventory(tenantId);
@@ -101,7 +98,7 @@ export class MerchantTransfersService {
   }
 
   async listTransfers(tenantId: string, query: StockTransferListQueryDto) {
-    const { skip, take, page, limit } = this.paginate(query.page, query.limit);
+    const { skip, take, page, limit } = getPagination(query);
     const where: Prisma.StockTransferWhereInput = { tenantId };
     if (query.fromWarehouseId) where.fromWarehouseId = query.fromWarehouseId;
     if (query.toWarehouseId) where.toWarehouseId = query.toWarehouseId;
@@ -168,7 +165,9 @@ export class MerchantTransfersService {
       select: { id: true },
     });
     if (variants.length !== variantIds.length) {
-      throw new BadRequestException('One or more variants are invalid for this tenant');
+      throw new BadRequestException(
+        'One or more variants are invalid for this tenant',
+      );
     }
   }
 
@@ -189,7 +188,12 @@ export class MerchantTransfersService {
       transferId: string;
       variantId: string;
       quantity: number;
-      variant: { id: string; sku: string; name: string; product: { name: string } };
+      variant: {
+        id: string;
+        sku: string;
+        name: string;
+        product: { name: string };
+      };
     }>;
   }) {
     return {

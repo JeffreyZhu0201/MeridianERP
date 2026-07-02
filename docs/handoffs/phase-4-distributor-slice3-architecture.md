@@ -3,7 +3,7 @@
 **Agent:** architect  
 **Date:** 2025-06-25  
 **Branch:** `feature/phase-4-distributor-enhancements` (from `develop`)  
-**Depends on:** Slices 1–2 shipped (store bind, QR management)
+**Depends on:** Earlier store bind and QR management slices
 
 ## Scope
 

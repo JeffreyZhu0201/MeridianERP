@@ -1,36 +1,5 @@
-/**
- * 商店前端 API 客户端
- *
- * 模块说明:
- * - 封装所有与商店 API 交互的函数
- * - 支持多种认证方式（JWT Token / Cart Session / StoreSlug）
- * - 所有请求默认不缓存，确保数据实时性
- *
- * 认证机制（三种方式，优先级依次递减）:
- * 1. JWT Token: 已登录用户，使用 Authorization 头
- * 2. Cart Session: 非登录用户，使用 CART_SESSION_HEADER
- * 3. Store Slug: 匿名用户，使用 storeSlug 生成会话 ID
- *
- * Cookie 配置:
- * - 使用 store_token 作为认证 Cookie
- * - 商店前端 URL: STORE_APP_URL（默认 http://localhost:3003）
- *
- * API 基础配置:
- * - 基础 URL: NEXT_PUBLIC_API_URL 环境变量，默认为 http://localhost:3001
- * - API 版本前缀: /api/v1
- * - Content-Type: application/json
- *
- * 辅助函数:
- * - storePath: 生成商店相关的 API 路径
- *
- * 关键类型定义:
- * - StoreApiAuth: 认证参数联合类型
- * - Cart/CartItem: 购物车数据结构
- * - Product/ProductVariant: 商品数据结构
- * - AuthResponse: 认证响应
- * - StoreInfo: 商店信息
- */
 import {
+  ApiError,
   CART_SESSION_HEADER,
   type BindVerifyResponse,
   type PublishedStoreListResponse,
@@ -38,39 +7,19 @@ import {
 } from '@meridian/shared';
 
 export type { BindVerifyResponse, PublishedStoreListResponse, StoreClaimBindingResponse };
+export { ApiError };
 
 import { ensureCartSessionId } from './cart-session.client';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-
-/** 商店前端应用 URL（用于跳转和链接生成） */
-export const STORE_APP_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';
-
-/** 商店前端认证 Cookie 名称 */
-export const AUTH_COOKIE = 'store_token';
-
-/**
- * API 错误类
- *
- * @property status - HTTP 状态码
- * @property message - 错误消息（通常来自 API 响应 body.message）
- */
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number };
 }
 
-/**
- * 商店 API 认证参数类型
- *
- * 支持三种认证方式:
- * - string: 直接传入 JWT token
- * - object: 传入包含 token/storeSlug/cartSession 的对象
- */
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const STORE_APP_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';
+export const AUTH_COOKIE = 'store_token';
+
 export type StoreApiAuth =
   | string
   | {
@@ -167,19 +116,6 @@ export function storePath(slug: string, path = ''): string {
   return `/store/${slug}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-/**
- * 分页响应数据结构
- *
- * @property data - 当前页的数据数组
- * @property meta - 分页元信息
- *   - total: 总记录数
- *   - page: 当前页码
- *   - limit: 每页条数
- */
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number; page: number; limit: number };
-}
 
 /**
  * 认证响应结构

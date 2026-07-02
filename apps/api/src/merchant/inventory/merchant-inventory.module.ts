@@ -1,22 +1,3 @@
-/**
- * 商户库存模块 (MerchantInventoryModule)
- *
- * 聚合商户库存相关的所有控制器和服务。
- *
- * 子控制器：
- * - MerchantInventorySettingsController: 库存设置
- * - MerchantWarehousesController: 仓库管理
- * - MerchantStockLevelsController: 库存水平查询
- * - MerchantAdjustmentsController: 库存调整
- * - MerchantTransfersController: 库存调拨
- * - MerchantPurchaseOrdersController: 采购订单
- * - MerchantInventoryReportsController: 库存报表
- *
- * 依赖模块：
- * - AuthModule: 认证
- * - InventoryModule: 基础库存服务
- * - QueueModule: 队列服务（低库存检查）
- */
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../../auth/auth.module';
 import { InventoryModule } from '../../inventory/inventory.module';
@@ -28,7 +9,11 @@ import { MerchantPurchaseOrdersController } from './purchase-orders.controller';
 import { MerchantStockLevelsController } from './stock-levels.controller';
 import { MerchantTransfersController } from './transfers.controller';
 import { MerchantWarehousesController } from './warehouses.controller';
+import { MerchantInventoryReportsService } from './merchant-inventory-reports.service';
 import { MerchantInventoryService } from './merchant-inventory.service';
+import { MerchantPurchaseOrdersService } from './merchant-purchase-orders.service';
+import { MerchantStockService } from './merchant-stock.service';
+import { MerchantWarehousesService } from './merchant-warehouses.service';
 import { MerchantTransfersService } from './transfers.service';
 
 @Module({
@@ -42,7 +27,14 @@ import { MerchantTransfersService } from './transfers.service';
     MerchantPurchaseOrdersController,
     MerchantInventoryReportsController,
   ],
-  providers: [MerchantInventoryService, MerchantTransfersService],
+  providers: [
+    MerchantWarehousesService,
+    MerchantStockService,
+    MerchantPurchaseOrdersService,
+    MerchantInventoryReportsService,
+    MerchantInventoryService,
+    MerchantTransfersService,
+  ],
   exports: [MerchantInventoryService, MerchantTransfersService],
 })
 export class MerchantInventoryModule {}

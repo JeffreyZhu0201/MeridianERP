@@ -4,20 +4,6 @@
 **Port:** 3000  
 **Shell:** `AdminShell`
 
-## Figma
-
-- File: TBD (create on first implementation via ui-designer)
-- Frames: see table below
-
-| Frame | Node ID | React route |
-|-------|---------|-------------|
-| Login | TBD | `/login` |
-| Dashboard | TBD | `/` |
-| Merchants list | TBD | `/merchants` |
-| Merchant detail | TBD | `/merchants/[id]` |
-
----
-
 ## Screen Specifications
 
 ### Login (`/login`)

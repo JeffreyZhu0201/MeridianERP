@@ -26,7 +26,7 @@ Phase 6 (Shipping) complete. CI verified for Phase 3 inventory APIs; demo seed p
 | `.github/workflows/ci.yml` | Verified — no changes |
 | `apps/api/prisma/seed.ts` | Verified — already seeds default warehouse + `StockLevel` |
 | `apps/api/src/merchant/inventory/merchant-inventory.service.ts` | Fixed PO receipt include for build |
-| `docs/superpowers/plans/2025-06-24-phase-3-inventory.md` | Created — tasks marked complete |
+| `docs/prd/phase-3-inventory.md` | Created — tasks marked complete |
 | `docs/handoffs/phase-3-inventory-shipping.md` | Created |
 | `README.md` | Phase 3 status → Complete |
 

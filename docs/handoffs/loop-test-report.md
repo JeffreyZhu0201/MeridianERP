@@ -2,7 +2,7 @@
 
 **Date:** 2025-06-25  
 **Engineer:** test-engineer  
-**Scope:** P0 acceptance criteria from `platform-overview.md`, `phase-1-foundation.md`, `phase-2-ecommerce.md`
+**Scope:** P0 acceptance criteria from `PRODUCT.md`, `phase-1-foundation.md`, `phase-2-ecommerce.md`
 
 ---
 

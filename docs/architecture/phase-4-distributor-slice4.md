@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
-**Status:** Ready for implementation  
+**Status:** Implemented; retained as historical architecture reference  
 **PRD:** `docs/prd/phase-4-distributor-enhancements.md` (US-4.5)  
 **Depends on:** Slices 1–3 shipped (store bind, QR management, merchant visibility)  
 **Parent:** `docs/architecture/phase-4-distributor-enhancements.md`

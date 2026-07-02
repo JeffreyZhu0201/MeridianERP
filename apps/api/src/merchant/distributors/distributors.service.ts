@@ -11,6 +11,8 @@ import { BindType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
 import { computeQrStatus } from '@meridian/shared';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { eachUtcDay, parseDateRangeQuery } from '../../common/date-range';
+import { createListResponse } from '../../common/list-response';
+import { getPagination } from '../../common/pagination';
 import { decimalSumToString } from '../commissions/commission-mappers';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
@@ -59,17 +61,6 @@ export class DistributorsService {
     if (!user.roles.includes('MERCHANT_OWNER')) {
       throw new ForbiddenException('Merchant owner role required');
     }
-  }
-
-  private paginate(page = 1, limit = 20) {
-    const safePage = Math.max(1, page);
-    const safeLimit = Math.min(100, Math.max(1, limit));
-    return {
-      skip: (safePage - 1) * safeLimit,
-      take: safeLimit,
-      page: safePage,
-      limit: safeLimit,
-    };
   }
 
   private appUrls(): { merchantAppUrl: string; storeAppUrl: string } {
@@ -175,15 +166,23 @@ export class DistributorsService {
       }),
     ]);
 
-    const commissionAccrued = decimalSumToString(commissionAccruedAgg._sum.amount);
-    const commissionSettled = decimalSumToString(commissionSettledAgg._sum.amount);
+    const commissionAccrued = decimalSumToString(
+      commissionAccruedAgg._sum.amount,
+    );
+    const commissionSettled = decimalSumToString(
+      commissionSettledAgg._sum.amount,
+    );
     const commissionTotal = new Prisma.Decimal(commissionAccrued)
       .plus(commissionSettled)
       .toString();
 
     const trendMap = new Map<
       string,
-      { orderCount: number; orderRevenue: Prisma.Decimal; commissionAccrued: Prisma.Decimal }
+      {
+        orderCount: number;
+        orderRevenue: Prisma.Decimal;
+        commissionAccrued: Prisma.Decimal;
+      }
     >();
     for (const day of eachUtcDay(range.from, range.to)) {
       trendMap.set(day, {
@@ -376,7 +375,7 @@ export class DistributorsService {
   ) {
     await this.findOne(tenantId, id);
 
-    const { skip, take, page, limit } = this.paginate(query.page, query.limit);
+    const { skip, take, page, limit } = getPagination(query);
     const where = {
       distributorId: id,
       ...(query.bindType ? { bindType: query.bindType } : {}),
@@ -413,7 +412,7 @@ export class DistributorsService {
       ),
     }));
 
-    return { items, total, page, limit };
+    return createListResponse(items, total, page, limit);
   }
 
   async downloadQrPng(tenantId: string, distributorId: string, qrId: string) {

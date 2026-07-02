@@ -31,7 +31,7 @@
 
 **4. 文档交付**
 
-完成 `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md` 平台设计规格说明书，以及 Phase 1 PRD 和架构文档初稿，明确第一阶段的交付范围和验收标准。
+完成 `docs/architecture/system-overview.md` 平台设计规格说明书，以及 Phase 1 PRD 和架构文档初稿，明确第一阶段的交付范围和验收标准。
 
 ---
 

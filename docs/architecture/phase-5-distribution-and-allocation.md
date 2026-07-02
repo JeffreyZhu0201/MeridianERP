@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
-**Status:** Ready for implementation  
+**Status:** Implemented; retained as Phase 5 architecture reference  
 **PRD:** `docs/prd/phase-5-distribution-and-allocation.md`  
 **Depends on:** Phase 1 (distributors, bindings), Phase 2 (orders, commission ledger), Phase 3 (warehouses, `StockLevel`), Phase 4 (distributor portal, store bind)
 

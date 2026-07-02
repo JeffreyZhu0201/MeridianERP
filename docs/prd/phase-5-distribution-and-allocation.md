@@ -2,7 +2,7 @@
 
 **Version:** 2.0  
 **Last updated:** 2025-06-25  
-**Status:** Ready for implementation  
+**Status:** Complete; retained as shipped Phase 5 product reference  
 **Depends on:** Phase 1–4 (auth, store commerce, inventory, distributor portal shell), Bento UI (US-5.1 store picker delivered)
 
 ## Revision summary (v1 → v2)
@@ -262,7 +262,7 @@ platform_pending_withdrawals  = Σ WithdrawalRequest.amount WHERE status = PENDI
 
 ## Dependencies on architecture
 
-The architect must produce `docs/architecture/phase-5-distribution-and-allocation.md` before S1 implementation. This PRD intentionally avoids prescribing schemas and endpoints.
+The shipped architecture reference is `docs/architecture/phase-5-distribution-and-allocation.md`. This PRD is retained for acceptance criteria and product context.
 
 1. Platform-scoped `Distributor` (`tenantId` nullable) and migration from legacy tenant-scoped rows
 2. `MerchantProfile.recruitedByDistributorId` lifecycle (pending → approved → change rules)
@@ -300,7 +300,7 @@ The architect must produce `docs/architecture/phase-5-distribution-and-allocatio
 
 | Document | Path |
 |----------|------|
-| Platform overview | `docs/prd/platform-overview.md` |
+| Platform overview | `docs/PRODUCT.md` |
 | Phase 4 distributors (legacy) | `docs/prd/phase-4-distributor-enhancements.md` |
 | Phase 2 commission (legacy model) | `docs/prd/phase-2-ecommerce.md` |
 | Phase 3 inventory | `docs/prd/phase-3-inventory.md` |

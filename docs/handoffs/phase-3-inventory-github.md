@@ -9,7 +9,7 @@
 - docs/prd/phase-3-inventory.md
 - docs/architecture/phase-3-inventory.md
 - docs/design/phase-3-inventory.md
-- docs/superpowers/plans/2025-06-24-phase-3-inventory.md
+- docs/prd/phase-3-inventory.md
 - docs/handoffs/phase-3-inventory-*.md
 
 ## Suggested PR title

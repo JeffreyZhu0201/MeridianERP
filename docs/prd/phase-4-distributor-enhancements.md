@@ -114,7 +114,7 @@ The architect should produce `docs/architecture/phase-4-distributor-enhancements
 
 | Document | Path |
 |----------|------|
-| Platform overview & gaps | `docs/prd/platform-overview.md` |
+| Platform overview & gaps | `docs/PRODUCT.md` |
 | Phase 1 distributors & QR | `docs/prd/phase-1-foundation.md` |
 | Phase 2 attribution & commission | `docs/prd/phase-2-ecommerce.md` |
 | Phase 1 architecture (bindings) | `docs/architecture/phase-1-foundation.md` |

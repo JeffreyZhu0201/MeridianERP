@@ -21,3 +21,12 @@ Shared contracts go in `packages/shared` before frontend and backend implementat
 ## Design
 
 Write screen specs to `docs/design/<feature>.md` when UI changes. Map every screen to `packages/ui` components and include empty, loading, error, success, and responsive states.
+
+## Documentation Governance
+
+- Keep entrypoints short: `README.md` for human startup, `docs/PRODUCT.md` for current product state, and `docs/execution/README.md` for workflow navigation.
+- Use one canonical source per topic. Link to canonical docs instead of repeating long sections.
+- Mark stale docs as superseded and move historical content to `docs/archive/` instead of deleting useful context.
+- If the user requests direct deletion of old docs, first update or remove active references, then delete the stale file instead of leaving a pointer-only document.
+- Feature docs should be read on demand: `docs/prd/<feature>.md`, `docs/architecture/<feature>.md`, and `docs/design/<feature>.md`.
+- After renaming or deleting rules/docs, search active docs and agents for stale references.

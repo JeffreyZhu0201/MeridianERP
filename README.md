@@ -1,6 +1,6 @@
 # MeridianERP
 
-**Version:** v1.0.0 (Phase 5 complete)  
+**Version:** v1.0.1 (Phase 5 complete)  
 **Project:** QTWBJFXT20250904
 
 ## What This Is
@@ -74,6 +74,7 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Agent execution workflow | `docs/execution/README.md` |
 | Git and PR workflow | `.cursor/rules/core.mdc` |
 | UI implementation rules | `.cursor/rules/ui.mdc` and `packages/ui/src/index.ts` |
+| Code simplification rules | `.cursor/rules/quality.mdc` |
 | Historical plans/specs | `docs/superpowers/` |
 
 ## Troubleshooting

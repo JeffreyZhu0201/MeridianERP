@@ -26,6 +26,7 @@
  * - i18n/index.js: 国际化消息
  */
 
+export * from './frontend-api.js';
 export * from './enums.js';
 export * from './inventory.js';
 export * from './platform.js';

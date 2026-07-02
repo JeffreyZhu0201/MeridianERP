@@ -2,7 +2,7 @@
 
 **Version:** 1.1  
 **Last updated:** 2025-06-25  
-**Status:** Slices 1–2 shipped; Slice 3 ready for implementation (`docs/architecture/phase-4-distributor-slice3.md`)  
+**Status:** Implemented; retained as Phase 4 distributor architecture reference  
 **PRD:** `docs/prd/phase-4-distributor-enhancements.md`  
 **Depends on:** Phase 1 (bindings, distributors), Phase 2 (checkout attribution, `CommissionLedger`)
 

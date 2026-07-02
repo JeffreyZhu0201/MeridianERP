@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
-**Status:** Ready for implementation  
+**Status:** Implemented; retained as historical architecture reference  
 **PRD:** `docs/prd/phase-4-distributor-enhancements.md` (US-4.2, US-4.3)  
 **Depends on:** Slice 1 (store bind + attribution), Slice 2 (QR management) shipped  
 **Parent:** `docs/architecture/phase-4-distributor-enhancements.md`

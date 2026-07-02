@@ -1,6 +1,6 @@
 # Phase 3 Inventory — Product Requirements
 
-**Status:** ✅ Shipped (API + merchant UI) · P0 tests green · See [platform overview](./platform-overview.md)
+**Status:** ✅ Shipped (API + merchant UI) · P0 tests green · See [platform overview](../PRODUCT.md)
 
 ## Implementation Status (2025-06-25)
 
@@ -125,10 +125,10 @@ Phase 2 tracks a single `inventory` count per product variant and decrements it 
 
 | Document | Path |
 |----------|------|
-| Platform overview | `docs/prd/platform-overview.md` |
+| Platform overview | `docs/PRODUCT.md` |
 | Phase 1 PRD | `docs/prd/phase-1-foundation.md` |
 | Phase 2 PRD | `docs/prd/phase-2-ecommerce.md` |
-| Platform spec | `docs/superpowers/specs/2025-06-24-meridianerp-platform-design.md` |
+| Platform spec | `docs/architecture/system-overview.md` |
 | Phase 3 architecture | `docs/architecture/phase-3-inventory.md` |
 | Phase 3 design | `docs/design/phase-3-inventory.md` |
 | Verification handoff | `docs/handoffs/phase-3-inventory-verification.md` |

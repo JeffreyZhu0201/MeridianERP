@@ -1,79 +1,15 @@
-/**
- * 商户门户 API 客户端
- *
- * 模块说明:
- * - 封装所有与商户 API 交互的函数
- * - 使用 JWT Bearer Token 进行身份认证
- * - 所有请求默认不缓存，确保数据实时性
- *
- * 认证机制:
- * - 使用 merchant_token 作为认证 Cookie
- * - 请求头 Authorization: Bearer <token>
- * - 商户用户 JWT 使用 JWT_MERCHANT_SECRET 签名
- *
- * API 基础配置:
- * - 基础 URL: NEXT_PUBLIC_API_URL 环境变量，默认为 http://localhost:3001
- * - API 版本前缀: /api/v1
- * - Content-Type: application/json
- *
- * 错误处理:
- * - ApiError 类封装 HTTP 状态码和错误消息
- * - 非 2xx 响应自动抛出 ApiError
- * - 204 No Content 返回 undefined
- *
- * 辅助函数:
- * - asList: 兼容 PaginatedResponse 和数组两种响应格式
- * - asListTotal: 获取列表总条数
- *
- * 关键类型定义:
- * - OnboardingProfile: 商户基本资料
- * - Contact: CRM 联系人
- * - Company: CRM 公司
- * - Lead: 销售线索
- * - Distributor: 经销商绑定信息
- * - Binding: 绑定关系
- * - MerchantDashboard: 商户仪表盘数据
- * - Category: 商品分类
- * - Product/ProductVariant: 商品和变体
- */
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+import { ApiError, asList, asListTotal } from '@meridian/shared';
 
-/** 商户门户认证 Cookie 名称 */
-export const AUTH_COOKIE = 'merchant_token';
+export { ApiError, asList, asListTotal };
 
-/**
- * API 错误类
- *
- * @property status - HTTP 状态码
- * @property message - 错误消息（通常来自 API 响应 body.message）
- */
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number };
 }
 
-/**
- * 通用 API 请求函数
- *
- * @param path - API 路径（不含 /api/v1 前缀）
- * @param options - fetch 选项（method, body, headers 等）
- * @param token - JWT 认证令牌（可选，有则添加到 Authorization 头）
- * @returns 解析后的 JSON 响应数据
- *
- * 请求特性:
- * - 自动添加 Content-Type: application/json
- * - 自动添加 Authorization 头（如果提供 token）
- * - 默认 cache: no-store（不缓存）
- *
- * 错误处理:
- * - 非 ok 响应抛出 ApiError
- * - 尝试解析 JSON 错误体，失败时使用 statusText
- * - 204 响应返回 undefined
- */
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const AUTH_COOKIE = 'merchant_token';
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -104,48 +40,6 @@ export async function apiFetch<T>(
   }
 
   return res.json() as Promise<T>;
-}
-
-/**
- * 分页响应数据结构
- *
- * @property data - 当前页的数据数组
- * @property meta - 分页元信息
- *   - total: 总记录数
- *   - page: 当前页码
- *   - limit: 每页条数
- */
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number; page: number; limit: number };
-}
-
-/**
- * 兼容处理列表响应
- *
- * @param response - API 响应（PaginatedResponse 或 数组）
- * @returns 统一返回数组格式
- *
- * 使用场景:
- * - 有些 API 返回 PaginatedResponse，有些直接返回数组
- * - 此函数统一处理，避免调用方做类型判断
- */
-export function asList<T>(response: PaginatedResponse<T> | T[] | null | undefined): T[] {
-  if (Array.isArray(response)) return response;
-  if (response && Array.isArray(response.data)) return response.data;
-  return [];
-}
-
-/**
- * 获取列表总条数
- *
- * @param response - API 响应（PaginatedResponse 或 数组）
- * @returns 总记录数
- */
-export function asListTotal<T>(response: PaginatedResponse<T> | T[] | null | undefined): number {
-  if (Array.isArray(response)) return response.length;
-  if (response?.meta?.total != null) return response.meta.total;
-  return asList(response).length;
 }
 
 /**

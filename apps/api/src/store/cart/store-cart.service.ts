@@ -1,21 +1,6 @@
 /**
- * StoreCartService - 购物车服务
- *
- * 负责管理商店消费者的购物车功能，包括：
- * - 获取购物车
- * - 添加商品到购物车
- * - 更新购物车商品数量
- * - 删除购物车商品
- *
- * 购物车模式：
- * - 已登录用户：按 customerId 关联购物车
- * - 游客：按 sessionId 关联购物车
- *
- * 特殊功能：
- * - 自动从_binding表填充经销商信息（如果用户已绑定经销商）
- * - 支持游客和已登录用户混合使用
- *
- * @service StoreCartService
+ * Store cart service for customer and guest carts.
+ * Guest carts use session IDs; authenticated carts may hydrate distributor attribution from bindings.
  */
 
 import {
@@ -38,12 +23,16 @@ const CART_INCLUDE = {
   items: {
     include: {
       variant: {
-        include: { product: { select: { id: true, name: true, slug: true, isPublished: true } } },
+        include: {
+          product: {
+            select: { id: true, name: true, slug: true, isPublished: true },
+          },
+        },
       },
     },
-    orderBy: { createdAt: 'asc' as const },  // 按添加时间升序排列
+    orderBy: { createdAt: 'asc' as const }, // 按添加时间升序排列
   },
-  distributor: { select: { id: true, name: true } },  // 关联的经销商信息
+  distributor: { select: { id: true, name: true } }, // 关联的经销商信息
 };
 
 /**
@@ -127,7 +116,9 @@ export class StoreCartService {
 
     // 游客：必须提供 sessionId
     if (!sessionId) {
-      throw new BadRequestException('X-Cart-Session header is required for guest carts');
+      throw new BadRequestException(
+        'X-Cart-Session header is required for guest carts',
+      );
     }
 
     let cart = await this.prisma.cart.findFirst({
@@ -154,7 +145,11 @@ export class StoreCartService {
    * @param user - 已认证用户（可选）
    * @returns 格式化后的购物车信息
    */
-  async getCart(slug: string, sessionId: string | undefined, user?: AuthenticatedUser) {
+  async getCart(
+    slug: string,
+    sessionId: string | undefined,
+    user?: AuthenticatedUser,
+  ) {
     // 解析并验证商户商店
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
 
@@ -209,8 +204,8 @@ export class StoreCartService {
     const variant = await this.prisma.productVariant.findFirst({
       where: {
         id: dto.variantId,
-        isActive: true,  // 规格必须活跃
-        product: { tenantId: tenant.id, isPublished: true },  // 商品必须已发布
+        isActive: true, // 规格必须活跃
+        product: { tenantId: tenant.id, isPublished: true }, // 商品必须已发布
       },
     });
     if (!variant) {
@@ -219,7 +214,9 @@ export class StoreCartService {
 
     // 检查该规格是否已在购物车中
     const existing = await this.prisma.cartItem.findUnique({
-      where: { cartId_variantId: { cartId: cart.id, variantId: dto.variantId } },
+      where: {
+        cartId_variantId: { cartId: cart.id, variantId: dto.variantId },
+      },
     });
 
     if (existing) {
@@ -231,7 +228,11 @@ export class StoreCartService {
     } else {
       // 不在购物车，添加新商品
       await this.prisma.cartItem.create({
-        data: { cartId: cart.id, variantId: dto.variantId, quantity: dto.quantity },
+        data: {
+          cartId: cart.id,
+          variantId: dto.variantId,
+          quantity: dto.quantity,
+        },
       });
     }
 
@@ -397,17 +398,17 @@ export class StoreCartService {
 
     return {
       id: cart.id,
-      sessionId: sessionId ?? cart.sessionId ?? randomUUID(),  // 确保有 sessionId
-      distributorId: cart.distributorId,  // 关联的经销商 ID
-      distributor: cart.distributor,       // 经销商信息
+      sessionId: sessionId ?? cart.sessionId ?? randomUUID(), // 确保有 sessionId
+      distributorId: cart.distributorId, // 关联的经销商 ID
+      distributor: cart.distributor, // 经销商信息
       items: cart.items.map((item) => ({
         id: item.id,
         quantity: item.quantity,
         variant: item.variant,
-        lineTotal: Number(item.variant.price) * item.quantity,  // 该商品的小计
+        lineTotal: Number(item.variant.price) * item.quantity, // 该商品的小计
       })),
-      subtotal,                             // 购物车总金额
-      itemCount: cart.items.reduce((sum, item) => sum + item.quantity, 0),  // 商品总数量
+      subtotal, // 购物车总金额
+      itemCount: cart.items.reduce((sum, item) => sum + item.quantity, 0), // 商品总数量
     };
   }
 }

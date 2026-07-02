@@ -3,34 +3,13 @@
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Dialog,
-  DialogCloseButton,
-  EmptyState,
-  formatMoney,
-  Input,
-  Label,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  Textarea,
-} from '@meridian/ui';
 
-import {
-  apiFetch,
-  type AllocationOrder,
-  type MasterSku,
-} from '@/lib/api';
+import { apiFetch, type AllocationOrder, type MasterSku } from '@/lib/api';
+import { AllocationOrdersTable } from './allocation-orders-table';
+import { CreateAllocationDialog } from './create-allocation-dialog';
+import { CreateSkuDialog } from './create-sku-dialog';
+import { EditSkuDialog } from './edit-sku-dialog';
+import { MasterSkuTable } from './master-sku-table';
 
 interface ApprovedMerchant {
   id: string;
@@ -68,7 +47,6 @@ export function AllocationsView({
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
 
-  // Edit SKU state
   const [editSku, setEditSku] = useState<MasterSku | null>(null);
   const [editSkuName, setEditSkuName] = useState('');
   const [editOnHand, setEditOnHand] = useState('');
@@ -192,335 +170,99 @@ export function AllocationsView({
     <div className="space-y-8">
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>{t('masterSkus')}</CardTitle>
-          <Button size="sm" onClick={() => setSkuOpen(true)}>
-            {t('createSku')}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {masterSkus.length === 0 ? (
-            <EmptyState title={t('emptySkus')} />
-          ) : (
-            <div className="rounded-xl ring-1 ring-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('skuColumns.code')}</TableHead>
-                    <TableHead>{t('skuColumns.name')}</TableHead>
-                    <TableHead className="text-right">{t('skuColumns.onHand')}</TableHead>
-                    <TableHead className="text-right">{t('skuColumns.wholesale')}</TableHead>
-                    <TableHead className="text-right">{t('skuColumns.retail')}</TableHead>
-                    <TableHead className="text-right">{t('skuColumns.actions')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {masterSkus.map((sku) => (
-                    <TableRow key={sku.id}>
-                      <TableCell className="font-mono text-xs">{sku.skuCode}</TableCell>
-                      <TableCell>{sku.name}</TableCell>
-                      <TableCell className="text-right tabular-nums">{sku.quantityOnHand}</TableCell>
-                      <TableCell className="text-right">{formatMoney(sku.wholesalePrice)}</TableCell>
-                      <TableCell className="text-right">{formatMoney(sku.retailPrice)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button size="sm" variant="outline" onClick={() => openEditSku(sku)}>
-                          {tc('edit')}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <MasterSkuTable
+        masterSkus={masterSkus}
+        labels={{
+          title: t('masterSkus'),
+          create: t('createSku'),
+          empty: t('emptySkus'),
+          code: t('skuColumns.code'),
+          name: t('skuColumns.name'),
+          onHand: t('skuColumns.onHand'),
+          wholesale: t('skuColumns.wholesale'),
+          retail: t('skuColumns.retail'),
+          actions: t('skuColumns.actions'),
+          edit: tc('edit'),
+        }}
+        onCreate={() => setSkuOpen(true)}
+        onEdit={openEditSku}
+      />
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>{t('allocationOrders')}</CardTitle>
-          <Button
-            size="sm"
-            onClick={() => setAllocOpen(true)}
-            disabled={masterSkus.length === 0 || merchants.length === 0}
-          >
-            {t('createAllocation')}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {allocations.length === 0 ? (
-            <EmptyState title={t('emptyOrders')} />
-          ) : (
-            <div className="rounded-xl ring-1 ring-border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t('orderColumns.merchant')}</TableHead>
-                    <TableHead>{t('orderColumns.status')}</TableHead>
-                    <TableHead className="text-right">{t('orderColumns.lines')}</TableHead>
-                    <TableHead className="text-right">{t('orderColumns.total')}</TableHead>
-                    <TableHead>{t('orderColumns.created')}</TableHead>
-                    <TableHead className="text-right">{t('orderColumns.actions')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allocations.map((order) => {
-                    const total = order.lines.reduce(
-                      (sum, line) => sum + Number(line.wholesalePrice) * line.quantity,
-                      0,
-                    );
-                    return (
-                      <TableRow key={order.id}>
-                        <TableCell>
-                          {order.tenant?.merchantProfile?.businessName ?? order.tenantId}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">{order.status}</Badge>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums">{order.lines.length}</TableCell>
-                        <TableCell className="text-right">{formatMoney(total)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">
-                          {new Date(order.createdAt).toLocaleDateString(locale)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {order.status === 'DRAFT' ? (
-                            <Button size="sm" onClick={() => handleIssue(order.id)}>
-                              {t('issue')}
-                            </Button>
-                          ) : null}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <AllocationOrdersTable
+        allocations={allocations}
+        canCreate={masterSkus.length > 0 && merchants.length > 0}
+        locale={locale}
+        labels={{
+          title: t('allocationOrders'),
+          create: t('createAllocation'),
+          empty: t('emptyOrders'),
+          merchant: t('orderColumns.merchant'),
+          status: t('orderColumns.status'),
+          lines: t('orderColumns.lines'),
+          total: t('orderColumns.total'),
+          created: t('orderColumns.created'),
+          actions: t('orderColumns.actions'),
+          issue: t('issue'),
+        }}
+        onCreate={() => setAllocOpen(true)}
+        onIssue={handleIssue}
+      />
 
-      <Dialog
+      <CreateSkuDialog
         open={skuOpen}
         onOpenChange={setSkuOpen}
-        title={t('createSku')}
-        footer={
-          <>
-            <DialogCloseButton onClose={() => setSkuOpen(false)}>{tc('cancel')}</DialogCloseButton>
-            <Button onClick={handleCreateSku} disabled={submitting || !skuCode || !skuName}>
-              {t('form.submitSku')}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="sku-code">{t('form.skuCode')}</Label>
-            <Input id="sku-code" value={skuCode} onChange={(e) => setSkuCode(e.target.value)} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="sku-name">{t('form.skuName')}</Label>
-            <Input id="sku-name" value={skuName} onChange={(e) => setSkuName(e.target.value)} />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="sku-onhand">{t('form.onHand')}</Label>
-              <Input
-                id="sku-onhand"
-                type="number"
-                min="0"
-                value={onHand}
-                onChange={(e) => setOnHand(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sku-cost">{t('form.unitCost')}</Label>
-              <Input
-                id="sku-cost"
-                type="number"
-                min="0"
-                step="0.01"
-                value={unitCost}
-                onChange={(e) => setUnitCost(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sku-wholesale">{t('form.wholesalePrice')}</Label>
-              <Input
-                id="sku-wholesale"
-                type="number"
-                min="0"
-                step="0.01"
-                value={wholesalePrice}
-                onChange={(e) => setWholesalePrice(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sku-retail">{t('form.retailPrice')}</Label>
-              <Input
-                id="sku-retail"
-                type="number"
-                min="0"
-                step="0.01"
-                value={retailPrice}
-                onChange={(e) => setRetailPrice(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </Dialog>
+        skuCode={skuCode}
+        skuName={skuName}
+        onHand={onHand}
+        unitCost={unitCost}
+        wholesalePrice={wholesalePrice}
+        retailPrice={retailPrice}
+        submitting={submitting}
+        onSkuCodeChange={setSkuCode}
+        onSkuNameChange={setSkuName}
+        onOnHandChange={setOnHand}
+        onUnitCostChange={setUnitCost}
+        onWholesalePriceChange={setWholesalePrice}
+        onRetailPriceChange={setRetailPrice}
+        onSubmit={handleCreateSku}
+      />
 
-      <Dialog
+      <EditSkuDialog
         open={skuEditOpen}
         onOpenChange={setSkuEditOpen}
-        title={t('editSku')}
-        footer={
-          <>
-            <DialogCloseButton onClose={() => setSkuEditOpen(false)}>{tc('cancel')}</DialogCloseButton>
-            <Button onClick={handleUpdateSku} disabled={submitting || !editSkuName}>
-              {t('form.submitSku')}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          {editSku && (
-            <p className="text-sm text-muted-foreground font-mono">{editSku.skuCode}</p>
-          )}
-          <div className="space-y-2">
-            <Label htmlFor="edit-sku-name">{t('form.skuName')}</Label>
-            <Input
-              id="edit-sku-name"
-              value={editSkuName}
-              onChange={(e) => setEditSkuName(e.target.value)}
-            />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-sku-onhand">{t('form.onHand')}</Label>
-              <Input
-                id="edit-sku-onhand"
-                type="number"
-                min="0"
-                value={editOnHand}
-                onChange={(e) => setEditOnHand(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-sku-cost">{t('form.unitCost')}</Label>
-              <Input
-                id="edit-sku-cost"
-                type="number"
-                min="0"
-                step="0.01"
-                value={editUnitCost}
-                onChange={(e) => setEditUnitCost(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-sku-wholesale">{t('form.wholesalePrice')}</Label>
-              <Input
-                id="edit-sku-wholesale"
-                type="number"
-                min="0"
-                step="0.01"
-                value={editWholesalePrice}
-                onChange={(e) => setEditWholesalePrice(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-sku-retail">{t('form.retailPrice')}</Label>
-              <Input
-                id="edit-sku-retail"
-                type="number"
-                min="0"
-                step="0.01"
-                value={editRetailPrice}
-                onChange={(e) => setEditRetailPrice(e.target.value)}
-              />
-            </div>
-          </div>
-        </div>
-      </Dialog>
+        sku={editSku}
+        skuName={editSkuName}
+        onHand={editOnHand}
+        unitCost={editUnitCost}
+        wholesalePrice={editWholesalePrice}
+        retailPrice={editRetailPrice}
+        submitting={submitting}
+        onSkuNameChange={setEditSkuName}
+        onOnHandChange={setEditOnHand}
+        onUnitCostChange={setEditUnitCost}
+        onWholesalePriceChange={setEditWholesalePrice}
+        onRetailPriceChange={setEditRetailPrice}
+        onSubmit={handleUpdateSku}
+      />
 
-      <Dialog
+      <CreateAllocationDialog
         open={allocOpen}
         onOpenChange={setAllocOpen}
-        title={t('createAllocation')}
-        footer={
-          <>
-            <DialogCloseButton onClose={() => setAllocOpen(false)}>{tc('cancel')}</DialogCloseButton>
-            <Button
-              onClick={handleCreateAllocation}
-              disabled={submitting || !tenantId || lines.length === 0}
-            >
-              {t('form.submitAllocation')}
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="alloc-merchant">{t('form.merchant')}</Label>
-            <Select
-              id="alloc-merchant"
-              value={tenantId}
-              onChange={(e) => setTenantId(e.target.value)}
-            >
-              {merchants.map((m) => (
-                <option key={m.tenantId} value={m.tenantId!}>
-                  {m.businessName}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="alloc-note">{t('form.note')}</Label>
-            <Textarea id="alloc-note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="alloc-sku">{t('form.sku')}</Label>
-              <Select
-                id="alloc-sku"
-                value={lineSkuId}
-                onChange={(e) => setLineSkuId(e.target.value)}
-              >
-                {masterSkus.map((sku) => (
-                  <option key={sku.id} value={sku.id}>
-                    {sku.skuCode} — {sku.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="alloc-qty">{t('form.quantity')}</Label>
-              <Input
-                id="alloc-qty"
-                type="number"
-                min="1"
-                value={lineQty}
-                onChange={(e) => setLineQty(e.target.value)}
-              />
-            </div>
-          </div>
-          <Button type="button" variant="outline" size="sm" onClick={handleAddLine}>
-            {t('form.addLine')}
-          </Button>
-          {lines.length > 0 ? (
-            <ul className="text-sm text-muted-foreground space-y-1">
-              {lines.map((line, i) => {
-                const sku = masterSkus.find((s) => s.id === line.masterSkuId);
-                return (
-                  <li key={i}>
-                    {sku?.skuCode ?? line.masterSkuId} × {line.quantity}
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
-        </div>
-      </Dialog>
+        merchants={merchants}
+        masterSkus={masterSkus}
+        tenantId={tenantId}
+        note={note}
+        lineSkuId={lineSkuId}
+        lineQty={lineQty}
+        lines={lines}
+        submitting={submitting}
+        onTenantIdChange={setTenantId}
+        onNoteChange={setNote}
+        onLineSkuIdChange={setLineSkuId}
+        onLineQtyChange={setLineQty}
+        onAddLine={handleAddLine}
+        onSubmit={handleCreateAllocation}
+      />
     </div>
   );
 }

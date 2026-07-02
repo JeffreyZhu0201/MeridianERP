@@ -1,38 +1,3 @@
-/**
- * 管理门户 API 客户端
- *
- * 模块说明:
- * - 封装所有与平台 API 交互的函数
- * - 使用 JWT Bearer Token 进行身份认证
- * - 所有请求默认不缓存，确保数据实时性
- *
- * 认证机制:
- * - 使用 admin_token 作为认证 Cookie
- * - 请求头 Authorization: Bearer <token>
- * - 平台管理员 JWT 使用 JWT_SECRET 签名
- *
- * API 基础配置:
- * - 基础 URL: NEXT_PUBLIC_API_URL 环境变量，默认为 http://localhost:3001
- * - API 版本前缀: /api/v1
- * - Content-Type: application/json
- *
- * 错误处理:
- * - ApiError 类封装 HTTP 状态码和错误消息
- * - 非 2xx 响应自动抛出 ApiError
- * - 204 No Content 返回 undefined
- *
- * 关键类型定义:
- * - DashboardStats: 平台仪表盘统计数据
- * - MerchantListItem: 商户列表项
- * - MerchantDetail: 商户详情（含 CRM 和经销商信息）
- * - PlatformOrder: 平台订单
- * - PlatformDistributor: 平台经销商
- * - FundsSummary: 资金汇总
- * - AllocationOrder: 配额分配单
- * - WithdrawalRequest: 提现申请
- * - CommissionLedgerEntry: 佣金账本条目
- * - SettlementBatch: 结算批次
- */
 import type {
   DistributorBranchSummary,
   MasterSkuSummary,
@@ -43,50 +8,18 @@ import type {
   PlatformMerchantDetail,
   PlatformRecentMerchant,
 } from '@meridian/shared';
+import { ApiError } from '@meridian/shared';
 
-/** API 服务器基础地址 */
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export { ApiError };
 
-/** 管理门户认证 Cookie 名称 */
-export const AUTH_COOKIE = 'admin_token';
-
-/**
- * API 错误类
- *
- * @property status - HTTP 状态码
- * @property message - 错误消息（通常来自 API 响应 body.message）
- *
- * 使用场景:
- * - API 调用失败时抛出
- * - 区分不同类型的错误（400, 401, 403, 404, 500 等）
- */
-export class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: { total: number; page: number; limit: number };
 }
 
-/**
- * 通用 API 请求函数
- *
- * @param path - API 路径（不含 /api/v1 前缀）
- * @param options - fetch 选项（method, body, headers 等）
- * @param token - JWT 认证令牌（可选，有则添加到 Authorization 头）
- * @returns 解析后的 JSON 响应数据
- *
- * 请求特性:
- * - 自动添加 Content-Type: application/json
- * - 自动添加 Authorization 头（如果提供 token）
- * - 默认 cache: no-store（不缓存）
- *
- * 错误处理:
- * - 非 ok 响应抛出 ApiError
- * - 尝试解析 JSON 错误体，失败时使用 statusText
- * - 204 响应返回 undefined
- */
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+export const AUTH_COOKIE = 'admin_token';
+
 export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -119,19 +52,6 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
-/**
- * 分页响应数据结构
- *
- * @property data - 当前页的数据数组
- * @property meta - 分页元信息
- *   - total: 总记录数
- *   - page: 当前页码
- *   - limit: 每页条数
- */
-export interface PaginatedResponse<T> {
-  data: T[];
-  meta: { total: number; page: number; limit: number };
-}
 
 /** 商户列表项 — 与仪表盘最近商户数据结构相同 */
 export type MerchantListItem = PlatformRecentMerchant;
