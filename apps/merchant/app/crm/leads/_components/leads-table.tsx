@@ -131,7 +131,11 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
             <TableBody>
               {filtered.map((lead) => (
                 <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/crm/leads/${lead.id}`} className="hover:underline">
+                      {lead.title}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={stageVariant[lead.stage] ?? 'secondary'}>
                       {stageLabel(lead.stage)}

@@ -126,8 +126,13 @@ export function TransfersTable({
             <TableBody>
               {transfers.map((transfer) => (
                 <TableRow key={transfer.id}>
-                  <TableCell className="text-muted-foreground">
-                    {new Date(transfer.createdAt).toLocaleString()}
+                  <TableCell>
+                    <Link
+                      href={`/inventory/transfers/${transfer.id}`}
+                      className="hover:underline"
+                    >
+                      {new Date(transfer.createdAt).toLocaleString()}
+                    </Link>
                   </TableCell>
                   <TableCell>{transfer.fromWarehouse.name}</TableCell>
                   <TableCell>{transfer.toWarehouse.name}</TableCell>

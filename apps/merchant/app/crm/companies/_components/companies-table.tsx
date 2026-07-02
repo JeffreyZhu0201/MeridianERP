@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -98,7 +99,11 @@ export function CompaniesTable({ companies: initial, token }: CompaniesTableProp
             <TableBody>
               {companies.map((company) => (
                 <TableRow key={company.id}>
-                  <TableCell className="font-medium">{company.name}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link href={`/crm/companies/${company.id}`} className="hover:underline">
+                      {company.name}
+                    </Link>
+                  </TableCell>
                   <TableCell>{company.website ?? '—'}</TableCell>
                   <TableCell>{company._count?.contacts ?? 0}</TableCell>
                   <TableCell className="text-right">
