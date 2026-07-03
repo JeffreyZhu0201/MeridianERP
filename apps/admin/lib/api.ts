@@ -67,6 +67,7 @@ export interface AuthResponse {
 
 export interface PlatformOrder {
   id: string;
+  tenantId?: string;
   status: string;
   fulfillmentType?: string;
   total: string | number;
@@ -74,7 +75,7 @@ export interface PlatformOrder {
   guestEmail?: string;
   createdAt: string;
   tenant: { id: string; slug: string; businessName?: string };
-  distributor?: { name: string };
+  distributor?: { id: string; name: string } | null;
 }
 
 export type PlatformDistributor = PlatformDistributorSummary;

@@ -1,9 +1,11 @@
+import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { ReplenishmentStatusTabs } from './_components/replenishment-status-tabs';
 import { ReplenishmentView } from './_components/replenishment-view';
 
 export interface ReplenishmentRequestRow {
@@ -22,16 +24,26 @@ export interface ReplenishmentRequestRow {
   }>;
 }
 
-export default async function ReplenishmentPage() {
+interface ReplenishmentPageProps {
+  searchParams: Promise<{ status?: string }>;
+}
+
+export default async function ReplenishmentPage({ searchParams }: ReplenishmentPageProps) {
   const token = await getToken();
   if (!token) return null;
 
   const t = await getTranslations('admin.replenishment');
+  const params = await searchParams;
+  const status = params.status ?? 'PENDING';
+
+  const query = new URLSearchParams();
+  if (status && status !== 'ALL') query.set('status', status);
 
   let requests: ReplenishmentRequestRow[] = [];
   try {
+    const queryString = query.toString();
     requests = await apiFetch<ReplenishmentRequestRow[]>(
-      '/platform/replenishment?status=PENDING',
+      `/platform/replenishment${queryString ? `?${queryString}` : ''}`,
       {},
       token,
     );
@@ -43,8 +55,11 @@ export default async function ReplenishmentPage() {
     <AdminShellWrapper>
       <div className="space-y-6">
         <BentoListHeader metrics={[{ title: t('title'), value: requests.length }]} />
+        <Suspense fallback={null}>
+          <ReplenishmentStatusTabs />
+        </Suspense>
         <ListPageFrame title={t('title')} description={t('description')}>
-          <ReplenishmentView requests={requests} token={token} />
+          <ReplenishmentView requests={requests} token={token} status={status} />
         </ListPageFrame>
       </div>
     </AdminShellWrapper>

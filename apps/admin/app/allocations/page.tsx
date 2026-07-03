@@ -1,7 +1,9 @@
-import { getLocale, getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import { OnboardingStatus } from '@meridian/shared';
 
+import { ListPagination } from '@/components/list-pagination';
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import {
   apiFetch,
@@ -13,18 +15,34 @@ import {
 import { getToken } from '@/lib/auth';
 import { AllocationsView } from './_components/allocations-view';
 
-export default async function AllocationsPage() {
+interface AllocationsPageProps {
+  searchParams: Promise<{ skuPage?: string; tenantId?: string; status?: string }>;
+}
+
+export default async function AllocationsPage({ searchParams }: AllocationsPageProps) {
   const token = await getToken();
   if (!token) return null;
 
-  const locale = await getLocale();
   const t = await getTranslations('admin.allocations');
+  const params = await searchParams;
+  const skuPage = params.skuPage ?? '1';
+  const skuLimit = 20;
+
+  const allocationQuery = new URLSearchParams();
+  if (params.tenantId) allocationQuery.set('tenantId', params.tenantId);
+  if (params.status) allocationQuery.set('status', params.status);
 
   const [masterSkusRes, allocations, merchantsRes, flagshipCatalog] = await Promise.all([
-    apiFetch<{ data: MasterSku[] }>('/platform/allocations/master-skus', {}, token).catch(
-      () => ({ data: [] }),
-    ),
-    apiFetch<AllocationOrder[]>('/platform/allocations', {}, token).catch(() => []),
+    apiFetch<PaginatedResponse<MasterSku>>(
+      `/platform/allocations/master-skus?page=${skuPage}&limit=${skuLimit}`,
+      {},
+      token,
+    ).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: skuLimit } })),
+    apiFetch<AllocationOrder[]>(
+      `/platform/allocations${allocationQuery.toString() ? `?${allocationQuery.toString()}` : ''}`,
+      {},
+      token,
+    ).catch(() => []),
     apiFetch<PaginatedResponse<MerchantListItem>>(
       `/platform/merchants?status=${OnboardingStatus.APPROVED}&limit=100`,
       {},
@@ -40,6 +58,7 @@ export default async function AllocationsPage() {
     ...sku,
     synced: syncById.get(sku.id) ?? false,
   }));
+  const skuMeta = masterSkusRes.meta ?? { total: masterSkus.length, page: 1, limit: skuLimit };
 
   const approvedMerchants = merchantsRes.data
     .map((m) => {
@@ -51,11 +70,12 @@ export default async function AllocationsPage() {
     .filter((m): m is { id: string; businessName: string; tenantId: string } => m !== null);
 
   const draftCount = allocations.filter((a) => a.status === 'DRAFT').length;
+  const skuTotalPages = Math.max(1, Math.ceil(skuMeta.total / skuMeta.limit));
 
   const metrics: Array<{ title: string; value: number | string; description?: string }> = [
-    { title: t('masterSkus'), value: masterSkus.length },
+    { title: t('masterSkus'), value: skuMeta.total },
     { title: t('allocationOrders'), value: allocations.length },
-    { title: 'Draft', value: draftCount },
+    { title: t('draftOrders'), value: draftCount },
   ];
 
   if (masterSkus.length > 0) {
@@ -76,10 +96,27 @@ export default async function AllocationsPage() {
         <ListPageFrame title={t('title')} description={t('description')}>
           <AllocationsView
             masterSkus={masterSkus}
+            skuMeta={skuMeta}
             allocations={allocations}
             merchants={approvedMerchants}
             token={token}
+            filterTenantId={params.tenantId ?? ''}
+            filterStatus={params.status ?? ''}
           />
+          <Suspense>
+            <ListPagination
+              basePath="/allocations"
+              total={skuMeta.total}
+              page={skuMeta.page}
+              limit={skuMeta.limit}
+              pageParam="skuPage"
+              summary={t('skuPagination', {
+                page: skuMeta.page,
+                totalPages: skuTotalPages,
+                total: skuMeta.total,
+              })}
+            />
+          </Suspense>
         </ListPageFrame>
       </div>
     </AdminShellWrapper>

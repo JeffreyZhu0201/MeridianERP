@@ -262,7 +262,16 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{td('contactEmail')}</span>
-              <span>{merchant.contactEmail}</span>
+              {merchant.ownerAccountId ? (
+                <Link
+                  href={`/users/${merchant.ownerAccountId}`}
+                  className="text-primary hover:underline"
+                >
+                  {merchant.contactEmail}
+                </Link>
+              ) : (
+                <span>{merchant.contactEmail}</span>
+              )}
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{td('contactPhone')}</span>

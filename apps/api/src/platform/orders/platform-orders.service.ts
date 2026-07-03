@@ -1,7 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { FulfillmentType } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { PrismaService } from '../../prisma/prisma.service';
+
+type DistributorRef = { id: string; name: string };
 
 @Injectable()
 export class PlatformOrdersService {
@@ -10,17 +12,35 @@ export class PlatformOrdersService {
     private readonly fulfillmentService: FulfillmentService,
   ) {}
 
-  
+  private resolveDistributor(order: {
+    distributor: DistributorRef | null;
+    commissionEntry: { distributor: DistributorRef } | null;
+  }): DistributorRef | null {
+    if (order.distributor) {
+      return order.distributor;
+    }
+    return order.commissionEntry?.distributor ?? null;
+  }
+
   async findAll(
     page = 1,
     limit = 20,
     status?: string,
     fulfillmentType?: string,
+    guestEmail?: string,
+    tenantId?: string,
   ) {
     const skip = (page - 1) * limit;
-    const where: Record<string, unknown> = {};
-    if (status) where.status = status;
-    if (fulfillmentType) where.fulfillmentType = fulfillmentType;
+    const where: Prisma.OrderWhereInput = {};
+    if (status) where.status = status as Prisma.EnumOrderStatusFilter['equals'];
+    if (fulfillmentType) {
+      where.fulfillmentType =
+        fulfillmentType as Prisma.EnumFulfillmentTypeFilter['equals'];
+    }
+    if (tenantId) where.tenantId = tenantId;
+    if (guestEmail?.trim()) {
+      where.guestEmail = { contains: guestEmail.trim(), mode: 'insensitive' };
+    }
 
     const [data, total] = await Promise.all([
       this.prisma.order.findMany({
@@ -35,8 +55,10 @@ export class PlatformOrdersService {
               merchantProfile: { select: { businessName: true } },
             },
           },
-          lines: true,
-          commissionEntry: true,
+          distributor: { select: { id: true, name: true } },
+          commissionEntry: {
+            include: { distributor: { select: { id: true, name: true } } },
+          },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -45,12 +67,20 @@ export class PlatformOrdersService {
 
     return {
       data: data.map((order) => ({
-        ...order,
+        id: order.id,
+        tenantId: order.tenantId,
+        status: order.status,
+        fulfillmentType: order.fulfillmentType,
+        currency: order.currency,
+        total: order.total,
+        guestEmail: order.guestEmail,
+        createdAt: order.createdAt.toISOString(),
         tenant: {
           id: order.tenant.id,
           slug: order.tenant.slug,
           businessName: order.tenant.merchantProfile?.businessName,
         },
+        distributor: this.resolveDistributor(order),
       })),
       meta: { total, page, limit },
     };
@@ -73,6 +103,19 @@ export class PlatformOrdersService {
             merchantProfile: { select: { businessName: true } },
           },
         },
+        customer: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            accountId: true,
+          },
+        },
+        distributor: { select: { id: true, name: true } },
+        commissionEntry: {
+          include: { distributor: { select: { id: true, name: true } } },
+        },
         lines: { include: { variant: { select: { sku: true } } } },
       },
     });
@@ -81,23 +124,40 @@ export class PlatformOrdersService {
     }
     return {
       id: order.id,
+      tenantId: order.tenantId,
       status: order.status,
       fulfillmentType: order.fulfillmentType,
       currency: order.currency,
       total: order.total,
       guestEmail: order.guestEmail,
       deliveryAddress: order.deliveryAddress,
+      pickupCode: order.pickupCode,
+      pickupVerifiedAt: order.pickupVerifiedAt?.toISOString() ?? null,
+      shippedAt: order.shippedAt?.toISOString() ?? null,
       createdAt: order.createdAt.toISOString(),
       tenant: {
         id: order.tenant.id,
         slug: order.tenant.slug,
         businessName: order.tenant.merchantProfile?.businessName ?? null,
       },
+      distributor: this.resolveDistributor(order),
+      customer: order.customer
+        ? {
+            id: order.customer.id,
+            email: order.customer.email,
+            firstName: order.customer.firstName,
+            lastName: order.customer.lastName,
+            accountId: order.customer.accountId,
+          }
+        : null,
       lines: order.lines.map((line) => ({
         id: line.id,
         productName: line.productName,
         variantName: line.variantName,
         quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        unitWholesalePrice: line.unitWholesalePrice,
+        lineTotal: line.lineTotal,
         skuCode: line.variant?.sku ?? null,
       })),
     };

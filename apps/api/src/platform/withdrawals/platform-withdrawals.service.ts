@@ -49,14 +49,20 @@ export class PlatformWithdrawalsService {
     const limit = Math.min(100, Math.max(1, query.limit ?? 50));
     const skip = (page - 1) * limit;
 
-    const rows = await this.prisma.withdrawalRequest.findMany({
-      where,
-      include: { distributor: { select: { name: true, email: true } } },
-      orderBy: { createdAt: 'desc' },
-      skip,
-      take: limit,
-    });
-    return rows.map((row) => this.mapWithdrawalRow(row));
+    const [rows, total] = await Promise.all([
+      this.prisma.withdrawalRequest.findMany({
+        where,
+        include: { distributor: { select: { name: true, email: true } } },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.withdrawalRequest.count({ where }),
+    ]);
+    return {
+      data: rows.map((row) => this.mapWithdrawalRow(row)),
+      meta: { total, page, limit },
+    };
   }
 
   async approve(id: string, platformUserId: string) {

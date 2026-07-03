@@ -93,6 +93,7 @@ describe('Platform merchants list filters (e2e)', () => {
       .expect(200);
 
     expect(res.body.data.every((m: { onboardingStatus: string }) => m.onboardingStatus === 'SUBMITTED')).toBe(true);
+    expect(res.body.data[0].tenantId).toBeDefined();
   });
 
   it('filters merchants by search term', async () => {

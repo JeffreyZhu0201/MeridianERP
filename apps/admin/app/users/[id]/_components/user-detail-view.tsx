@@ -524,16 +524,31 @@ export function UserDetailView({
                   <TableHead>{td('columns.tenant')}</TableHead>
                   <TableHead>{td('columns.business')}</TableHead>
                   <TableHead>{td('columns.orders')}</TableHead>
+                  <TableHead className="text-right">{tc('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {user.consumerProfiles.map((profile) => (
-                  <TableRow key={profile.customerId}>
-                    <TableCell>{profile.tenantSlug}</TableCell>
-                    <TableCell>{profile.businessName}</TableCell>
-                    <TableCell>{profile.orderCount}</TableCell>
-                  </TableRow>
-                ))}
+                {user.consumerProfiles.map((profile) => {
+                  const ordersParams = new URLSearchParams({
+                    guestEmail: user.email,
+                    tenantId: profile.tenantId,
+                  });
+                  return (
+                    <TableRow key={profile.customerId}>
+                      <TableCell>{profile.tenantSlug}</TableCell>
+                      <TableCell>{profile.businessName}</TableCell>
+                      <TableCell>{profile.orderCount}</TableCell>
+                      <TableCell className="text-right">
+                        <Link
+                          href={`/orders?${ordersParams.toString()}`}
+                          className="text-sm text-primary underline-offset-4 hover:underline"
+                        >
+                          {td('viewOrders')}
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}

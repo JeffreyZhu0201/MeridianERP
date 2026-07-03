@@ -48,25 +48,57 @@ export interface PickupTokenResponse {
   qrPayload: string;
 }
 
-export interface PlatformOrderDetail {
+export interface PlatformOrderListItem {
   id: string;
+  tenantId: string;
   status: OrderStatus;
   fulfillmentType: FulfillmentType;
   currency: string;
   total: string | number;
   guestEmail: string | null;
-  deliveryAddress: DeliveryAddress | null;
   createdAt: string;
   tenant: {
     id: string;
     slug: string;
     businessName?: string | null;
   };
+  distributor?: { id: string; name: string } | null;
+}
+
+export interface PlatformOrderDetail {
+  id: string;
+  tenantId: string;
+  status: OrderStatus;
+  fulfillmentType: FulfillmentType;
+  currency: string;
+  total: string | number;
+  guestEmail: string | null;
+  deliveryAddress: DeliveryAddress | null;
+  pickupCode: string | null;
+  pickupVerifiedAt: string | null;
+  shippedAt: string | null;
+  createdAt: string;
+  tenant: {
+    id: string;
+    slug: string;
+    businessName?: string | null;
+  };
+  distributor?: { id: string; name: string } | null;
+  customer?: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    accountId: string;
+  } | null;
   lines: Array<{
     id: string;
     productName: string;
     variantName: string;
     quantity: number;
+    unitPrice: string | number;
+    unitWholesalePrice?: string | number | null;
+    lineTotal: string | number;
     skuCode?: string | null;
   }>;
 }

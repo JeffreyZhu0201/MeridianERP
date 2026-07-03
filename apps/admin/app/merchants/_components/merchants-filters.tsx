@@ -18,6 +18,7 @@ export function MerchantsFilters() {
     } else {
       params.delete(key);
     }
+    params.delete('page');
     router.push(`/merchants?${params.toString()}`);
   }
 
@@ -31,6 +32,7 @@ export function MerchantsFilters() {
           onChange={(e) => update('status', e.target.value)}
         >
           <option value="">{t('allStatuses')}</option>
+          <option value={OnboardingStatus.DRAFT}>{t('onboardingStatus.DRAFT')}</option>
           <option value={OnboardingStatus.SUBMITTED}>{t('statusSubmitted')}</option>
           <option value={OnboardingStatus.UNDER_REVIEW}>{t('statusUnderReview')}</option>
           <option value={OnboardingStatus.APPROVED}>{t('statusApproved')}</option>

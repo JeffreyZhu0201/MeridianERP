@@ -21,6 +21,7 @@ import { usePathname } from 'next/navigation';
 import { type ReactNode, useMemo, useState } from 'react';
 import {
   IconAddressBook,
+  IconBox,
   IconBuildingStore,
   IconCash,
   IconChevronRight,
@@ -88,6 +89,7 @@ const navItems: NavItem[] = [
   { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
   { href: '/users', key: 'users', icon: IconUserCircle },
   { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
+  { href: '/merchants?status=APPROVED', key: 'inventory', icon: IconBox },
   { href: '/distributors', key: 'distributors', icon: IconUsers },
   { href: '/orders', key: 'orders', icon: IconReceipt },
   { href: '/allocations', key: 'allocations', icon: IconPackage },

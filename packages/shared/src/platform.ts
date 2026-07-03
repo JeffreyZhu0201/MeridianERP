@@ -17,10 +17,14 @@ export interface MerchantCrmSummary {
 
 export interface PlatformRecentMerchant {
   id: string;
+  tenantId: string;
   businessName: string;
   contactEmail: string;
   onboardingStatus: string;
-  submittedAt?: string;
+  submittedAt?: string | null;
+  createdAt?: string;
+  storePublished?: boolean;
+  isFlagship?: boolean;
 }
 
 export interface PlatformMerchantDetail {
@@ -34,6 +38,7 @@ export interface PlatformMerchantDetail {
   submittedAt?: string | null;
   reviewedAt?: string | null;
   tenantId: string;
+  ownerAccountId?: string | null;
   pendingRecruitInviteCode?: string | null;
   pendingRecruiterId?: string | null;
   pendingRecruiterName?: string | null;

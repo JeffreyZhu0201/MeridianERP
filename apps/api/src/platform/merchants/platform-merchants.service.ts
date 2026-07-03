@@ -15,6 +15,7 @@ import { slugify } from '../../common/utils/slug.util';
 import { dashboardWindowStart } from '../../common/date-range';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';
 import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
+import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { UpdateStoreSettingsDto } from './dto/update-store-settings.dto';
 
@@ -55,19 +56,25 @@ export class PlatformMerchantsService {
       this.prisma.merchantProfile.count({ where }),
     ]);
     return {
-      data: items,
+      data: items.map((profile) => ({
+        id: profile.id,
+        tenantId: profile.tenantId,
+        businessName: profile.businessName,
+        contactEmail: profile.contactEmail,
+        onboardingStatus: profile.onboardingStatus,
+        submittedAt: profile.submittedAt?.toISOString() ?? null,
+        createdAt: profile.createdAt.toISOString(),
+        storePublished: profile.storePublished,
+        isFlagship: profile.isFlagship,
+      })),
       meta: { total, page, limit },
-      items,
-      total,
-      page,
-      limit,
     };
   }
 
   
   async getById(id: string): Promise<PlatformMerchantDetail> {
     const profile = await this.findProfileById(id);
-    const [crmSummary, distributors, pendingRecruiter, recruitedDistributor] =
+    const [crmSummary, distributors, pendingRecruiter, recruitedDistributor, ownerUser] =
       await Promise.all([
         this.getCrmSummary(profile.tenantId),
         this.getDistributorSummaries(profile.tenantId),
@@ -83,6 +90,10 @@ export class PlatformMerchantsService {
               select: { id: true, name: true },
             })
           : Promise.resolve(null),
+        this.prisma.user.findFirst({
+          where: { tenantId: profile.tenantId, role: MerchantRole.MERCHANT_OWNER },
+          select: { accountId: true },
+        }),
       ]);
     return this.toPlatformMerchantDetail(
       profile,
@@ -90,6 +101,7 @@ export class PlatformMerchantsService {
       distributors,
       pendingRecruiter,
       recruitedDistributor,
+      ownerUser?.accountId ?? null,
     );
   }
 
@@ -376,6 +388,7 @@ export class PlatformMerchantsService {
       distributor: { name: string };
     } | null = null,
     recruitedDistributor: { id: string; name: string } | null = null,
+    ownerAccountId: string | null = null,
   ): PlatformMerchantDetail {
     return {
       id: profile.id,
@@ -388,6 +401,7 @@ export class PlatformMerchantsService {
       submittedAt: profile.submittedAt?.toISOString() ?? null,
       reviewedAt: profile.reviewedAt?.toISOString() ?? null,
       tenantId: profile.tenantId,
+      ownerAccountId,
       pendingRecruitInviteCode: profile.pendingRecruitInviteCode,
       pendingRecruiterId: pendingRecruiter?.distributorId ?? null,
       pendingRecruiterName: pendingRecruiter?.distributor.name ?? null,

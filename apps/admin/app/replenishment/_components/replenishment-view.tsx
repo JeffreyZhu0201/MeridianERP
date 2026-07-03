@@ -25,9 +25,10 @@ import type { ReplenishmentRequestRow } from '../page';
 interface ReplenishmentViewProps {
   requests: ReplenishmentRequestRow[];
   token: string;
+  status: string;
 }
 
-export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
+export function ReplenishmentView({ requests, token, status }: ReplenishmentViewProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.replenishment');
@@ -70,6 +71,8 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
     }
   }
 
+  const showActions = status === 'PENDING' || !status || status === 'ALL';
+
   if (requests.length === 0) {
     return <EmptyState title={t('empty')} />;
   }
@@ -85,7 +88,9 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
               <TableHead>{t('columns.lines')}</TableHead>
               <TableHead>{t('columns.note')}</TableHead>
               <TableHead>{t('columns.created')}</TableHead>
-              <TableHead className="text-right">{t('columns.actions')}</TableHead>
+              {showActions ? (
+                <TableHead className="text-right">{t('columns.actions')}</TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,16 +112,20 @@ export function ReplenishmentView({ requests, token }: ReplenishmentViewProps) {
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(req.createdAt).toLocaleDateString(locale)}
                 </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" onClick={() => setApproveId(req.id)}>
-                      {t('approve')}
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => setRejectId(req.id)}>
-                      {t('reject')}
-                    </Button>
-                  </div>
-                </TableCell>
+                {showActions ? (
+                  <TableCell className="text-right">
+                    {req.status === 'PENDING' ? (
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" onClick={() => setApproveId(req.id)}>
+                          {t('approve')}
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => setRejectId(req.id)}>
+                          {t('reject')}
+                        </Button>
+                      </div>
+                    ) : null}
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))}
           </TableBody>

@@ -155,6 +155,11 @@ export interface WithdrawalListQuery {
   limit?: number;
 }
 
+export interface PaginatedWithdrawalList {
+  data: WithdrawalRequestRow[];
+  meta: { total: number; page: number; limit: number };
+}
+
 export interface CreateWithdrawalRequest {
   amount: number;
   note?: string;

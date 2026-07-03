@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { LeadStage, type PlatformCrmContact, type PlatformCrmLead } from '@meridian/shared';
 import {
   Badge,
@@ -56,11 +56,6 @@ export function LeadsTable({
   const [form, setForm] = useState({ title: '', contactId: '', source: '' });
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
-
-  const filtered = useMemo(
-    () => (stageFilter ? initial.filter((l) => l.stage === stageFilter) : initial),
-    [initial, stageFilter],
-  );
 
   function stageLabel(stage: string): string {
     return t(`stage.${stage as 'NEW' | 'QUALIFIED' | 'WON' | 'LOST'}`);
@@ -155,7 +150,7 @@ export function LeadsTable({
         <Button onClick={openCreate}>{t('add')}</Button>
       </div>
 
-      {filtered.length === 0 ? (
+      {initial.length === 0 ? (
         <EmptyState title={t('empty')} />
       ) : (
         <div className="rounded-xl ring-1 ring-border">
@@ -171,7 +166,7 @@ export function LeadsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((lead) => (
+              {initial.map((lead) => (
                 <TableRow key={lead.id}>
                   <TableCell className="font-medium">{lead.title}</TableCell>
                   <TableCell>

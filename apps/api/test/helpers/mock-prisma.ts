@@ -596,11 +596,53 @@ export function createMockPrisma() {
       result.customer = customers.get(order.customerId) ?? null;
     }
     if (include?.commissionEntry) {
-      result.commissionEntry =
+      const entry =
         [...commissionLedgers.values()].find((e) => e.orderId === order.id) ?? null;
+      if (
+        entry &&
+        typeof include.commissionEntry === 'object' &&
+        'include' in include.commissionEntry
+      ) {
+        const nested = (include.commissionEntry as { include?: Record<string, unknown> }).include;
+        const enriched: CommissionLedgerRecord & Record<string, unknown> = { ...entry };
+        if (nested?.distributor) {
+          const distributor = distributors.get(entry.distributorId);
+          if (
+            distributor &&
+            typeof nested.distributor === 'object' &&
+            'select' in nested.distributor
+          ) {
+            const select = (nested.distributor as { select?: Record<string, boolean> }).select ?? {};
+            enriched.distributor = Object.fromEntries(
+              Object.keys(select)
+                .filter((k) => select[k])
+                .map((k) => [k, distributor[k as keyof DistributorRecord]]),
+            );
+          } else {
+            enriched.distributor = distributor ?? null;
+          }
+        }
+        result.commissionEntry = enriched;
+      } else {
+        result.commissionEntry = entry;
+      }
     }
     if (include?.distributor && order.distributorId) {
-      result.distributor = distributors.get(order.distributorId) ?? null;
+      const distributor = distributors.get(order.distributorId) ?? null;
+      if (
+        distributor &&
+        typeof include.distributor === 'object' &&
+        'select' in include.distributor
+      ) {
+        const select = (include.distributor as { select?: Record<string, boolean> }).select ?? {};
+        result.distributor = Object.fromEntries(
+          Object.keys(select)
+            .filter((k) => select[k])
+            .map((k) => [k, distributor[k as keyof DistributorRecord]]),
+        );
+      } else {
+        result.distributor = distributor;
+      }
     }
     if (include?._count) {
       const countInclude = include._count as { select?: { lines?: boolean } };
@@ -811,6 +853,18 @@ export function createMockPrisma() {
     }
     if (where.customerId) {
       items = items.filter((o) => o.customerId === where.customerId);
+    }
+    if (where.fulfillmentType) {
+      items = items.filter(
+        (o) => (o as OrderRecord & { fulfillmentType?: string }).fulfillmentType === where.fulfillmentType,
+      );
+    }
+    if (where.guestEmail) {
+      const guestEmail = where.guestEmail as { contains?: string; mode?: string };
+      if (guestEmail.contains) {
+        const needle = guestEmail.contains.toLowerCase();
+        items = items.filter((o) => o.guestEmail?.toLowerCase().includes(needle));
+      }
     }
     if (where.createdAt) {
       items = items.filter((o) =>
@@ -4102,6 +4156,23 @@ export function createMockPrisma() {
           }
           return result;
         });
+      },
+      count: async ({
+        where,
+      }: {
+        where?: {
+          distributorId?: string;
+          status?: WithdrawalRequestStatus;
+        };
+      } = {}) => {
+        let items = [...withdrawalRequests.values()];
+        if (where?.distributorId) {
+          items = items.filter((w) => w.distributorId === where.distributorId);
+        }
+        if (where?.status) {
+          items = items.filter((w) => w.status === where.status);
+        }
+        return items.length;
       },
       findFirst: async ({
         where,

@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from 'next-intl/server';
+import { Alert, AlertDescription } from '@meridian/ui';
 import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import type { PlatformFundsSummary } from '@meridian/shared';
 
@@ -48,7 +49,13 @@ export default async function FundsPage({
           />
         ) : null}
         <ListPageFrame title={t('title')} description={t('description')}>
-          {summary ? <FundsView initialSummary={summary} token={token} /> : null}
+          {summary ? (
+            <FundsView initialSummary={summary} token={token} />
+          ) : (
+            <Alert variant="destructive">
+              <AlertDescription>{t('loadError')}</AlertDescription>
+            </Alert>
+          )}
         </ListPageFrame>
       </div>
     </AdminShellWrapper>

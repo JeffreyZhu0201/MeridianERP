@@ -24,12 +24,16 @@ export class PlatformOrdersController {
     @Query('limit') limit?: string,
     @Query('status') status?: string,
     @Query('fulfillmentType') fulfillmentType?: string,
+    @Query('guestEmail') guestEmail?: string,
+    @Query('tenantId') tenantId?: string,
   ) {
     return this.ordersService.findAll(
       page ? parseInt(page, 10) : 1,
       limit ? parseInt(limit, 10) : 20,
       status,
       fulfillmentType,
+      guestEmail,
+      tenantId,
     );
   }
 

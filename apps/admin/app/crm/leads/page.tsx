@@ -8,16 +8,28 @@ import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { LeadsTable } from './_components/leads-table';
 
-export default async function CrmLeadsPage() {
+export default async function CrmLeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ stage?: string }>;
+}) {
   const token = await getToken();
   if (!token) return null;
 
+  const params = await searchParams;
   const t = await getTranslations('admin.crm.leads');
   let leads: PlatformCrmLead[] = [];
   let contacts: PlatformCrmContact[] = [];
+
+  const leadsQuery = new URLSearchParams();
+  if (params.stage) {
+    leadsQuery.set('stage', params.stage);
+  }
+  const leadsPath = `/platform/crm/leads${leadsQuery.toString() ? `?${leadsQuery}` : ''}`;
+
   try {
     [leads, contacts] = await Promise.all([
-      apiFetch<PlatformCrmLead[]>('/platform/crm/leads', {}, token),
+      apiFetch<PlatformCrmLead[]>(leadsPath, {}, token),
       apiFetch<PlatformCrmContact[]>('/platform/crm/contacts', {}, token),
     ]);
   } catch {

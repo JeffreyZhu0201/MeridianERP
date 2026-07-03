@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
@@ -8,6 +9,9 @@ import {
   Button,
   EmptyState,
   formatMoney,
+  Input,
+  Label,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -16,13 +20,21 @@ import {
   TableRow,
 } from '@meridian/ui';
 
+import { ListPagination } from '@/components/list-pagination';
 import { apiFetch, type CommissionLedgerEntry, type SettlementBatch } from '@/lib/api';
+
+type LedgerStatusFilter = 'ACCRUED' | 'SETTLED' | 'ALL';
 
 interface SettlementsViewProps {
   batches: SettlementBatch[];
+  batchMeta: { total: number; page: number; limit: number };
   ledgerEntries: CommissionLedgerEntry[];
+  ledgerMeta: { total: number; page: number; limit: number };
+  ledgerStatus: LedgerStatusFilter;
   token: string;
 }
+
+const LEDGER_STATUSES: LedgerStatusFilter[] = ['ACCRUED', 'SETTLED', 'ALL'];
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale, {
@@ -32,20 +44,76 @@ function formatDate(iso: string, locale: string): string {
   });
 }
 
-export function SettlementsView({ batches, ledgerEntries, token }: SettlementsViewProps) {
+function currentMonthValue(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `${now.getFullYear()}-${month}`;
+}
+
+function exportPeriodForMonth(monthValue: string): { periodStart: string; periodEnd: string } {
+  const [year, month] = monthValue.split('-').map(Number);
+  const periodStart = new Date(year, month - 1, 1);
+  const periodEnd = new Date(year, month, 0, 23, 59, 59, 999);
+  return { periodStart: periodStart.toISOString(), periodEnd: periodEnd.toISOString() };
+}
+
+function exportPeriodLast30Days(): { periodStart: string; periodEnd: string } {
+  const periodEnd = new Date();
+  const periodStart = new Date(periodEnd);
+  periodStart.setDate(periodStart.getDate() - 30);
+  return { periodStart: periodStart.toISOString(), periodEnd: periodEnd.toISOString() };
+}
+
+export function SettlementsView({
+  batches,
+  batchMeta,
+  ledgerEntries,
+  ledgerMeta,
+  ledgerStatus,
+  token,
+}: SettlementsViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations('admin.settlements');
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
+  const [exportMode, setExportMode] = useState<'month' | 'last30'>('month');
+  const [exportMonth, setExportMonth] = useState(currentMonthValue);
+
+  const ledgerTotalPages = Math.max(1, Math.ceil(ledgerMeta.total / ledgerMeta.limit));
+
+  const ledgerTitleKey =
+    ledgerStatus === 'SETTLED'
+      ? 'settledLedger'
+      : ledgerStatus === 'ALL'
+        ? 'commissionLedger'
+        : 'accruedLedger';
+
+  const emptyLedgerKey =
+    ledgerStatus === 'SETTLED'
+      ? 'emptySettledLedger'
+      : ledgerStatus === 'ALL'
+        ? 'emptyCommissionLedger'
+        : 'emptyLedger';
+
+  function updateLedgerStatus(value: LedgerStatusFilter) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value === 'ACCRUED') {
+      params.delete('ledgerStatus');
+    } else {
+      params.set('ledgerStatus', value);
+    }
+    params.delete('ledgerPage');
+    router.push(`/settlements?${params.toString()}`);
+  }
 
   async function handleExport() {
     setExporting(true);
     setError('');
     try {
-      const now = new Date();
-      const periodStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-      const periodEnd = now.toISOString();
+      const { periodStart, periodEnd } =
+        exportMode === 'last30' ? exportPeriodLast30Days() : exportPeriodForMonth(exportMonth);
 
       await apiFetch(
         '/platform/settlements/export',
@@ -65,8 +133,32 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-end gap-4">
-        <Button onClick={handleExport} disabled={exporting || ledgerEntries.length === 0}>
+      <div className="flex flex-wrap items-end justify-end gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="export-mode">{t('exportPeriod')}</Label>
+          <Select
+            id="export-mode"
+            value={exportMode}
+            onChange={(e) => setExportMode(e.target.value as 'month' | 'last30')}
+            className="min-w-[160px]"
+          >
+            <option value="month">{t('exportByMonth')}</option>
+            <option value="last30">{t('exportLast30Days')}</option>
+          </Select>
+        </div>
+        {exportMode === 'month' ? (
+          <div className="space-y-2">
+            <Label htmlFor="export-month">{t('exportMonth')}</Label>
+            <Input
+              id="export-month"
+              type="month"
+              value={exportMonth}
+              onChange={(e) => setExportMonth(e.target.value)}
+              className="w-40"
+            />
+          </div>
+        ) : null}
+        <Button onClick={handleExport} disabled={exporting}>
           {exporting ? t('exporting') : t('export')}
         </Button>
       </div>
@@ -113,12 +205,42 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
             </Table>
           </div>
         )}
+        <Suspense>
+          <ListPagination
+            basePath="/settlements"
+            total={batchMeta.total}
+            page={batchMeta.page}
+            limit={batchMeta.limit}
+            summary={t('batchPagination', {
+              page: batchMeta.page,
+              totalPages: Math.max(1, Math.ceil(batchMeta.total / batchMeta.limit)),
+              total: batchMeta.total,
+            })}
+          />
+        </Suspense>
       </div>
 
       <div className="space-y-3">
-        <h2 className="text-lg font-medium">{t('accruedLedger')}</h2>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <h2 className="text-lg font-medium">{t(ledgerTitleKey)}</h2>
+          <div className="space-y-2">
+            <Label htmlFor="ledger-status-filter">{t('ledgerStatusFilter')}</Label>
+            <Select
+              id="ledger-status-filter"
+              value={ledgerStatus}
+              onChange={(e) => updateLedgerStatus(e.target.value as LedgerStatusFilter)}
+              className="min-w-[160px]"
+            >
+              {LEDGER_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {t(`ledgerStatus.${status}`)}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </div>
         {ledgerEntries.length === 0 ? (
-          <EmptyState title={t('emptyLedger')} />
+          <EmptyState title={t(emptyLedgerKey)} />
         ) : (
           <div className="rounded-xl ring-1 ring-border">
             <Table>
@@ -127,6 +249,9 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
                   <TableHead>{t('columns.merchant')}</TableHead>
                   <TableHead>{t('columns.distributor')}</TableHead>
                   <TableHead>{t('columns.order')}</TableHead>
+                  {ledgerStatus === 'ALL' ? (
+                    <TableHead>{t('columns.status')}</TableHead>
+                  ) : null}
                   <TableHead className="text-right">{t('columns.commission')}</TableHead>
                   <TableHead>{t('columns.date')}</TableHead>
                 </TableRow>
@@ -139,7 +264,16 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
                     <TableCell className="font-mono text-xs">
                       {entry.order.id.slice(0, 8)}…
                     </TableCell>
-                    <TableCell className="text-right">{formatMoney(entry.amount, 'USD', locale)}</TableCell>
+                    {ledgerStatus === 'ALL' ? (
+                      <TableCell>
+                        <Badge variant={entry.status === 'SETTLED' ? 'default' : 'secondary'}>
+                          {t(`ledgerStatus.${entry.status as 'ACCRUED' | 'SETTLED'}`)}
+                        </Badge>
+                      </TableCell>
+                    ) : null}
+                    <TableCell className="text-right">
+                      {formatMoney(entry.amount, 'USD', locale)}
+                    </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {formatDate(entry.createdAt, locale)}
                     </TableCell>
@@ -149,6 +283,20 @@ export function SettlementsView({ batches, ledgerEntries, token }: SettlementsVi
             </Table>
           </div>
         )}
+        <Suspense>
+          <ListPagination
+            basePath="/settlements"
+            total={ledgerMeta.total}
+            page={ledgerMeta.page}
+            limit={ledgerMeta.limit}
+            pageParam="ledgerPage"
+            summary={t('ledgerPagination', {
+              page: ledgerMeta.page,
+              totalPages: ledgerTotalPages,
+              total: ledgerMeta.total,
+            })}
+          />
+        </Suspense>
       </div>
     </div>
   );

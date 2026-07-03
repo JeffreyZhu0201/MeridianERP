@@ -50,7 +50,9 @@ export default async function DashboardPage() {
           <>
           
             <BentoMetricTile title={t('totalMerchants')} value={stats.totalMerchants} />
-            <BentoMetricTile title={t('pendingMerchants')} value={stats.pendingReview} />
+            <Link href="/merchants?status=SUBMITTED" className="block transition-opacity hover:opacity-90">
+              <BentoMetricTile title={t('pendingMerchants')} value={stats.pendingReview} />
+            </Link>
             <BentoMetricTile title={t('activeDistributors')} value={stats.activeDistributors} />
             <BentoMetricTile title={t('ordersLast30Days')} value={stats.ordersLast30Days} />
             <BentoMetricTile

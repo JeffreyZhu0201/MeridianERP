@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Button, Dialog, DialogCloseButton, Input, Label } from '@meridian/ui';
+import { Button, Dialog, DialogCloseButton, Input, Label, Switch } from '@meridian/ui';
 
 import type { MasterSku } from '@/lib/api';
 
@@ -15,6 +15,7 @@ interface EditSkuDialogProps {
   wholesalePrice: string;
   retailPrice: string;
   flagshipPrice: string;
+  isActive: boolean;
   submitting: boolean;
   onSkuNameChange: (value: string) => void;
   onOnHandChange: (value: string) => void;
@@ -22,6 +23,7 @@ interface EditSkuDialogProps {
   onWholesalePriceChange: (value: string) => void;
   onRetailPriceChange: (value: string) => void;
   onFlagshipPriceChange: (value: string) => void;
+  onIsActiveChange: (value: boolean) => void;
   onSubmit: () => void;
 }
 
@@ -35,6 +37,7 @@ export function EditSkuDialog({
   wholesalePrice,
   retailPrice,
   flagshipPrice,
+  isActive,
   submitting,
   onSkuNameChange,
   onOnHandChange,
@@ -42,6 +45,7 @@ export function EditSkuDialog({
   onWholesalePriceChange,
   onRetailPriceChange,
   onFlagshipPriceChange,
+  onIsActiveChange,
   onSubmit,
 }: EditSkuDialogProps) {
   const t = useTranslations('admin.allocations');
@@ -66,6 +70,17 @@ export function EditSkuDialog({
         <div className="space-y-2">
           <Label htmlFor="edit-sku-name">{t('form.skuName')}</Label>
           <Input id="edit-sku-name" value={skuName} onChange={(e) => onSkuNameChange(e.target.value)} />
+        </div>
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
+          <div className="space-y-0.5">
+            <Label htmlFor="edit-sku-active">{t('form.isActive')}</Label>
+            <p className="text-xs text-muted-foreground">{t('form.isActiveHint')}</p>
+          </div>
+          <Switch
+            id="edit-sku-active"
+            checked={isActive}
+            onCheckedChange={onIsActiveChange}
+          />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

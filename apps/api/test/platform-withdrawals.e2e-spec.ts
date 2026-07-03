@@ -108,8 +108,10 @@ describe('Platform withdrawals (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    expect(pending.body.length).toBeGreaterThanOrEqual(1);
-    expect(pending.body[0]).toMatchObject({
+    expect(pending.body.meta).toMatchObject({ page: 1, limit: 50 });
+    expect(pending.body.meta.total).toBeGreaterThanOrEqual(1);
+    expect(pending.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(pending.body.data[0]).toMatchObject({
       distributorId: promoterId,
       distributorName: 'Withdraw Promoter',
       status: WithdrawalRequestStatus.PENDING,
@@ -120,9 +122,10 @@ describe('Platform withdrawals (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    expect(filtered.body.every((row: { distributorId: string }) => row.distributorId === promoterId)).toBe(
-      true,
-    );
+    expect(filtered.body.meta.total).toBeGreaterThanOrEqual(1);
+    expect(
+      filtered.body.data.every((row: { distributorId: string }) => row.distributorId === promoterId),
+    ).toBe(true);
   });
 
   it('approves and rejects pending withdrawals', async () => {

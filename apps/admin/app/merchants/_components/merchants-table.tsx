@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
+  Badge,
   Button,
   EmptyState,
   Table,
@@ -90,7 +91,18 @@ export function MerchantsTable({ merchants, token, distributors = [] }: Merchant
           <TableBody>
             {merchants.map((merchant) => (
               <TableRow key={merchant.id}>
-                <TableCell className="font-medium">{merchant.businessName}</TableCell>
+                <TableCell className="font-medium">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span>{merchant.businessName}</span>
+                    {merchant.onboardingStatus === OnboardingStatus.APPROVED &&
+                    merchant.storePublished ? (
+                      <Badge variant="secondary">{t('detail.storePublished')}</Badge>
+                    ) : null}
+                    {merchant.isFlagship ? (
+                      <Badge variant="default">{t('detail.isFlagship')}</Badge>
+                    ) : null}
+                  </div>
+                </TableCell>
                 <TableCell>{merchant.contactEmail}</TableCell>
                 <TableCell>
                   <StatusBadge status={merchant.onboardingStatus} />
@@ -107,6 +119,13 @@ export function MerchantsTable({ merchants, token, distributors = [] }: Merchant
                         {t('view')}
                       </Button>
                     </Link>
+                    {merchant.onboardingStatus === OnboardingStatus.APPROVED && merchant.tenantId ? (
+                      <Link href={`/inventory/tenants/${merchant.tenantId}`}>
+                        <Button variant="outline" size="sm">
+                          {t('viewInventory')}
+                        </Button>
+                      </Link>
+                    ) : null}
                     {merchant.onboardingStatus === OnboardingStatus.SUBMITTED ||
                     merchant.onboardingStatus === OnboardingStatus.UNDER_REVIEW ? (
                       <>

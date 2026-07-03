@@ -2,13 +2,21 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
 
+import { ListPagination } from '@/components/list-pagination';
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type PaginatedResponse, type PlatformOrder } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { OrdersView } from './_components/orders-view';
 
 interface OrdersPageProps {
-  searchParams: Promise<{ page?: string; status?: string; fulfillmentType?: string; tab?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    status?: string;
+    fulfillmentType?: string;
+    tab?: string;
+    guestEmail?: string;
+    tenantId?: string;
+  }>;
 }
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
@@ -19,12 +27,15 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const tc = await getTranslations('common');
   const params = await searchParams;
   const activeTab = params.tab === 'delivery' ? 'delivery' : 'all';
+  const statusFilter = activeTab === 'delivery' ? 'PAID' : (params.status ?? '');
 
   const query = new URLSearchParams();
   query.set('page', params.page ?? '1');
   query.set('limit', '20');
   if (params.status) query.set('status', params.status);
   if (params.fulfillmentType) query.set('fulfillmentType', params.fulfillmentType);
+  if (params.guestEmail) query.set('guestEmail', params.guestEmail);
+  if (params.tenantId) query.set('tenantId', params.tenantId);
 
   let orders: PlatformOrder[] = [];
   let meta = { total: 0, page: 1, limit: 20 };
@@ -40,6 +51,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     orders = [];
   }
 
+  const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
+
   const metrics = [
     {
       title: activeTab === 'delivery' ? t('tabDelivery') : t('title'),
@@ -47,10 +60,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
       description: activeTab === 'delivery' ? t('description') : undefined,
     },
     {
-      title: tc('pageOf', {
-        page: meta.page,
-        total: Math.max(1, Math.ceil(meta.total / meta.limit)),
-      }),
+      title: tc('pageOf', { page: meta.page, total: totalPages }),
       value: orders.length,
     },
   ];
@@ -67,7 +77,21 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
           }
         >
           <Suspense>
-            <OrdersView orders={orders} token={token} activeTab={activeTab} />
+            <OrdersView
+              orders={orders}
+              token={token}
+              activeTab={activeTab}
+              statusFilter={statusFilter}
+            />
+          </Suspense>
+          <Suspense>
+            <ListPagination
+              basePath="/orders"
+              total={meta.total}
+              page={meta.page}
+              limit={meta.limit}
+              summary={t('pagination', { page: meta.page, totalPages, total: meta.total })}
+            />
           </Suspense>
         </ListPageFrame>
       </div>

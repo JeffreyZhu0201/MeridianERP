@@ -11,25 +11,70 @@ import {
 import { getToken } from '@/lib/auth';
 import { SettlementsView } from './_components/settlements-view';
 
-export default async function SettlementsPage() {
+type LedgerStatusFilter = 'ACCRUED' | 'SETTLED' | 'ALL';
+
+function parseLedgerStatus(value?: string): LedgerStatusFilter {
+  if (value === 'SETTLED' || value === 'ALL') return value;
+  return 'ACCRUED';
+}
+
+export default async function SettlementsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+    ledgerPage?: string;
+    ledgerStatus?: string;
+  }>;
+}) {
   const token = await getToken();
   if (!token) return null;
 
+  const params = await searchParams;
   const locale = await getLocale();
   const t = await getTranslations('admin.settlements');
 
+  const batchPage = Math.max(1, Number(params.page ?? '1') || 1);
+  const ledgerPage = Math.max(1, Number(params.ledgerPage ?? '1') || 1);
+  const ledgerStatus = parseLedgerStatus(params.ledgerStatus);
+
+  const batchQuery = new URLSearchParams({
+    page: String(batchPage),
+    limit: '20',
+  });
+
+  const ledgerQuery = new URLSearchParams({
+    page: String(ledgerPage),
+    limit: '50',
+  });
+  if (ledgerStatus !== 'ALL') {
+    ledgerQuery.set('status', ledgerStatus);
+  }
+
   const [batchesRes, ledgerRes] = await Promise.all([
-    apiFetch<PaginatedResponse<SettlementBatch>>('/platform/settlements', {}, token).catch(
-      () => ({ data: [], meta: { total: 0, page: 1, limit: 20 } }),
-    ),
-    apiFetch<PaginatedResponse<CommissionLedgerEntry>>(
-      '/platform/settlements/ledger?status=ACCRUED',
+    apiFetch<PaginatedResponse<SettlementBatch>>(
+      `/platform/settlements?${batchQuery.toString()}`,
       {},
       token,
-    ).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: 50 } })),
+    ).catch(() => ({ data: [], meta: { total: 0, page: batchPage, limit: 20 } })),
+    apiFetch<PaginatedResponse<CommissionLedgerEntry>>(
+      `/platform/settlements/ledger?${ledgerQuery.toString()}`,
+      {},
+      token,
+    ).catch(() => ({ data: [], meta: { total: 0, page: ledgerPage, limit: 50 } })),
   ]);
 
-  const accruedTotal = ledgerRes.data.reduce((sum, entry) => sum + Number(entry.amount), 0);
+  const accruedTotal =
+    ledgerStatus === 'ACCRUED'
+      ? ledgerRes.data.reduce((sum, entry) => sum + Number(entry.amount), 0)
+      : 0;
+
+  const ledgerTitleKey =
+    ledgerStatus === 'SETTLED'
+      ? 'settledLedger'
+      : ledgerStatus === 'ALL'
+        ? 'commissionLedger'
+        : 'accruedLedger';
 
   const metrics = [
     {
@@ -37,14 +82,18 @@ export default async function SettlementsPage() {
       value: batchesRes.meta.total,
     },
     {
-      title: t('accruedLedger'),
+      title: t(ledgerTitleKey),
       value: ledgerRes.meta.total,
       description: t('entries', { count: ledgerRes.data.length }),
     },
-    {
-      title: t('accruedCommissions'),
-      value: formatMoney(accruedTotal),
-    },
+    ...(ledgerStatus === 'ACCRUED'
+      ? [
+          {
+            title: t('accruedCommissions'),
+            value: formatMoney(accruedTotal, 'USD', locale),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -54,7 +103,10 @@ export default async function SettlementsPage() {
         <ListPageFrame title={t('title')} description={t('description')}>
           <SettlementsView
             batches={batchesRes.data}
+            batchMeta={batchesRes.meta}
             ledgerEntries={ledgerRes.data}
+            ledgerMeta={ledgerRes.meta}
+            ledgerStatus={ledgerStatus}
             token={token}
           />
         </ListPageFrame>

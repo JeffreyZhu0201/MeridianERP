@@ -1,8 +1,9 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { Label, Select } from '@meridian/ui';
 
 import { apiFetch, type AllocationOrder, type MasterSku } from '@/lib/api';
 import { AllocationOrdersTable } from './allocation-orders-table';
@@ -19,18 +20,27 @@ interface ApprovedMerchant {
 
 interface AllocationsViewProps {
   masterSkus: MasterSku[];
+  skuMeta: { total: number; page: number; limit: number };
   allocations: AllocationOrder[];
   merchants: ApprovedMerchant[];
   token: string;
+  filterTenantId: string;
+  filterStatus: string;
 }
+
+const ALLOCATION_STATUSES = ['DRAFT', 'ISSUED', 'CONFIRMED', 'CANCELLED'] as const;
 
 export function AllocationsView({
   masterSkus,
   allocations,
   merchants,
   token,
+  filterTenantId,
+  filterStatus,
 }: AllocationsViewProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const t = useTranslations('admin.allocations');
   const tc = useTranslations('common');
@@ -55,12 +65,23 @@ export function AllocationsView({
   const [editWholesalePrice, setEditWholesalePrice] = useState('');
   const [editRetailPrice, setEditRetailPrice] = useState('');
   const [editFlagshipPrice, setEditFlagshipPrice] = useState('');
+  const [editIsActive, setEditIsActive] = useState(true);
 
   const [tenantId, setTenantId] = useState(merchants[0]?.tenantId ?? '');
   const [note, setNote] = useState('');
   const [lineSkuId, setLineSkuId] = useState(masterSkus[0]?.id ?? '');
   const [lineQty, setLineQty] = useState('1');
   const [lines, setLines] = useState<Array<{ masterSkuId: string; quantity: number }>>([]);
+
+  function updateFilter(key: 'tenantId' | 'status', value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  }
 
   async function handleCreateSku() {
     setSubmitting(true);
@@ -139,6 +160,7 @@ export function AllocationsView({
     setEditWholesalePrice(String(sku.wholesalePrice));
     setEditRetailPrice(String(sku.retailPrice));
     setEditFlagshipPrice(String(sku.flagshipPrice));
+    setEditIsActive(sku.isActive);
     setSkuEditOpen(true);
   }
 
@@ -168,6 +190,7 @@ export function AllocationsView({
             wholesalePrice: Number(editWholesalePrice),
             retailPrice: Number(editRetailPrice),
             flagshipPrice: Number(editFlagshipPrice),
+            isActive: editIsActive,
           }),
         },
         token,
@@ -208,6 +231,41 @@ export function AllocationsView({
         onEdit={openEditSku}
         onSyncAll={handleSyncAll}
       />
+
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="alloc-tenant-filter">{t('filterMerchant')}</Label>
+          <Select
+            id="alloc-tenant-filter"
+            value={filterTenantId}
+            onChange={(e) => updateFilter('tenantId', e.target.value)}
+            className="min-w-[200px]"
+          >
+            <option value="">{t('allMerchants')}</option>
+            {merchants.map((m) => (
+              <option key={m.tenantId} value={m.tenantId}>
+                {m.businessName}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="alloc-status-filter">{t('filterStatus')}</Label>
+          <Select
+            id="alloc-status-filter"
+            value={filterStatus}
+            onChange={(e) => updateFilter('status', e.target.value)}
+            className="w-[160px]"
+          >
+            <option value="">{t('allStatuses')}</option>
+            {ALLOCATION_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {t(`orderStatus.${status}`)}
+              </option>
+            ))}
+          </Select>
+        </div>
+      </div>
 
       <AllocationOrdersTable
         allocations={allocations}
@@ -260,6 +318,7 @@ export function AllocationsView({
         wholesalePrice={editWholesalePrice}
         retailPrice={editRetailPrice}
         flagshipPrice={editFlagshipPrice}
+        isActive={editIsActive}
         submitting={submitting}
         onSkuNameChange={setEditSkuName}
         onOnHandChange={setEditOnHand}
@@ -267,6 +326,7 @@ export function AllocationsView({
         onWholesalePriceChange={setEditWholesalePrice}
         onRetailPriceChange={setEditRetailPrice}
         onFlagshipPriceChange={setEditFlagshipPrice}
+        onIsActiveChange={setEditIsActive}
         onSubmit={handleUpdateSku}
       />
 

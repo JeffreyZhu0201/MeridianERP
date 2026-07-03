@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Badge,
   BentoDetailHero,
@@ -41,39 +42,47 @@ export function TenantInventorySummary({
 }: TenantInventorySummaryProps) {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') ?? 'overview';
+  const t = useTranslations('admin.inventory');
+  const tc = useTranslations('common');
+
+  const tabs = [
+    { id: 'overview', label: t('tabs.overview') },
+    { id: 'adjustments', label: t('tabs.adjustments') },
+    { id: 'purchase-orders', label: t('tabs.purchaseOrders') },
+  ] as const;
 
   return (
     <DetailPageFrame
-      title={`${businessName} — Inventory`}
-      description="Read-only support view"
-      backHref="/merchants"
-      backLabel="Merchants"
+      title={t('title', { businessName })}
+      description={t('description')}
+      backHref="/merchants?status=APPROVED"
+      backLabel={t('backLabel')}
     >
       <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm">
-        Read-only support view. Changes must be made by the merchant.
+        {t('readOnlyBanner')}
       </div>
 
       <BentoDetailHero
         metrics={[
-          { title: 'Warehouses', value: summary.warehouseCount },
-          { title: 'SKUs', value: summary.skuCount },
-          { title: 'Units on hand', value: summary.totalUnitsOnHand.toLocaleString() },
-          { title: 'Low stock', value: summary.lowStockCount },
+          { title: t('metrics.warehouses'), value: summary.warehouseCount },
+          { title: t('metrics.skus'), value: summary.skuCount },
+          { title: t('metrics.unitsOnHand'), value: summary.totalUnitsOnHand.toLocaleString() },
+          { title: t('metrics.lowStock'), value: summary.lowStockCount },
         ]}
       />
 
       <div className="flex gap-2 border-b border-border/50">
-        {(['overview', 'adjustments', 'purchase-orders'] as const).map((t) => (
+        {tabs.map((item) => (
           <Link
-            key={t}
-            href={`/inventory/tenants/${tenantId}?tab=${t}`}
-            className={`border-b-2 px-4 py-2 text-sm font-medium capitalize ${
-              tab === t
+            key={item.id}
+            href={`/inventory/tenants/${tenantId}?tab=${item.id}`}
+            className={`border-b-2 px-4 py-2 text-sm font-medium ${
+              tab === item.id
                 ? 'border-primary text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            {t === 'purchase-orders' ? 'Recent POs' : t === 'adjustments' ? 'Recent adjustments' : 'Overview'}
+            {item.label}
           </Link>
         ))}
       </div>
@@ -84,10 +93,10 @@ export function TenantInventorySummary({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Default</TableHead>
-                  <TableHead className="text-right">SKUs</TableHead>
-                  <TableHead className="text-right">Units</TableHead>
+                  <TableHead>{t('columns.name')}</TableHead>
+                  <TableHead>{t('columns.default')}</TableHead>
+                  <TableHead className="text-right">{t('columns.skus')}</TableHead>
+                  <TableHead className="text-right">{t('columns.units')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -95,7 +104,11 @@ export function TenantInventorySummary({
                   <TableRow key={wh.id}>
                     <TableCell className="font-medium">{wh.name}</TableCell>
                     <TableCell>
-                      {wh.isDefault ? <Badge variant="outline">Default</Badge> : '—'}
+                      {wh.isDefault ? (
+                        <Badge variant="outline">{t('defaultBadge')}</Badge>
+                      ) : (
+                        tc('emptyDash')
+                      )}
                     </TableCell>
                     <TableCell className="text-right font-mono text-sm tabular-nums">
                       {wh.skuCount}
@@ -116,18 +129,18 @@ export function TenantInventorySummary({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead className="text-right">Delta</TableHead>
-                <TableHead>Reason</TableHead>
-                <TableHead>Actor</TableHead>
+                <TableHead>{t('columns.date')}</TableHead>
+                <TableHead>{t('columns.product')}</TableHead>
+                <TableHead className="text-right">{t('columns.delta')}</TableHead>
+                <TableHead>{t('columns.reason')}</TableHead>
+                <TableHead>{t('columns.actor')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {adjustments.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    No recent adjustments
+                    {t('emptyAdjustments')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -164,17 +177,17 @@ export function TenantInventorySummary({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>PO #</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>{t('columns.poNumber')}</TableHead>
+                <TableHead>{t('columns.supplier')}</TableHead>
+                <TableHead>{t('columns.status')}</TableHead>
+                <TableHead>{t('columns.created')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {purchaseOrders.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="text-center text-muted-foreground">
-                    No recent purchase orders
+                    {t('emptyPurchaseOrders')}
                   </TableCell>
                 </TableRow>
               ) : (

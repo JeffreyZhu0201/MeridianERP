@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
+import { ListPagination } from '@/components/list-pagination';
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type PaginatedResponse, type PlatformAccountListItem } from '@/lib/api';
 import { getToken } from '@/lib/auth';
@@ -17,6 +18,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   if (!token) return null;
 
   const t = await getTranslations('admin.users');
+  const tc = await getTranslations('common');
   const params = await searchParams;
   const query = new URLSearchParams();
   if (params.search) query.set('search', params.search);
@@ -38,13 +40,18 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
     users = [];
   }
 
+  const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
+
   return (
     <AdminShellWrapper>
       <div className="space-y-6">
         <BentoListHeader
           metrics={[
             { title: t('title'), value: meta.total },
-            { title: t('filterIdentity'), value: users.length },
+            {
+              title: tc('pageOf', { page: meta.page, total: totalPages }),
+              value: users.length,
+            },
           ]}
         />
         <ListPageFrame
@@ -57,6 +64,15 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
           }
         >
           <UsersTable users={users} />
+          <Suspense>
+            <ListPagination
+              basePath="/users"
+              total={meta.total}
+              page={meta.page}
+              limit={meta.limit}
+              summary={t('pagination', { page: meta.page, totalPages, total: meta.total })}
+            />
+          </Suspense>
         </ListPageFrame>
       </div>
     </AdminShellWrapper>
