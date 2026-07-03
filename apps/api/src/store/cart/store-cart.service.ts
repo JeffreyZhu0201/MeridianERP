@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { BindType, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -66,13 +66,6 @@ export class StoreCartService {
           data: { sessionId },
           include: CART_INCLUDE,
         });
-      }
-      if (!cart.distributorId) {
-        cart = await this.hydrateDistributorFromBinding(
-          cart,
-          tenantId,
-          customerId,
-        );
       }
 
       return { cart, sessionId: sessionId ?? cart.sessionId ?? undefined };
@@ -221,32 +214,6 @@ export class StoreCartService {
     return this.formatCart(updated, resolvedSession);
   }
 
-  
-  private async hydrateDistributorFromBinding(
-    cart: Prisma.CartGetPayload<{ include: typeof CART_INCLUDE }>,
-    tenantId: string,
-    customerId: string,
-  ) {
-    const binding = await this.prisma.binding.findUnique({
-      where: {
-        bindableType_bindableId: {
-          bindableType: BindType.CUSTOMER,
-          bindableId: customerId,
-        },
-      },
-    });
-    if (!binding || binding.tenantId !== tenantId) {
-      return cart;
-    }
-
-    return this.prisma.cart.update({
-      where: { id: cart.id },
-      data: { distributorId: binding.distributorId },
-      include: CART_INCLUDE,
-    });
-  }
-
-  
   private formatCart(
     cart: Prisma.CartGetPayload<{ include: typeof CART_INCLUDE }>,
     sessionId?: string,

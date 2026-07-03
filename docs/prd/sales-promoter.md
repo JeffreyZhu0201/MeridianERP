@@ -13,7 +13,7 @@ Branch recruitment today uses the merchant portal (`/merchant/register?invite=`)
 |---------|--------|-------|
 | Platform admin | `apps/admin` | Create promoters from existing users, set commission rate, review applications, view promoted stores and per-order commission |
 | Prospective store owner | `apps/store` | Scan promoter code, register/login, submit store application |
-| Sales promoter | `apps/distributor` (optional) | Share invite link, view branches and earnings |
+| Sales promoter | `apps/distributor` | Share invite link/QR, view branches and earnings, apply for withdrawal |
 
 ## User Stories
 
@@ -26,6 +26,11 @@ Branch recruitment today uses the merchant portal (`/merchant/register?invite=`)
 | US-SP5 | As admin, I create a store and assign a promoter directly | P0 | **Given** create-merchant form, **When** I select promoter, **Then** branch is approved with recruiter set. |
 | US-SP6 | As admin, I view promoted stores and per-order commission | P0 | **Given** promoter detail, **When** I open commission tab, **Then** I see orders with sequence (1st/2nd), amount, and status. |
 | US-SP7 | As platform, I accrue promoter commission only on 1st and 2nd fulfilled orders per customer per branch | P0 | **Given** recruited branch, **When** customer order 3+ is fulfilled, **Then** no new ledger entry. **Given** guest order without `customerId`, **Then** no commission (P0). |
+| US-SP8 | As promoter, I self-create share codes and QR on distributor portal | P0 | **Given** portal-enabled platform promoter, **When** I open `/share` and generate a code, **Then** I get 6-char code, `{STORE}/open-shop?invite=` URL, and QR; history lists use count and revoke works. |
+| US-SP9 | As promoter, I view branch sales and commission details with store name and order sequence | P0 | **Given** recruited branches and ledger entries, **When** I open branches/commissions, **Then** I see 30d + lifetime sales (branches) and store name, order sequence, order total (commissions). |
+| US-SP10 | As promoter, I apply for withdrawal and see request history | P0 | **Given** available settled balance, **When** I submit withdrawal, **Then** request is PENDING; history shows PENDING/APPROVED/REJECTED with reviewed time. |
+| US-SP11 | As admin, I view promoter funds summary and full withdrawal history | P0 | **Given** promoter detail, **When** I open funds/withdrawals sections, **Then** I see accrued/settled/available/pending totals and all withdrawal rows with link to filtered withdrawals list. |
+| US-SP12 | As admin, I filter withdrawals by status and promoter | P0 | **Given** withdrawals in multiple states, **When** I filter by status or `distributorId`, **Then** list matches; approve = disburse confirm (no payment gateway). |
 
 ## Non-Goals
 

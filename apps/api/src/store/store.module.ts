@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { BindingsModule } from '../bindings/bindings.module';
-import { CommissionModule } from '../commission/commission.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { PaymentModule } from '../payment/payment.module';
@@ -12,8 +10,6 @@ import {
   StorePlatformAuthController,
 } from './auth/store-auth.controller';
 import { StoreAuthService } from './auth/store-auth.service';
-import { StoreBindingsController } from './bindings/store-bindings.controller';
-import { StoreBindingsService } from './bindings/store-bindings.service';
 import { StoreCatalogController } from './catalog/store-catalog.controller';
 import { StoreCatalogService } from './catalog/store-catalog.service';
 import { StoreCartController } from './cart/store-cart.controller';
@@ -29,11 +25,10 @@ import { StoreMerchantApplicationController } from './merchant-application/store
 import { StoreMerchantApplicationService } from './merchant-application/store-merchant-application.service';
 
 @Module({
-  imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule, FulfillmentModule, PlatformAccountsModule],
+  imports: [AuthModule, PaymentModule, QueueModule, InventoryModule, FulfillmentModule, PlatformAccountsModule],
   controllers: [
     StorePlatformAuthController,
     StoreAuthController,
-    StoreBindingsController,
     StoreCatalogController,
     StoreCartController,
     StoreCheckoutController,
@@ -44,7 +39,6 @@ import { StoreMerchantApplicationService } from './merchant-application/store-me
   providers: [
     StoreTenantService,
     StoreAuthService,
-    StoreBindingsService,
     StoreCatalogService,
     StoreCartService,
     StoreCheckoutService,

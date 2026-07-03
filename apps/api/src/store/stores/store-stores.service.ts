@@ -5,22 +5,28 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class StoreStoresService {
-  
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async listPublished(): Promise<PublishedStoreListResponse> {
     const profiles = await this.prisma.merchantProfile.findMany({
-      where: { onboardingStatus: OnboardingStatus.APPROVED },
+      where: {
+        onboardingStatus: OnboardingStatus.APPROVED,
+        storePublished: true,
+      },
       include: { tenant: true },
     });
-    return {
-      items: profiles
-        .map((profile) => ({
-          slug: profile.tenant.slug,        // 商店 URL 标识
-          displayName: profile.businessName, // 商店显示名称
-        }))
-        .sort((a, b) => a.displayName.localeCompare(b.displayName)),
-    };
+    const items = profiles
+      .map((profile) => ({
+        slug: profile.tenant.slug,
+        displayName: profile.businessName,
+        isFlagship: profile.isFlagship,
+      }))
+      .sort((a, b) => {
+        if (a.isFlagship !== b.isFlagship) {
+          return a.isFlagship ? -1 : 1;
+        }
+        return a.displayName.localeCompare(b.displayName);
+      });
+    return { items };
   }
 }

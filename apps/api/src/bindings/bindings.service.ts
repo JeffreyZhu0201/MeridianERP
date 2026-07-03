@@ -9,7 +9,6 @@ import { BindType } from '@meridian/shared';
 import type {
   BindVerifyResponse,
   BindingRecord,
-  StoreClaimBindingResponse,
 } from '@meridian/shared';
 import { EnvService } from '../config/env.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -113,73 +112,7 @@ export class BindingsService {
 
     return this.formatBinding(binding);
   }
-  async claimCustomer(
-    tenantId: string,
-    customerId: string,
-    token: string,
-  ): Promise<StoreClaimBindingResponse & { isExisting: boolean }> {
-    const qr = await this.validateBindToken(token);
-    if (qr.bindType !== PrismaBindType.CUSTOMER) {
-      throw new BadRequestException(
-        'This link is for merchant partners, not customers',
-      );
-    }
-    if (qr.distributor.tenantId !== tenantId) {
-      throw new BadRequestException('Distributor not in your tenant');
-    }
-    const existing = await this.prisma.binding.findUnique({
-      where: {
-        bindableType_bindableId: {
-          bindableType: PrismaBindType.CUSTOMER,
-          bindableId: customerId,
-        },
-      },
-    });
-    if (existing) {
-      if (existing.distributorId !== qr.distributorId) {
-        throw new ConflictException(
-          'You are already bound to another distributor',
-        );
-      }
-      const cart = await this.ensureCartDistributor(
-        tenantId,
-        customerId,
-        qr.distributorId,
-      );
-      return {
-        binding: this.formatBinding(existing),
-        distributor: { id: qr.distributor.id, name: qr.distributor.name },
-        cart: { id: cart.id, distributorId: cart.distributorId! },
-        isExisting: true,
-      };
-    }
-    const binding = await this.prisma.binding.create({
-      data: {
-        tenantId,
-        distributorId: qr.distributorId,
-        bindableType: PrismaBindType.CUSTOMER,
-        bindableId: customerId,
-      },
-    });
-    const cart = await this.ensureCartDistributor(
-      tenantId,
-      customerId,
-      qr.distributorId,
-    );
-    await this.notifyBindingCreatedIfEnabled(
-      tenantId,
-      qr.distributorId,
-      binding.bindableType,
-      binding.boundAt,
-    );
 
-    return {
-      binding: this.formatBinding(binding),
-      distributor: { id: qr.distributor.id, name: qr.distributor.name },
-      cart: { id: cart.id, distributorId: cart.distributorId! },
-      isExisting: false,
-    };
-  }
   private async validateBindToken(token: string) {
     const qr = await this.prisma.distributorQrCode.findUnique({
       where: { token },
@@ -206,28 +139,7 @@ export class BindingsService {
 
     return qr;
   }
-  private async ensureCartDistributor(
-    tenantId: string,
-    customerId: string,
-    distributorId: string,
-  ) {
-    let cart = await this.prisma.cart.findFirst({
-      where: { tenantId, customerId },
-    });
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: { tenantId, customerId, distributorId },
-      });
-    }
-    else if (cart.distributorId !== distributorId) {
-      cart = await this.prisma.cart.update({
-        where: { id: cart.id },
-        data: { distributorId },
-      });
-    }
 
-    return cart;
-  }
   private async notifyBindingCreatedIfEnabled(
     tenantId: string,
     distributorId: string,

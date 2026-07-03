@@ -7,7 +7,32 @@ export function sumAllocationLineCost(
   );
 }
 
+export function pickupOrderGrossProfit(
+  orderTotal: number,
+  lines: Array<{ quantity: number; unitWholesalePrice: string | number | null | undefined }>,
+): number {
+  const cost = lines.reduce((sum, line) => {
+    const wholesale = line.unitWholesalePrice;
+    if (wholesale == null) return sum;
+    return sum + Number(wholesale) * line.quantity;
+  }, 0);
+  return Number((orderTotal - cost).toFixed(2));
+}
+
 export function computeBranchNetPosition(input: {
+  pickupGrossProfit: number;
+  allocationCost: number;
+  deliveryCost: number;
+}): number {
+  return (
+    input.pickupGrossProfit -
+    input.allocationCost -
+    input.deliveryCost
+  );
+}
+
+/** @deprecated Use computeBranchNetPosition without payableCommission */
+export function computeBranchNetPositionLegacy(input: {
   salesGmv: number;
   allocationCost: number;
   deliveryCost: number;

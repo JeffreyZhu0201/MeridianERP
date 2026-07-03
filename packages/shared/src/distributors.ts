@@ -92,10 +92,12 @@ export interface DateRangeQuery {
 
 export interface CommissionStatementRow {
   id: string;
-  orderId: string;
-  /** Short display reference — last 8 chars of `orderId` (server-derived). */
+  orderId?: string | null;
+  allocationOrderId?: string | null;
+  /** Short display reference — last 8 chars of source id (server-derived). */
   orderReference: string;
   orderTotal: string | number;
+  businessName?: string | null;
   distributorId: string;
   distributorName: string;
   commissionType: string;
@@ -103,6 +105,8 @@ export interface CommissionStatementRow {
   amount: string | number;
   status: LedgerStatus;
   customerOrderSequence?: number | null;
+  merchantAllocationSequence?: number | null;
+  commissionSource?: string | null;
   settlementBatchId: string | null;
   /** Human-readable batch window when SETTLED, e.g. `2025-06-01 — 2025-06-30`. */
   settlementBatchPeriod: string | null;

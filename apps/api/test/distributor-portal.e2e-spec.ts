@@ -1,9 +1,8 @@
 import { INestApplication } from '@nestjs/common';
 import {
-  BindType,
+  CommissionSource,
   CommissionType,
   LedgerStatus,
-  OrderStatus,
   Prisma,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -12,13 +11,9 @@ import { App } from 'supertest/types';
 import { createTestApp } from './helpers/create-test-app';
 import { MockPrisma } from './helpers/mock-prisma';
 
-async function loginMerchant(
-  app: INestApplication<App>,
-  email: string,
-  password: string,
-) {
+async function loginPromoter(app: INestApplication<App>, email: string, password: string) {
   const res = await request(app.getHttpServer())
-    .post('/api/v1/merchant/auth/login')
+    .post('/api/v1/distributor/auth/login')
     .send({ email, password });
   return res.body.accessToken as string;
 }
@@ -26,144 +21,109 @@ async function loginMerchant(
 describe('Distributor portal (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: MockPrisma;
-  let merchantToken: string;
+  let promoterToken: string;
+  let promoterId: string;
   let tenantId: string;
-  let tenantSlug: string;
-  let distributorId: string;
 
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
 
     const password = await bcrypt.hash('secret12', 10);
     const { tenant } = await prisma._seedMerchantOwner(
-      'portal-corp',
-      'Portal Corp',
+      'portal-branch',
+      'Portal Branch',
       'owner@portal.test',
       password,
     );
     tenantId = tenant.id;
-    tenantSlug = tenant.slug;
-    merchantToken = await loginMerchant(app, 'owner@portal.test', 'secret12');
 
-    const distributor = await prisma.distributor.create({
+    const passwordHash = await bcrypt.hash('portalpass1', 10);
+    const promoter = await prisma.distributor.create({
       data: {
-        tenantId,
-        name: 'Portal Partner',
-        email: 'partner@portal.test',
+        tenantId: null,
+        name: 'Portal Promoter',
+        email: 'promoter@portal.test',
         commissionRate: new Prisma.Decimal(10),
         commissionType: CommissionType.PERCENT,
+        isActive: true,
+        portalEnabled: true,
+        passwordHash,
       },
     });
-    distributorId = distributor.id;
+    promoterId = promoter.id;
+    promoterToken = await loginPromoter(app, 'promoter@portal.test', 'portalpass1');
 
-    await request(app.getHttpServer())
-      .post(`/api/v1/merchant/distributors/${distributorId}/portal`)
-      .set('Authorization', `Bearer ${merchantToken}`)
-      .send({ password: 'portalpass1' })
-      .expect(200);
-
-    await prisma.binding.create({
-      data: {
-        tenantId,
-        distributorId,
-        bindableType: BindType.CUSTOMER,
-        bindableId: 'cust-1',
-      },
-    });
-
-    const order = await prisma.order.create({
-      data: {
-        tenantId,
-        distributorId,
-        status: OrderStatus.PAID,
-        subtotal: new Prisma.Decimal(50),
-        tax: new Prisma.Decimal(0),
-        total: new Prisma.Decimal(50),
-      },
+    await prisma.merchantProfile.update({
+      where: { tenantId },
+      data: { recruitedByDistributorId: promoterId, recruitedAt: new Date() },
     });
 
     await prisma.commissionLedger.create({
       data: {
         tenantId,
-        orderId: order.id,
-        distributorId,
+        allocationOrderId: (
+          await prisma._seedConfirmedAllocation({
+            tenantId,
+            lines: [{ quantity: 1, wholesalePrice: 50 }],
+          })
+        ).id,
+        distributorId: promoterId,
         amount: new Prisma.Decimal(5),
         status: LedgerStatus.ACCRUED,
+        merchantAllocationSequence: 1,
+        commissionSource: CommissionSource.ALLOCATION,
       },
     });
   });
 
-  it('POST /distributor/auth/login returns JWT', async () => {
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('POST /distributor/auth/login returns JWT for platform promoter', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/v1/distributor/auth/login')
       .send({
-        email: 'partner@portal.test',
+        email: 'promoter@portal.test',
         password: 'portalpass1',
-        tenantSlug,
       })
       .expect(200);
 
     expect(res.body.accessToken).toBeDefined();
-    expect(res.body.distributor.id).toBe(distributorId);
-    expect(res.body.distributor.tenantSlug).toBe(tenantSlug);
+    expect(res.body.distributor.id).toBe(promoterId);
+    expect(res.body.distributor.isPlatformDistributor).toBe(true);
   });
 
-  it('GET /distributor/me/* returns scoped read-only data', async () => {
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/distributor/auth/login')
-      .send({
-        email: 'partner@portal.test',
-        password: 'portalpass1',
-        tenantSlug,
-      })
-      .expect(200);
-
-    const token = login.body.accessToken as string;
-
+  it('GET /distributor/me/* returns recruited branch and commission data', async () => {
     const dashboard = await request(app.getHttpServer())
       .get('/api/v1/distributor/me/dashboard')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${promoterToken}`)
       .expect(200);
 
-    expect(dashboard.body.distributorId).toBe(distributorId);
-    expect(dashboard.body.bindingsCount).toBeGreaterThanOrEqual(1);
-    expect(dashboard.body.attributedOrderCount).toBeGreaterThanOrEqual(1);
+    expect(dashboard.body.distributorId).toBe(promoterId);
+    expect(dashboard.body.branchCount).toBeGreaterThanOrEqual(1);
     expect(dashboard.body.commissionSummary.entryCount).toBeGreaterThanOrEqual(1);
     expect(Array.isArray(dashboard.body.trend)).toBe(true);
 
+    const branches = await request(app.getHttpServer())
+      .get('/api/v1/distributor/me/branches')
+      .set('Authorization', `Bearer ${promoterToken}`)
+      .expect(200);
+
+    expect(branches.body.length).toBeGreaterThanOrEqual(1);
+    expect(branches.body[0]).toMatchObject({
+      tenantId,
+      businessName: 'Portal Branch',
+    });
+    expect(branches.body[0].lifetimeOrderCount).toBeGreaterThanOrEqual(0);
+
     const commissions = await request(app.getHttpServer())
       .get('/api/v1/distributor/me/commissions')
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${promoterToken}`)
       .expect(200);
 
     expect(commissions.body.items.length).toBeGreaterThanOrEqual(1);
-    expect(commissions.body.items[0].distributorId).toBe(distributorId);
-
-    const bindings = await request(app.getHttpServer())
-      .get('/api/v1/distributor/me/bindings')
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
-
-    expect(bindings.body.total).toBeGreaterThanOrEqual(1);
-    expect(bindings.body.items[0].bindableType).toBe(BindType.CUSTOMER);
-  });
-
-  it('rejects portal enable for non-owner', async () => {
-    const staffPassword = await bcrypt.hash('staffpass1', 10);
-    await prisma.user.create({
-      data: {
-        tenantId,
-        email: 'staff@portal.test',
-        password: staffPassword,
-        role: 'MERCHANT_STAFF',
-      },
-    });
-    const staffToken = await loginMerchant(app, 'staff@portal.test', 'staffpass1');
-
-    await request(app.getHttpServer())
-      .post(`/api/v1/merchant/distributors/${distributorId}/portal`)
-      .set('Authorization', `Bearer ${staffToken}`)
-      .send({ password: 'newpass123' })
-      .expect(403);
+    expect(commissions.body.items[0].merchantAllocationSequence).toBe(1);
+    expect(commissions.body.items[0].businessName).toBe('Portal Branch');
   });
 });

@@ -1,24 +1,39 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoListHeader, Button, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui/server';
+import { BentoListHeader, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui/server';
+import type { WithdrawalRequestRow } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
-import { apiFetch, type WithdrawalRequest } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { WithdrawalsStatusTabs } from './_components/withdrawals-status-tabs';
 import { WithdrawalsTable } from './_components/withdrawals-table';
+
 const CURRENCY = 'CNY';
 
-export default async function WithdrawalsPage() {
+export default async function WithdrawalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; distributorId?: string }>;
+}) {
   const token = await getToken();
   if (!token) return null;
 
+  const params = await searchParams;
+  const status = params.status ?? 'PENDING';
   const locale = await getLocale();
   const t = await getTranslations('admin.withdrawals');
 
-  let withdrawals: WithdrawalRequest[] = [];
+  const query = new URLSearchParams();
+  if (status && status !== 'ALL') query.set('status', status);
+  if (params.distributorId) query.set('distributorId', params.distributorId);
+  const queryString = query.toString();
+
+  let withdrawals: WithdrawalRequestRow[] = [];
   try {
-    withdrawals = await apiFetch<WithdrawalRequest[]>(
-      '/platform/withdrawals?status=PENDING',
+    withdrawals = await apiFetch<WithdrawalRequestRow[]>(
+      `/platform/withdrawals${queryString ? `?${queryString}` : ''}`,
       {},
       token,
     );
@@ -26,7 +41,9 @@ export default async function WithdrawalsPage() {
     withdrawals = [];
   }
 
-  const pendingTotal = withdrawals.reduce((sum, w) => sum + Number(w.amount), 0);
+  const pendingTotal = withdrawals
+    .filter((w) => w.status === 'PENDING')
+    .reduce((sum, w) => sum + Number(w.amount), 0);
 
   const metrics = [
     { title: t('title'), value: withdrawals.length },
@@ -50,6 +67,9 @@ export default async function WithdrawalsPage() {
             {t('goToSettlements')}
           </Link>
         </div>
+        <Suspense fallback={null}>
+          <WithdrawalsStatusTabs />
+        </Suspense>
         <ListPageFrame
           title={t('title')}
           description={t('description')}

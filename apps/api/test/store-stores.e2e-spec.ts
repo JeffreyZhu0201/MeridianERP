@@ -17,6 +17,22 @@ describe('Store published list (e2e)', () => {
     await app.close();
   });
 
+  it('GET /store/stores lists flagship first when marked', async () => {
+    const flagship = await prisma._seedApprovedTenant('flagship-shop', 'Flagship Shop');
+    await prisma.merchantProfile.update({
+      where: { tenantId: flagship.id },
+      data: { isFlagship: true },
+    });
+    await prisma._seedApprovedTenant('other-shop', 'Other Shop');
+
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/store/stores')
+      .expect(200);
+
+    expect(res.body.items[0].slug).toBe('flagship-shop');
+    expect(res.body.items[0].isFlagship).toBe(true);
+  });
+
   it('GET /store/stores returns APPROVED tenants only', async () => {
     const approved = await prisma._seedApprovedTenant('demo-shop', 'Demo Shop');
     const pendingTenant = await prisma.tenant.create({ data: { slug: 'pending-shop' } });

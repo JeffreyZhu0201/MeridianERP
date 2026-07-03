@@ -1,24 +1,35 @@
 export interface PlatformFundsSummary {
+  consumerGmv: string | number;
+  /** @deprecated Use consumerGmv */
   gmv: string | number;
+  wholesaleFromAllocations: string | number;
+  wholesaleFromDelivery: string | number;
   wholesaleRevenue: string | number;
+  distributorCommissionAccrued: string | number;
+  distributorCommissionSettled: string | number;
+  /** @deprecated Use distributorCommissionAccrued */
   commissionAccrued: string | number;
+  /** @deprecated Use distributorCommissionSettled */
   commissionSettled: string | number;
   commissionLiability: string | number;
   accruedAwaitingSettlement: string | number;
   pendingWithdrawals: string | number;
+  pickupMarginAcrossBranches: string | number;
   orderCount: number;
   deliveryOrderCount: number;
   from: string;
   to: string;
-  /** Daily GMV for trend chart (YYYY-MM-DD → amount) */
   gmvTrend?: Array<{ date: string; amount: number }>;
 }
 
 export interface MerchantFundsSummary {
+  pickupGmv: string | number;
+  pickupCostOfGoods: string | number;
+  pickupGrossProfit: string | number;
+  /** @deprecated Use pickupGmv */
   salesGmv: string | number;
   allocationCost: string | number;
   deliveryAllocationCost: string | number;
-  payableCommission: string | number;
   netPosition: string | number;
   from: string;
   to: string;

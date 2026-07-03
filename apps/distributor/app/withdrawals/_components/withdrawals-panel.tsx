@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -18,7 +18,7 @@ import {
   TableRow,
   Textarea,
 } from '@meridian/ui';
-import type { WithdrawalRequestRow } from '@meridian/shared';
+import type { WithdrawalRequestRow, WithdrawalRequestStatus } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
@@ -34,17 +34,32 @@ function statusVariant(status: string): 'default' | 'secondary' | 'destructive' 
   return 'warning';
 }
 
+function withdrawalStatusLabel(
+  status: string,
+  t: ReturnType<typeof useTranslations<'distributor'>>,
+): string {
+  if (status === 'PENDING' || status === 'APPROVED' || status === 'REJECTED') {
+    return t(`withdrawalStatus.${status as WithdrawalRequestStatus}`);
+  }
+  return status;
+}
+
 export function WithdrawalsPanel({
   withdrawals,
   availableBalance,
   token,
 }: WithdrawalsPanelProps) {
+  const locale = useLocale();
   const t = useTranslations('distributor.withdrawals');
+  const td = useTranslations('distributor');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const emptyDash = tc('emptyDash');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +90,7 @@ export function WithdrawalsPanel({
         <p className="text-sm text-muted-foreground">
           {t('availableBalance')}:{' '}
           <span className="font-medium text-foreground tabular-nums">
-            {formatMoney(availableBalance)}
+            {formatMoney(availableBalance, locale)}
           </span>
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -105,7 +120,7 @@ export function WithdrawalsPanel({
         </div>
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button type="submit" disabled={saving || availableBalance <= 0}>
-          {saving ? '…' : t('submit')}
+          {saving ? tc('saving') : t('submit')}
         </Button>
       </form>
 
@@ -126,16 +141,18 @@ export function WithdrawalsPanel({
               {withdrawals.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="tabular-nums font-medium">
-                    {formatMoney(row.amount)}
+                    {formatMoney(row.amount, locale)}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant(row.status)}>{row.status}</Badge>
+                    <Badge variant={statusVariant(row.status)}>
+                      {withdrawalStatusLabel(row.status, td)}
+                    </Badge>
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
-                    {row.note ?? '—'}
+                    {row.note ?? emptyDash}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {new Date(row.createdAt).toLocaleDateString()}
+                    {new Date(row.createdAt).toLocaleDateString(locale)}
                   </TableCell>
                 </TableRow>
               ))}

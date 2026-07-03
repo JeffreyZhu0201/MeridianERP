@@ -19,12 +19,29 @@ import {
   TableRow,
   Textarea,
 } from '@meridian/ui';
+import type { WithdrawalRequestRow, WithdrawalRequestStatus } from '@meridian/shared';
 
-import { apiFetch, type WithdrawalRequest } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 
 interface WithdrawalsTableProps {
-  withdrawals: WithdrawalRequest[];
+  withdrawals: WithdrawalRequestRow[];
   token: string;
+}
+
+function statusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'warning' {
+  if (status === 'APPROVED') return 'default';
+  if (status === 'REJECTED') return 'destructive';
+  return 'warning';
+}
+
+function withdrawalStatusLabel(
+  status: string,
+  t: ReturnType<typeof useTranslations<'admin.withdrawals'>>,
+): string {
+  if (status === 'PENDING' || status === 'APPROVED' || status === 'REJECTED') {
+    return t(`withdrawalStatus.${status as WithdrawalRequestStatus}`);
+  }
+  return status;
 }
 
 export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) {
@@ -39,9 +56,11 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
   const [submitting, setSubmitting] = useState(false);
 
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
+  const emptyDash = tc('emptyDash');
 
   async function handleApprove() {
     if (!approveId) return;
+    setSubmitting(true);
     setError('');
     try {
       await apiFetch(`/platform/withdrawals/${approveId}/approve`, { method: 'POST' }, token);
@@ -49,6 +68,8 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('approveFailed'));
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -84,38 +105,55 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
               <TableHead>{t('columns.note')}</TableHead>
               <TableHead>{t('columns.status')}</TableHead>
               <TableHead>{t('columns.created')}</TableHead>
+              <TableHead>{t('columns.reviewed')}</TableHead>
               <TableHead className="text-right">{t('columns.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {withdrawals.map((withdrawal) => (
               <TableRow key={withdrawal.id}>
-                <TableCell className="font-medium">{withdrawal.distributor.name}</TableCell>
+                <TableCell className="font-medium">{withdrawal.distributorName}</TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatCNY(withdrawal.amount)}
                 </TableCell>
                 <TableCell className="max-w-[200px] truncate text-muted-foreground">
-                  {withdrawal.note ?? '—'}
+                  {withdrawal.note ?? emptyDash}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{withdrawal.status}</Badge>
+                  <Badge variant={statusVariant(withdrawal.status)}>
+                    {withdrawalStatusLabel(withdrawal.status, t)}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(withdrawal.createdAt).toLocaleDateString(locale)}
                 </TableCell>
+                <TableCell className="text-xs text-muted-foreground">
+                  {withdrawal.reviewedAt
+                    ? new Date(withdrawal.reviewedAt).toLocaleDateString(locale)
+                    : emptyDash}
+                  {withdrawal.rejectionReason ? (
+                    <span className="mt-1 block text-destructive">
+                      {withdrawal.rejectionReason}
+                    </span>
+                  ) : null}
+                </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button size="sm" onClick={() => setApproveId(withdrawal.id)}>
-                      {t('approve')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setRejectId(withdrawal.id)}
-                    >
-                      {t('reject')}
-                    </Button>
-                  </div>
+                  {withdrawal.status === 'PENDING' ? (
+                    <div className="flex justify-end gap-2">
+                      <Button size="sm" onClick={() => setApproveId(withdrawal.id)}>
+                        {t('approve')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setRejectId(withdrawal.id)}
+                      >
+                        {t('reject')}
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">{emptyDash}</span>
+                  )}
                 </TableCell>
               </TableRow>
             ))}
@@ -130,15 +168,13 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
         footer={
           <>
             <DialogCloseButton onClose={() => setApproveId(null)}>{tc('cancel')}</DialogCloseButton>
-            <Button onClick={handleApprove} disabled={submitting}>
+            <Button onClick={() => void handleApprove()} disabled={submitting}>
               {t('approve')}
             </Button>
           </>
         }
       >
-        <p className="text-sm text-muted-foreground">
-          {t('approveConfirm')}
-        </p>
+        <p className="text-sm text-muted-foreground">{t('approveConfirm')}</p>
       </Dialog>
 
       <Dialog
@@ -150,7 +186,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
             <DialogCloseButton onClose={() => setRejectId(null)}>{tc('cancel')}</DialogCloseButton>
             <Button
               variant="destructive"
-              onClick={handleReject}
+              onClick={() => void handleReject()}
               disabled={submitting || !rejectReason.trim()}
             >
               {t('reject')}

@@ -62,8 +62,13 @@ export function StorePicker() {
         if (cancelled) return;
         setStores(response.items);
         const remembered = readRememberedSlug();
+        const flagship = response.items.find((store) => store.isFlagship);
         if (remembered && response.items.some((store) => store.slug === remembered)) {
           setSelectedSlug(remembered);
+        } else if (flagship) {
+          setSelectedSlug(flagship.slug);
+        } else if (response.items[0]) {
+          setSelectedSlug(response.items[0].slug);
         }
       } catch {
         if (!cancelled) {
@@ -172,7 +177,14 @@ export function StorePicker() {
                     selected ? 'bg-muted font-medium' : ''
                   }`}
                 >
-                  <span>{store.displayName}</span>
+                  <span className="flex items-center gap-2">
+                    {store.displayName}
+                    {store.isFlagship ? (
+                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                        {t('home.flagshipBadge')}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="font-mono text-xs text-muted-foreground">/s/{store.slug}</span>
                 </button>
               );

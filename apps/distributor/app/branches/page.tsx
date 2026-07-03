@@ -56,6 +56,8 @@ export default async function BranchesPage() {
                   <TableHead>{t('recruitedAt')}</TableHead>
                   <TableHead className="text-right">{t('orderCount')}</TableHead>
                   <TableHead className="text-right">{t('salesLast30')}</TableHead>
+                  <TableHead className="text-right">{t('lifetimeOrders')}</TableHead>
+                  <TableHead className="text-right">{t('lifetimeSales')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -73,6 +75,12 @@ export default async function BranchesPage() {
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {formatMoney(branch.salesLast30Days, locale)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {branch.lifetimeOrderCount ?? 0}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatMoney(branch.lifetimeSales ?? 0, locale)}
                     </TableCell>
                   </TableRow>
                 ))}

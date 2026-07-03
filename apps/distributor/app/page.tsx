@@ -51,11 +51,6 @@ export default async function DashboardPage() {
             title={t('availableBalance')}
             value={formatMoney(dashboard.availableBalance, locale)}
           />
-          <BentoMetricTile title={t('attributedOrders')} value={dashboard.attributedOrderCount} />
-          <BentoMetricTile
-            title={t('orderRevenue')}
-            value={formatMoney(dashboard.attributedOrderRevenue, locale)}
-          />
           <BentoMetricTile
             title={t('commissionAccrued')}
             value={formatMoney(dashboard.commissionSummary.accruedTotal, locale)}
@@ -63,6 +58,11 @@ export default async function DashboardPage() {
           <BentoMetricTile
             title={t('commissionSettled')}
             value={formatMoney(dashboard.commissionSummary.settledTotal, locale)}
+          />
+          <BentoMetricTile title={t('attributedOrders')} value={dashboard.attributedOrderCount} />
+          <BentoMetricTile
+            title={t('orderRevenue')}
+            value={formatMoney(dashboard.attributedOrderRevenue, locale)}
           />
           <BentoChartTile
             title={t('trendChart')}

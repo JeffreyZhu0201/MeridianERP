@@ -16,7 +16,7 @@ import { dashboardWindowStart } from '../../common/date-range';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';
 import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
-import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
+import { UpdateStoreSettingsDto } from './dto/update-store-settings.dto';
 
 @Injectable()
 export class PlatformMerchantsService {
@@ -393,8 +393,52 @@ export class PlatformMerchantsService {
       pendingRecruiterName: pendingRecruiter?.distributor.name ?? null,
       recruitedByDistributorId: profile.recruitedByDistributorId,
       recruitedByDistributorName: recruitedDistributor?.name ?? null,
+      storePublished: profile.storePublished,
+      isFlagship: profile.isFlagship,
       crmSummary,
       distributors,
     };
+  }
+
+  async updateStoreSettings(id: string, dto: UpdateStoreSettingsDto) {
+    const profile = await this.findProfileById(id);
+    if (profile.onboardingStatus !== OnboardingStatus.APPROVED) {
+      throw new BadRequestException(
+        'Store settings can only be updated for approved merchants',
+      );
+    }
+
+    const nextStorePublished =
+      dto.storePublished !== undefined ? dto.storePublished : profile.storePublished;
+    let nextIsFlagship =
+      dto.isFlagship !== undefined ? dto.isFlagship : profile.isFlagship;
+
+    if (nextIsFlagship && !nextStorePublished) {
+      throw new BadRequestException('Flagship store must be published');
+    }
+    if (!nextStorePublished) {
+      nextIsFlagship = false;
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      if (nextIsFlagship) {
+        await tx.merchantProfile.updateMany({
+          where: {
+            isFlagship: true,
+            id: { not: profile.id },
+          },
+          data: { isFlagship: false },
+        });
+      }
+      await tx.merchantProfile.update({
+        where: { id: profile.id },
+        data: {
+          storePublished: nextStorePublished,
+          isFlagship: nextIsFlagship,
+        },
+      });
+    });
+
+    return this.getById(id);
   }
 }

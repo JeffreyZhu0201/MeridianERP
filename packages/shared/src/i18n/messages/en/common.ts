@@ -29,6 +29,7 @@ export const common = {
   to: 'To',
   date: 'Date',
   noData: 'No data',
+  emptyDash: '—',
   previous: 'Previous',
   next: 'Next',
   pageOf: 'Page {page} of {total}',

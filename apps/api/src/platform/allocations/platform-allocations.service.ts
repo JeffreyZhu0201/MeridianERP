@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { AllocationOrderStatus, Prisma } from '@prisma/client';
 import { InventoryService } from '../../inventory/inventory.service';
+import { CommissionService } from '../../commission/commission.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class PlatformAllocationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly inventoryService: InventoryService,
+    private readonly commissionService: CommissionService,
   ) {}
 
   
@@ -221,6 +223,8 @@ export class PlatformAllocationsService {
         await this.inventoryService.syncVariantInventoryCache(variant.id, tx);
       }
     });
+
+    await this.commissionService.accrueOnAllocationConfirmed(id);
 
     return { id, status: AllocationOrderStatus.CONFIRMED };
   }

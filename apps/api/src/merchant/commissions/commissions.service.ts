@@ -42,6 +42,11 @@ export class CommissionsService {
         where,
         include: {
           order: { select: { total: true } },
+          allocationOrder: {
+            include: {
+              lines: { select: { quantity: true, wholesalePrice: true } },
+            },
+          },
           distributor: {
             select: {
               id: true,

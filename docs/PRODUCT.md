@@ -1,6 +1,6 @@
 # MeridianERP Product State
 
-**Version:** 1.0.2  
+**Version:** 1.0.3  
 **Updated:** 2026-07-03  
 **Status:** Phase 1-5 complete; UI consistency cleanup in progress.
 
@@ -35,9 +35,10 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - Tenant isolation is enforced with `tenantId` on merchant-owned data and guarded API access.
 - Admin manages merchants, distributors, MasterSku catalog, allocations, delivery queue, platform CRM, and funds.
 - Merchant manages CRM, inventory, orders, pickup verification, funds, replenishment, and settings.
-- Store supports catalog browsing, cart, Stripe checkout, account orders, pickup, delivery, and QR attribution.
-- Sales promoters (platform `Distributor`) recruit branches via store-portal share links, performance views, commission ledger, and withdrawals.
+- Store supports catalog browsing, cart, Stripe checkout, account orders, pickup, and delivery (no customer–distributor binding).
+- Sales promoters (platform `Distributor`) recruit branches via store-portal share links, self-service invite codes/QR on `apps/distributor`, performance views, commission ledger, and withdrawals.
 - Store open-shop flow (`/open-shop?invite=`) lets registered users apply to become branch owners; HQ approves in admin.
+- HQ withdrawal approval confirms disbursement (`APPROVED` + `reviewedAt`); no third-party payout integration in P0.
 
 ## Business Rules
 
@@ -46,10 +47,11 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - **Admin user directory:** Platform admins can view all `PlatformAccount` records and computed identity tags at `/users`.
 - Merchant onboarding: `DRAFT -> SUBMITTED -> UNDER_REVIEW -> APPROVED` or `REJECTED`; login is blocked until approval (self-service path). Admin-created merchants start `APPROVED`.
 - CRM pipeline: `NEW -> QUALIFIED -> WON` or `LOST`; activity types include `CALL`, `NOTE`, and `MEETING`.
-- QR binding uses HMAC-signed JWTs with `distributorId`, `tenantId`, `bindType`, and `exp`; default expiry is 7 days.
 - **Sales promoters (拓店员):** Platform-level `Distributor` records (`tenantId: null`); may link to `PlatformAccount` via `accountId`. Admins create promoters from existing users and set `commissionRate`.
-- **Branch recruitment:** Share link `{STORE_APP_URL}/open-shop?invite={CODE}` or admin direct create with `recruitedByDistributorId`. Binding stored on `MerchantProfile.recruitedByDistributorId`.
-- **Promoter commission:** Accrued when an order reaches `FULFILLED` (pickup verify or HQ ship) **only for a customer's 1st and 2nd fulfilled orders** at that branch (`tenantId + customerId`). Same rate for both orders in P0. Guest orders without `customerId` do not accrue (P0).
+- **Branch recruitment:** Share link `{STORE_APP_URL}/open-shop?invite={CODE}` (admin or promoter portal self-service) or admin direct create with `recruitedByDistributorId`. Binding stored on `MerchantProfile.recruitedByDistributorId`.
+- **Promoter commission:** Accrued when a branch's **allocation order** reaches `CONFIRMED` — **only for the 1st and 2nd** commissionable allocations per recruited branch (`commissionSource=ALLOCATION`). Base = wholesale total of that allocation × promoter rate. Retail order fulfillment does **not** accrue new commission.
+- **Pickup margin:** Branch online pickup gross profit = order total minus wholesale cost snapshot on order lines (`unitWholesalePrice` at checkout).
+- **Flagship store:** One branch may be marked `isFlagship`; store picker lists it first and pre-selects it by default.
 - Commission balance equals settled commission minus approved withdrawals.
 - Pickup orders deduct branch inventory only when verified.
 - Delivery orders enter the HQ delivery queue and deduct MasterSku stock when shipped.

@@ -245,11 +245,13 @@ export const merchant = {
   },
   funds: {
     title: 'Funds',
-    description: 'Sales, allocation costs, and net position for the selected period.',
-    salesGmv: 'Sales GMV',
+    description: 'Pickup gross profit, allocation costs, and net position for the selected period.',
+    pickupGmv: 'Pickup GMV',
+    pickupCostOfGoods: 'Cost of goods',
+    pickupGrossProfit: 'Pickup gross profit',
+    salesGmv: 'Pickup GMV',
     allocationCost: 'Allocation cost',
     deliveryAllocationCost: 'Delivery allocation',
-    payableCommission: 'Payable commission',
     netPosition: 'Net position',
     period: '{from} – {to}',
     from: 'From',
@@ -257,7 +259,7 @@ export const merchant = {
     applyRange: 'Apply',
     loading: 'Loading…',
     formulaHint:
-      'Net = sales GMV − allocation cost − delivery allocation − payable commission (CNY).',
+      'Net = pickup gross profit − allocation cost − delivery allocation (CNY).',
     loadError: 'Failed to load funds summary',
   },
   allocations: {
@@ -417,10 +419,10 @@ export const merchant = {
   commissions: {
     title: 'Commission statements',
     description:
-      'Line items from attributed PAID orders. Settled entries reflect platform payout batches.',
+      'Allocation-based commission entries for recruited branches.',
     emptyTitle: 'No commission entries yet',
     emptyDescription:
-      'Commission appears here after customers complete PAID orders attributed to a distributor. Share QR codes and wait for attributed checkouts.',
+      'Commission appears here after branches confirm incoming allocations.',
     summary: {
       accrued: 'Accrued',
       settled: 'Settled',
@@ -436,12 +438,19 @@ export const merchant = {
     },
     table: {
       date: 'Date',
-      order: 'Order',
+      order: 'Reference',
       distributor: 'Distributor',
+      source: 'Source',
+      sequence: 'Sequence',
+      wholesaleBase: 'Wholesale base',
       orderTotal: 'Order total',
       rate: 'Rate',
       commission: 'Commission',
       batchPeriod: 'Batch period',
+      sourceAllocation: 'Allocation',
+      sourceRetail: 'Retail (legacy)',
+      allocationSequenceFirst: '1st allocation',
+      allocationSequenceSecond: '2nd allocation',
     },
     ledgerStatus: {
       ACCRUED: 'Accrued',

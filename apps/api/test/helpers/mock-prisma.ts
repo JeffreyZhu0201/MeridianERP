@@ -13,6 +13,7 @@ import {
   SettlementBatchStatus,
   StockAdjustmentReason,
   StockTransferStatus,
+  WithdrawalRequestStatus,
 } from '@prisma/client';
 
 type Id = string;
@@ -47,6 +48,7 @@ export function createMockPrisma() {
   const orders = new Map<Id, OrderRecord>();
   const orderLines = new Map<Id, OrderLineRecord>();
   const commissionLedgers = new Map<Id, CommissionLedgerRecord>();
+  const allocationOrders = new Map<Id, AllocationOrderRecord>();
   const settlementBatches = new Map<Id, SettlementBatchRecord>();
   const inventorySettings = new Map<Id, TenantInventorySettingsRecord>();
   const tenantSettings = new Map<Id, TenantSettingsRecord>();
@@ -61,6 +63,7 @@ export function createMockPrisma() {
   const stockTransfers = new Map<Id, StockTransferRecord>();
   const stockTransferLines = new Map<Id, StockTransferLineRecord>();
   const merchantRecruitInviteCodes = new Map<Id, MerchantRecruitInviteCodeRecord>();
+  const withdrawalRequests = new Map<Id, WithdrawalRequestRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -109,6 +112,7 @@ export function createMockPrisma() {
     recruitedAt: Date | null;
     pendingRecruitInviteCode: string | null;
     storePublished: boolean;
+    isFlagship: boolean;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -297,14 +301,35 @@ export function createMockPrisma() {
   interface CommissionLedgerRecord {
     id: Id;
     tenantId: Id;
-    orderId: Id;
+    orderId: Id | null;
+    allocationOrderId: Id | null;
     distributorId: Id;
     customerId: Id | null;
     customerOrderSequence: number | null;
+    merchantAllocationSequence: number | null;
+    commissionSource: string | null;
     amount: Prisma.Decimal;
     status: LedgerStatus;
     settlementBatchId: string | null;
     settledAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface AllocationOrderLineRecord {
+    id: Id;
+    allocationOrderId: Id;
+    masterSkuId: Id;
+    quantity: number;
+    wholesalePrice: Prisma.Decimal;
+  }
+
+  interface AllocationOrderRecord {
+    id: Id;
+    tenantId: Id;
+    status: string;
+    confirmedAt: Date | null;
+    lines: AllocationOrderLineRecord[];
     createdAt: Date;
     updatedAt: Date;
   }
@@ -317,6 +342,19 @@ export function createMockPrisma() {
     expiresAt: Date | null;
     useCount: number;
     createdAt: Date;
+  }
+
+  interface WithdrawalRequestRecord {
+    id: Id;
+    distributorId: Id;
+    amount: Prisma.Decimal;
+    status: WithdrawalRequestStatus;
+    note: string | null;
+    reviewedByPlatformUserId: string | null;
+    rejectionReason: string | null;
+    reviewedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   interface SettlementBatchRecord {
@@ -579,7 +617,7 @@ export function createMockPrisma() {
     if (include?.distributor) {
       result.distributor = distributors.get(entry.distributorId);
     }
-    if (include?.order) {
+    if (include?.order && entry.orderId) {
       const order = orders.get(entry.orderId);
       if (typeof include.order === 'object' && 'select' in include.order) {
         const select = include.order.select as Record<string, boolean>;
@@ -591,20 +629,69 @@ export function createMockPrisma() {
             )
           : null;
       } else {
-        result.order = order;
+        result.order = order ?? null;
+      }
+    } else if (include?.order) {
+      result.order = null;
+    }
+    if (include?.allocationOrder && entry.allocationOrderId) {
+      const allocation = allocationOrders.get(entry.allocationOrderId);
+      if (allocation && typeof include.allocationOrder === 'object') {
+        if ('include' in include.allocationOrder) {
+          const nested = include.allocationOrder.include as Record<string, unknown>;
+          result.allocationOrder = {
+            ...allocation,
+            lines:
+              nested.lines && allocation.lines
+                ? allocation.lines.map((line) => {
+                    const lineSelect = (nested.lines as { select?: Record<string, boolean> })
+                      .select;
+                    if (!lineSelect) return line;
+                    return Object.fromEntries(
+                      Object.keys(lineSelect)
+                        .filter((k) => lineSelect[k])
+                        .map((k) => [k, line[k as keyof AllocationOrderLineRecord]]),
+                    );
+                  })
+                : allocation.lines,
+          };
+        } else {
+          result.allocationOrder = allocation;
+        }
+      } else {
+        result.allocationOrder = null;
       }
     }
     if (include?.tenant) {
       const tenant = tenants.get(entry.tenantId);
       if (typeof include.tenant === 'object' && 'select' in include.tenant) {
-        const select = include.tenant.select as Record<string, boolean>;
-        result.tenant = tenant
+        const select = include.tenant.select as Record<string, unknown>;
+        const tenantBase = tenant
           ? Object.fromEntries(
               Object.keys(select)
-                .filter((k) => select[k])
+                .filter((k) => k !== 'merchantProfile' && select[k])
                 .map((k) => [k, tenant[k as keyof TenantRecord]]),
             )
           : null;
+        if (tenant && select.merchantProfile) {
+          const profileId = profileByTenant.get(entry.tenantId);
+          const profile = profileId ? merchantProfiles.get(profileId) : null;
+          const mpSelect = (select.merchantProfile as { select?: Record<string, boolean> })
+            ?.select;
+          const merchantProfile =
+            profile && mpSelect
+              ? Object.fromEntries(
+                  Object.keys(mpSelect)
+                    .filter((k) => mpSelect[k])
+                    .map((k) => [k, profile[k as keyof MerchantProfileRecord]]),
+                )
+              : profile;
+          result.tenant = tenantBase
+            ? { ...tenantBase, merchantProfile: merchantProfile ?? null }
+            : null;
+        } else {
+          result.tenant = tenantBase;
+        }
       } else {
         result.tenant = tenant;
       }
@@ -737,6 +824,12 @@ export function createMockPrisma() {
     }
     if (where.settlementBatchId === null) {
       items = items.filter((e) => e.settlementBatchId === null);
+    }
+    if (where.commissionSource) {
+      items = items.filter((e) => e.commissionSource === where.commissionSource);
+    }
+    if (where.allocationOrderId) {
+      items = items.filter((e) => e.allocationOrderId === where.allocationOrderId);
     }
     return items;
   };
@@ -1265,6 +1358,7 @@ export function createMockPrisma() {
           recruitedAt: data.recruitedAt ?? null,
           pendingRecruitInviteCode: data.pendingRecruitInviteCode ?? null,
           storePublished: data.storePublished ?? false,
+          isFlagship: data.isFlagship ?? false,
           createdAt: now(),
           updatedAt: now(),
         };
@@ -1382,6 +1476,27 @@ export function createMockPrisma() {
         const updated = { ...existing, ...data, updatedAt: now() };
         merchantProfiles.set(id, updated);
         return updated;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where: {
+          isFlagship?: boolean;
+          id?: { not?: string };
+        };
+        data: Partial<MerchantProfileRecord>;
+      }) => {
+        let count = 0;
+        for (const [id, profile] of merchantProfiles.entries()) {
+          if (where.isFlagship !== undefined && profile.isFlagship !== where.isFlagship) {
+            continue;
+          }
+          if (where.id?.not && id === where.id.not) continue;
+          merchantProfiles.set(id, { ...profile, ...data, updatedAt: now() });
+          count += 1;
+        }
+        return { count };
       },
     },
     user: {
@@ -3348,8 +3463,12 @@ export function createMockPrisma() {
         const record: CommissionLedgerRecord = {
           ...data,
           id: nextId('cl'),
+          orderId: data.orderId ?? null,
+          allocationOrderId: data.allocationOrderId ?? null,
           customerId: data.customerId ?? null,
           customerOrderSequence: data.customerOrderSequence ?? null,
+          merchantAllocationSequence: data.merchantAllocationSequence ?? null,
+          commissionSource: data.commissionSource ?? null,
           settlementBatchId: null,
           settledAt: null,
           status: data.status ?? LedgerStatus.ACCRUED,
@@ -3505,29 +3624,90 @@ export function createMockPrisma() {
       count: async () => 0,
     },
     allocationOrder: {
-      findMany: async () => [],
-      findUnique: async () => null,
-      findFirst: async () => null,
-      create: async ({ data, include }: { data: Record<string, unknown>; include?: unknown }) => {
-        const record = {
+      findMany: async () => [...allocationOrders.values()],
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: Record<string, unknown>;
+      }) => {
+        const order = allocationOrders.get(where.id);
+        if (!order) return null;
+        if (include?.commissionEntry) {
+          const entry =
+            [...commissionLedgers.values()].find(
+              (e) => e.allocationOrderId === order.id,
+            ) ?? null;
+          return { ...order, commissionEntry: entry };
+        }
+        if (include?.lines) {
+          return { ...order, lines: order.lines };
+        }
+        return order;
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where: { id?: string; tenantId?: string };
+        include?: Record<string, unknown>;
+      }) => {
+        let order: AllocationOrderRecord | undefined;
+        if (where.id) {
+          order = allocationOrders.get(where.id);
+        } else {
+          order = [...allocationOrders.values()].find((o) => {
+            if (where.tenantId && o.tenantId !== where.tenantId) return false;
+            return true;
+          });
+        }
+        if (!order) return null;
+        if (include?.lines) {
+          const linesInclude = include.lines as Record<string, unknown>;
+          if (linesInclude.include?.masterSku) {
+            return {
+              ...order,
+              lines: order.lines.map((line) => ({
+                ...line,
+                masterSku: { id: line.masterSkuId, skuCode: 'SKU', name: 'Item' },
+              })),
+            };
+          }
+          return { ...order, lines: order.lines };
+        }
+        return order;
+      },
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: AllocationOrderRecord = {
           id: nextId('alloc'),
-          status: 'DRAFT',
+          tenantId: data.tenantId as string,
+          status: (data.status as string) ?? 'DRAFT',
+          confirmedAt: (data.confirmedAt as Date | null) ?? null,
+          lines: [],
           createdAt: now(),
           updatedAt: now(),
-          lines: [],
-          ...data,
         };
+        allocationOrders.set(record.id, record);
         return record;
       },
       update: async ({
         where,
         data,
-        include,
       }: {
         where: { id: string };
         data: Record<string, unknown>;
-        include?: unknown;
-      }) => ({ id: where.id, lines: [], ...data }),
+      }) => {
+        const existing = allocationOrders.get(where.id);
+        if (!existing) return { id: where.id, ...data, lines: [] };
+        const updated = {
+          ...existing,
+          ...data,
+          updatedAt: now(),
+        } as AllocationOrderRecord;
+        allocationOrders.set(where.id, updated);
+        return updated;
+      },
     },
     allocationOrderLine: {
       findMany: async () => [],
@@ -3561,22 +3741,158 @@ export function createMockPrisma() {
       aggregate: async () => ({ _sum: { lineTotal: null } }),
     },
     withdrawalRequest: {
-      aggregate: async () => ({ _sum: { amount: null } }),
-      findMany: async () => [],
-      findFirst: async () => null,
-      create: async ({ data }: { data: Record<string, unknown> }) => ({
-        id: nextId('wd'),
-        status: 'PENDING',
-        createdAt: now(),
-        ...data,
-      }),
+      aggregate: async ({
+        where,
+        _sum,
+      }: {
+        where?: { distributorId?: string; status?: WithdrawalRequestStatus };
+        _sum?: { amount?: boolean };
+      }) => {
+        let items = [...withdrawalRequests.values()];
+        if (where?.distributorId) {
+          items = items.filter((w) => w.distributorId === where.distributorId);
+        }
+        if (where?.status) {
+          items = items.filter((w) => w.status === where.status);
+        }
+        const amount = items.reduce(
+          (acc, w) => acc.plus(w.amount),
+          new Prisma.Decimal(0),
+        );
+        return { _sum: { amount: items.length ? amount : null } };
+      },
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+        skip,
+        take,
+      }: {
+        where?: {
+          distributorId?: string;
+          status?: WithdrawalRequestStatus;
+        };
+        include?: { distributor?: { select?: Record<string, boolean> } };
+        orderBy?: { createdAt: 'desc' | 'asc' };
+        skip?: number;
+        take?: number;
+      } = {}) => {
+        let items = [...withdrawalRequests.values()];
+        if (where?.distributorId) {
+          items = items.filter((w) => w.distributorId === where.distributorId);
+        }
+        if (where?.status) {
+          items = items.filter((w) => w.status === where.status);
+        }
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (skip !== undefined && take !== undefined) {
+          items = items.slice(skip, skip + take);
+        }
+        return items.map((row) => {
+          const result: WithdrawalRequestRecord & Record<string, unknown> = { ...row };
+          if (include?.distributor) {
+            const distributor = distributors.get(row.distributorId);
+            const select = include.distributor.select;
+            if (distributor && select) {
+              result.distributor = Object.fromEntries(
+                Object.keys(select)
+                  .filter((k) => select[k])
+                  .map((k) => [k, distributor[k as keyof DistributorRecord]]),
+              );
+            } else {
+              result.distributor = distributor ?? null;
+            }
+          }
+          return result;
+        });
+      },
+      findFirst: async ({
+        where,
+      }: {
+        where?: { distributorId?: string; status?: WithdrawalRequestStatus };
+      }) => {
+        let items = [...withdrawalRequests.values()];
+        if (where?.distributorId) {
+          items = items.filter((w) => w.distributorId === where.distributorId);
+        }
+        if (where?.status) {
+          items = items.filter((w) => w.status === where.status);
+        }
+        return items[0] ?? null;
+      },
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: { distributor?: boolean };
+      }) => {
+        const row = withdrawalRequests.get(where.id) ?? null;
+        if (!row) return null;
+        if (include?.distributor) {
+          return { ...row, distributor: distributors.get(row.distributorId) ?? null };
+        }
+        return row;
+      },
+      create: async ({
+        data,
+      }: {
+        data: {
+          distributorId: string;
+          amount: Prisma.Decimal;
+          note?: string | null;
+        };
+      }) => {
+        const record: WithdrawalRequestRecord = {
+          id: nextId('wd'),
+          distributorId: data.distributorId,
+          amount: data.amount,
+          status: WithdrawalRequestStatus.PENDING,
+          note: data.note ?? null,
+          reviewedByPlatformUserId: null,
+          rejectionReason: null,
+          reviewedAt: null,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        withdrawalRequests.set(record.id, record);
+        return record;
+      },
       update: async ({
         where,
         data,
+        include,
       }: {
         where: { id: string };
-        data: Record<string, unknown>;
-      }) => ({ id: where.id, ...data }),
+        data: Partial<WithdrawalRequestRecord>;
+        include?: { distributor?: { select?: Record<string, boolean> } };
+      }) => {
+        const existing = withdrawalRequests.get(where.id);
+        if (!existing) throw new Error('Withdrawal not found');
+        const updated: WithdrawalRequestRecord = {
+          ...existing,
+          ...data,
+          updatedAt: now(),
+        };
+        withdrawalRequests.set(where.id, updated);
+        const result: WithdrawalRequestRecord & Record<string, unknown> = { ...updated };
+        if (include?.distributor) {
+          const distributor = distributors.get(updated.distributorId);
+          const select = include.distributor.select;
+          if (distributor && select) {
+            result.distributor = Object.fromEntries(
+              Object.keys(select)
+                .filter((k) => select[k])
+                .map((k) => [k, distributor[k as keyof DistributorRecord]]),
+            );
+          } else {
+            result.distributor = distributor ?? null;
+          }
+        }
+        return result;
+      },
     },
     merchantRecruitInviteCode: {
       findMany: async ({
@@ -3764,6 +4080,30 @@ export function createMockPrisma() {
       const qr = qrCodes.get(id);
       if (!qr) return;
       qrCodes.set(id, { ...qr, expiresAt: new Date(0) });
+    },
+    _seedConfirmedAllocation: async (input: {
+      tenantId: string;
+      lines: Array<{ quantity: number; wholesalePrice: number }>;
+    }) => {
+      const allocId = nextId('alloc');
+      const lines: AllocationOrderLineRecord[] = input.lines.map((line, index) => ({
+        id: nextId('alloc-line'),
+        allocationOrderId: allocId,
+        masterSkuId: nextId('msku'),
+        quantity: line.quantity,
+        wholesalePrice: new Prisma.Decimal(line.wholesalePrice),
+      }));
+      const record: AllocationOrderRecord = {
+        id: allocId,
+        tenantId: input.tenantId,
+        status: 'CONFIRMED',
+        confirmedAt: now(),
+        lines,
+        createdAt: now(),
+        updatedAt: now(),
+      };
+      allocationOrders.set(allocId, record);
+      return record;
     },
   };
 

@@ -15,6 +15,7 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
+import { UpdateStoreSettingsDto } from './dto/update-store-settings.dto';
 import { PlatformMerchantsService } from './platform-merchants.service';
 
 @Controller('platform/merchants')
@@ -67,5 +68,13 @@ export class PlatformMerchantsController {
       dto,
       user.userId,
     );
+  }
+
+  @Patch(':id/store-settings')
+  updateStoreSettings(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreSettingsDto,
+  ) {
+    return this.platformMerchantsService.updateStoreSettings(id, dto);
   }
 }

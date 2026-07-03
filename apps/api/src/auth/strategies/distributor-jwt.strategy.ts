@@ -19,9 +19,6 @@ export class DistributorJwtStrategy extends PassportStrategy(Strategy, 'distribu
     if (payload.aud !== 'distributor') {
       throw new UnauthorizedException('Invalid token audience');
     }
-    if (!payload.tenantId) {
-      throw new UnauthorizedException('Missing tenant context');
-    }
     if (!payload.roles.includes('DISTRIBUTOR')) {
       throw new UnauthorizedException('Invalid distributor role');
     }

@@ -89,15 +89,13 @@ export function MerchantFundsPanel({
 
         <BentoListHeader
           metrics={[
-            { title: t('salesGmv'), value: formatCNY(summary.salesGmv) },
+            { title: t('pickupGrossProfit'), value: formatCNY(summary.pickupGrossProfit) },
+            { title: t('pickupGmv'), value: formatCNY(summary.pickupGmv) },
+            { title: t('pickupCostOfGoods'), value: formatCNY(summary.pickupCostOfGoods) },
             { title: t('allocationCost'), value: formatCNY(summary.allocationCost) },
             {
               title: t('deliveryAllocationCost'),
               value: formatCNY(summary.deliveryAllocationCost),
-            },
-            {
-              title: t('payableCommission'),
-              value: formatCNY(summary.payableCommission),
             },
             { title: t('netPosition'), value: formatCNY(summary.netPosition) },
           ]}

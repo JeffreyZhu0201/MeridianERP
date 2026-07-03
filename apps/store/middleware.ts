@@ -24,7 +24,7 @@ function isPublicStorePath(pathname: string): boolean {
 
   const { rest } = parsed;
   if (rest === '' || rest === '/') return true;
-  if (rest.startsWith('/login') || rest.startsWith('/register') || rest.startsWith('/bind')) {
+  if (rest.startsWith('/login') || rest.startsWith('/register')) {
     return true;
   }
   if (rest.startsWith('/products/')) return true;

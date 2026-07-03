@@ -52,6 +52,10 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
   const [recruiterId, setRecruiterId] = useState('');
   const [recruiterReason, setRecruiterReason] = useState('');
   const [updatingRecruiter, setUpdatingRecruiter] = useState(false);
+  const [storePublished, setStorePublished] = useState(merchant.storePublished);
+  const [isFlagship, setIsFlagship] = useState(merchant.isFlagship);
+  const [savingStoreSettings, setSavingStoreSettings] = useState(false);
+  const [storeSettingsSuccess, setStoreSettingsSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const canReview =
@@ -121,6 +125,28 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
     }
   }
 
+  async function handleSaveStoreSettings() {
+    setSavingStoreSettings(true);
+    setStoreSettingsSuccess(false);
+    setError('');
+    try {
+      await apiFetch(
+        `/platform/merchants/${merchant.id}/store-settings`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({ storePublished, isFlagship }),
+        },
+        token,
+      );
+      setStoreSettingsSuccess(true);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : td('storeSettingsFailed'));
+    } finally {
+      setSavingStoreSettings(false);
+    }
+  }
+
   return (
     <DetailPageFrame
       title={merchant.businessName}
@@ -175,6 +201,51 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
             <Button variant="outline" onClick={() => setRecruiterOpen(true)}>
               {td('updateRecruiter')}
             </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {merchant.onboardingStatus === OnboardingStatus.APPROVED && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{td('storeSettings')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">{td('storeSettingsDescription')}</p>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={storePublished}
+                  onChange={(e) => {
+                    const next = e.target.checked;
+                    setStorePublished(next);
+                    if (!next) setIsFlagship(false);
+                  }}
+                />
+                {td('storePublished')}
+              </label>
+              <label className="flex items-center gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-4 rounded border"
+                  checked={isFlagship}
+                  disabled={!storePublished}
+                  onChange={(e) => setIsFlagship(e.target.checked)}
+                />
+                {td('isFlagship')}
+              </label>
+              <p className="text-xs text-muted-foreground">{td('flagshipHint')}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button onClick={handleSaveStoreSettings} disabled={savingStoreSettings}>
+                {td('saveStoreSettings')}
+              </Button>
+              {storeSettingsSuccess ? (
+                <span className="text-sm text-emerald-600">{td('storeSettingsSaved')}</span>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
       )}

@@ -10,6 +10,7 @@ import {
 } from '../merchant/commissions/commission-mappers';
 import { CommissionListQueryDto } from '../merchant/commissions/dto/commission-list-query.dto';
 import { PlatformWithdrawalsService } from '../platform/withdrawals/platform-withdrawals.service';
+import { RecruitInviteCodesService } from '../recruit-invite/recruit-invite-codes.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class DistributorMeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly withdrawalsService: PlatformWithdrawalsService,
+    private readonly inviteCodes: RecruitInviteCodesService,
   ) {}
 
   
@@ -151,35 +153,73 @@ export class DistributorMeService {
     });
     return Promise.all(
       merchants.map(async (m) => {
-        const agg = await this.prisma.order.aggregate({
-          where: {
-            tenantId: m.tenantId,                                  // 该分店的租户ID
-            status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] }, // 只统计已支付和已完成的订单
-            createdAt: { gte: windowStart },                        // 创建时间在最近30天内
-          },
-          _sum: { total: true },   // 汇总订单总额
-          _count: { _all: true },  // 统计订单数量
-        });
+        const [recentAgg, lifetimeAgg] = await Promise.all([
+          this.prisma.order.aggregate({
+            where: {
+              tenantId: m.tenantId,
+              status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },
+              createdAt: { gte: windowStart },
+            },
+            _sum: { total: true },
+            _count: { _all: true },
+          }),
+          this.prisma.order.aggregate({
+            where: {
+              tenantId: m.tenantId,
+              status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },
+            },
+            _sum: { total: true },
+            _count: { _all: true },
+          }),
+        ]);
         return {
-          tenantId: m.tenantId,                                  // 分店所属租户ID
-          merchantProfileId: m.id,                               // 商户档案ID
-          businessName: m.businessName,                          // 业务名称
-          slug: m.tenant.slug,                                   // 分店slug（用于URL）
-          recruitedAt: m.recruitedAt?.toISOString() ?? null,     // 招募时间
-          salesLast30Days: Number(agg._sum.total ?? 0),          // 最近30天销售额
-          orderCountLast30Days: agg._count._all,                 // 最近30天订单数
+          tenantId: m.tenantId,
+          merchantProfileId: m.id,
+          businessName: m.businessName,
+          slug: m.tenant.slug,
+          recruitedAt: m.recruitedAt?.toISOString() ?? null,
+          salesLast30Days: Number(recentAgg._sum.total ?? 0),
+          orderCountLast30Days: recentAgg._count._all,
+          lifetimeSales: Number(lifetimeAgg._sum.total ?? 0),
+          lifetimeOrderCount: lifetimeAgg._count._all,
         };
       }),
     );
   }
 
+  async listInviteCodes(user: AuthenticatedUser) {
+    const distributor = await this.loadDistributor(user);
+    return this.inviteCodes.listInviteCodes(distributor.id);
+  }
+
+  async createInviteCode(user: AuthenticatedUser, expiresInDays?: number) {
+    const distributor = await this.loadDistributor(user);
+    return this.inviteCodes.createInviteCode(distributor.id, expiresInDays);
+  }
+
+  async revokeInviteCode(user: AuthenticatedUser, codeId: string) {
+    const distributor = await this.loadDistributor(user);
+    return this.inviteCodes.revokeInviteCode(distributor.id, codeId);
+  }
+
   
   async listWithdrawals(user: AuthenticatedUser) {
     const distributor = await this.loadDistributor(user);
-    return this.prisma.withdrawalRequest.findMany({
-      where: { distributorId: distributor.id },  // 只返回属于该经销商的记录
-      orderBy: { createdAt: 'desc' },             // 按创建时间倒序，最新的在前
+    const rows = await this.prisma.withdrawalRequest.findMany({
+      where: { distributorId: distributor.id },
+      orderBy: { createdAt: 'desc' },
     });
+    return rows.map((row) => ({
+      id: row.id,
+      distributorId: row.distributorId,
+      distributorName: distributor.name,
+      amount: row.amount.toString(),
+      status: row.status,
+      note: row.note,
+      rejectionReason: row.rejectionReason,
+      reviewedAt: row.reviewedAt?.toISOString() ?? null,
+      createdAt: row.createdAt.toISOString(),
+    }));
   }
 
   
@@ -212,12 +252,22 @@ export class DistributorMeService {
         where,
         include: {
           order: { select: { total: true } },
+          allocationOrder: {
+            include: {
+              lines: { select: { quantity: true, wholesalePrice: true } },
+            },
+          },
+          tenant: {
+            select: {
+              merchantProfile: { select: { businessName: true } },
+            },
+          },
           distributor: {
             select: {
               id: true,
               name: true,
-              commissionType: true,    // 佣金类型（按比例/固定金额）
-              commissionRate: true,    // 佣金费率
+              commissionType: true,
+              commissionRate: true,
             },
           },
           settlementBatch: true,

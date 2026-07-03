@@ -21,8 +21,18 @@ export class PlatformWithdrawalsController {
 
   
   @Get()
-  list(@Query('status') status?: WithdrawalRequestStatus) {
-    return this.service.list(status);
+  list(
+    @Query('status') status?: WithdrawalRequestStatus,
+    @Query('distributorId') distributorId?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.list({
+      status,
+      distributorId,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
   }
 
   

@@ -98,7 +98,7 @@ describe('StoreCheckout (e2e)', () => {
     expect(merchantOrders.body[0].guestEmail).toBe('guest@example.com');
   });
 
-  it('accrues commission after pickup verify when branch has recruiter', async () => {
+  it('does not accrue retail commission after pickup verify when branch has recruiter', async () => {
     const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
     const platformDist = await prisma.distributor.create({
       data: {
@@ -141,7 +141,6 @@ describe('StoreCheckout (e2e)', () => {
       include: { commissionEntry: true },
     });
     expect(paidOrder?.pickupCode).toMatch(/^\d{6}$/);
-    expect(paidOrder?.customerId).toBeTruthy();
     expect(paidOrder?.commissionEntry).toBeNull();
 
     await request(app.getHttpServer())
@@ -155,15 +154,10 @@ describe('StoreCheckout (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    expect(orderDetail.body.commissionEntry).toMatchObject({
-      distributorId: platformDist.id,
-      status: 'ACCRUED',
-      customerOrderSequence: 1,
-    });
-    expect(Number(orderDetail.body.commissionEntry.amount)).toBe(5);
+    expect(orderDetail.body.commissionEntry).toBeNull();
   });
 
-  it('does not accrue commission on third fulfilled order for same customer', async () => {
+  it('does not accrue retail commission on repeated fulfilled orders', async () => {
     const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
     const platformDist = await prisma.distributor.create({
       data: {

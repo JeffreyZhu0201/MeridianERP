@@ -1,10 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { LedgerStatus, OrderStatus } from '@prisma/client';
 import {
+  CommissionSource,
+  FulfillmentType,
+  LedgerStatus,
+  OrderStatus,
+} from '@prisma/client';
+import {
+  computeBranchNetPosition,
   computeCommissionLiability,
   computePlatformWholesaleRevenue,
+  pickupOrderGrossProfit,
   sumAllocationLineCost,
-  computeBranchNetPosition,
 } from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { eachUtcDay, parseDateRangeQuery } from '../../common/date-range';
@@ -14,7 +20,6 @@ import type { DateRangeQuery } from '@meridian/shared';
 export class PlatformFundsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async getSummary(query: DateRangeQuery = {}) {
     const { from, to, fromIso, toIso } = parseDateRangeQuery(query);
 
@@ -32,6 +37,7 @@ export class PlatformFundsService {
       commissionSettled,
       pendingWithdrawals,
       ordersForTrend,
+      pickupOrders,
     ] = await Promise.all([
       this.prisma.order.aggregate({
         where: orderWhere,
@@ -39,7 +45,7 @@ export class PlatformFundsService {
         _count: { _all: true },
       }),
       this.prisma.order.count({
-        where: { ...orderWhere, fulfillmentType: 'DELIVERY' },
+        where: { ...orderWhere, fulfillmentType: FulfillmentType.DELIVERY },
       }),
       this.prisma.allocationOrderLine.findMany({
         where: {
@@ -55,11 +61,19 @@ export class PlatformFundsService {
         _sum: { lineTotal: true },
       }),
       this.prisma.commissionLedger.aggregate({
-        where: { status: LedgerStatus.ACCRUED, createdAt: { gte: from, lte: to } },
+        where: {
+          commissionSource: CommissionSource.ALLOCATION,
+          status: LedgerStatus.ACCRUED,
+          createdAt: { gte: from, lte: to },
+        },
         _sum: { amount: true },
       }),
       this.prisma.commissionLedger.aggregate({
-        where: { status: LedgerStatus.SETTLED, createdAt: { gte: from, lte: to } },
+        where: {
+          commissionSource: CommissionSource.ALLOCATION,
+          status: LedgerStatus.SETTLED,
+          createdAt: { gte: from, lte: to },
+        },
         _sum: { amount: true },
       }),
       this.prisma.withdrawalRequest.aggregate({
@@ -69,6 +83,17 @@ export class PlatformFundsService {
       this.prisma.order.findMany({
         where: orderWhere,
         select: { total: true, createdAt: true },
+      }),
+      this.prisma.order.findMany({
+        where: {
+          ...orderWhere,
+          fulfillmentType: FulfillmentType.PICKUP,
+          status: OrderStatus.FULFILLED,
+        },
+        select: {
+          total: true,
+          lines: { select: { quantity: true, unitWholesalePrice: true } },
+        },
       }),
     ]);
 
@@ -81,20 +106,39 @@ export class PlatformFundsService {
     const wholesaleFromDelivery = Number(deliveryAgg._sum.lineTotal ?? 0);
     const accrued = Number(commissionAccrued._sum.amount ?? 0);
     const settled = Number(commissionSettled._sum.amount ?? 0);
+    const consumerGmv = Number(orderAgg._sum.total ?? 0);
+    const pickupMarginAcrossBranches = pickupOrders.reduce(
+      (sum, order) =>
+        sum +
+        pickupOrderGrossProfit(
+          Number(order.total),
+          order.lines.map((l) => ({
+            quantity: l.quantity,
+            unitWholesalePrice: l.unitWholesalePrice,
+          })),
+        ),
+      0,
+    );
 
     const gmvTrend = this.buildGmvTrend(ordersForTrend, from, to);
 
     return {
-      gmv: Number(orderAgg._sum.total ?? 0),
+      consumerGmv,
+      gmv: consumerGmv,
+      wholesaleFromAllocations: wholesaleFromAlloc,
+      wholesaleFromDelivery,
       wholesaleRevenue: computePlatformWholesaleRevenue(
         wholesaleFromAlloc,
         wholesaleFromDelivery,
       ),
+      distributorCommissionAccrued: accrued,
+      distributorCommissionSettled: settled,
       commissionAccrued: accrued,
       commissionSettled: settled,
       commissionLiability: computeCommissionLiability(accrued, settled),
       accruedAwaitingSettlement: accrued,
       pendingWithdrawals: Number(pendingWithdrawals._sum.amount ?? 0),
+      pickupMarginAcrossBranches,
       orderCount: orderAgg._count._all,
       deliveryOrderCount: deliveryCount,
       from: fromIso,
@@ -103,7 +147,6 @@ export class PlatformFundsService {
     };
   }
 
-  
   private buildGmvTrend(
     orders: Array<{ total: unknown; createdAt: Date }>,
     from: Date,
@@ -125,46 +168,64 @@ export class PlatformFundsService {
 export class MerchantFundsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async getSummary(tenantId: string, query: DateRangeQuery = {}) {
     const { from, to, fromIso, toIso } = parseDateRangeQuery(query);
 
-    const orderWhere = {
+    const pickupOrderWhere = {
       tenantId,
-      status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },
-      createdAt: { gte: from, lte: to },
+      status: OrderStatus.FULFILLED,
+      fulfillmentType: FulfillmentType.PICKUP,
+      pickupVerifiedAt: { gte: from, lte: to },
     };
 
-    const [salesAgg, allocationLines, deliveryLedgers, commissionAgg] =
-      await Promise.all([
-        this.prisma.order.aggregate({
-          where: orderWhere,
-          _sum: { total: true },
-        }),
-        this.prisma.allocationOrderLine.findMany({
-          where: {
-            allocationOrder: {
-              tenantId,
-              status: 'CONFIRMED',
-              confirmedAt: { gte: from, lte: to },
-            },
-          },
-          select: { quantity: true, wholesalePrice: true },
-        }),
-        this.prisma.deliveryAllocationLedger.aggregate({
-          where: { tenantId, createdAt: { gte: from, lte: to } },
-          _sum: { lineTotal: true },
-        }),
-        this.prisma.commissionLedger.aggregate({
-          where: {
+    const [pickupOrders, allocationLines, deliveryLedgers] = await Promise.all([
+      this.prisma.order.findMany({
+        where: pickupOrderWhere,
+        select: {
+          total: true,
+          lines: { select: { quantity: true, unitWholesalePrice: true } },
+        },
+      }),
+      this.prisma.allocationOrderLine.findMany({
+        where: {
+          allocationOrder: {
             tenantId,
-            status: { in: [LedgerStatus.ACCRUED, LedgerStatus.SETTLED] },
-            createdAt: { gte: from, lte: to },
+            status: 'CONFIRMED',
+            confirmedAt: { gte: from, lte: to },
           },
-          _sum: { amount: true },
-        }),
-      ]);
+        },
+        select: { quantity: true, wholesalePrice: true },
+      }),
+      this.prisma.deliveryAllocationLedger.aggregate({
+        where: { tenantId, createdAt: { gte: from, lte: to } },
+        _sum: { lineTotal: true },
+      }),
+    ]);
 
+    const pickupGmv = pickupOrders.reduce((sum, o) => sum + Number(o.total), 0);
+    const pickupCostOfGoods = pickupOrders.reduce((sum, order) => {
+      const cost = order.lines.reduce(
+        (lineSum, line) =>
+          lineSum +
+          (line.unitWholesalePrice != null
+            ? Number(line.unitWholesalePrice) * line.quantity
+            : 0),
+        0,
+      );
+      return sum + cost;
+    }, 0);
+    const pickupGrossProfit = pickupOrders.reduce(
+      (sum, order) =>
+        sum +
+        pickupOrderGrossProfit(
+          Number(order.total),
+          order.lines.map((l) => ({
+            quantity: l.quantity,
+            unitWholesalePrice: l.unitWholesalePrice,
+          })),
+        ),
+      0,
+    );
     const allocationCost = sumAllocationLineCost(
       allocationLines.map((l) => ({
         quantity: l.quantity,
@@ -172,20 +233,19 @@ export class MerchantFundsService {
       })),
     );
     const deliveryCost = Number(deliveryLedgers._sum.lineTotal ?? 0);
-    const salesGmv = Number(salesAgg._sum.total ?? 0);
-    const payableCommission = Number(commissionAgg._sum.amount ?? 0);
     const netPosition = computeBranchNetPosition({
-      salesGmv,
+      pickupGrossProfit,
       allocationCost,
       deliveryCost,
-      payableCommission,
     });
 
     return {
-      salesGmv,
+      pickupGmv,
+      pickupCostOfGoods,
+      pickupGrossProfit,
+      salesGmv: pickupGmv,
       allocationCost,
       deliveryAllocationCost: deliveryCost,
-      payableCommission,
       netPosition,
       from: fromIso,
       to: toIso,

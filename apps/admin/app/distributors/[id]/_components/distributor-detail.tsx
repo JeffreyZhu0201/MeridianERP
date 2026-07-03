@@ -1,8 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import QRCode from 'react-qr-code';
 import {
   Badge,
   Button,
@@ -26,7 +28,8 @@ import {
 } from '@meridian/ui';
 
 import { apiFetch, type DistributorBranch } from '@/lib/api';
-import type { DistributorCommissionEntry } from '@meridian/shared';
+import type { DistributorCommissionEntry, DistributorFundsSummary, WithdrawalRequestRow, WithdrawalRequestStatus } from '@meridian/shared';
+import { LedgerStatus } from '@meridian/shared';
 import type { DistributorDetailResponse } from '../page';
 
 interface DistributorDetailViewProps {
@@ -44,6 +47,7 @@ export function DistributorDetailView({
   const locale = useLocale();
   const t = useTranslations('admin.distributors');
   const td = useTranslations('admin.distributors.detail');
+  const tw = useTranslations('admin.withdrawals');
   const tc = useTranslations('common');
   const [distributor, setDistributor] = useState(initial);
   const [invite, setInvite] = useState<{ url: string; code: string } | null>(null);
@@ -58,8 +62,39 @@ export function DistributorDetailView({
   const [isActive, setIsActive] = useState(distributor.isActive);
   const [commissionEntries, setCommissionEntries] = useState<DistributorCommissionEntry[]>([]);
   const [loadingCommission, setLoadingCommission] = useState(true);
+  const [fundsSummary, setFundsSummary] = useState<DistributorFundsSummary | null>(null);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequestRow[]>([]);
+  const [loadingFunds, setLoadingFunds] = useState(true);
 
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
+  const emptyDash = tc('emptyDash');
+
+  const sequenceLabel = (entry: DistributorCommissionEntry) => {
+    const seq = entry.merchantAllocationSequence ?? entry.customerOrderSequence;
+    if (seq === 1) return td('allocationSequenceFirst');
+    if (seq === 2) return td('allocationSequenceSecond');
+    return emptyDash;
+  };
+
+  const sourceLabel = (source: string | null | undefined) => {
+    if (source === 'ALLOCATION') return td('sourceAllocation');
+    if (source === 'RETAIL') return td('sourceRetail');
+    return td('sourceAllocation');
+  };
+
+  const ledgerStatusLabel = (status: string) => {
+    if (status === LedgerStatus.ACCRUED || status === LedgerStatus.SETTLED || status === LedgerStatus.VOID) {
+      return td(`ledgerStatus.${status}`);
+    }
+    return status;
+  };
+
+  const withdrawalStatusLabel = (status: string) => {
+    if (status === 'PENDING' || status === 'APPROVED' || status === 'REJECTED') {
+      return tw(`withdrawalStatus.${status as WithdrawalRequestStatus}`);
+    }
+    return status;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -84,11 +119,41 @@ export function DistributorDetailView({
     };
   }, [distributor.id, token]);
 
-  const sequenceLabel = (seq: number | null) => {
-    if (seq === 1) return td('orderSequenceFirst');
-    if (seq === 2) return td('orderSequenceSecond');
-    return '—';
-  };
+  useEffect(() => {
+    let cancelled = false;
+    async function loadFunds() {
+      setLoadingFunds(true);
+      try {
+        const [summary, withdrawalRows] = await Promise.all([
+          apiFetch<DistributorFundsSummary>(
+            `/platform/distributors/${distributor.id}/funds-summary`,
+            {},
+            token,
+          ),
+          apiFetch<WithdrawalRequestRow[]>(
+            `/platform/distributors/${distributor.id}/withdrawals`,
+            {},
+            token,
+          ),
+        ]);
+        if (!cancelled) {
+          setFundsSummary(summary);
+          setWithdrawals(withdrawalRows);
+        }
+      } catch {
+        if (!cancelled) {
+          setFundsSummary(null);
+          setWithdrawals([]);
+        }
+      } finally {
+        if (!cancelled) setLoadingFunds(false);
+      }
+    }
+    void loadFunds();
+    return () => {
+      cancelled = true;
+    };
+  }, [distributor.id, token]);
 
   const commissionLabel =
     distributor.commissionType === 'FIXED'
@@ -213,24 +278,77 @@ export function DistributorDetailView({
             title: td('portal'),
             value: distributor.portalEnabled ? tc('yes') : tc('no'),
           },
-          { title: t('columns.email'), value: distributor.email ?? '—' },
+          { title: t('columns.email'), value: distributor.email ?? emptyDash },
           ...(distributor.accountEmail
             ? [{ title: td('linkedAccount'), value: distributor.accountEmail }]
             : []),
+          ...(fundsSummary
+            ? [
+                {
+                  title: td('availableBalance'),
+                  value: formatCNY(fundsSummary.availableBalance),
+                },
+                {
+                  title: td('pendingWithdrawals'),
+                  value: formatCNY(fundsSummary.pendingWithdrawals),
+                },
+              ]
+            : []),
         ]}
       />
+
+      {!loadingFunds && fundsSummary ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{td('fundsSummary')}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-xs text-muted-foreground">{td('accruedTotal')}</p>
+              <p className="text-lg font-medium tabular-nums">
+                {formatCNY(fundsSummary.accruedTotal)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">{td('settledTotal')}</p>
+              <p className="text-lg font-medium tabular-nums">
+                {formatCNY(fundsSummary.settledTotal)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">{td('availableBalance')}</p>
+              <p className="text-lg font-medium tabular-nums">
+                {formatCNY(fundsSummary.availableBalance)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">{td('pendingWithdrawals')}</p>
+              <p className="text-lg font-medium tabular-nums">
+                {formatCNY(fundsSummary.pendingWithdrawals)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       {invite ? (
         <Card>
           <CardHeader>
             <CardTitle>{td('inviteUrl')}</CardTitle>
           </CardHeader>
-          <CardContent className="flex flex-wrap items-center gap-2">
-            <Input readOnly value={invite.url} className="font-mono text-xs" />
-            <Button variant="outline" size="sm" onClick={handleCopy}>
-              {copied ? td('copied') : td('copy')}
-            </Button>
-            <span className="font-mono text-xs text-muted-foreground">{invite.code}</span>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+              <div className="rounded-lg border bg-white p-4">
+                <QRCode value={invite.url} size={160} />
+              </div>
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                <Input readOnly value={invite.url} className="font-mono text-xs" />
+                <Button variant="outline" size="sm" onClick={handleCopy}>
+                  {copied ? td('copied') : td('copy')}
+                </Button>
+                <span className="font-mono text-xs text-muted-foreground">{invite.code}</span>
+              </div>
+            </div>
           </CardContent>
         </Card>
       ) : null}
@@ -262,8 +380,8 @@ export function DistributorDetailView({
                   value={commissionType}
                   onChange={(e) => setCommissionType(e.target.value)}
                 >
-                  <option value="PERCENT">PERCENT</option>
-                  <option value="FIXED">FIXED</option>
+                  <option value="PERCENT">{t('form.percent')}</option>
+                  <option value="FIXED">{t('form.fixed')}</option>
                 </Select>
               </div>
             </div>
@@ -324,9 +442,14 @@ export function DistributorDetailView({
                       </TableCell>
                       <TableCell className="text-right">
                         {!code.revokedAt ? (
-                          <Button size="sm" variant="outline" onClick={() => handleRevoke(code.id)}>
-                            {td('revoke')}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <div className="hidden rounded border bg-white p-1 lg:block">
+                              <QRCode value={code.url} size={64} />
+                            </div>
+                            <Button size="sm" variant="outline" onClick={() => handleRevoke(code.id)}>
+                              {td('revoke')}
+                            </Button>
+                          </div>
                         ) : null}
                       </TableCell>
                     </TableRow>
@@ -339,6 +462,58 @@ export function DistributorDetailView({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
+          <CardTitle>{td('withdrawals')}</CardTitle>
+          <Link
+            href={`/withdrawals?distributorId=${distributor.id}`}
+            className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+          >
+            {td('viewAllWithdrawals')}
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {loadingFunds ? (
+            <p className="text-sm text-muted-foreground">{tc('loading')}</p>
+          ) : withdrawals.length > 0 ? (
+            <div className="rounded-xl ring-1 ring-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-right">{td('columns.amount')}</TableHead>
+                    <TableHead>{tc('status')}</TableHead>
+                    <TableHead>{td('columns.requested')}</TableHead>
+                    <TableHead>{td('columns.reviewed')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {withdrawals.slice(0, 10).map((row) => (
+                    <TableRow key={row.id}>
+                      <TableCell className="text-right tabular-nums">
+                        {formatCNY(row.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{withdrawalStatusLabel(row.status)}</Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {new Date(row.createdAt).toLocaleDateString(locale)}
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">
+                        {row.reviewedAt
+                          ? new Date(row.reviewedAt).toLocaleDateString(locale)
+                          : emptyDash}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <EmptyState title={td('noWithdrawals')} />
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -391,8 +566,9 @@ export function DistributorDetailView({
                 <TableHeader>
                   <TableRow>
                     <TableHead>{td('columns.business')}</TableHead>
-                    <TableHead>{td('orderSequence')}</TableHead>
-                    <TableHead className="text-right">{td('columns.sales')}</TableHead>
+                    <TableHead>{td('allocationSequence')}</TableHead>
+                    <TableHead>{td('commissionSource')}</TableHead>
+                    <TableHead className="text-right">{td('wholesaleBase')}</TableHead>
                     <TableHead className="text-right">{t('columns.commission')}</TableHead>
                     <TableHead>{tc('status')}</TableHead>
                   </TableRow>
@@ -401,7 +577,16 @@ export function DistributorDetailView({
                   {commissionEntries.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.businessName}</TableCell>
-                      <TableCell>{sequenceLabel(entry.customerOrderSequence)}</TableCell>
+                      <TableCell>{sequenceLabel(entry)}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            entry.commissionSource === 'RETAIL' ? 'outline' : 'secondary'
+                          }
+                        >
+                          {sourceLabel(entry.commissionSource)}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {formatCNY(entry.orderTotal)}
                       </TableCell>
@@ -409,7 +594,7 @@ export function DistributorDetailView({
                         {formatCNY(entry.amount)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{entry.status}</Badge>
+                        <Badge variant="secondary">{ledgerStatusLabel(entry.status)}</Badge>
                       </TableCell>
                     </TableRow>
                   ))}

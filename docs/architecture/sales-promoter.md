@@ -36,7 +36,25 @@ Trigger points unchanged: pickup verify, HQ delivery ship (`fulfillment.service.
 |--------|------|-------|
 | POST | `/platform/distributors` | Add optional `accountId` |
 | GET | `/platform/distributors/:id/commission-entries` | Paginated ledger with branch name, sequence |
+| GET | `/platform/distributors/:id/funds-summary` | `accruedTotal`, `settledTotal`, `pendingWithdrawals`, `availableBalance`, `branchCount` |
+| GET | `/platform/distributors/:id/withdrawals` | All withdrawal requests for promoter |
 | POST | `/platform/distributors/:id/invite-code` | URL uses `STORE_APP_URL/open-shop?invite=` |
+| GET | `/platform/withdrawals` | Query: `status?`, `distributorId?`, `page?`, `limit?` → `WithdrawalRequestRow[]` |
+| POST | `/platform/withdrawals/:id/approve` | Disburse confirm; updates `APPROVED` + `reviewedAt` |
+| POST | `/platform/withdrawals/:id/reject` | Body `{ reason }` |
+
+### Distributor portal (`apps/distributor`)
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| GET | `/distributor/me/invite-codes` | Distributor JWT | List codes with `url`, `useCount`, `revokedAt` |
+| POST | `/distributor/me/invite-codes` | Distributor JWT | Generate code (shared `RecruitInviteCodesService`) |
+| POST | `/distributor/me/invite-codes/:codeId/revoke` | Distributor JWT | Revoke own code |
+| GET | `/distributor/me/branches` | Distributor JWT | 30d + lifetime sales/order counts |
+| GET | `/distributor/me/commissions` | Distributor JWT | Includes `businessName`, `customerOrderSequence`, `orderTotal` |
+| GET/POST | `/distributor/me/withdrawals` | Distributor JWT | List history; create request |
+
+Portal auth requires `tenantId: null`, `portalEnabled`, `isActive`.
 
 ### Store
 
@@ -61,10 +79,17 @@ Approval reuses `POST /platform/merchants/:id/approve`.
 
 ## Shared Types
 
-`packages/shared/src/phase-5-distribution.ts`: `CreatePlatformDistributorRequest.accountId`, `DistributorCommissionEntry`, `InviteCodePreview`, `StoreMerchantApplicationRequest`.
+`packages/shared/src/phase-5-distribution.ts`:
+
+- `DistributorInviteCodeRow` — portal invite list item with `url`, `createdAt`
+- `DistributorFundsSummary` — promoter funds snapshot
+- `WithdrawalListQuery` — admin list filters
+- `CommissionStatementRow.businessName`, `customerOrderSequence` (in `distributors.ts`)
 
 ## Module Layout
 
-- `apps/api/src/recruit-invite/recruit-invite.service.ts` — shared invite validation
+- `apps/api/src/recruit-invite/recruit-invite.service.ts` — invite validation
+- `apps/api/src/recruit-invite/recruit-invite-codes.service.ts` — create/list/revoke + URL builder (admin + portal)
 - `apps/api/src/store/merchant-application/` — store onboarding API
 - `apps/store/app/open-shop/` — wizard UI
+- `apps/distributor/app/share/` — self-service share + QR

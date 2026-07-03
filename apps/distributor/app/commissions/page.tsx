@@ -10,7 +10,7 @@ import { Badge,
   TableHeader,
   TableRow,
   formatMoney, } from '@meridian/ui/server';
-import { LedgerStatus } from '@meridian/shared';
+import { LedgerStatus, type DistributorDashboard } from '@meridian/shared';
 
 import {
   apiFetch,
@@ -24,43 +24,83 @@ const statusVariant: Record<string, 'default' | 'warning' | 'success' | 'destruc
   [LedgerStatus.VOID]: 'destructive',
 };
 
+function sequenceLabel(
+  row: {
+    merchantAllocationSequence?: number | null;
+    customerOrderSequence?: number | null;
+  },
+  t: Awaited<ReturnType<typeof getTranslations>>,
+  emptyDash: string,
+): string {
+  const seq = row.merchantAllocationSequence ?? row.customerOrderSequence;
+  if (seq === 1) return t('allocationSequenceFirst');
+  if (seq === 2) return t('allocationSequenceSecond');
+  return emptyDash;
+}
+
+function sourceLabel(
+  source: string | null | undefined,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): string {
+  if (source === 'RETAIL') return t('sourceRetail');
+  return t('sourceAllocation');
+}
+
+function ledgerStatusLabel(
+  status: string,
+  t: Awaited<ReturnType<typeof getTranslations>>,
+): string {
+  if (status === LedgerStatus.ACCRUED || status === LedgerStatus.SETTLED || status === LedgerStatus.VOID) {
+    return t(`ledgerStatus.${status}`);
+  }
+  return status;
+}
+
 export default async function CommissionsPage() {
   const locale = await getLocale();
   const t = await getTranslations('distributor.commissions');
-  const td = await getTranslations('distributor.dashboard');
+  const td = await getTranslations('distributor');
+  const tc = await getTranslations('common');
   const token = await getToken();
   if (!token) return null;
 
+  const emptyDash = tc('emptyDash');
+
   let commissions: DistributorCommissionListResponse | null = null;
+  let dashboard: DistributorDashboard | null = null;
   let error: string | null = null;
 
   try {
-    commissions = await apiFetch<DistributorCommissionListResponse>(
-      '/distributor/me/commissions',
-      {},
-      token,
-    );
+    [commissions, dashboard] = await Promise.all([
+      apiFetch<DistributorCommissionListResponse>('/distributor/me/commissions', {}, token),
+      apiFetch<DistributorDashboard>('/distributor/me/dashboard', {}, token),
+    ]);
   } catch (err) {
     error = err instanceof Error ? err.message : t('loadError');
   }
 
   const isEmpty = !commissions?.items.length;
-  const accruedTotal = commissions?.items
-    .filter((row) => row.status === LedgerStatus.ACCRUED)
-    .reduce((sum, row) => sum + Number(row.amount), 0) ?? 0;
-  const settledTotal = commissions?.items
-    .filter((row) => row.status === LedgerStatus.SETTLED)
-    .reduce((sum, row) => sum + Number(row.amount), 0) ?? 0;
+  const summary = dashboard?.commissionSummary;
+  const tDashboard = await getTranslations('distributor.dashboard');
 
   return (
     <div className="space-y-6">
-      {commissions ? (
+      {summary ? (
         <BentoListHeader
           metrics={[
-            { title: t('title'), value: commissions.total },
-            { title: t('amount'), value: formatMoney(accruedTotal + settledTotal, locale) },
-            { title: td('commissionAccrued'), value: formatMoney(accruedTotal, locale) },
-            { title: td('commissionSettled'), value: formatMoney(settledTotal, locale) },
+            { title: t('title'), value: summary.entryCount },
+            {
+              title: tDashboard('commissionAccrued'),
+              value: formatMoney(summary.accruedTotal, locale),
+            },
+            {
+              title: tDashboard('commissionSettled'),
+              value: formatMoney(summary.settledTotal, locale),
+            },
+            {
+              title: tDashboard('availableBalance'),
+              value: formatMoney(dashboard?.availableBalance ?? 0, locale),
+            },
           ]}
         />
       ) : null}
@@ -83,7 +123,11 @@ export default async function CommissionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>{t('businessName')}</TableHead>
                   <TableHead>{t('order')}</TableHead>
+                  <TableHead>{t('allocationSequence')}</TableHead>
+                  <TableHead>{t('commissionSource')}</TableHead>
+                  <TableHead>{t('wholesaleBase')}</TableHead>
                   <TableHead>{t('amount')}</TableHead>
                   <TableHead>{t('status')}</TableHead>
                   <TableHead>{t('created')}</TableHead>
@@ -92,11 +136,23 @@ export default async function CommissionsPage() {
               <TableBody>
                 {commissions.items.map((row) => (
                   <TableRow key={row.id}>
+                    <TableCell className="font-medium">
+                      {row.businessName ?? emptyDash}
+                    </TableCell>
                     <TableCell className="font-mono text-xs">{row.orderReference}</TableCell>
+                    <TableCell>
+                      {sequenceLabel(row, t, emptyDash)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={row.commissionSource === 'RETAIL' ? 'outline' : 'secondary'}>
+                        {sourceLabel(row.commissionSource, t)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{formatMoney(row.orderTotal, locale)}</TableCell>
                     <TableCell>{formatMoney(row.amount, locale)}</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[row.status] ?? 'secondary'}>
-                        {row.status}
+                        {ledgerStatusLabel(row.status, td)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">

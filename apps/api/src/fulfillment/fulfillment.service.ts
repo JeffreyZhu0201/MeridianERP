@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { createHmac } from 'crypto';
 import { FulfillmentType, OrderStatus, Prisma } from '@prisma/client';
-import { CommissionService } from '../commission/commission.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -19,7 +18,6 @@ export class FulfillmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly inventoryService: InventoryService,
-    private readonly commissionService: CommissionService,
   ) {}
   async generatePickupCodeForOrder(orderId: string): Promise<string> {
     for (let attempt = 0; attempt < 10; attempt++) {
@@ -112,7 +110,6 @@ export class FulfillmentService {
         );
       }
     });
-    await this.commissionService.accrueOnFulfilled(orderId);
     return { orderId, status: OrderStatus.FULFILLED };
   }
   async shipDelivery(orderId: string, platformUserId: string) {
@@ -177,7 +174,6 @@ export class FulfillmentService {
         });
       }
     });
-    await this.commissionService.accrueOnFulfilled(orderId);
     return { orderId, status: OrderStatus.FULFILLED };
   }
   buildPickupQrPayload(orderId: string, pickupCode: string): string {

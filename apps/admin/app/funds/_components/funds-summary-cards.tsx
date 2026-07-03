@@ -13,14 +13,33 @@ export function FundsSummaryCards({ summary, formatMoney }: FundsSummaryCardsPro
   const t = useTranslations('admin.funds');
 
   const items = [
-    { label: t('gmv'), value: formatMoney(summary.gmv) },
+    { label: t('consumerGmv'), value: formatMoney(summary.consumerGmv ?? summary.gmv) },
     { label: t('wholesaleRevenue'), value: formatMoney(summary.wholesaleRevenue) },
-    { label: t('commissionAccrued'), value: formatMoney(summary.commissionAccrued) },
-    { label: t('commissionSettled'), value: formatMoney(summary.commissionSettled) },
     {
-      label: t('commissionLiability'),
-      value: formatMoney(summary.commissionLiability),
+      label: t('wholesaleFromAllocations'),
+      value: formatMoney(summary.wholesaleFromAllocations ?? 0),
     },
+    {
+      label: t('wholesaleFromDelivery'),
+      value: formatMoney(summary.wholesaleFromDelivery ?? 0),
+    },
+    {
+      label: t('pickupMarginAcrossBranches'),
+      value: formatMoney(summary.pickupMarginAcrossBranches ?? 0),
+    },
+    {
+      label: t('distributorCommissionAccrued'),
+      value: formatMoney(
+        summary.distributorCommissionAccrued ?? summary.commissionAccrued,
+      ),
+    },
+    {
+      label: t('distributorCommissionSettled'),
+      value: formatMoney(
+        summary.distributorCommissionSettled ?? summary.commissionSettled,
+      ),
+    },
+    { label: t('commissionLiability'), value: formatMoney(summary.commissionLiability) },
     {
       label: t('accruedAwaitingSettlement'),
       value: formatMoney(summary.accruedAwaitingSettlement),

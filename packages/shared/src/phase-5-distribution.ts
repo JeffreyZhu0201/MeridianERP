@@ -57,6 +57,10 @@ export interface MerchantRecruitInviteCodeResponse {
   url: string;
 }
 
+export interface DistributorInviteCodeRow extends MerchantRecruitInviteCodeResponse {
+  createdAt: string | null;
+}
+
 export interface ApproveMerchantRequest {
   recruitedByDistributorId?: string;
 }
@@ -69,14 +73,20 @@ export interface DistributorBranchSummary {
   recruitedAt: string | null;
   salesLast30Days: string | number;
   orderCountLast30Days: number;
+  lifetimeSales?: string | number;
+  lifetimeOrderCount?: number;
 }
 
 export interface DistributorCommissionEntry {
   id: string;
-  orderId: string;
+  orderId?: string | null;
+  allocationOrderId?: string | null;
   tenantId: string;
   businessName: string;
-  customerOrderSequence: number | null;
+  customerOrderSequence?: number | null;
+  merchantAllocationSequence?: number | null;
+  commissionSource?: string | null;
+  /** Wholesale base for ALLOCATION; order total for legacy RETAIL */
   orderTotal: string | number;
   amount: string | number;
   status: LedgerStatus;
@@ -115,12 +125,20 @@ export interface WithdrawalRequestRow {
   id: string;
   distributorId: string;
   distributorName: string;
+  distributorEmail?: string | null;
   amount: string | number;
   status: WithdrawalRequestStatus;
   note: string | null;
   rejectionReason: string | null;
   reviewedAt: string | null;
   createdAt: string;
+}
+
+export interface WithdrawalListQuery {
+  status?: WithdrawalRequestStatus;
+  distributorId?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface CreateWithdrawalRequest {

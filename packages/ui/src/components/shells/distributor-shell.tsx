@@ -48,6 +48,7 @@ export function DistributorShell({
 
   const navItems = [
     { href: '/', label: t('dashboard'), exact: true },
+    { href: '/share', label: t('share') },
     { href: '/branches', label: t('branches') },
     { href: '/commissions', label: t('commissions') },
     { href: '/withdrawals', label: t('withdrawals') },
@@ -92,7 +93,7 @@ export function DistributorShell({
                 onClick={onLogout}
                 className="text-sm text-muted-foreground transition-colors hover:text-foreground"
               >
-                {tc('logout')}
+                {tc('signOut')}
               </button>
             ) : null}
           </div>

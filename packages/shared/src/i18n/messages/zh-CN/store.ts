@@ -15,6 +15,7 @@ export const store = {
     pickerEmpty: '暂无可用店铺',
     pickerEmptyDescription: '请稍后再来或使用商户提供的店铺链接。',
     pickerLoadError: '无法加载店铺列表',
+    flagshipBadge: '总店',
     openShop: '我要开店',
   },
   openShop: {

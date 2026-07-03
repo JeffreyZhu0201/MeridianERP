@@ -230,6 +230,24 @@ export const merchant = {
       failed: '核销失败',
     },
   },
+  funds: {
+    title: '资金',
+    description: '所选周期内的自提毛利、进货成本与净额。',
+    pickupGmv: '自提销售额',
+    pickupCostOfGoods: '拿货成本',
+    pickupGrossProfit: '自提毛利',
+    salesGmv: '自提销售额',
+    allocationCost: '进货成本',
+    deliveryAllocationCost: '配送虚拟成本',
+    netPosition: '净额',
+    period: '{from} – {to}',
+    from: '开始',
+    to: '结束',
+    applyRange: '应用',
+    loading: '加载中…',
+    formulaHint: '净额 = 自提毛利 − 进货成本 − 配送虚拟成本（人民币）。',
+    loadError: '无法加载资金汇总',
+  },
   distributors: {
     title: '分销商',
     table: {
@@ -348,10 +366,9 @@ export const merchant = {
   },
   commissions: {
     title: '佣金对账单',
-    description: '归因已付款订单的明细。已结算条目反映平台结算批次。',
+    description: '招募分店的配货佣金明细。已结算条目反映平台结算批次。',
     emptyTitle: '暂无佣金记录',
-    emptyDescription:
-      '顾客完成归因分销商的已付款订单后，佣金将显示在此处。请分享二维码并等待归因结账。',
+    emptyDescription: '分店确认进货配货后，佣金将显示在此处。',
     summary: {
       accrued: '已计提',
       settled: '已结算',
@@ -367,12 +384,19 @@ export const merchant = {
     },
     table: {
       date: '日期',
-      order: '订单',
+      order: '参考号',
       distributor: '分销商',
+      source: '来源',
+      sequence: '序号',
+      wholesaleBase: '批发基数',
       orderTotal: '订单金额',
       rate: '费率',
       commission: '佣金',
       batchPeriod: '结算批次',
+      sourceAllocation: '配货',
+      sourceRetail: '零售（历史）',
+      allocationSequenceFirst: '第 1 笔配货',
+      allocationSequenceSecond: '第 2 笔配货',
     },
     ledgerStatus: {
       ACCRUED: '已计提',

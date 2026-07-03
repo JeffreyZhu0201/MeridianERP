@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@meridian/ui';
+import { Button, Input, Label, Select } from '@meridian/ui';
 
 import type { UserIdentity } from '@meridian/shared';
 
@@ -44,22 +44,18 @@ export function UsersFilters() {
         />
       </div>
       <div className="w-full space-y-2 sm:w-56">
-        <Label>{t('filterIdentity')}</Label>
+        <Label htmlFor="user-identity">{t('filterIdentity')}</Label>
         <Select
+          id="user-identity"
           value={identity || 'all'}
-          onValueChange={(value) => applyFilters(search, value === 'all' ? '' : value)}
+          onChange={(e) => applyFilters(search, e.target.value === 'all' ? '' : e.target.value)}
         >
-          <SelectTrigger>
-            <SelectValue placeholder={t('allIdentities')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t('allIdentities')}</SelectItem>
-            {IDENTITIES.map((id) => (
-              <SelectItem key={id} value={id}>
-                {t(`identities.${id}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
+          <option value="all">{t('allIdentities')}</option>
+          {IDENTITIES.map((id) => (
+            <option key={id} value={id}>
+              {t(`identities.${id}`)}
+            </option>
+          ))}
         </Select>
       </div>
       <Button type="button" onClick={() => applyFilters(search, identity)}>

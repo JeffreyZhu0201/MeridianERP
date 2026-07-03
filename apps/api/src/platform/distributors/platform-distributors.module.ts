@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../../auth/auth.module';
 import { EnvModule } from '../../config/env.module';
 import { PlatformAccountsModule } from '../accounts/platform-accounts.module';
+import { PlatformWithdrawalsModule } from '../withdrawals/platform-withdrawals.module';
 import { PlatformDistributorsController } from './platform-distributors.controller';
 import { PlatformDistributorsService } from './platform-distributors.service';
 
 @Module({
-  imports: [AuthModule, EnvModule, PlatformAccountsModule],
+  imports: [AuthModule, EnvModule, PlatformAccountsModule, PlatformWithdrawalsModule],
   controllers: [PlatformDistributorsController],
   providers: [PlatformDistributorsService],
   exports: [PlatformDistributorsService],

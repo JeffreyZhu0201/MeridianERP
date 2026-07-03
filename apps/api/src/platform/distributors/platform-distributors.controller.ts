@@ -102,4 +102,14 @@ export class PlatformDistributorsController {
       limit: limit ? Number(limit) : undefined,
     });
   }
+
+  @Get(':id/funds-summary')
+  getFundsSummary(@Param('id') id: string) {
+    return this.service.getFundsSummary(id);
+  }
+
+  @Get(':id/withdrawals')
+  getWithdrawals(@Param('id') id: string) {
+    return this.service.getWithdrawals(id);
+  }
 }

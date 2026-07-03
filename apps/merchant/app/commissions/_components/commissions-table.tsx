@@ -24,6 +24,24 @@ function statusVariant(status: LedgerStatus): 'default' | 'secondary' | 'outline
   return 'outline';
 }
 
+function sequenceLabel(
+  row: CommissionStatementRow,
+  t: ReturnType<typeof useTranslations>,
+): string {
+  const seq = row.merchantAllocationSequence ?? row.customerOrderSequence;
+  if (seq === 1) return t('allocationSequenceFirst');
+  if (seq === 2) return t('allocationSequenceSecond');
+  return '—';
+}
+
+function sourceLabel(
+  row: CommissionStatementRow,
+  t: ReturnType<typeof useTranslations>,
+): string {
+  if (row.commissionSource === 'RETAIL') return t('sourceRetail');
+  return t('sourceAllocation');
+}
+
 export function CommissionsTable({ items }: CommissionsTableProps) {
   const t = useTranslations('merchant.commissions.table');
   const ts = useTranslations('merchant.commissions.ledgerStatus');
@@ -40,8 +58,10 @@ export function CommissionsTable({ items }: CommissionsTableProps) {
           <TableRow>
             <TableHead>{t('date')}</TableHead>
             <TableHead>{t('order')}</TableHead>
+            <TableHead>{t('source')}</TableHead>
+            <TableHead>{t('sequence')}</TableHead>
             <TableHead>{t('distributor')}</TableHead>
-            <TableHead className="text-right">{t('orderTotal')}</TableHead>
+            <TableHead className="text-right">{t('wholesaleBase')}</TableHead>
             <TableHead className="text-right">{t('rate')}</TableHead>
             <TableHead className="text-right">{t('commission')}</TableHead>
             <TableHead>{tc('status')}</TableHead>
@@ -53,13 +73,23 @@ export function CommissionsTable({ items }: CommissionsTableProps) {
             <TableRow key={row.id}>
               <TableCell className="text-xs text-muted-foreground">{formatDate(row.createdAt)}</TableCell>
               <TableCell>
-                <Link
-                  href={`/orders/${row.orderId}`}
-                  className="font-mono text-xs text-primary hover:underline"
-                >
-                  {row.orderReference}
-                </Link>
+                {row.orderId ? (
+                  <Link
+                    href={`/orders/${row.orderId}`}
+                    className="font-mono text-xs text-primary hover:underline"
+                  >
+                    {row.orderReference}
+                  </Link>
+                ) : (
+                  <span className="font-mono text-xs">{row.orderReference}</span>
+                )}
               </TableCell>
+              <TableCell>
+                <Badge variant={row.commissionSource === 'RETAIL' ? 'outline' : 'secondary'}>
+                  {sourceLabel(row, t)}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-sm">{sequenceLabel(row, t)}</TableCell>
               <TableCell className="text-sm">{row.distributorName}</TableCell>
               <TableCell className="text-right text-sm tabular-nums">
                 {formatMoney(row.orderTotal)}

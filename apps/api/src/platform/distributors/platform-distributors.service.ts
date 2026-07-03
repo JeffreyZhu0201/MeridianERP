@@ -4,18 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommissionType, OrderStatus, Prisma } from '@prisma/client';
+import { CommissionType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import { sumAllocationLineCost } from '@meridian/shared';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { EnvService } from '../../config/env.service';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';
-
-function generateInviteCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const bytes = randomBytes(6);
-  return Array.from(bytes, (b) => chars[b % chars.length]).join('');
-}
+import { PlatformWithdrawalsService } from '../withdrawals/platform-withdrawals.service';
+import { RecruitInviteCodesService } from '../../recruit-invite/recruit-invite-codes.service';
 
 function displayNameFromAccount(account: {
   email: string;
@@ -31,17 +26,10 @@ function displayNameFromAccount(account: {
 export class PlatformDistributorsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly env: EnvService,
     private readonly platformAccounts: PlatformAccountsService,
+    private readonly inviteCodes: RecruitInviteCodesService,
+    private readonly withdrawalsService: PlatformWithdrawalsService,
   ) {}
-
-  private storeInviteBaseUrl(): string {
-    return this.env.get('STORE_APP_URL') ?? 'http://localhost:3003';
-  }
-
-  private inviteUrl(code: string): string {
-    return `${this.storeInviteBaseUrl()}/open-shop?invite=${code}`;
-  }
 
   async list() {
     const rows = await this.prisma.distributor.findMany({
@@ -174,66 +162,18 @@ export class PlatformDistributorsService {
       portalEnabled: d.portalEnabled,
       recruitedMerchantCount: recruitedCount,
       createdAt: d.createdAt.toISOString(),
-      inviteCodes: inviteCodes.map((inv) => ({
-        id: inv.id,
-        code: inv.code,
-        expiresAt: inv.expiresAt?.toISOString() ?? null,
-        revokedAt: inv.revokedAt?.toISOString() ?? null,
-        useCount: inv.useCount,
-        url: this.inviteUrl(inv.code),
-      })),
+      inviteCodes: inviteCodes.map((inv) => this.inviteCodes.toInviteRow(inv)),
     };
   }
 
   async createInviteCode(distributorId: string, expiresInDays?: number) {
     await this.assertPlatformDistributor(distributorId);
-    for (let i = 0; i < 10; i++) {
-      const code = generateInviteCode();
-      try {
-        const invite = await this.prisma.merchantRecruitInviteCode.create({
-          data: {
-            code,
-            distributorId,
-            expiresAt: expiresInDays
-              ? new Date(Date.now() + expiresInDays * 86400000)
-              : null,
-          },
-        });
-        return {
-          id: invite.id,
-          code: invite.code,
-          distributorId,
-          expiresAt: invite.expiresAt?.toISOString() ?? null,
-          revokedAt: null,
-          useCount: 0,
-          url: this.inviteUrl(code),
-        };
-      } catch (err) {
-        if (
-          err instanceof Prisma.PrismaClientKnownRequestError &&
-          err.code === 'P2002'
-        ) {
-          continue;
-        }
-        throw err;
-      }
-    }
-    throw new ConflictException('Could not generate invite code');
+    return this.inviteCodes.createInviteCode(distributorId, expiresInDays);
   }
 
   async revokeInviteCode(distributorId: string, codeId: string) {
     await this.assertPlatformDistributor(distributorId);
-    const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
-      where: { id: codeId, distributorId },
-    });
-    if (!invite) throw new NotFoundException('Invite code not found');
-    if (invite.revokedAt) {
-      throw new BadRequestException('Invite code already revoked');
-    }
-    return this.prisma.merchantRecruitInviteCode.update({
-      where: { id: codeId },
-      data: { revokedAt: new Date() },
-    });
+    return this.inviteCodes.revokeInviteCode(distributorId, codeId);
   }
 
   async getBranches(distributorId: string) {
@@ -248,27 +188,94 @@ export class PlatformDistributorsService {
 
     const summaries = await Promise.all(
       merchants.map(async (m) => {
-        const agg = await this.prisma.order.aggregate({
-          where: {
-            tenantId: m.tenantId,
-            status: { in: ['PAID', 'FULFILLED'] },
-            createdAt: { gte: windowStart },
-          },
-          _sum: { total: true },
-          _count: { _all: true },
-        });
+        const [recentAgg, lifetimeAgg] = await Promise.all([
+          this.prisma.order.aggregate({
+            where: {
+              tenantId: m.tenantId,
+              status: { in: ['PAID', 'FULFILLED'] },
+              createdAt: { gte: windowStart },
+            },
+            _sum: { total: true },
+            _count: { _all: true },
+          }),
+          this.prisma.order.aggregate({
+            where: {
+              tenantId: m.tenantId,
+              status: { in: ['PAID', 'FULFILLED'] },
+            },
+            _sum: { total: true },
+            _count: { _all: true },
+          }),
+        ]);
         return {
           tenantId: m.tenantId,
           merchantProfileId: m.id,
           businessName: m.businessName,
           slug: m.tenant.slug,
           recruitedAt: m.recruitedAt?.toISOString() ?? null,
-          salesLast30Days: Number(agg._sum.total ?? 0),
-          orderCountLast30Days: agg._count._all,
+          salesLast30Days: Number(recentAgg._sum.total ?? 0),
+          orderCountLast30Days: recentAgg._count._all,
+          lifetimeSales: Number(lifetimeAgg._sum.total ?? 0),
+          lifetimeOrderCount: lifetimeAgg._count._all,
         };
       }),
     );
     return summaries;
+  }
+
+  async getFundsSummary(distributorId: string) {
+    await this.assertPlatformDistributor(distributorId);
+    const [accruedAgg, settledAgg, pendingAgg, available, branchCount] =
+      await Promise.all([
+        this.prisma.commissionLedger.aggregate({
+          where: { distributorId, status: LedgerStatus.ACCRUED },
+          _sum: { amount: true },
+        }),
+        this.prisma.commissionLedger.aggregate({
+          where: { distributorId, status: LedgerStatus.SETTLED },
+          _sum: { amount: true },
+        }),
+        this.prisma.withdrawalRequest.aggregate({
+          where: { distributorId, status: 'PENDING' },
+          _sum: { amount: true },
+        }),
+        this.withdrawalsService.getAvailableBalance(distributorId),
+        this.prisma.merchantProfile.count({
+          where: { recruitedByDistributorId: distributorId },
+        }),
+      ]);
+
+    return {
+      accruedTotal: accruedAgg._sum.amount?.toString() ?? '0',
+      settledTotal: settledAgg._sum.amount?.toString() ?? '0',
+      pendingWithdrawals: pendingAgg._sum.amount?.toString() ?? '0',
+      availableBalance: available.toString(),
+      branchCount,
+    };
+  }
+
+  async getWithdrawals(distributorId: string) {
+    await this.assertPlatformDistributor(distributorId);
+    const distributor = await this.prisma.distributor.findUniqueOrThrow({
+      where: { id: distributorId },
+      select: { name: true, email: true },
+    });
+    const rows = await this.prisma.withdrawalRequest.findMany({
+      where: { distributorId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      distributorId: row.distributorId,
+      distributorName: distributor.name,
+      distributorEmail: distributor.email,
+      amount: row.amount.toString(),
+      status: row.status,
+      note: row.note,
+      rejectionReason: row.rejectionReason,
+      reviewedAt: row.reviewedAt?.toISOString() ?? null,
+      createdAt: row.createdAt.toISOString(),
+    }));
   }
 
   async getCommissionEntries(
@@ -294,6 +301,11 @@ export class PlatformDistributorsService {
               status: true,
             },
           },
+          allocationOrder: {
+            include: {
+              lines: { select: { quantity: true, wholesalePrice: true } },
+            },
+          },
           tenant: {
             select: {
               merchantProfile: { select: { businessName: true } },
@@ -308,23 +320,35 @@ export class PlatformDistributorsService {
     ]);
 
     return {
-      items: rows.map((row) => ({
-        id: row.id,
-        orderId: row.orderId,
-        tenantId: row.tenantId,
-        businessName: row.tenant.merchantProfile?.businessName ?? '—',
-        customerOrderSequence: row.customerOrderSequence,
-        orderTotal: row.order.total.toString(),
-        amount: row.amount.toString(),
-        status: row.status,
-        fulfilledAt:
-          row.order.pickupVerifiedAt?.toISOString() ??
-          row.order.shippedAt?.toISOString() ??
-          (row.order.status === OrderStatus.FULFILLED
-            ? row.createdAt.toISOString()
-            : null),
-        createdAt: row.createdAt.toISOString(),
-      })),
+      items: rows.map((row) => {
+        const orderTotal = row.order
+          ? row.order.total.toString()
+          : row.allocationOrder?.lines?.length
+            ? sumAllocationLineCost(row.allocationOrder.lines).toFixed(2)
+            : '0';
+        const fulfilledAt = row.order
+          ? row.order.pickupVerifiedAt?.toISOString() ??
+            row.order.shippedAt?.toISOString() ??
+            (row.order.status === OrderStatus.FULFILLED
+              ? row.createdAt.toISOString()
+              : null)
+          : row.createdAt.toISOString();
+        return {
+          id: row.id,
+          orderId: row.orderId,
+          allocationOrderId: row.allocationOrderId,
+          tenantId: row.tenantId,
+          businessName: row.tenant.merchantProfile?.businessName ?? '—',
+          customerOrderSequence: row.customerOrderSequence,
+          merchantAllocationSequence: row.merchantAllocationSequence,
+          commissionSource: row.commissionSource,
+          orderTotal,
+          amount: row.amount.toString(),
+          status: row.status,
+          fulfilledAt,
+          createdAt: row.createdAt.toISOString(),
+        };
+      }),
       total,
       page,
       limit,

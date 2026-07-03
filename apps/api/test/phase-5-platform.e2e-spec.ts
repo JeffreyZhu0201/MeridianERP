@@ -75,10 +75,10 @@ describe('Phase5 Platform (e2e)', () => {
       .expect(200);
 
     expect(res.body).toMatchObject({
-      salesGmv: expect.anything(),
+      pickupGmv: expect.anything(),
+      pickupGrossProfit: expect.anything(),
       allocationCost: expect.anything(),
       deliveryAllocationCost: expect.anything(),
-      payableCommission: expect.anything(),
       netPosition: expect.anything(),
     });
   });

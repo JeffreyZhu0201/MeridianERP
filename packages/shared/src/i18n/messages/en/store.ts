@@ -14,8 +14,9 @@ export const store = {
     pickerContinue: 'Continue to shop',
     pickerEmpty: 'No stores available yet',
     pickerEmptyDescription: 'Check back later or use a direct store link from your merchant.',
-    pickerLoadError: '无法加载店铺列表',
-    openShop: '我要开店',
+    pickerLoadError: 'Could not load stores',
+    flagshipBadge: 'Flagship',
+    openShop: 'Open a shop',
   },
   openShop: {
     subtitle: '申请开店',

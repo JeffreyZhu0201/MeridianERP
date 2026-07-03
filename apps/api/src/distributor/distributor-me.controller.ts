@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -53,5 +54,28 @@ export class DistributorMeController {
     @Query() query: CommissionListQueryDto,
   ) {
     return this.meService.listCommissions(user, query);
+  }
+
+  @Get('invite-codes')
+  listInviteCodes(@CurrentUser() user: AuthenticatedUser) {
+    return this.meService.listInviteCodes(user);
+  }
+
+  @Post('invite-codes')
+  @HttpCode(201)
+  createInviteCode(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: { expiresInDays?: number },
+  ) {
+    return this.meService.createInviteCode(user, dto.expiresInDays);
+  }
+
+  @Post('invite-codes/:codeId/revoke')
+  @HttpCode(200)
+  revokeInviteCode(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('codeId') codeId: string,
+  ) {
+    return this.meService.revokeInviteCode(user, codeId);
   }
 }

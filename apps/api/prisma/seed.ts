@@ -82,6 +82,7 @@ async function main() {
         contactEmail: 'demo@merchant.test',
         onboardingStatus: OnboardingStatus.APPROVED,
         storePublished: true,
+        isFlagship: true,
       },
     });
     const account = await prisma.platformAccount.upsert({

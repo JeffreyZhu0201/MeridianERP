@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { OrderStatus } from '@prisma/client';
+import { CommissionSource, LedgerStatus, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
+import { sumAllocationLineCost } from '@meridian/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { CommissionQueueService } from '../queue/commission-queue.service';
 import { EmailQueueService } from '../queue/email-queue.service';
@@ -13,32 +14,34 @@ export class CommissionService {
     private readonly emailQueue: EmailQueueService,
   ) {}
 
-  
   async accrueOnPaid(_orderId: string): Promise<void> {
     return;
   }
 
-  
-  async accrueOnFulfilled(orderId: string): Promise<void> {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: { commissionEntry: true },
+  /** @deprecated Retail commission disabled — use accrueOnAllocationConfirmed */
+  async accrueOnFulfilled(_orderId: string): Promise<void> {
+    return;
+  }
+
+  async accrueOnAllocationConfirmed(allocationOrderId: string): Promise<void> {
+    const allocation = await this.prisma.allocationOrder.findUnique({
+      where: { id: allocationOrderId },
+      include: { lines: true, commissionEntry: true },
     });
-    if (!order || order.status !== OrderStatus.FULFILLED) {
+    if (!allocation || allocation.status !== 'CONFIRMED') {
       return;
     }
-    if (order.commissionEntry) {
+    if (allocation.commissionEntry) {
       return;
     }
-    if (!order.customerId) {
-      return;
-    }
+
     const profile = await this.prisma.merchantProfile.findUnique({
-      where: { tenantId: order.tenantId },
+      where: { tenantId: allocation.tenantId },
     });
     if (!profile?.recruitedByDistributorId) {
       return;
     }
+
     const distributor = await this.prisma.distributor.findFirst({
       where: {
         id: profile.recruitedByDistributorId,
@@ -49,49 +52,57 @@ export class CommissionService {
     if (!distributor) {
       return;
     }
-    const priorFulfilled = await this.prisma.order.count({
+
+    const priorCount = await this.prisma.commissionLedger.count({
       where: {
-        tenantId: order.tenantId,
-        customerId: order.customerId,
-        status: OrderStatus.FULFILLED,
-        id: { not: orderId },
+        tenantId: allocation.tenantId,
+        commissionSource: CommissionSource.ALLOCATION,
+        status: { not: LedgerStatus.VOID },
       },
     });
-    const customerOrderSequence = priorFulfilled + 1;
-    if (customerOrderSequence > 2) {
+    if (priorCount >= 2) {
       return;
     }
+
+    const wholesaleTotal = sumAllocationLineCost(
+      allocation.lines.map((l) => ({
+        quantity: l.quantity,
+        wholesalePrice: l.wholesalePrice,
+      })),
+    );
     const amount = this.calculateAmount(
-      Number(order.total),
+      wholesaleTotal,
       Number(distributor.commissionRate),
       distributor.commissionType,
     );
+
     await this.prisma.commissionLedger.create({
       data: {
-        tenantId: order.tenantId,
-        orderId: order.id,
+        tenantId: allocation.tenantId,
+        allocationOrderId: allocation.id,
         distributorId: distributor.id,
-        customerId: order.customerId,
-        customerOrderSequence,
+        merchantAllocationSequence: priorCount + 1,
+        commissionSource: CommissionSource.ALLOCATION,
         amount,
-        status: 'ACCRUED',
+        status: LedgerStatus.ACCRUED,
       },
     });
-    await this.commissionQueue.enqueueAccrual(order.id);
+
+    await this.commissionQueue.enqueueAccrual(allocationOrderId);
+
     const settings = await this.prisma.tenantSettings.findUnique({
-      where: { tenantId: order.tenantId },
+      where: { tenantId: allocation.tenantId },
     });
     if (settings?.notifyOnCommission !== false) {
       await this.emailQueue.sendCommissionAccrued({
-        tenantId: order.tenantId,
-        orderId: order.id,
+        tenantId: allocation.tenantId,
+        orderId: allocationOrderId,
         distributorId: distributor.id,
         amount: amount.toString(),
       });
     }
   }
 
-  
   calculateAmount(
     orderTotal: number,
     commissionRate: number,
@@ -99,8 +110,8 @@ export class CommissionService {
   ): Prisma.Decimal {
     const value =
       commissionType === 'PERCENT'
-        ? orderTotal * (commissionRate / 100) // 百分比：总额 × 率
-        : commissionRate; // 固定金额
+        ? orderTotal * (commissionRate / 100)
+        : commissionRate;
     return new Prisma.Decimal(value.toFixed(2));
   }
 }

@@ -1,5 +1,5 @@
-import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import type { PlatformFundsSummary } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
@@ -16,6 +16,7 @@ export default async function FundsPage({
   if (!token) return null;
 
   const t = await getTranslations('admin.funds');
+  const locale = await getLocale();
   const params = await searchParams;
   const query = new URLSearchParams();
   if (params.from) query.set('from', params.from);
@@ -35,8 +36,14 @@ export default async function FundsPage({
         {summary ? (
           <BentoListHeader
             metrics={[
-              { title: t('gmv'), value: String(summary.gmv) },
-              { title: t('pendingWithdrawals'), value: String(summary.pendingWithdrawals) },
+              {
+                title: t('consumerGmv'),
+                value: formatMoney(summary.consumerGmv ?? summary.gmv, locale),
+              },
+              {
+                title: t('pickupMarginAcrossBranches'),
+                value: formatMoney(summary.pickupMarginAcrossBranches ?? 0, locale),
+              },
             ]}
           />
         ) : null}

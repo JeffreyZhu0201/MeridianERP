@@ -7,7 +7,6 @@ import {
 import { FulfillmentType, OrderStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
-import { CommissionService } from '../../commission/commission.service';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { InventoryService } from '../../inventory/inventory.service';
 import { PaymentService } from '../../payment/payment.service';
@@ -22,7 +21,7 @@ const CART_INCLUDE = {
   items: {
     include: {
       variant: {
-        include: { product: true },
+        include: { product: true, masterSku: true },
       },
     },
   },
@@ -35,7 +34,6 @@ export class StoreCheckoutService {
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
     private readonly paymentService: PaymentService,
-    private readonly commissionService: CommissionService,
     private readonly emailQueue: EmailQueueService,
     private readonly inventoryService: InventoryService,
     private readonly inventoryQueue: InventoryQueueService,
@@ -118,6 +116,7 @@ export class StoreCheckoutService {
             variantName: item.variant.name,
             quantity: item.quantity,
             unitPrice: item.variant.price,
+            unitWholesalePrice: item.variant.masterSku?.wholesalePrice ?? null,
             lineTotal: new Prisma.Decimal(
               (Number(item.variant.price) * item.quantity).toFixed(2),
             ),
