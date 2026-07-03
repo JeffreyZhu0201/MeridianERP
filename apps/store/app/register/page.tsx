@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { AuthLayout, AuthToolbar, Button, Input, Label } from '@meridian/ui';
 
 import { API_URL, AUTH_COOKIE } from '@/lib/api';
@@ -18,8 +18,9 @@ interface GlobalAuthResponse {
   };
 }
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const t = useTranslations('store');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -52,7 +53,8 @@ export default function RegisterPage() {
 
       const data = (await res.json()) as GlobalAuthResponse;
       document.cookie = `${AUTH_COOKIE}=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-      router.push('/');
+      const from = searchParams.get('from') ?? '/';
+      router.push(from);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('register.failed'));
@@ -69,7 +71,14 @@ export default function RegisterPage() {
         footer={
           <>
             {t('register.hasAccountPrompt')}{' '}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link
+              href={
+                searchParams.get('from')
+                  ? `/login?from=${encodeURIComponent(searchParams.get('from')!)}`
+                  : '/login'
+              }
+              className="text-primary hover:underline"
+            >
               {t('register.signInLink')}
             </Link>
           </>
@@ -119,5 +128,13 @@ export default function RegisterPage() {
         </form>
       </AuthLayout>
     </>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

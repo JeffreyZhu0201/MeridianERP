@@ -178,7 +178,7 @@ export function CreateMerchantForm({ token, distributors }: CreateMerchantFormPr
         ) : null}
       </div>
       <div className="space-y-2">
-        <Label>{t('recruitedBy')}</Label>
+        <Label>{t('recruitedByPromoter')}</Label>
         <Select
           value={recruitedByDistributorId || 'none'}
           onValueChange={(value) =>

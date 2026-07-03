@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Button,
   Dialog,
@@ -12,7 +12,11 @@ import {
   Select,
 } from '@meridian/ui';
 
-import { apiFetch } from '@/lib/api';
+import {
+  apiFetch,
+  type PaginatedResponse,
+  type PlatformAccountListItem,
+} from '@/lib/api';
 
 interface CreateDistributorFormProps {
   token: string;
@@ -21,15 +25,47 @@ interface CreateDistributorFormProps {
 export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
   const router = useRouter();
   const t = useTranslations('admin.distributors');
+  const tu = useTranslations('admin.users');
   const tc = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [accountId, setAccountId] = useState('');
+  const [ownerSearch, setOwnerSearch] = useState('');
+  const [selectedOwnerEmail, setSelectedOwnerEmail] = useState('');
+  const [ownerOptions, setOwnerOptions] = useState<PlatformAccountListItem[]>([]);
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [commissionRate, setCommissionRate] = useState('10');
   const [commissionType, setCommissionType] = useState<'PERCENT' | 'FIXED'>('PERCENT');
+
+  useEffect(() => {
+    if (!ownerSearch.trim()) {
+      setOwnerOptions([]);
+      return;
+    }
+    const handle = setTimeout(async () => {
+      try {
+        const res = await apiFetch<PaginatedResponse<PlatformAccountListItem>>(
+          `/platform/users?search=${encodeURIComponent(ownerSearch.trim())}&limit=10`,
+          {},
+          token,
+        );
+        setOwnerOptions(res.data);
+      } catch {
+        setOwnerOptions([]);
+      }
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [ownerSearch, token]);
+
+  function resetForm() {
+    setAccountId('');
+    setOwnerSearch('');
+    setSelectedOwnerEmail('');
+    setName('');
+    setCommissionRate('10');
+    setCommissionType('PERCENT');
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -40,9 +76,8 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
         {
           method: 'POST',
           body: JSON.stringify({
-            name,
-            email: email || undefined,
-            phone: phone || undefined,
+            accountId: accountId || undefined,
+            name: name || undefined,
             commissionRate: Number(commissionRate),
             commissionType,
           }),
@@ -50,10 +85,7 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
         token,
       );
       setOpen(false);
-      setName('');
-      setEmail('');
-      setPhone('');
-      setCommissionRate('10');
+      resetForm();
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('createFailed'));
@@ -61,6 +93,8 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
       setSubmitting(false);
     }
   }
+
+  const canSubmit = accountId || name.trim();
 
   return (
     <>
@@ -72,7 +106,7 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
         footer={
           <>
             <DialogCloseButton onClose={() => setOpen(false)}>{tc('cancel')}</DialogCloseButton>
-            <Button onClick={handleSubmit} disabled={submitting || !name.trim()}>
+            <Button onClick={handleSubmit} disabled={submitting || !canSubmit}>
               {submitting ? t('form.submitting') : t('form.submit')}
             </Button>
           </>
@@ -81,29 +115,53 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
         <div className="space-y-4">
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <div className="space-y-2">
+            <Label htmlFor="promoter-user">{t('form.selectUser')}</Label>
+            <Input
+              id="promoter-user"
+              placeholder={tu('searchPlaceholder')}
+              value={ownerSearch}
+              onChange={(e) => {
+                setOwnerSearch(e.target.value);
+                setAccountId('');
+                setSelectedOwnerEmail('');
+              }}
+            />
+            {ownerOptions.length > 0 && !accountId ? (
+              <ul className="max-h-40 overflow-y-auto rounded-md border text-sm">
+                {ownerOptions.map((account) => (
+                  <li key={account.id}>
+                    <button
+                      type="button"
+                      className="w-full px-3 py-2 text-left hover:bg-muted"
+                      onClick={() => {
+                        setAccountId(account.id);
+                        setSelectedOwnerEmail(account.email);
+                        setOwnerSearch(account.email);
+                        const display =
+                          [account.firstName, account.lastName].filter(Boolean).join(' ') ||
+                          account.email.split('@')[0];
+                        setName(display);
+                      }}
+                    >
+                      {account.email}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {accountId ? (
+              <p className="text-xs text-muted-foreground">
+                {t('form.selectedUser')}: {selectedOwnerEmail}
+              </p>
+            ) : null}
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="dist-name">{t('form.name')}</Label>
             <Input
               id="dist-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dist-email">{t('form.email')}</Label>
-            <Input
-              id="dist-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dist-phone">{t('form.phone')}</Label>
-            <Input
-              id="dist-phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t('form.nameOptional')}
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">

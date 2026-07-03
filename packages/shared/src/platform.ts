@@ -34,6 +34,11 @@ export interface PlatformMerchantDetail {
   submittedAt?: string | null;
   reviewedAt?: string | null;
   tenantId: string;
+  pendingRecruitInviteCode?: string | null;
+  pendingRecruiterId?: string | null;
+  pendingRecruiterName?: string | null;
+  recruitedByDistributorId?: string | null;
+  recruitedByDistributorName?: string | null;
   crmSummary: MerchantCrmSummary;
   distributors: MerchantDistributorSummary[];
 }

@@ -19,6 +19,8 @@ export interface PlatformDistributorSummary {
   name: string;
   email: string | null;
   phone: string | null;
+  accountId: string | null;
+  accountEmail: string | null;
   commissionRate: string | number;
   commissionType: CommissionType;
   isActive: boolean;
@@ -28,9 +30,10 @@ export interface PlatformDistributorSummary {
 }
 
 export interface CreatePlatformDistributorRequest {
-  name: string;
+  name?: string;
   email?: string;
   phone?: string;
+  accountId?: string;
   commissionRate: number;
   commissionType?: CommissionType;
 }
@@ -66,6 +69,46 @@ export interface DistributorBranchSummary {
   recruitedAt: string | null;
   salesLast30Days: string | number;
   orderCountLast30Days: number;
+}
+
+export interface DistributorCommissionEntry {
+  id: string;
+  orderId: string;
+  tenantId: string;
+  businessName: string;
+  customerOrderSequence: number | null;
+  orderTotal: string | number;
+  amount: string | number;
+  status: LedgerStatus;
+  fulfilledAt: string | null;
+  createdAt: string;
+}
+
+export interface DistributorCommissionEntriesResponse {
+  items: DistributorCommissionEntry[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface InviteCodePreview {
+  code: string;
+  promoterName: string;
+}
+
+export interface StoreMerchantApplicationRequest {
+  inviteCode: string;
+  businessName: string;
+  legalName?: string;
+  contactPhone?: string;
+}
+
+export interface StoreMerchantApplicationStatus {
+  id: string;
+  businessName: string;
+  onboardingStatus: string;
+  submittedAt: string | null;
+  pendingRecruitInviteCode: string | null;
 }
 
 export interface WithdrawalRequestRow {

@@ -25,6 +25,8 @@ import { StoreOrdersService } from './orders/store-orders.service';
 import { StoreStoresController } from './stores/store-stores.controller';
 import { StoreStoresService } from './stores/store-stores.service';
 import { StoreTenantService } from './common/store-tenant.service';
+import { StoreMerchantApplicationController } from './merchant-application/store-merchant-application.controller';
+import { StoreMerchantApplicationService } from './merchant-application/store-merchant-application.service';
 
 @Module({
   imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule, FulfillmentModule, PlatformAccountsModule],
@@ -37,6 +39,7 @@ import { StoreTenantService } from './common/store-tenant.service';
     StoreCheckoutController,
     StoreOrdersController,
     StoreStoresController,
+    StoreMerchantApplicationController,
   ],
   providers: [
     StoreTenantService,
@@ -47,6 +50,7 @@ import { StoreTenantService } from './common/store-tenant.service';
     StoreCheckoutService,
     StoreOrdersService,
     StoreStoresService,
+    StoreMerchantApplicationService,
   ],
   exports: [StoreTenantService, StoreAuthService],
 })

@@ -11,6 +11,7 @@ import { MerchantRole, OnboardingStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { draftSlug } from '../../common/utils/slug.util';
 import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
+import { RecruitInviteService } from '../../recruit-invite/recruit-invite.service';
 import { MerchantLoginDto, MerchantRegisterDto } from './dto/merchant-auth.dto';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class MerchantAuthService {
     private readonly jwt: JwtService,
     private readonly env: EnvService,
     private readonly platformAccounts: PlatformAccountsService,
+    private readonly recruitInvite: RecruitInviteService,
   ) {}
 
   private signMerchantToken(userId: string, tenantId: string, role: string) {
@@ -44,22 +46,9 @@ export class MerchantAuthService {
 
     let pendingRecruitInviteCode: string | null = null;
     if (dto.inviteCode) {
-      const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
-        where: {
-          code: dto.inviteCode.toUpperCase(),
-          revokedAt: null,
-        },
-        include: { distributor: true },
-      });
-      if (!invite) {
-        throw new BadRequestException('Invalid invite code');
-      }
-      if (invite.expiresAt && invite.expiresAt < new Date()) {
-        throw new BadRequestException('Invite code has expired');
-      }
-      if (!invite.distributor.isActive || invite.distributor.tenantId !== null) {
-        throw new BadRequestException('Invite code is not valid for branch registration');
-      }
+      const invite = await this.recruitInvite.validateMerchantRecruitCode(
+        dto.inviteCode,
+      );
       pendingRecruitInviteCode = invite.code;
     }
 

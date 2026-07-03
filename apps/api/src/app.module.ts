@@ -12,6 +12,7 @@ import { MerchantModule } from './merchant/merchant.module';
 import { PaymentModule } from './payment/payment.module';
 import { PlatformModule } from './platform/platform.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RecruitInviteModule } from './recruit-invite/recruit-invite.module';
 import { QueueModule } from './queue/queue.module';
 import { StoreModule } from './store/store.module';
 import { DistributorModule } from './distributor/distributor.module';
@@ -20,6 +21,7 @@ import { DistributorModule } from './distributor/distributor.module';
   imports: [
     EnvModule,
     PrismaModule,
+    RecruitInviteModule,
     AuthModule,
     QueueModule,
     PaymentModule,

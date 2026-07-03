@@ -102,6 +102,7 @@ export interface CommissionStatementRow {
   commissionRate: string | number;
   amount: string | number;
   status: LedgerStatus;
+  customerOrderSequence?: number | null;
   settlementBatchId: string | null;
   /** Human-readable batch window when SETTLED, e.g. `2025-06-01 — 2025-06-30`. */
   settlementBatchPeriod: string | null;

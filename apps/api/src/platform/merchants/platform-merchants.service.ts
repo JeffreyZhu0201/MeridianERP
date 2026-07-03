@@ -67,11 +67,30 @@ export class PlatformMerchantsService {
   
   async getById(id: string): Promise<PlatformMerchantDetail> {
     const profile = await this.findProfileById(id);
-    const [crmSummary, distributors] = await Promise.all([
-      this.getCrmSummary(profile.tenantId),
-      this.getDistributorSummaries(profile.tenantId),
-    ]);
-    return this.toPlatformMerchantDetail(profile, crmSummary, distributors);
+    const [crmSummary, distributors, pendingRecruiter, recruitedDistributor] =
+      await Promise.all([
+        this.getCrmSummary(profile.tenantId),
+        this.getDistributorSummaries(profile.tenantId),
+        profile.pendingRecruitInviteCode
+          ? this.prisma.merchantRecruitInviteCode.findFirst({
+              where: { code: profile.pendingRecruitInviteCode },
+              include: { distributor: { select: { id: true, name: true } } },
+            })
+          : Promise.resolve(null),
+        profile.recruitedByDistributorId
+          ? this.prisma.distributor.findUnique({
+              where: { id: profile.recruitedByDistributorId },
+              select: { id: true, name: true },
+            })
+          : Promise.resolve(null),
+      ]);
+    return this.toPlatformMerchantDetail(
+      profile,
+      crmSummary,
+      distributors,
+      pendingRecruiter,
+      recruitedDistributor,
+    );
   }
 
   async create(dto: CreatePlatformMerchantDto) {
@@ -352,6 +371,11 @@ export class PlatformMerchantsService {
     profile: MerchantProfile,
     crmSummary: MerchantCrmSummary,
     distributors: MerchantDistributorSummary[],
+    pendingRecruiter: {
+      distributorId: string;
+      distributor: { name: string };
+    } | null = null,
+    recruitedDistributor: { id: string; name: string } | null = null,
   ): PlatformMerchantDetail {
     return {
       id: profile.id,
@@ -364,6 +388,11 @@ export class PlatformMerchantsService {
       submittedAt: profile.submittedAt?.toISOString() ?? null,
       reviewedAt: profile.reviewedAt?.toISOString() ?? null,
       tenantId: profile.tenantId,
+      pendingRecruitInviteCode: profile.pendingRecruitInviteCode,
+      pendingRecruiterId: pendingRecruiter?.distributorId ?? null,
+      pendingRecruiterName: pendingRecruiter?.distributor.name ?? null,
+      recruitedByDistributorId: profile.recruitedByDistributorId,
+      recruitedByDistributorName: recruitedDistributor?.name ?? null,
       crmSummary,
       distributors,
     };

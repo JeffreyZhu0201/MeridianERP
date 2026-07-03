@@ -162,8 +162,9 @@ model PlatformAccount {
   createdAt DateTime @default(now())       // 创建时间
   updatedAt DateTime @updatedAt            // 更新时间
 
-  customers     Customer[] // 各租户消费者档案
-  merchantUsers User[]     // 商户门户用户
+  customers     Customer[]    // 各租户消费者档案
+  merchantUsers User[]        // 商户门户用户
+  distributor   Distributor?  // 拓店员身份（可选）
 }
 
 // ============================================================
@@ -351,6 +352,8 @@ model Distributor {
   id                 String                      @id @default(cuid()) // 主键
   tenantId           String?                                // 租户 ID（可选，平台级经销商可能为空）
   tenant             Tenant?                     @relation(fields: [tenantId], references: [id]) // 所属租户
+  accountId          String?                     @unique               // 关联平台账号（拓店员）
+  account            PlatformAccount?            @relation(fields: [accountId], references: [id]) // 平台账号
   name               String                                  // 经销商名称
   email              String?                                 // 邮箱
   phone              String?                                 // 电话
@@ -621,9 +624,11 @@ model CommissionLedger {
   tenant            Tenant           @relation(fields: [tenantId], references: [id]) // 所属租户
   orderId           String           @unique               // 订单 ID（唯一）
   order             Order            @relation(fields: [orderId], references: [id]) // 关联订单
-  distributorId     String                                // 经销商 ID
-  distributor       Distributor      @relation(fields: [distributorId], references: [id]) // 所属经销商
-  amount            Decimal          @db.Decimal(12, 2)   // 佣金金额
+  distributorId         String                                // 经销商 ID
+  distributor           Distributor      @relation(fields: [distributorId], references: [id]) // 所属经销商
+  customerId            String?                               // 消费者 ID（分润报表）
+  customerOrderSequence Int?                                  // 该客户在本店的第几笔履约单（1 或 2）
+  amount                Decimal          @db.Decimal(12, 2)   // 佣金金额
   status            LedgerStatus     @default(ACCRUED)    // 状态
   settlementBatchId String?                               // 结算批次 ID
   settlementBatch   SettlementBatch? @relation(fields: [settlementBatchId], references: [id]) // 所属结算批次

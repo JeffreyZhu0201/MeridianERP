@@ -33,6 +33,7 @@ export function mapCommissionStatementRow(
     commissionRate: entry.distributor.commissionRate.toString(),
     amount: entry.amount.toString(),
     status: entry.status as CommissionStatementRow['status'],
+    customerOrderSequence: entry.customerOrderSequence ?? null,
     settlementBatchId: entry.settlementBatchId,
     settlementBatchPeriod: formatSettlementBatchPeriod(entry.settlementBatch),
     createdAt: entry.createdAt.toISOString(),

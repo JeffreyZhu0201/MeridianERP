@@ -114,16 +114,22 @@ describe('StoreCheckout (e2e)', () => {
       data: { recruitedByDistributorId: platformDist.id },
     });
 
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/auth/register')
+      .send({ email: 'buyer@acme.test', password: 'secret1234' })
+      .expect(201);
+    const storeToken = register.body.accessToken as string;
+
     await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/cart/items')
-      .set('X-Cart-Session', sessionId)
+      .set('Authorization', `Bearer ${storeToken}`)
       .send({ variantId, quantity: 1 })
       .expect(201);
 
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
-      .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
+      .set('Authorization', `Bearer ${storeToken}`)
+      .send({ fulfillmentType: 'PICKUP' })
       .expect(201);
 
     await request(app.getHttpServer())
@@ -135,6 +141,7 @@ describe('StoreCheckout (e2e)', () => {
       include: { commissionEntry: true },
     });
     expect(paidOrder?.pickupCode).toMatch(/^\d{6}$/);
+    expect(paidOrder?.customerId).toBeTruthy();
     expect(paidOrder?.commissionEntry).toBeNull();
 
     await request(app.getHttpServer())
@@ -151,8 +158,73 @@ describe('StoreCheckout (e2e)', () => {
     expect(orderDetail.body.commissionEntry).toMatchObject({
       distributorId: platformDist.id,
       status: 'ACCRUED',
+      customerOrderSequence: 1,
     });
     expect(Number(orderDetail.body.commissionEntry.amount)).toBe(5);
+  });
+
+  it('does not accrue commission on third fulfilled order for same customer', async () => {
+    const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
+    const platformDist = await prisma.distributor.create({
+      data: {
+        tenantId: null,
+        name: 'HQ Channel',
+        commissionRate: new Prisma.Decimal(10),
+        commissionType: CommissionType.PERCENT,
+        isActive: true,
+      },
+    });
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant!.id },
+      data: { recruitedByDistributorId: platformDist.id },
+    });
+
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/auth/register')
+      .send({ email: 'repeat-buyer@acme.test', password: 'secret1234' })
+      .expect(201);
+    const storeToken = register.body.accessToken as string;
+
+    async function placeAndFulfillOrder() {
+      await request(app.getHttpServer())
+        .post('/api/v1/store/acme-store/cart/items')
+        .set('Authorization', `Bearer ${storeToken}`)
+        .send({ variantId, quantity: 1 })
+        .expect(201);
+
+      const checkout = await request(app.getHttpServer())
+        .post('/api/v1/store/acme-store/checkout')
+        .set('Authorization', `Bearer ${storeToken}`)
+        .send({ fulfillmentType: 'PICKUP' })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+        .expect(200);
+
+      const paidOrder = await prisma.order.findUnique({
+        where: { id: checkout.body.order.id },
+      });
+
+      await request(app.getHttpServer())
+        .post(`/api/v1/merchant/orders/${checkout.body.order.id}/verify-pickup`)
+        .set('Authorization', `Bearer ${merchantToken}`)
+        .send({ code: paidOrder!.pickupCode })
+        .expect(200);
+
+      return checkout.body.order.id as string;
+    }
+
+    await placeAndFulfillOrder();
+    await placeAndFulfillOrder();
+    const thirdOrderId = await placeAndFulfillOrder();
+
+    const thirdOrder = await request(app.getHttpServer())
+      .get(`/api/v1/merchant/orders/${thirdOrderId}`)
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(thirdOrder.body.commissionEntry).toBeNull();
   });
 
   it('rejects checkout with empty cart', async () => {

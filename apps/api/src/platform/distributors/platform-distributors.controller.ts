@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
@@ -16,21 +17,20 @@ import { PlatformDistributorsService } from './platform-distributors.service';
 export class PlatformDistributorsController {
   constructor(private readonly service: PlatformDistributorsService) {}
 
-  
   @Get()
   list() {
     return this.service.list();
   }
 
-  
   @Post()
   @HttpCode(201)
   create(
     @Body()
     dto: {
-      name: string;
+      name?: string;
       email?: string;
       phone?: string;
+      accountId?: string;
       commissionRate: number;
       commissionType?: 'PERCENT' | 'FIXED';
     },
@@ -38,13 +38,11 @@ export class PlatformDistributorsController {
     return this.service.create(dto);
   }
 
-  
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.service.getById(id);
   }
 
-  
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -61,7 +59,6 @@ export class PlatformDistributorsController {
     return this.service.update(id, dto);
   }
 
-  
   @Post(':id/portal')
   @HttpCode(200)
   enablePortal(
@@ -71,7 +68,6 @@ export class PlatformDistributorsController {
     return this.service.enablePortal(id, dto.password);
   }
 
-  
   @Post(':id/invite-code')
   @HttpCode(201)
   createInviteCode(
@@ -81,7 +77,6 @@ export class PlatformDistributorsController {
     return this.service.createInviteCode(id, dto.expiresInDays);
   }
 
-  
   @Post(':id/invite-code/:codeId/revoke')
   @HttpCode(200)
   revokeInviteCode(
@@ -91,9 +86,20 @@ export class PlatformDistributorsController {
     return this.service.revokeInviteCode(id, codeId);
   }
 
-  
   @Get(':id/branches')
   getBranches(@Param('id') id: string) {
     return this.service.getBranches(id);
+  }
+
+  @Get(':id/commission-entries')
+  getCommissionEntries(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.service.getCommissionEntries(id, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
   }
 }

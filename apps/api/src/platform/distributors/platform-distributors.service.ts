@@ -1,35 +1,15 @@
-/*
- * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
- * @Date: 2026-06-30 20:26:16
- * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
- * @LastEditTime: 2026-07-01 15:34:38
- * @FilePath: /MeridianERP/apps/api/src/platform/distributors/platform-distributors.service.ts
- * @Description: Platform distributors service
- * 
- * Platform distributors service
- * - 查询平台级经销商列表
- * - 创建平台级经销商
- * - 更新平台级经销商信息
- * - 开通平台级经销商门户
- * - 获取平台级经销商详情
- * - 为平台级经销商创建商户招募邀请码
- * - 作废平台级经销商邀请码
- * - 获取平台级经销商招募的分店列表
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
- */
-
 import {
   BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommissionType, Prisma } from '@prisma/client';
+import { CommissionType, OrderStatus, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EnvService } from '../../config/env.service';
+import { PlatformAccountsService } from '../accounts/platform-accounts.service';
 
 function generateInviteCode(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -37,18 +17,39 @@ function generateInviteCode(): string {
   return Array.from(bytes, (b) => chars[b % chars.length]).join('');
 }
 
+function displayNameFromAccount(account: {
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}): string {
+  const parts = [account.firstName, account.lastName].filter(Boolean);
+  if (parts.length > 0) return parts.join(' ');
+  return account.email.split('@')[0] ?? account.email;
+}
+
 @Injectable()
 export class PlatformDistributorsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly env: EnvService,
+    private readonly platformAccounts: PlatformAccountsService,
   ) {}
 
-  
+  private storeInviteBaseUrl(): string {
+    return this.env.get('STORE_APP_URL') ?? 'http://localhost:3003';
+  }
+
+  private inviteUrl(code: string): string {
+    return `${this.storeInviteBaseUrl()}/open-shop?invite=${code}`;
+  }
+
   async list() {
     const rows = await this.prisma.distributor.findMany({
       where: { tenantId: null },
-      include: { _count: { select: { recruitedMerchants: true } } },
+      include: {
+        _count: { select: { recruitedMerchants: true } },
+        account: { select: { id: true, email: true } },
+      },
       orderBy: { createdAt: 'desc' },
     });
     return rows.map((d) => ({
@@ -56,6 +57,8 @@ export class PlatformDistributorsService {
       name: d.name,
       email: d.email,
       phone: d.phone,
+      accountId: d.accountId,
+      accountEmail: d.account?.email ?? null,
       commissionRate: Number(d.commissionRate),
       commissionType: d.commissionType,
       isActive: d.isActive,
@@ -65,20 +68,47 @@ export class PlatformDistributorsService {
     }));
   }
 
-  
   async create(dto: {
-    name: string;
+    name?: string;
     email?: string;
     phone?: string;
+    accountId?: string;
     commissionRate: number;
     commissionType?: CommissionType;
   }) {
+    let name = dto.name?.trim();
+    let email = dto.email?.trim();
+    let phone = dto.phone?.trim();
+    let accountId: string | undefined;
+
+    if (dto.accountId) {
+      const account = await this.platformAccounts.findById(dto.accountId);
+      if (!account) {
+        throw new NotFoundException('Account not found');
+      }
+      const existing = await this.prisma.distributor.findUnique({
+        where: { accountId: account.id },
+      });
+      if (existing) {
+        throw new ConflictException('Account is already linked to a promoter');
+      }
+      accountId = account.id;
+      name = name || displayNameFromAccount(account);
+      email = email || account.email;
+      phone = phone || account.phone || undefined;
+    }
+
+    if (!name) {
+      throw new BadRequestException('Name is required');
+    }
+
     return this.prisma.distributor.create({
       data: {
         tenantId: null,
-        name: dto.name,
-        email: dto.email,
-        phone: dto.phone,
+        accountId,
+        name,
+        email: email || null,
+        phone: phone || null,
         commissionRate: dto.commissionRate,
         commissionType: dto.commissionType ?? CommissionType.PERCENT,
         isActive: true,
@@ -86,7 +116,6 @@ export class PlatformDistributorsService {
     });
   }
 
-  
   async update(
     id: string,
     dto: Partial<{
@@ -102,7 +131,6 @@ export class PlatformDistributorsService {
     return this.prisma.distributor.update({ where: { id }, data: dto });
   }
 
-  
   async enablePortal(id: string, password: string) {
     const distributor = await this.assertPlatformDistributor(id);
     if (!distributor.email) {
@@ -115,9 +143,14 @@ export class PlatformDistributorsService {
     });
   }
 
-  
   async getById(id: string) {
-    const d = await this.assertPlatformDistributor(id);
+    const d = await this.prisma.distributor.findFirst({
+      where: { id, tenantId: null },
+      include: { account: { select: { id: true, email: true } } },
+    });
+    if (!d) {
+      throw new NotFoundException('Platform distributor not found');
+    }
     const [recruitedCount, inviteCodes] = await Promise.all([
       this.prisma.merchantProfile.count({
         where: { recruitedByDistributorId: id },
@@ -128,12 +161,13 @@ export class PlatformDistributorsService {
         take: 20,
       }),
     ]);
-    const baseUrl = this.env.get('MERCHANT_APP_URL') ?? 'http://localhost:3002';
     return {
       id: d.id,
       name: d.name,
       email: d.email,
       phone: d.phone,
+      accountId: d.accountId,
+      accountEmail: d.account?.email ?? null,
       commissionRate: Number(d.commissionRate),
       commissionType: d.commissionType,
       isActive: d.isActive,
@@ -146,12 +180,11 @@ export class PlatformDistributorsService {
         expiresAt: inv.expiresAt?.toISOString() ?? null,
         revokedAt: inv.revokedAt?.toISOString() ?? null,
         useCount: inv.useCount,
-        url: `${baseUrl}/register?invite=${inv.code}`,
+        url: this.inviteUrl(inv.code),
       })),
     };
   }
 
-  
   async createInviteCode(distributorId: string, expiresInDays?: number) {
     await this.assertPlatformDistributor(distributorId);
     for (let i = 0; i < 10; i++) {
@@ -166,7 +199,6 @@ export class PlatformDistributorsService {
               : null,
           },
         });
-        const baseUrl = this.env.get('MERCHANT_APP_URL') ?? 'http://localhost:3002';
         return {
           id: invite.id,
           code: invite.code,
@@ -174,7 +206,7 @@ export class PlatformDistributorsService {
           expiresAt: invite.expiresAt?.toISOString() ?? null,
           revokedAt: null,
           useCount: 0,
-          url: `${baseUrl}/register?invite=${code}`,
+          url: this.inviteUrl(code),
         };
       } catch (err) {
         if (
@@ -189,7 +221,6 @@ export class PlatformDistributorsService {
     throw new ConflictException('Could not generate invite code');
   }
 
-  
   async revokeInviteCode(distributorId: string, codeId: string) {
     await this.assertPlatformDistributor(distributorId);
     const invite = await this.prisma.merchantRecruitInviteCode.findFirst({
@@ -205,7 +236,6 @@ export class PlatformDistributorsService {
     });
   }
 
-  
   async getBranches(distributorId: string) {
     await this.assertPlatformDistributor(distributorId);
     const windowStart = new Date();
@@ -241,7 +271,66 @@ export class PlatformDistributorsService {
     return summaries;
   }
 
-  
+  async getCommissionEntries(
+    distributorId: string,
+    query: { page?: number; limit?: number } = {},
+  ) {
+    await this.assertPlatformDistributor(distributorId);
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 20));
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.CommissionLedgerWhereInput = { distributorId };
+
+    const [rows, total] = await Promise.all([
+      this.prisma.commissionLedger.findMany({
+        where,
+        include: {
+          order: {
+            select: {
+              total: true,
+              pickupVerifiedAt: true,
+              shippedAt: true,
+              status: true,
+            },
+          },
+          tenant: {
+            select: {
+              merchantProfile: { select: { businessName: true } },
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      this.prisma.commissionLedger.count({ where }),
+    ]);
+
+    return {
+      items: rows.map((row) => ({
+        id: row.id,
+        orderId: row.orderId,
+        tenantId: row.tenantId,
+        businessName: row.tenant.merchantProfile?.businessName ?? '—',
+        customerOrderSequence: row.customerOrderSequence,
+        orderTotal: row.order.total.toString(),
+        amount: row.amount.toString(),
+        status: row.status,
+        fulfilledAt:
+          row.order.pickupVerifiedAt?.toISOString() ??
+          row.order.shippedAt?.toISOString() ??
+          (row.order.status === OrderStatus.FULFILLED
+            ? row.createdAt.toISOString()
+            : null),
+        createdAt: row.createdAt.toISOString(),
+      })),
+      total,
+      page,
+      limit,
+    };
+  }
+
   private async assertPlatformDistributor(id: string) {
     const distributor = await this.prisma.distributor.findFirst({
       where: { id, tenantId: null },

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
@@ -182,6 +183,15 @@ export function StorePicker() {
         <Button type="button" className="w-full" disabled={!selectedSlug} onClick={handleContinue}>
           {t('home.pickerContinue')}
         </Button>
+
+        <div className="border-t pt-4 text-center">
+          <Link
+            href="/open-shop"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t('home.openShop')}
+          </Link>
+        </div>
       </div>
     </BentoTile>
   );

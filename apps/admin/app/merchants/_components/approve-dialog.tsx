@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Dialog, DialogCloseButton, Label, Select } from '@meridian/ui';
 
 import type { PlatformDistributor } from '@/lib/api';
@@ -11,6 +11,8 @@ interface ApproveDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (recruitedByDistributorId?: string) => void;
   distributors?: PlatformDistributor[];
+  defaultRecruiterId?: string | null;
+  pendingRecruiterName?: string | null;
 }
 
 export function ApproveDialog({
@@ -18,10 +20,18 @@ export function ApproveDialog({
   onOpenChange,
   onConfirm,
   distributors = [],
+  defaultRecruiterId,
+  pendingRecruiterName,
 }: ApproveDialogProps) {
   const t = useTranslations('admin.merchants');
   const tc = useTranslations('common');
   const [recruitedByDistributorId, setRecruitedByDistributorId] = useState('');
+
+  useEffect(() => {
+    if (open && defaultRecruiterId) {
+      setRecruitedByDistributorId(defaultRecruiterId);
+    }
+  }, [open, defaultRecruiterId]);
 
   function handleConfirm() {
     onConfirm(recruitedByDistributorId || undefined);
@@ -46,9 +56,14 @@ export function ApproveDialog({
         </>
       }
     >
+      {pendingRecruiterName ? (
+        <p className="mb-4 text-sm text-muted-foreground">
+          {t('pendingRecruiter', { name: pendingRecruiterName })}
+        </p>
+      ) : null}
       {distributors.length > 0 ? (
         <div className="space-y-2">
-          <Label htmlFor="recruited-by">{t('recruitedBy')}</Label>
+          <Label htmlFor="recruited-by">{t('recruitedByPromoter')}</Label>
           <Select
             id="recruited-by"
             value={recruitedByDistributorId}

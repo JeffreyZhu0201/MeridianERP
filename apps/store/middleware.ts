@@ -9,7 +9,15 @@ function parseStorePath(pathname: string): { slug: string; rest: string } | null
 }
 
 function isPublicStorePath(pathname: string): boolean {
-  if (pathname === '/' || pathname === '/login' || pathname === '/register') return true;
+  if (
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/open-shop' ||
+    pathname.startsWith('/open-shop/')
+  ) {
+    return true;
+  }
 
   const parsed = parseStorePath(pathname);
   if (!parsed) return false;
@@ -43,6 +51,10 @@ export function middleware(request: NextRequest) {
   }
 
   if (token && (pathname === '/login' || pathname === '/register')) {
+    const from = request.nextUrl.searchParams.get('from');
+    if (from?.startsWith('/open-shop')) {
+      return NextResponse.next();
+    }
     return NextResponse.redirect(new URL('/', request.url));
   }
 

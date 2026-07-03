@@ -10,6 +10,8 @@ export interface DistributorDetailResponse {
   name: string;
   email: string | null;
   phone: string | null;
+  accountId: string | null;
+  accountEmail: string | null;
   commissionRate: number;
   commissionType: string;
   isActive: boolean;

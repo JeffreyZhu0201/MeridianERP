@@ -197,6 +197,17 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
               <span className="text-muted-foreground">{td('contactPhone')}</span>
               <span>{merchant.contactPhone ?? '—'}</span>
             </div>
+            {merchant.pendingRecruiterName ? (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">{t('recruitedByPromoter')}</span>
+                <span>{merchant.pendingRecruiterName}</span>
+              </div>
+            ) : merchant.recruitedByDistributorName ? (
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">{t('recruitedByPromoter')}</span>
+                <span>{merchant.recruitedByDistributorName}</span>
+              </div>
+            ) : null}
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{td('submitted')}</span>
               <span>
@@ -264,6 +275,8 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
         onOpenChange={setApproveOpen}
         onConfirm={handleApprove}
         distributors={distributors}
+        defaultRecruiterId={merchant.pendingRecruiterId}
+        pendingRecruiterName={merchant.pendingRecruiterName}
       />
       <RejectDialog open={rejectOpen} onOpenChange={setRejectOpen} onConfirm={handleReject} />
       <Dialog

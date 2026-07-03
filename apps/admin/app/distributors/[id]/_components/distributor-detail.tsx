@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Badge,
   Button,
@@ -26,6 +26,7 @@ import {
 } from '@meridian/ui';
 
 import { apiFetch, type DistributorBranch } from '@/lib/api';
+import type { DistributorCommissionEntry } from '@meridian/shared';
 import type { DistributorDetailResponse } from '../page';
 
 interface DistributorDetailViewProps {
@@ -55,8 +56,39 @@ export function DistributorDetailView({
   const [commissionRate, setCommissionRate] = useState(String(distributor.commissionRate));
   const [commissionType, setCommissionType] = useState(distributor.commissionType);
   const [isActive, setIsActive] = useState(distributor.isActive);
+  const [commissionEntries, setCommissionEntries] = useState<DistributorCommissionEntry[]>([]);
+  const [loadingCommission, setLoadingCommission] = useState(true);
 
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCommission() {
+      setLoadingCommission(true);
+      try {
+        const res = await apiFetch<{ items: DistributorCommissionEntry[] }>(
+          `/platform/distributors/${distributor.id}/commission-entries?limit=50`,
+          {},
+          token,
+        );
+        if (!cancelled) setCommissionEntries(res.items);
+      } catch {
+        if (!cancelled) setCommissionEntries([]);
+      } finally {
+        if (!cancelled) setLoadingCommission(false);
+      }
+    }
+    void loadCommission();
+    return () => {
+      cancelled = true;
+    };
+  }, [distributor.id, token]);
+
+  const sequenceLabel = (seq: number | null) => {
+    if (seq === 1) return td('orderSequenceFirst');
+    if (seq === 2) return td('orderSequenceSecond');
+    return '—';
+  };
 
   const commissionLabel =
     distributor.commissionType === 'FIXED'
@@ -182,6 +214,9 @@ export function DistributorDetailView({
             value: distributor.portalEnabled ? tc('yes') : tc('no'),
           },
           { title: t('columns.email'), value: distributor.email ?? '—' },
+          ...(distributor.accountEmail
+            ? [{ title: td('linkedAccount'), value: distributor.accountEmail }]
+            : []),
         ]}
       />
 
@@ -339,6 +374,50 @@ export function DistributorDetailView({
             </div>
           ) : (
             <EmptyState title={td('noBranches')} />
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{td('commissionEntries')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loadingCommission ? (
+            <p className="text-sm text-muted-foreground">{tc('loading')}</p>
+          ) : commissionEntries.length > 0 ? (
+            <div className="rounded-xl ring-1 ring-border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{td('columns.business')}</TableHead>
+                    <TableHead>{td('orderSequence')}</TableHead>
+                    <TableHead className="text-right">{td('columns.sales')}</TableHead>
+                    <TableHead className="text-right">{t('columns.commission')}</TableHead>
+                    <TableHead>{tc('status')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {commissionEntries.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell className="font-medium">{entry.businessName}</TableCell>
+                      <TableCell>{sequenceLabel(entry.customerOrderSequence)}</TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatCNY(entry.orderTotal)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {formatCNY(entry.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{entry.status}</Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <EmptyState title={td('noCommissionEntries')} />
           )}
         </CardContent>
       </Card>

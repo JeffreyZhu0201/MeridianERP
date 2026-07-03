@@ -30,6 +30,9 @@ export class CommissionService {
     if (order.commissionEntry) {
       return;
     }
+    if (!order.customerId) {
+      return;
+    }
     const profile = await this.prisma.merchantProfile.findUnique({
       where: { tenantId: order.tenantId },
     });
@@ -39,11 +42,23 @@ export class CommissionService {
     const distributor = await this.prisma.distributor.findFirst({
       where: {
         id: profile.recruitedByDistributorId,
-        tenantId: null, // 平台级经销商
+        tenantId: null,
         isActive: true,
       },
     });
     if (!distributor) {
+      return;
+    }
+    const priorFulfilled = await this.prisma.order.count({
+      where: {
+        tenantId: order.tenantId,
+        customerId: order.customerId,
+        status: OrderStatus.FULFILLED,
+        id: { not: orderId },
+      },
+    });
+    const customerOrderSequence = priorFulfilled + 1;
+    if (customerOrderSequence > 2) {
       return;
     }
     const amount = this.calculateAmount(
@@ -56,8 +71,10 @@ export class CommissionService {
         tenantId: order.tenantId,
         orderId: order.id,
         distributorId: distributor.id,
+        customerId: order.customerId,
+        customerOrderSequence,
         amount,
-        status: 'ACCRUED', // 预提状态
+        status: 'ACCRUED',
       },
     });
     await this.commissionQueue.enqueueAccrual(order.id);

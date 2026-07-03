@@ -60,6 +60,7 @@ export function createMockPrisma() {
   const purchaseOrderReceiptLines = new Map<Id, PurchaseOrderReceiptLineRecord>();
   const stockTransfers = new Map<Id, StockTransferRecord>();
   const stockTransferLines = new Map<Id, StockTransferLineRecord>();
+  const merchantRecruitInviteCodes = new Map<Id, MerchantRecruitInviteCodeRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -168,6 +169,7 @@ export function createMockPrisma() {
   interface DistributorRecord {
     id: Id;
     tenantId: Id | null;
+    accountId: Id | null;
     name: string;
     email: string | null;
     phone: string | null;
@@ -297,12 +299,24 @@ export function createMockPrisma() {
     tenantId: Id;
     orderId: Id;
     distributorId: Id;
+    customerId: Id | null;
+    customerOrderSequence: number | null;
     amount: Prisma.Decimal;
     status: LedgerStatus;
     settlementBatchId: string | null;
     settledAt: Date | null;
     createdAt: Date;
     updatedAt: Date;
+  }
+
+  interface MerchantRecruitInviteCodeRecord {
+    id: Id;
+    code: string;
+    distributorId: Id;
+    revokedAt: Date | null;
+    expiresAt: Date | null;
+    useCount: number;
+    createdAt: Date;
   }
 
   interface SettlementBatchRecord {
@@ -677,7 +691,18 @@ export function createMockPrisma() {
       items = items.filter((o) => o.distributorId === where.distributorId);
     }
     if (where.status) items = items.filter((o) => o.status === where.status);
-    if (where.id) items = items.filter((o) => o.id === where.id);
+    if (where.id) {
+      if (
+        typeof where.id === 'object' &&
+        where.id !== null &&
+        'not' in (where.id as { not?: string })
+      ) {
+        const excluded = (where.id as { not: string }).not;
+        items = items.filter((o) => o.id !== excluded);
+      } else {
+        items = items.filter((o) => o.id === where.id);
+      }
+    }
     if (where.customerId) {
       items = items.filter((o) => o.customerId === where.customerId);
     }
@@ -1833,6 +1858,7 @@ export function createMockPrisma() {
           ...data,
           id: nextId('dist'),
           tenantId: data.tenantId ?? null,
+          accountId: data.accountId ?? null,
           email: data.email ?? null,
           phone: data.phone ?? null,
           isActive: data.isActive ?? true,
@@ -1862,6 +1888,20 @@ export function createMockPrisma() {
         const existing = distributors.get(where.id);
         distributors.delete(where.id);
         return existing;
+      },
+      findUnique: async ({
+        where,
+      }: {
+        where: { id?: string; accountId?: string };
+      }) => {
+        if (where.id) return distributors.get(where.id) ?? null;
+        if (where.accountId) {
+          return (
+            [...distributors.values()].find((d) => d.accountId === where.accountId) ??
+            null
+          );
+        }
+        return null;
       },
     },
     distributorQrCode: {
@@ -3308,6 +3348,8 @@ export function createMockPrisma() {
         const record: CommissionLedgerRecord = {
           ...data,
           id: nextId('cl'),
+          customerId: data.customerId ?? null,
+          customerOrderSequence: data.customerOrderSequence ?? null,
           settlementBatchId: null,
           settledAt: null,
           status: data.status ?? LedgerStatus.ACCRUED,
@@ -3537,22 +3579,85 @@ export function createMockPrisma() {
       }) => ({ id: where.id, ...data }),
     },
     merchantRecruitInviteCode: {
-      findMany: async () => [],
-      findFirst: async () => null,
-      findUnique: async () => null,
-      create: async ({ data }: { data: Record<string, unknown> }) => ({
-        id: nextId('inv'),
-        useCount: 0,
-        createdAt: now(),
-        ...data,
-      }),
+      findMany: async ({
+        where,
+      }: {
+        where?: { distributorId?: string };
+      } = {}) => {
+        let items = [...merchantRecruitInviteCodes.values()];
+        if (where?.distributorId) {
+          items = items.filter((c) => c.distributorId === where.distributorId);
+        }
+        return items;
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where: {
+          code?: string;
+          id?: string;
+          distributorId?: string;
+          revokedAt?: null;
+        };
+        include?: { distributor?: boolean };
+      }) => {
+        let items = [...merchantRecruitInviteCodes.values()];
+        if (where.code) items = items.filter((c) => c.code === where.code);
+        if (where.id) items = items.filter((c) => c.id === where.id);
+        if (where.distributorId) {
+          items = items.filter((c) => c.distributorId === where.distributorId);
+        }
+        if (where.revokedAt === null) {
+          items = items.filter((c) => c.revokedAt === null);
+        }
+        const invite = items[0] ?? null;
+        if (!invite) return null;
+        if (include?.distributor) {
+          const distributor = distributors.get(invite.distributorId) ?? null;
+          return { ...invite, distributor };
+        }
+        return invite;
+      },
+      findUnique: async ({ where }: { where: { code?: string } }) => {
+        if (!where.code) return null;
+        return (
+          [...merchantRecruitInviteCodes.values()].find((c) => c.code === where.code) ??
+          null
+        );
+      },
+      create: async ({
+        data,
+      }: {
+        data: Omit<MerchantRecruitInviteCodeRecord, 'id' | 'createdAt' | 'useCount'> & {
+          useCount?: number;
+        };
+      }) => {
+        const record: MerchantRecruitInviteCodeRecord = {
+          id: nextId('inv'),
+          useCount: data.useCount ?? 0,
+          createdAt: now(),
+          revokedAt: data.revokedAt ?? null,
+          expiresAt: data.expiresAt ?? null,
+          code: data.code,
+          distributorId: data.distributorId,
+        };
+        merchantRecruitInviteCodes.set(record.id, record);
+        return record;
+      },
       update: async ({
         where,
         data,
       }: {
         where: { id: string };
-        data: Record<string, unknown>;
-      }) => ({ id: where.id, ...data }),
+        data: Partial<MerchantRecruitInviteCodeRecord>;
+      }) => {
+        const existing = merchantRecruitInviteCodes.get(where.id);
+        if (!existing) throw new Error('Invite not found');
+        const updated = { ...existing, ...data };
+        merchantRecruitInviteCodes.set(where.id, updated);
+        return updated;
+      },
     },
     recruiterChangeLog: {
       create: async ({ data }: { data: Record<string, unknown> }) => ({
