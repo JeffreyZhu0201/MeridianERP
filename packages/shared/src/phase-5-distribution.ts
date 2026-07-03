@@ -75,6 +75,20 @@ export interface DistributorBranchSummary {
   orderCountLast30Days: number;
   lifetimeSales?: string | number;
   lifetimeOrderCount?: number;
+  allocationOrderCount?: number;
+  allocationWholesaleTotal?: number;
+  lastAllocationAt?: string | null;
+  confirmedAllocationCount?: number;
+}
+
+export interface DistributorBranchAllocationSummary {
+  id: string;
+  status: AllocationOrderStatus;
+  issuedAt: string | null;
+  confirmedAt: string | null;
+  wholesaleTotal: number;
+  lineCount: number;
+  createdAt: string;
 }
 
 export interface DistributorCommissionEntry {

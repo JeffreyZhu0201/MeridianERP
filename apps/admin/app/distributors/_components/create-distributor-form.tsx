@@ -12,6 +12,8 @@ import {
   Select,
 } from '@meridian/ui';
 
+import type { PlatformDistributorSummary } from '@meridian/shared';
+
 import {
   apiFetch,
   type PaginatedResponse,
@@ -68,16 +70,20 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
   }
 
   async function handleSubmit() {
+    if (!accountId) {
+      setError(t('form.accountRequired'));
+      return;
+    }
     setSubmitting(true);
     setError('');
     try {
-      await apiFetch(
+      const created = await apiFetch<PlatformDistributorSummary>(
         '/platform/distributors',
         {
           method: 'POST',
           body: JSON.stringify({
-            accountId: accountId || undefined,
-            name: name || undefined,
+            accountId,
+            name: name.trim() || undefined,
             commissionRate: Number(commissionRate),
             commissionType,
           }),
@@ -86,7 +92,7 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
       );
       setOpen(false);
       resetForm();
-      router.refresh();
+      router.push(`/distributors/${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('createFailed'));
     } finally {
@@ -94,7 +100,7 @@ export function CreateDistributorForm({ token }: CreateDistributorFormProps) {
     }
   }
 
-  const canSubmit = accountId || name.trim();
+  const canSubmit = Boolean(accountId);
 
   return (
     <>

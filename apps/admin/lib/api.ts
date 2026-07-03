@@ -1,4 +1,5 @@
 import type {
+  DistributorBranchAllocationSummary,
   DistributorBranchSummary,
   MasterSkuSummary,
   MerchantRecruitInviteCodeResponse,
@@ -78,6 +79,7 @@ export interface PlatformOrder {
 
 export type PlatformDistributor = PlatformDistributorSummary;
 export type DistributorBranch = DistributorBranchSummary;
+export type { DistributorBranchAllocationSummary };
 export type MasterSku = MasterSkuSummary;
 export type FundsSummary = PlatformFundsSummary;
 export type RecruitInviteCode = MerchantRecruitInviteCodeResponse;

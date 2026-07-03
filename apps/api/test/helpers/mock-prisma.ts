@@ -330,6 +330,7 @@ export function createMockPrisma() {
     id: Id;
     tenantId: Id;
     status: string;
+    issuedAt: Date | null;
     confirmedAt: Date | null;
     lines: AllocationOrderLineRecord[];
     createdAt: Date;
@@ -1880,7 +1881,41 @@ export function createMockPrisma() {
         return existing;
       },
     },
-    distributor: {
+    distributor: (() => {
+      const attachDistributorIncludes = (
+        distributor: DistributorRecord,
+        include?: {
+          _count?: { select: { recruitedMerchants?: boolean } };
+          account?: { select: { id?: boolean; email?: boolean } };
+        },
+      ) => {
+        let row: Record<string, unknown> = { ...distributor };
+        if (include?._count?.select?.recruitedMerchants) {
+          const recruitedMerchantCount = [...merchantProfiles.values()].filter(
+            (m) => m.recruitedByDistributorId === distributor.id,
+          ).length;
+          row = { ...row, _count: { recruitedMerchants: recruitedMerchantCount } };
+        }
+        if (include?.account) {
+          const account = distributor.accountId
+            ? (platformAccounts.get(distributor.accountId) ?? null)
+            : null;
+          if (account) {
+            row = {
+              ...row,
+              account: {
+                ...(include.account.select?.id === false ? {} : { id: account.id }),
+                ...(include.account.select?.email === false ? {} : { email: account.email }),
+              },
+            };
+          } else {
+            row = { ...row, account: null };
+          }
+        }
+        return row;
+      };
+
+      return {
       findMany: async ({
         where,
         orderBy,
@@ -1899,8 +1934,22 @@ export function createMockPrisma() {
         include?: { tenant?: boolean };
       } = {}) => {
         let items = [...distributors.values()];
-        if (where?.tenantId) {
+        if (where?.tenantId !== undefined) {
           items = items.filter((d) => d.tenantId === where.tenantId);
+        }
+        if (where?.OR) {
+          const orClauses = where.OR as Array<Record<string, unknown>>;
+          items = items.filter((d) =>
+            orClauses.some((clause) => {
+              if (clause.email && d.email === clause.email) return true;
+              const accountClause = clause.account as { email?: string } | undefined;
+              if (accountClause?.email && d.accountId) {
+                const account = platformAccounts.get(d.accountId);
+                return account?.email === accountClause.email;
+              }
+              return false;
+            }),
+          );
         }
         if (where?.email) {
           items = items.filter((d) => d.email === where.email);
@@ -1937,6 +1986,12 @@ export function createMockPrisma() {
             tenant: d.tenantId ? (tenants.get(d.tenantId) ?? null) : null,
           }));
         }
+        if (include?.account) {
+          return items.map((d) => ({
+            ...d,
+            account: d.accountId ? (platformAccounts.get(d.accountId) ?? null) : null,
+          }));
+        }
         return items;
       },
       count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
@@ -1955,18 +2010,30 @@ export function createMockPrisma() {
       }: {
         where: {
           id?: string;
-          tenantId?: string;
+          tenantId?: string | null;
           email?: string | { equals: string; mode?: string };
           isActive?: boolean;
           portalEnabled?: boolean;
           tenant?: { slug?: string };
+          account?: { email?: string };
         };
-        include?: { tenant?: boolean; qrCodes?: { take?: number } };
+        include?: {
+          tenant?: boolean;
+          qrCodes?: { take?: number };
+          account?: { select?: { password?: boolean } };
+        };
       }) => {
         let items = [...distributors.values()];
         if (where.id) items = items.filter((d) => d.id === where.id);
         if (where.tenantId !== undefined) {
           items = items.filter((d) => d.tenantId === where.tenantId);
+        }
+        if (where.account?.email) {
+          items = items.filter((d) => {
+            if (!d.accountId) return false;
+            const account = platformAccounts.get(d.accountId);
+            return account?.email === where.account!.email;
+          });
         }
         if (where.email) {
           const target =
@@ -2006,16 +2073,34 @@ export function createMockPrisma() {
             tenant: distributor.tenantId ? (tenants.get(distributor.tenantId) ?? null) : null,
           };
         }
+        if (include?.account) {
+          const account = distributor.accountId
+            ? (platformAccounts.get(distributor.accountId) ?? null)
+            : null;
+          const select = include.account.select;
+          if (select?.password && account) {
+            return {
+              ...distributor,
+              account: { password: account.password },
+            };
+          }
+          return { ...distributor, account };
+        }
         return distributor;
       },
       create: async ({
         data,
+        include,
       }: {
         data: MockCreateInput<
           DistributorRecord,
           'id' | 'createdAt' | 'updatedAt' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt',
           'tenantId' | 'email' | 'phone' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt'
         >;
+        include?: {
+          _count?: { select: { recruitedMerchants?: boolean } };
+          account?: { select: { id?: boolean; email?: boolean } };
+        };
       }) => {
         const record: DistributorRecord = {
           ...data,
@@ -2032,20 +2117,25 @@ export function createMockPrisma() {
           updatedAt: now(),
         };
         distributors.set(record.id, record);
-        return record;
+        return attachDistributorIncludes(record, include);
       },
       update: async ({
         where,
         data,
+        include,
       }: {
         where: { id: string };
         data: Partial<DistributorRecord>;
+        include?: {
+          _count?: { select: { recruitedMerchants?: boolean } };
+          account?: { select: { id?: boolean; email?: boolean } };
+        };
       }) => {
         const existing = distributors.get(where.id);
         if (!existing) throw new Error('Not found');
         const updated = { ...existing, ...data, updatedAt: now() };
         distributors.set(where.id, updated);
-        return updated;
+        return attachDistributorIncludes(updated, include);
       },
       delete: async ({ where }: { where: { id: string } }) => {
         const existing = distributors.get(where.id);
@@ -2066,7 +2156,8 @@ export function createMockPrisma() {
         }
         return null;
       },
-    },
+    };
+    })(),
     distributorQrCode: {
       create: async ({
         data,
@@ -3799,7 +3890,35 @@ export function createMockPrisma() {
       count: async () => masterSkus.size,
     },
     allocationOrder: {
-      findMany: async () => [...allocationOrders.values()],
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+      }: {
+        where?: {
+          tenantId?: string;
+          status?: { in?: string[] };
+        };
+        include?: { lines?: boolean };
+        orderBy?: { createdAt: 'asc' | 'desc' };
+      } = {}) => {
+        let items = [...allocationOrders.values()];
+        if (where?.tenantId) {
+          items = items.filter((o) => o.tenantId === where.tenantId);
+        }
+        if (where?.status?.in) {
+          items = items.filter((o) => where.status!.in!.includes(o.status));
+        }
+        if (orderBy?.createdAt === 'desc') {
+          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } else if (orderBy?.createdAt === 'asc') {
+          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        if (include?.lines) {
+          return items.map((o) => ({ ...o, lines: o.lines }));
+        }
+        return items;
+      },
       findUnique: async ({
         where,
         include,
@@ -3858,6 +3977,7 @@ export function createMockPrisma() {
           id: nextId('alloc'),
           tenantId: data.tenantId as string,
           status: (data.status as string) ?? 'DRAFT',
+          issuedAt: (data.issuedAt as Date | null) ?? null,
           confirmedAt: (data.confirmedAt as Date | null) ?? null,
           lines: [],
           createdAt: now(),
@@ -4272,6 +4392,7 @@ export function createMockPrisma() {
         id: allocId,
         tenantId: input.tenantId,
         status: 'CONFIRMED',
+        issuedAt: now(),
         confirmedAt: now(),
         lines,
         createdAt: now(),

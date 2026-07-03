@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import {
   Badge,
@@ -27,7 +27,7 @@ import {
   TableRow,
 } from '@meridian/ui';
 
-import { apiFetch, type DistributorBranch } from '@/lib/api';
+import { apiFetch, type DistributorBranch, type DistributorBranchAllocationSummary } from '@/lib/api';
 import type { DistributorCommissionEntry, DistributorFundsSummary, WithdrawalRequestRow, WithdrawalRequestStatus } from '@meridian/shared';
 import { LedgerStatus } from '@meridian/shared';
 import type { DistributorDetailResponse } from '../page';
@@ -65,6 +65,13 @@ export function DistributorDetailView({
   const [fundsSummary, setFundsSummary] = useState<DistributorFundsSummary | null>(null);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequestRow[]>([]);
   const [loadingFunds, setLoadingFunds] = useState(true);
+  const [expandedBranchId, setExpandedBranchId] = useState<string | null>(null);
+  const [branchAllocations, setBranchAllocations] = useState<DistributorBranchAllocationSummary[]>(
+    [],
+  );
+  const [loadingAllocations, setLoadingAllocations] = useState(false);
+
+  const hasLinkedAccount = Boolean(distributor.accountId);
 
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
   const emptyDash = tc('emptyDash');
@@ -95,6 +102,41 @@ export function DistributorDetailView({
     }
     return status;
   };
+
+  const allocationStatusLabel = (status: string) => {
+    if (
+      status === 'DRAFT' ||
+      status === 'ISSUED' ||
+      status === 'CONFIRMED' ||
+      status === 'CANCELLED'
+    ) {
+      return td(`allocationStatus.${status}`);
+    }
+    return status;
+  };
+
+  async function loadBranchAllocations(tenantId: string) {
+    if (expandedBranchId === tenantId) {
+      setExpandedBranchId(null);
+      setBranchAllocations([]);
+      return;
+    }
+    setExpandedBranchId(tenantId);
+    setLoadingAllocations(true);
+    setBranchAllocations([]);
+    try {
+      const rows = await apiFetch<DistributorBranchAllocationSummary[]>(
+        `/platform/distributors/${distributor.id}/branches/${tenantId}/allocations`,
+        {},
+        token,
+      );
+      setBranchAllocations(rows);
+    } catch {
+      setBranchAllocations([]);
+    } finally {
+      setLoadingAllocations(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -280,7 +322,21 @@ export function DistributorDetailView({
           },
           { title: t('columns.email'), value: distributor.email ?? emptyDash },
           ...(distributor.accountEmail
-            ? [{ title: td('linkedAccount'), value: distributor.accountEmail }]
+            ? [
+                {
+                  title: td('linkedAccount'),
+                  value: distributor.accountId ? (
+                    <Link
+                      href={`/users/${distributor.accountId}`}
+                      className="text-primary underline-offset-4 hover:underline"
+                    >
+                      {distributor.accountEmail}
+                    </Link>
+                  ) : (
+                    distributor.accountEmail
+                  ),
+                },
+              ]
             : []),
           ...(fundsSummary
             ? [
@@ -396,7 +452,16 @@ export function DistributorDetailView({
             <Button onClick={handleSave} disabled={saving}>
               {saving ? tc('saving') : tc('save')}
             </Button>
-            {!distributor.portalEnabled ? (
+            {hasLinkedAccount ? (
+              <div className="space-y-2 border-t pt-4">
+                <p className="text-sm text-muted-foreground">{td('portalAccountLogin')}</p>
+                {distributor.portalEnabled ? (
+                  <Badge variant="success">{td('portal')}</Badge>
+                ) : (
+                  <Badge variant="secondary">{tc('no')}</Badge>
+                )}
+              </div>
+            ) : !distributor.portalEnabled ? (
               <div className="space-y-2 border-t pt-4">
                 <Label htmlFor="portal-pw">{td('portalPassword')}</Label>
                 <Input
@@ -521,7 +586,7 @@ export function DistributorDetailView({
         </CardHeader>
         <CardContent>
           {branches.length > 0 ? (
-            <div className="rounded-xl ring-1 ring-border">
+            <div className="rounded-xl ring-1 ring-border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -529,20 +594,108 @@ export function DistributorDetailView({
                     <TableHead>{td('columns.slug')}</TableHead>
                     <TableHead className="text-right">{td('columns.sales')}</TableHead>
                     <TableHead className="text-right">{td('columns.orders')}</TableHead>
+                    <TableHead className="text-right">{td('columns.allocationOrders')}</TableHead>
+                    <TableHead className="text-right">{td('columns.confirmedAllocations')}</TableHead>
+                    <TableHead className="text-right">{td('columns.wholesaleTotal')}</TableHead>
+                    <TableHead>{td('columns.lastAllocation')}</TableHead>
+                    <TableHead className="w-[140px]">{td('columns.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {branches.map((branch) => (
-                    <TableRow key={branch.tenantId}>
-                      <TableCell className="font-medium">{branch.businessName}</TableCell>
-                      <TableCell className="font-mono text-xs">{branch.slug}</TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {formatMoney(branch.salesLast30Days)}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {branch.orderCountLast30Days}
-                      </TableCell>
-                    </TableRow>
+                    <Fragment key={branch.tenantId}>
+                      <TableRow>
+                        <TableCell className="font-medium">{branch.businessName}</TableCell>
+                        <TableCell className="font-mono text-xs">{branch.slug}</TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatMoney(branch.salesLast30Days, 'CNY', locale)}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {branch.orderCountLast30Days}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {branch.allocationOrderCount ?? 0}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {branch.confirmedAllocationCount ?? 0}
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">
+                          {formatCNY(branch.allocationWholesaleTotal ?? 0)}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {branch.lastAllocationAt
+                            ? new Date(branch.lastAllocationAt).toLocaleDateString(locale)
+                            : emptyDash}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => void loadBranchAllocations(branch.tenantId)}
+                          >
+                            {expandedBranchId === branch.tenantId
+                              ? td('hideAllocations')
+                              : td('viewAllocations')}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                      {expandedBranchId === branch.tenantId ? (
+                        <TableRow key={`${branch.tenantId}-allocations`}>
+                          <TableCell colSpan={9} className="bg-muted/30 p-4">
+                            {loadingAllocations ? (
+                              <p className="text-sm text-muted-foreground">{tc('loading')}</p>
+                            ) : branchAllocations.length > 0 ? (
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>{tc('status')}</TableHead>
+                                    <TableHead>{td('allocationColumns.issuedAt')}</TableHead>
+                                    <TableHead>{td('allocationColumns.confirmedAt')}</TableHead>
+                                    <TableHead className="text-right">
+                                      {td('allocationColumns.wholesaleTotal')}
+                                    </TableHead>
+                                    <TableHead className="text-right">
+                                      {td('allocationColumns.lineCount')}
+                                    </TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {branchAllocations.map((allocation) => (
+                                    <TableRow key={allocation.id}>
+                                      <TableCell>
+                                        <Badge variant="secondary">
+                                          {allocationStatusLabel(allocation.status)}
+                                        </Badge>
+                                      </TableCell>
+                                      <TableCell className="text-xs text-muted-foreground">
+                                        {allocation.issuedAt
+                                          ? new Date(allocation.issuedAt).toLocaleDateString(locale)
+                                          : emptyDash}
+                                      </TableCell>
+                                      <TableCell className="text-xs text-muted-foreground">
+                                        {allocation.confirmedAt
+                                          ? new Date(allocation.confirmedAt).toLocaleDateString(
+                                              locale,
+                                            )
+                                          : emptyDash}
+                                      </TableCell>
+                                      <TableCell className="text-right tabular-nums">
+                                        {formatCNY(allocation.wholesaleTotal)}
+                                      </TableCell>
+                                      <TableCell className="text-right tabular-nums">
+                                        {allocation.lineCount}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            ) : (
+                              <EmptyState title={td('noBranchAllocations')} />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ) : null}
+                    </Fragment>
                   ))}
                 </TableBody>
               </Table>

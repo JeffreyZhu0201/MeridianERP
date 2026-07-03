@@ -17,7 +17,6 @@ export class DistributorAuthService {
     private readonly env: EnvService,
   ) {}
 
-  
   private signDistributorToken(distributorId: string, tenantId: string | null) {
     return this.jwt.sign(
       {
@@ -30,36 +29,92 @@ export class DistributorAuthService {
     );
   }
 
-  
-  async login(dto: DistributorLoginDto) {
-    const distributors = await this.prisma.distributor.findMany({
+  private async findLoginDistributor(dto: DistributorLoginDto) {
+    if (dto.tenantSlug) {
+      return this.prisma.distributor.findFirst({
+        where: {
+          email: dto.email,
+          portalEnabled: true,
+          isActive: true,
+          tenant: { slug: dto.tenantSlug },
+        },
+        include: {
+          tenant: true,
+          account: { select: { password: true } },
+        },
+      });
+    }
+
+    const byEmail = await this.prisma.distributor.findFirst({
       where: {
         email: dto.email,
         portalEnabled: true,
         isActive: true,
-        ...(dto.tenantSlug
-          ? { tenant: { slug: dto.tenantSlug } }
-          : { tenantId: null }),
+        tenantId: null,
       },
-      include: { tenant: true },
+      include: {
+        tenant: true,
+        account: { select: { password: true } },
+      },
     });
-    if (distributors.length === 0) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    if (!dto.tenantSlug && distributors.length > 1) {
-      throw new ForbiddenException(
-        'Multiple merchant accounts found — provide tenantSlug',
-      );
+    if (byEmail) {
+      return byEmail;
     }
 
-    const distributor = distributors[0]!;
-    if (!distributor.passwordHash) {
+    return this.prisma.distributor.findFirst({
+      where: {
+        portalEnabled: true,
+        isActive: true,
+        tenantId: null,
+        account: { email: dto.email },
+      },
+      include: {
+        tenant: true,
+        account: { select: { password: true } },
+      },
+    });
+  }
+
+  async login(dto: DistributorLoginDto) {
+    if (!dto.tenantSlug) {
+      const matches = await this.prisma.distributor.findMany({
+        where: {
+          portalEnabled: true,
+          isActive: true,
+          tenantId: null,
+          OR: [{ email: dto.email }, { account: { email: dto.email } }],
+        },
+        select: { id: true },
+      });
+      if (matches.length > 1) {
+        throw new ForbiddenException(
+          'Multiple merchant accounts found — provide tenantSlug',
+        );
+      }
+    }
+
+    const distributor = await this.findLoginDistributor(dto);
+    if (!distributor) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const valid = await bcrypt.compare(dto.password, distributor.passwordHash);
+
+    let valid = false;
+    if (distributor.passwordHash) {
+      valid = await bcrypt.compare(dto.password, distributor.passwordHash);
+    }
+    if (!valid && distributor.accountId && distributor.account?.password) {
+      valid = await bcrypt.compare(dto.password, distributor.account.password);
+      if (valid) {
+        await this.prisma.distributor.update({
+          where: { id: distributor.id },
+          data: { passwordHash: distributor.account.password },
+        });
+      }
+    }
     if (!valid) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     await this.prisma.distributor.update({
       where: { id: distributor.id },
       data: { lastLoginAt: new Date() },

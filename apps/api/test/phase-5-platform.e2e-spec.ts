@@ -116,6 +116,13 @@ describe('Phase5 Platform (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .send({ name: 'Channel Partner', commissionRate: 8 })
       .expect(201);
-    expect(res.body.tenantId).toBeNull();
+    expect(res.body).toMatchObject({
+      name: 'Channel Partner',
+      commissionRate: 8,
+      isActive: true,
+      portalEnabled: false,
+      recruitedMerchantCount: 0,
+    });
+    expect(res.body.id).toBeDefined();
   });
 });

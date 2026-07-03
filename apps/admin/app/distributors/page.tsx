@@ -4,6 +4,7 @@ import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server'
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
 import { apiFetch, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import { CreateDistributorForm } from './_components/create-distributor-form';
 import { DistributorsTable } from './_components/distributors-table';
 
 export default async function DistributorsPage() {
@@ -27,13 +28,14 @@ export default async function DistributorsPage() {
         <ListPageFrame
           title={t('title')}
           description={t('description')}
+          action={<CreateDistributorForm token={token} />}
           emptyState={
             distributors.length === 0 ? (
               <EmptyState title={t('empty')} description={t('emptyDescription')} />
             ) : undefined
           }
         >
-          <DistributorsTable distributors={distributors} token={token} />
+          <DistributorsTable distributors={distributors} />
         </ListPageFrame>
       </div>
     </AdminShellWrapper>

@@ -1,108 +1,89 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Badge, Button } from '@meridian/ui';
-import type { PlatformDistributorSummary } from '@meridian/shared';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+  Badge,
+  EmptyState,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  buttonVariants,
+  formatMoney,
+} from '@meridian/ui';
 
-import { apiFetch } from '@/lib/api';
+import type { PlatformDistributor } from '@/lib/api';
 
-export function DistributorsTable({
-  distributors,
-  token,
-}: {
-  distributors: PlatformDistributorSummary[];
-  token: string;
-}) {
-  const router = useRouter();
-  const [creating, setCreating] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [rate, setRate] = useState('10');
+interface DistributorsTableProps {
+  distributors: PlatformDistributor[];
+}
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setCreating(true);
-    try {
-      await apiFetch(
-        '/platform/distributors',
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            name,
-            email: email || undefined,
-            commissionRate: Number(rate),
-            commissionType: 'PERCENT',
-          }),
-        },
-        token,
-      );
-      setName('');
-      setEmail('');
-      router.refresh();
-    } finally {
-      setCreating(false);
+export function DistributorsTable({ distributors }: DistributorsTableProps) {
+  const t = useTranslations('admin.distributors');
+  const tc = useTranslations('common');
+  const locale = useLocale();
+
+  if (distributors.length === 0) {
+    return <EmptyState title={t('empty')} description={t('emptyDescription')} />;
+  }
+
+  function commissionLabel(d: PlatformDistributor) {
+    if (d.commissionType === 'FIXED') {
+      return formatMoney(d.commissionRate, 'CNY', locale);
     }
+    return `${Number(d.commissionRate)}%`;
   }
 
   return (
-    <div className="space-y-6">
-      <form
-        onSubmit={handleCreate}
-        className="flex flex-wrap items-end gap-3 rounded-xl ring-1 ring-border p-4"
-      >
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Name</label>
-          <input
-            className="flex h-9 rounded-md border border-border bg-background px-3 text-sm"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Email</label>
-          <input
-            type="email"
-            className="flex h-9 rounded-md border border-border bg-background px-3 text-sm"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs text-muted-foreground">Commission %</label>
-          <input
-            type="number"
-            className="flex h-9 w-24 rounded-md border border-border bg-background px-3 text-sm"
-            value={rate}
-            onChange={(e) => setRate(e.target.value)}
-          />
-        </div>
-        <Button type="submit" disabled={creating}>
-          {creating ? 'Creating…' : 'Create distributor'}
-        </Button>
-      </form>
-
-      <div className="rounded-xl ring-1 ring-border divide-y divide-border">
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>{t('columns.name')}</TableHead>
+          <TableHead>{t('columns.linkedAccount')}</TableHead>
+          <TableHead>{t('columns.commission')}</TableHead>
+          <TableHead className="text-right">{t('columns.branches')}</TableHead>
+          <TableHead>{t('columns.portal')}</TableHead>
+          <TableHead>{t('columns.status')}</TableHead>
+          <TableHead className="w-[100px]">{t('columns.actions')}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {distributors.map((d) => (
-          <div key={d.id} className="flex items-center justify-between gap-4 px-4 py-3">
-            <div>
+          <TableRow key={d.id}>
+            <TableCell>
               <Link href={`/distributors/${d.id}`} className="font-medium hover:underline">
                 {d.name}
               </Link>
-              <p className="text-xs text-muted-foreground">{d.email ?? '—'}</p>
-            </div>
-            <div className="flex items-center gap-2 text-sm">
-              <Badge variant={d.isActive ? 'default' : 'secondary'}>
-                {d.isActive ? 'Active' : 'Inactive'}
+            </TableCell>
+            <TableCell className="text-muted-foreground">
+              {d.accountEmail ?? tc('emptyDash')}
+            </TableCell>
+            <TableCell className="tabular-nums">{commissionLabel(d)}</TableCell>
+            <TableCell className="text-right tabular-nums">{d.recruitedMerchantCount}</TableCell>
+            <TableCell>
+              <Badge variant={d.portalEnabled ? 'success' : 'secondary'}>
+                {d.portalEnabled ? t('portalEnabled') : t('portalDisabled')}
               </Badge>
-              <span className="tabular-nums">{d.recruitedMerchantCount} branches</span>
-              <span className="tabular-nums">{Number(d.commissionRate)}%</span>
-            </div>
-          </div>
+            </TableCell>
+            <TableCell>
+              <Badge variant={d.isActive ? 'default' : 'secondary'}>
+                {d.isActive ? tc('active') : tc('inactive')}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <Link
+                href={`/distributors/${d.id}`}
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              >
+                {t('view')}
+              </Link>
+            </TableCell>
+          </TableRow>
         ))}
-      </div>
-    </div>
+      </TableBody>
+    </Table>
   );
 }

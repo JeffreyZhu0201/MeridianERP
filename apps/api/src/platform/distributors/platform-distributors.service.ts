@@ -4,13 +4,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommissionType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import { AllocationOrderStatus, CommissionType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
 import { sumAllocationLineCost } from '@meridian/shared';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';
 import { PlatformWithdrawalsService } from '../withdrawals/platform-withdrawals.service';
 import { RecruitInviteCodesService } from '../../recruit-invite/recruit-invite-codes.service';
+import { CreatePlatformDistributorDto } from './dto/create-platform-distributor.dto';
 
 function displayNameFromAccount(account: {
   email: string;
@@ -21,6 +22,21 @@ function displayNameFromAccount(account: {
   if (parts.length > 0) return parts.join(' ');
   return account.email.split('@')[0] ?? account.email;
 }
+
+type DistributorSummaryRow = {
+  id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  accountId: string | null;
+  account?: { email?: string } | null;
+  commissionRate: Prisma.Decimal;
+  commissionType: CommissionType;
+  isActive: boolean;
+  portalEnabled: boolean;
+  createdAt: Date;
+  _count?: { recruitedMerchants: number };
+};
 
 @Injectable()
 export class PlatformDistributorsService {
@@ -40,7 +56,11 @@ export class PlatformDistributorsService {
       },
       orderBy: { createdAt: 'desc' },
     });
-    return rows.map((d) => ({
+    return rows.map((d) => this.toSummary(d));
+  }
+
+  private toSummary(d: DistributorSummaryRow) {
+    return {
       id: d.id,
       name: d.name,
       email: d.email,
@@ -51,57 +71,91 @@ export class PlatformDistributorsService {
       commissionType: d.commissionType,
       isActive: d.isActive,
       portalEnabled: d.portalEnabled,
-      recruitedMerchantCount: d._count.recruitedMerchants,
+      recruitedMerchantCount: d._count?.recruitedMerchants ?? 0,
       createdAt: d.createdAt.toISOString(),
-    }));
+    };
   }
 
-  async create(dto: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    accountId?: string;
-    commissionRate: number;
-    commissionType?: CommissionType;
-  }) {
+  async create(dto: CreatePlatformDistributorDto) {
     let name = dto.name?.trim();
     let email = dto.email?.trim();
     let phone = dto.phone?.trim();
     let accountId: string | undefined;
+    let passwordHash: string | undefined;
+    let portalEnabled = false;
 
     if (dto.accountId) {
       const account = await this.platformAccounts.findById(dto.accountId);
       if (!account) {
         throw new NotFoundException('Account not found');
       }
-      const existing = await this.prisma.distributor.findUnique({
+      const existingByAccount = await this.prisma.distributor.findUnique({
         where: { accountId: account.id },
       });
-      if (existing) {
+      if (existingByAccount) {
         throw new ConflictException('Account is already linked to a promoter');
       }
+
+      const inactiveByEmail = await this.prisma.distributor.findFirst({
+        where: {
+          tenantId: null,
+          isActive: false,
+          email: { equals: account.email, mode: 'insensitive' },
+        },
+      });
+      if (inactiveByEmail) {
+        const updated = await this.prisma.distributor.update({
+          where: { id: inactiveByEmail.id },
+          data: {
+            accountId: account.id,
+            name: name || displayNameFromAccount(account),
+            email: email || account.email,
+            phone: phone || account.phone || null,
+            passwordHash: account.password,
+            portalEnabled: true,
+            isActive: true,
+            commissionRate: dto.commissionRate,
+            commissionType: dto.commissionType ?? CommissionType.PERCENT,
+          },
+          include: {
+            _count: { select: { recruitedMerchants: true } },
+            account: { select: { id: true, email: true } },
+          },
+        });
+        return this.toSummary(updated);
+      }
+
       accountId = account.id;
       name = name || displayNameFromAccount(account);
       email = email || account.email;
       phone = phone || account.phone || undefined;
+      passwordHash = account.password;
+      portalEnabled = true;
     }
 
     if (!name) {
       throw new BadRequestException('Name is required');
     }
 
-    return this.prisma.distributor.create({
+    const created = await this.prisma.distributor.create({
       data: {
         tenantId: null,
         accountId,
         name,
         email: email || null,
         phone: phone || null,
+        passwordHash,
+        portalEnabled,
         commissionRate: dto.commissionRate,
         commissionType: dto.commissionType ?? CommissionType.PERCENT,
         isActive: true,
       },
+      include: {
+        _count: { select: { recruitedMerchants: true } },
+        account: { select: { id: true, email: true } },
+      },
     });
+    return this.toSummary(created);
   }
 
   async update(
@@ -188,7 +242,7 @@ export class PlatformDistributorsService {
 
     const summaries = await Promise.all(
       merchants.map(async (m) => {
-        const [recentAgg, lifetimeAgg] = await Promise.all([
+        const [recentAgg, lifetimeAgg, allocations] = await Promise.all([
           this.prisma.order.aggregate({
             where: {
               tenantId: m.tenantId,
@@ -206,7 +260,35 @@ export class PlatformDistributorsService {
             _sum: { total: true },
             _count: { _all: true },
           }),
+          this.prisma.allocationOrder.findMany({
+            where: {
+              tenantId: m.tenantId,
+              status: { in: [AllocationOrderStatus.ISSUED, AllocationOrderStatus.CONFIRMED] },
+            },
+            include: { lines: true },
+          }),
         ]);
+
+        const confirmedAllocations = allocations.filter(
+          (a) => a.status === AllocationOrderStatus.CONFIRMED,
+        );
+        const allocationWholesaleTotal = allocations.reduce(
+          (sum, a) =>
+            sum +
+            sumAllocationLineCost(
+              a.lines.map((l) => ({
+                quantity: l.quantity,
+                wholesalePrice: l.wholesalePrice.toString(),
+              })),
+            ),
+          0,
+        );
+        const lastAllocationAt = allocations.reduce<Date | null>((max, a) => {
+          const candidate = a.confirmedAt ?? a.issuedAt ?? a.createdAt;
+          if (!max || candidate > max) return candidate;
+          return max;
+        }, null);
+
         return {
           tenantId: m.tenantId,
           merchantProfileId: m.id,
@@ -217,10 +299,45 @@ export class PlatformDistributorsService {
           orderCountLast30Days: recentAgg._count._all,
           lifetimeSales: Number(lifetimeAgg._sum.total ?? 0),
           lifetimeOrderCount: lifetimeAgg._count._all,
+          allocationOrderCount: allocations.length,
+          allocationWholesaleTotal,
+          lastAllocationAt: lastAllocationAt?.toISOString() ?? null,
+          confirmedAllocationCount: confirmedAllocations.length,
         };
       }),
     );
     return summaries;
+  }
+
+  async getBranchAllocations(distributorId: string, tenantId: string) {
+    await this.assertPlatformDistributor(distributorId);
+    const merchant = await this.prisma.merchantProfile.findFirst({
+      where: { tenantId, recruitedByDistributorId: distributorId },
+    });
+    if (!merchant) {
+      throw new NotFoundException('Branch not found for this promoter');
+    }
+
+    const orders = await this.prisma.allocationOrder.findMany({
+      where: { tenantId },
+      include: { lines: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return orders.map((order) => ({
+      id: order.id,
+      status: order.status,
+      issuedAt: order.issuedAt?.toISOString() ?? null,
+      confirmedAt: order.confirmedAt?.toISOString() ?? null,
+      wholesaleTotal: sumAllocationLineCost(
+        order.lines.map((l) => ({
+          quantity: l.quantity,
+          wholesalePrice: l.wholesalePrice.toString(),
+        })),
+      ),
+      lineCount: order.lines.length,
+      createdAt: order.createdAt.toISOString(),
+    }));
   }
 
   async getFundsSummary(distributorId: string) {

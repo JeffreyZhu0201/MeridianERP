@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   AlertDescription,
@@ -32,6 +33,7 @@ import {
   apiFetch,
   type ApprovedMerchantOption,
   type PlatformAccountDetail,
+  type PlatformDistributor,
 } from '@/lib/api';
 
 interface UserDetailViewProps {
@@ -112,6 +114,32 @@ export function UserDetailView({
   const [identitiesError, setIdentitiesError] = useState('');
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [identitiesSuccess, setIdentitiesSuccess] = useState(false);
+  const [promoterId, setPromoterId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!hasDistributor) {
+      setPromoterId(null);
+      return;
+    }
+    let cancelled = false;
+    async function resolvePromoter() {
+      try {
+        const distributors = await apiFetch<PlatformDistributor[]>(
+          '/platform/distributors',
+          {},
+          token,
+        );
+        const match = distributors.find((d) => d.accountId === user.id);
+        if (!cancelled) setPromoterId(match?.id ?? null);
+      } catch {
+        if (!cancelled) setPromoterId(null);
+      }
+    }
+    void resolvePromoter();
+    return () => {
+      cancelled = true;
+    };
+  }, [hasDistributor, token, user.id]);
 
   const fullName =
     [user.firstName, user.lastName].filter(Boolean).join(' ') || tc('emptyDash');
@@ -258,6 +286,26 @@ export function UserDetailView({
           { title: t('columns.identities'), value: user.identities.length },
         ]}
       />
+
+      {hasDistributor ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {promoterId ? (
+            <Link
+              href={`/distributors/${promoterId}`}
+              className="text-sm text-primary underline-offset-4 hover:underline"
+            >
+              {td('viewPromoterProfile')}
+            </Link>
+          ) : (
+            <Link
+              href="/distributors"
+              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+            >
+              {td('viewPromotersList')}
+            </Link>
+          )}
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader>

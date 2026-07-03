@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { CreatePlatformDistributorDto } from './dto/create-platform-distributor.dto';
 import { PlatformDistributorsService } from './platform-distributors.service';
 
 @Controller('platform/distributors')
@@ -24,17 +25,7 @@ export class PlatformDistributorsController {
 
   @Post()
   @HttpCode(201)
-  create(
-    @Body()
-    dto: {
-      name?: string;
-      email?: string;
-      phone?: string;
-      accountId?: string;
-      commissionRate: number;
-      commissionType?: 'PERCENT' | 'FIXED';
-    },
-  ) {
+  create(@Body() dto: CreatePlatformDistributorDto) {
     return this.service.create(dto);
   }
 
@@ -89,6 +80,14 @@ export class PlatformDistributorsController {
   @Get(':id/branches')
   getBranches(@Param('id') id: string) {
     return this.service.getBranches(id);
+  }
+
+  @Get(':id/branches/:tenantId/allocations')
+  getBranchAllocations(
+    @Param('id') id: string,
+    @Param('tenantId') tenantId: string,
+  ) {
+    return this.service.getBranchAllocations(id, tenantId);
   }
 
   @Get(':id/commission-entries')
