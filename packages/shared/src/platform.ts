@@ -86,6 +86,10 @@ export interface PlatformAccountMerchantRole {
 export interface PlatformAccountDetail extends PlatformAccountListItem {
   consumerProfiles: PlatformAccountConsumerProfile[];
   merchantRoles: PlatformAccountMerchantRole[];
+  /** Present when the account has an active platform admin identity */
+  platformAdminRole?: 'SUPER_ADMIN' | 'PLATFORM_OPS' | null;
+  /** Present when the account has an active distributor identity (decimal rate, e.g. 0.1 = 10%) */
+  distributorCommissionRate?: number | null;
 }
 
 export interface CreatePlatformMerchantRequest {
@@ -97,4 +101,16 @@ export interface CreatePlatformMerchantRequest {
   ownerAccountId: string;
   recruitedByDistributorId?: string;
   autoApprove?: boolean;
+}
+
+export interface UpdatePlatformAccountRequest {
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+}
+
+export interface UpdatePlatformAccountIdentitiesRequest {
+  platformAdminRole?: 'SUPER_ADMIN' | 'PLATFORM_OPS' | null;
+  distributor?: { enabled: boolean; commissionRate?: number } | null;
+  merchantStaff?: Array<{ tenantId: string; enabled: boolean }>;
 }

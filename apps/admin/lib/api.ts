@@ -2,12 +2,15 @@ import type {
   DistributorBranchSummary,
   MasterSkuSummary,
   MerchantRecruitInviteCodeResponse,
+  PlatformAccountDetail,
   PlatformAccountListItem,
   PlatformDashboardStats,
   PlatformDistributorSummary,
   PlatformFundsSummary,
   PlatformMerchantDetail,
   PlatformRecentMerchant,
+  UpdatePlatformAccountIdentitiesRequest,
+  UpdatePlatformAccountRequest,
 } from '@meridian/shared';
 import { ApiError } from '@meridian/shared';
 
@@ -78,7 +81,19 @@ export type DistributorBranch = DistributorBranchSummary;
 export type MasterSku = MasterSkuSummary;
 export type FundsSummary = PlatformFundsSummary;
 export type RecruitInviteCode = MerchantRecruitInviteCodeResponse;
-export type { PlatformAccountListItem };
+export type {
+  PlatformAccountDetail,
+  PlatformAccountListItem,
+  UpdatePlatformAccountIdentitiesRequest,
+  UpdatePlatformAccountRequest,
+};
+
+/** Approved merchant row for staff assignment (list API includes tenantId). */
+export interface ApprovedMerchantOption {
+  id: string;
+  tenantId: string;
+  businessName: string;
+}
 
 export interface AllocationOrderLine {
   id: string;

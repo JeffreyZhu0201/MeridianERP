@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
   Badge,
@@ -10,6 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  buttonVariants,
 } from '@meridian/ui';
 
 import type { PlatformAccountListItem } from '@/lib/api';
@@ -34,6 +36,7 @@ export function UsersTable({ users }: UsersTableProps) {
           <TableHead>{t('columns.identities')}</TableHead>
           <TableHead>{t('columns.merchants')}</TableHead>
           <TableHead>{t('columns.registered')}</TableHead>
+          <TableHead className="w-[100px]">{t('columns.actions')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -41,7 +44,11 @@ export function UsersTable({ users }: UsersTableProps) {
           const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || '—';
           return (
             <TableRow key={user.id}>
-              <TableCell>{user.email}</TableCell>
+              <TableCell>
+                <Link href={`/users/${user.id}`} className="font-medium hover:underline">
+                  {user.email}
+                </Link>
+              </TableCell>
               <TableCell>{name}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
@@ -54,6 +61,14 @@ export function UsersTable({ users }: UsersTableProps) {
               </TableCell>
               <TableCell>{user.merchantNames.join(', ') || '—'}</TableCell>
               <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <Link
+                  href={`/users/${user.id}`}
+                  className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                >
+                  {t('actions.view')}
+                </Link>
+              </TableCell>
             </TableRow>
           );
         })}

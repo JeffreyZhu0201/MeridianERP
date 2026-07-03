@@ -90,19 +90,28 @@ export class PlatformAccountsService {
 
   async computeIdentities(account: PlatformAccount): Promise<UserIdentity[]> {
     const identities: UserIdentity[] = [];
-    const [customerCount, merchantUsers, distributor, platformUser] = await Promise.all([
-      this.prisma.customer.count({ where: { accountId: account.id } }),
-      this.prisma.user.findMany({
-        where: { accountId: account.id },
-        select: { role: true },
-      }),
-      account.email
-        ? this.prisma.distributor.findFirst({
-            where: { email: { equals: account.email, mode: 'insensitive' } },
+    const [customerCount, merchantUsers, distributorByAccount, platformUser] =
+      await Promise.all([
+        this.prisma.customer.count({ where: { accountId: account.id } }),
+        this.prisma.user.findMany({
+          where: { accountId: account.id },
+          select: { role: true },
+        }),
+        this.prisma.distributor.findUnique({ where: { accountId: account.id } }),
+        this.prisma.platformUser.findUnique({ where: { email: account.email } }),
+      ]);
+
+    const distributor =
+      distributorByAccount ??
+      (account.email
+        ? await this.prisma.distributor.findFirst({
+            where: {
+              tenantId: null,
+              isActive: true,
+              email: { equals: account.email, mode: 'insensitive' },
+            },
           })
-        : Promise.resolve(null),
-      this.prisma.platformUser.findUnique({ where: { email: account.email } }),
-    ]);
+        : null);
 
     if (customerCount > 0) identities.push('CONSUMER');
     if (merchantUsers.some((u) => u.role === MerchantRole.MERCHANT_OWNER)) {
@@ -111,7 +120,9 @@ export class PlatformAccountsService {
     if (merchantUsers.some((u) => u.role === MerchantRole.MERCHANT_STAFF)) {
       identities.push('MERCHANT_STAFF');
     }
-    if (distributor) identities.push('DISTRIBUTOR');
+    if (distributorByAccount?.isActive || (!distributorByAccount && distributor?.isActive)) {
+      identities.push('DISTRIBUTOR');
+    }
     if (platformUser) identities.push('PLATFORM_ADMIN');
     return identities;
   }

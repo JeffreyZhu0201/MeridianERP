@@ -101,4 +101,113 @@ describe('PlatformUsers (e2e)', () => {
       })
       .expect(400);
   });
+
+  it('updates platform account profile fields', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({
+        email: 'profile-user@test.com',
+        password: 'password12',
+        firstName: 'Old',
+        lastName: 'Name',
+      })
+      .expect(201);
+    const accountId = register.body.account.id;
+
+    const updated = await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ firstName: 'New', phone: '+15551234567' })
+      .expect(200);
+
+    expect(updated.body).toMatchObject({
+      id: accountId,
+      email: 'profile-user@test.com',
+      firstName: 'New',
+      lastName: 'Name',
+      phone: '+15551234567',
+    });
+  });
+
+  it('grants platform admin role to an account', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({ email: 'future-admin@test.com', password: 'password12' })
+      .expect(201);
+    const accountId = register.body.account.id;
+
+    const updated = await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}/identities`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ platformAdminRole: 'PLATFORM_OPS' })
+      .expect(200);
+
+    expect(updated.body.identities).toContain('PLATFORM_ADMIN');
+    expect(updated.body.platformAdminRole).toBe('PLATFORM_OPS');
+    expect(updated.body.merchantRoles).toEqual([]);
+  });
+
+  it('revokes platform admin role from an account', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({ email: 'revoke-admin@test.com', password: 'password12' })
+      .expect(201);
+    const accountId = register.body.account.id;
+
+    await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}/identities`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ platformAdminRole: 'PLATFORM_OPS' })
+      .expect(200);
+
+    const revoked = await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}/identities`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ platformAdminRole: null })
+      .expect(200);
+
+    expect(revoked.body.identities).not.toContain('PLATFORM_ADMIN');
+  });
+
+  it('grants distributor identity linked by accountId', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({ email: 'promoter@test.com', password: 'password12', firstName: 'Pat' })
+      .expect(201);
+    const accountId = register.body.account.id;
+
+    const updated = await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}/identities`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ distributor: { enabled: true, commissionRate: 0.15 } })
+      .expect(200);
+
+    expect(updated.body.identities).toContain('DISTRIBUTOR');
+    expect(updated.body.distributorCommissionRate).toBe(0.15);
+  });
+
+  it('assigns merchant staff role to a tenant', async () => {
+    const tenant = await prisma._seedApprovedTenant('staff-store', 'Staff Store');
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({ email: 'staff-member@test.com', password: 'password12' })
+      .expect(201);
+    const accountId = register.body.account.id;
+
+    const updated = await request(app.getHttpServer())
+      .patch(`/api/v1/platform/users/${accountId}/identities`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .send({ merchantStaff: [{ tenantId: tenant.id, enabled: true }] })
+      .expect(200);
+
+    expect(updated.body.identities).toContain('MERCHANT_STAFF');
+    expect(updated.body.merchantRoles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tenantId: tenant.id,
+          role: 'MERCHANT_STAFF',
+        }),
+      ]),
+    );
+  });
 });

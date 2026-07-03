@@ -1151,6 +1151,12 @@ export function createMockPrisma() {
         platformUsers.set(record.id, record);
         return record;
       },
+      delete: async ({ where }: { where: { id: string } }) => {
+        const existing = platformUsers.get(where.id);
+        if (!existing) throw new Error('PlatformUser not found');
+        platformUsers.delete(where.id);
+        return existing;
+      },
     },
     platformAccount: {
       findUnique: async ({
@@ -1959,7 +1965,9 @@ export function createMockPrisma() {
       }) => {
         let items = [...distributors.values()];
         if (where.id) items = items.filter((d) => d.id === where.id);
-        if (where.tenantId) items = items.filter((d) => d.tenantId === where.tenantId);
+        if (where.tenantId !== undefined) {
+          items = items.filter((d) => d.tenantId === where.tenantId);
+        }
         if (where.email) {
           const target =
             typeof where.email === 'string'
