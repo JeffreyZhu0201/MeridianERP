@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { EnvService } from '../../config/env.service';
 import { PaymentService } from '../../payment/payment.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { UpdateMerchantSettingsDto } from './dto/update-merchant-settings.dto';
 import {
   CreateTeamMemberDto,
@@ -22,6 +23,7 @@ export class MerchantSettingsService {
     private readonly prisma: PrismaService,
     private readonly env: EnvService,
     private readonly payment: PaymentService,
+    private readonly platformAccounts: PlatformAccountsService,
   ) {}
 
   private assertOwner(user: AuthenticatedUser) {
@@ -192,12 +194,24 @@ export class MerchantSettingsService {
       throw new ConflictException('Email already registered');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    let account = await this.platformAccounts.findByEmail(dto.email);
+    if (account) {
+      const valid = await this.platformAccounts.verifyPassword(account, dto.password);
+      if (!valid) {
+        throw new ConflictException('Email already registered');
+      }
+    } else {
+      account = await this.platformAccounts.createAccount({
+        email: dto.email,
+        password: dto.password,
+      });
+    }
+
     const created = await this.prisma.user.create({
       data: {
         tenantId,
+        accountId: account.id,
         email: dto.email,
-        password: passwordHash,
         role: MerchantRole.MERCHANT_STAFF,
       },
       select: {
@@ -226,6 +240,7 @@ export class MerchantSettingsService {
 
     const member = await this.prisma.user.findFirst({
       where: { id: memberId, tenantId },
+      include: { account: true },
     });
     if (!member) {
       throw new NotFoundException('Team member not found');
@@ -234,10 +249,12 @@ export class MerchantSettingsService {
       throw new ForbiddenException('Cannot modify owner account');
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
-    const updated = await this.prisma.user.update({
+    await this.prisma.platformAccount.update({
+      where: { id: member.accountId },
+      data: { password: await bcrypt.hash(dto.password, 10) },
+    });
+    const updated = await this.prisma.user.findUniqueOrThrow({
       where: { id: memberId },
-      data: { password: passwordHash },
       select: {
         id: true,
         email: true,

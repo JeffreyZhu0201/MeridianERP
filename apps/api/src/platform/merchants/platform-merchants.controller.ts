@@ -12,6 +12,7 @@ import {
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
+import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 import { PlatformMerchantsService } from './platform-merchants.service';
@@ -21,13 +22,17 @@ import { PlatformMerchantsService } from './platform-merchants.service';
 export class PlatformMerchantsController {
   constructor(private readonly platformMerchantsService: PlatformMerchantsService) {}
 
-  
   @Get()
   list(@Query() query: ListMerchantsQueryDto) {
     return this.platformMerchantsService.list(query);
   }
 
-  
+  @Post()
+  @HttpCode(201)
+  create(@Body() dto: CreatePlatformMerchantDto) {
+    return this.platformMerchantsService.create(dto);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.platformMerchantsService.getById(id);

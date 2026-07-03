@@ -27,6 +27,7 @@ type MockCreateInput<
 
 export function createMockPrisma() {
   const platformUsers = new Map<Id, PlatformUserRecord>();
+  const platformAccounts = new Map<Id, PlatformAccountRecord>();
   const tenants = new Map<Id, TenantRecord>();
   const merchantProfiles = new Map<Id, MerchantProfileRecord>();
   const users = new Map<Id, UserRecord>();
@@ -74,6 +75,17 @@ export function createMockPrisma() {
     updatedAt: Date;
   }
 
+  interface PlatformAccountRecord {
+    id: Id;
+    email: string;
+    password: string;
+    firstName: string | null;
+    lastName: string | null;
+    phone: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   interface TenantRecord {
     id: Id;
     slug: string;
@@ -103,8 +115,8 @@ export function createMockPrisma() {
   interface UserRecord {
     id: Id;
     tenantId: Id;
+    accountId: Id;
     email: string;
-    password: string;
     role: MerchantRole;
     createdAt: Date;
     updatedAt: Date;
@@ -191,8 +203,8 @@ export function createMockPrisma() {
   interface CustomerRecord {
     id: Id;
     tenantId: Id;
+    accountId: Id;
     email: string;
-    password: string;
     firstName: string | null;
     lastName: string | null;
     createdAt: Date;
@@ -998,6 +1010,169 @@ export function createMockPrisma() {
         return record;
       },
     },
+    platformAccount: {
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { email?: string; id?: string };
+        include?: Record<string, unknown>;
+      }) => {
+        let account: PlatformAccountRecord | null = null;
+        if (where.email) {
+          account =
+            [...platformAccounts.values()].find(
+              (a) => a.email.toLowerCase() === where.email!.toLowerCase(),
+            ) ?? null;
+        } else if (where.id) {
+          account = platformAccounts.get(where.id) ?? null;
+        }
+        if (!account) return null;
+        if (include) {
+          return {
+            ...account,
+            customers: [...customers.values()]
+              .filter((c) => c.accountId === account!.id)
+              .map((c) => ({
+                ...c,
+                tenant: {
+                  ...tenants.get(c.tenantId),
+                  merchantProfile: (() => {
+                    const pid = profileByTenant.get(c.tenantId);
+                    return pid ? merchantProfiles.get(pid) : null;
+                  })(),
+                },
+                orders: [...orders.values()].filter((o) => o.customerId === c.id),
+              })),
+            merchantUsers: [...users.values()]
+              .filter((u) => u.accountId === account!.id)
+              .map((u) => ({
+                ...u,
+                tenant: {
+                  ...tenants.get(u.tenantId),
+                  merchantProfile: (() => {
+                    const pid = profileByTenant.get(u.tenantId);
+                    return pid ? merchantProfiles.get(pid) : null;
+                  })(),
+                },
+              })),
+          };
+        }
+        return account;
+      },
+      findFirst: async ({ where }: { where: { email?: string } }) => {
+        if (where.email) {
+          return (
+            [...platformAccounts.values()].find(
+              (a) => a.email.toLowerCase() === where.email!.toLowerCase(),
+            ) ?? null
+          );
+        }
+        return null;
+      },
+      findMany: async ({
+        where,
+        orderBy,
+        skip = 0,
+        take,
+        include,
+      }: {
+        where?: {
+          OR?: Array<{
+            email?: { contains: string; mode?: string };
+            firstName?: { contains: string; mode?: string };
+            lastName?: { contains: string; mode?: string };
+          }>;
+          customers?: { some: Record<string, never> };
+          merchantUsers?: { some: { role?: MerchantRole } };
+        };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+        skip?: number;
+        take?: number;
+        include?: Record<string, unknown>;
+      }) => {
+        let rows = [...platformAccounts.values()];
+        if (where?.OR?.length) {
+          const term = where.OR[0]?.email?.contains?.toLowerCase() ?? '';
+          rows = rows.filter(
+            (a) =>
+              a.email.toLowerCase().includes(term) ||
+              (a.firstName ?? '').toLowerCase().includes(term) ||
+              (a.lastName ?? '').toLowerCase().includes(term),
+          );
+        }
+        if (where?.customers?.some) {
+          rows = rows.filter((a) =>
+            [...customers.values()].some((c) => c.accountId === a.id),
+          );
+        }
+        if (where?.merchantUsers?.some?.role) {
+          rows = rows.filter((a) =>
+            [...users.values()].some(
+              (u) => u.accountId === a.id && u.role === where.merchantUsers!.some.role,
+            ),
+          );
+        }
+        if (orderBy?.createdAt === 'desc') {
+          rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        const slice = rows.slice(skip, take === undefined ? undefined : skip + take);
+        if (include) {
+          return slice.map((account) => ({
+            ...account,
+            customers: [...customers.values()].filter((c) => c.accountId === account.id),
+            merchantUsers: [...users.values()]
+              .filter((u) => u.accountId === account.id)
+              .map((u) => ({
+                ...u,
+                tenant: {
+                  ...tenants.get(u.tenantId),
+                  merchantProfile: (() => {
+                    const pid = profileByTenant.get(u.tenantId);
+                    return pid ? merchantProfiles.get(pid) : null;
+                  })(),
+                },
+              })),
+          }));
+        }
+        return slice;
+      },
+      count: async ({ where }: { where?: Record<string, unknown> }) => {
+        const rows = await mock.platformAccount.findMany({ where: where as never });
+        return rows.length;
+      },
+      create: async ({
+        data,
+      }: {
+        data: Omit<PlatformAccountRecord, 'id' | 'createdAt' | 'updatedAt'>;
+      }) => {
+        const record: PlatformAccountRecord = {
+          id: nextId('pa'),
+          createdAt: now(),
+          updatedAt: now(),
+          ...data,
+          email: data.email.toLowerCase(),
+          firstName: data.firstName ?? null,
+          lastName: data.lastName ?? null,
+          phone: data.phone ?? null,
+        };
+        platformAccounts.set(record.id, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<PlatformAccountRecord>;
+      }) => {
+        const existing = platformAccounts.get(where.id);
+        if (!existing) throw new Error('PlatformAccount not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        platformAccounts.set(where.id, updated);
+        return updated;
+      },
+    },
     tenant: {
       create: async ({ data }: { data: { slug: string } }) => {
         const record: TenantRecord = {
@@ -1099,9 +1274,7 @@ export function createMockPrisma() {
           ) {
             tenantData = {
               ...tenantData,
-              users: [...users.values()]
-                .filter((u) => u.tenantId === profile!.tenantId)
-                .map(({ password: _p, ...rest }) => rest),
+              users: [...users.values()].filter((u) => u.tenantId === profile!.tenantId),
             };
           }
           return { ...profile, tenant: tenantData };
@@ -1191,17 +1364,29 @@ export function createMockPrisma() {
         where,
         include,
       }: {
-        where: { email?: string; id?: string; tenantId?: string };
-        include?: { tenant?: { include?: { merchantProfile?: boolean } } };
+        where: {
+          email?: string;
+          id?: string;
+          tenantId?: string;
+          accountId?: string;
+          role?: MerchantRole;
+        };
+        include?: {
+          tenant?: { include?: { merchantProfile?: boolean } };
+          account?: boolean;
+        };
       }) => {
         let user =
           [...users.values()].find((u) => {
             if (where.email && u.email !== where.email) return false;
             if (where.id && u.id !== where.id) return false;
             if (where.tenantId && u.tenantId !== where.tenantId) return false;
+            if (where.accountId && u.accountId !== where.accountId) return false;
+            if (where.role && u.role !== where.role) return false;
             return true;
           }) ?? null;
         if (!user) return null;
+        let result: Record<string, unknown> = { ...user };
         if (include?.tenant) {
           const tenant = tenants.get(user.tenantId);
           let tenantData: Record<string, unknown> = { ...tenant };
@@ -1212,9 +1397,18 @@ export function createMockPrisma() {
               merchantProfile: profileId ? merchantProfiles.get(profileId) : null,
             };
           }
-          return { ...user, tenant: tenantData };
+          result = { ...result, tenant: tenantData };
         }
-        return user;
+        if (include?.account) {
+          result = {
+            ...result,
+            account: platformAccounts.get(user.accountId) ?? null,
+          };
+        }
+        return result as UserRecord & {
+          tenant?: Record<string, unknown>;
+          account?: PlatformAccountRecord | null;
+        };
       },
       findMany: async ({
         where,
@@ -1242,18 +1436,65 @@ export function createMockPrisma() {
         }
         return items;
       },
+      findUniqueOrThrow: async ({
+        where,
+        select,
+      }: {
+        where: { id: string };
+        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+      }) => {
+        const user = users.get(where.id);
+        if (!user) throw new Error('User not found');
+        if (select) {
+          const row: Record<string, unknown> = {};
+          if (select.id) row.id = user.id;
+          if (select.email) row.email = user.email;
+          if (select.role) row.role = user.role;
+          if (select.createdAt) row.createdAt = user.createdAt;
+          return row;
+        }
+        return user;
+      },
       create: async ({
         data,
         select,
       }: {
-        data: Omit<UserRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: Partial<Omit<UserRecord, 'id' | 'createdAt' | 'updatedAt'>> & {
+          tenantId: string;
+          email: string;
+          role: MerchantRole;
+          password?: string;
+        };
         select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
       }) => {
+        let accountId = data.accountId;
+        if (!accountId) {
+          const existingAccount = [...platformAccounts.values()].find(
+            (a) => a.email === data.email,
+          );
+          if (existingAccount) {
+            accountId = existingAccount.id;
+          } else {
+            const account = await mock.platformAccount.create({
+              data: {
+                email: data.email,
+                password: data.password ?? 'hashed',
+                firstName: null,
+                lastName: null,
+                phone: null,
+              },
+            });
+            accountId = account.id;
+          }
+        }
         const record: UserRecord = {
           id: nextId('user'),
           createdAt: now(),
           updatedAt: now(),
-          ...data,
+          tenantId: data.tenantId,
+          accountId,
+          email: data.email,
+          role: data.role,
         };
         users.set(record.id, record);
         if (select) {
@@ -1529,7 +1770,7 @@ export function createMockPrisma() {
         where: {
           id?: string;
           tenantId?: string;
-          email?: string;
+          email?: string | { equals: string; mode?: string };
           isActive?: boolean;
           portalEnabled?: boolean;
           tenant?: { slug?: string };
@@ -1539,7 +1780,17 @@ export function createMockPrisma() {
         let items = [...distributors.values()];
         if (where.id) items = items.filter((d) => d.id === where.id);
         if (where.tenantId) items = items.filter((d) => d.tenantId === where.tenantId);
-        if (where.email) items = items.filter((d) => d.email === where.email);
+        if (where.email) {
+          const target =
+            typeof where.email === 'string'
+              ? where.email
+              : where.email.equals.toLowerCase();
+          items = items.filter((d) =>
+            typeof where.email === 'string'
+              ? d.email === where.email
+              : d.email?.toLowerCase() === target,
+          );
+        }
         if (where.isActive !== undefined) {
           items = items.filter((d) => d.isActive === where.isActive);
         }
@@ -1726,6 +1977,20 @@ export function createMockPrisma() {
       },
     },
     customer: {
+      findFirst: async ({
+        where,
+      }: {
+        where: { id?: string; tenantId?: string; accountId?: string };
+      }) => {
+        return (
+          [...customers.values()].find((c) => {
+            if (where.id && c.id !== where.id) return false;
+            if (where.tenantId && c.tenantId !== where.tenantId) return false;
+            if (where.accountId && c.accountId !== where.accountId) return false;
+            return true;
+          }) ?? null
+        );
+      },
       findUnique: async ({
         where,
       }: {
@@ -1746,16 +2011,51 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Omit<CustomerRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        data: Partial<Omit<CustomerRecord, 'id' | 'createdAt' | 'updatedAt'>> & {
+          tenantId: string;
+          email: string;
+          password?: string;
+        };
       }) => {
+        let accountId = data.accountId;
+        if (!accountId) {
+          const existingAccount = [...platformAccounts.values()].find(
+            (a) => a.email === data.email,
+          );
+          if (existingAccount) {
+            accountId = existingAccount.id;
+          } else {
+            const account = await mock.platformAccount.create({
+              data: {
+                email: data.email,
+                password: data.password ?? 'hashed',
+                firstName: data.firstName ?? null,
+                lastName: data.lastName ?? null,
+                phone: null,
+              },
+            });
+            accountId = account.id;
+          }
+        }
         const record: CustomerRecord = {
           id: nextId('cust'),
           createdAt: now(),
           updatedAt: now(),
-          ...data,
+          tenantId: data.tenantId,
+          accountId,
+          email: data.email,
+          firstName: data.firstName ?? null,
+          lastName: data.lastName ?? null,
         };
         customers.set(record.id, record);
         return record;
+      },
+      count: async ({ where }: { where?: { accountId?: string } }) => {
+        let rows = [...customers.values()];
+        if (where?.accountId) {
+          rows = rows.filter((c) => c.accountId === where.accountId);
+        }
+        return rows.length;
       },
     },
     category: {
@@ -3331,6 +3631,7 @@ export function createMockPrisma() {
           businessName,
           contactEmail: `${slug}@merchant.test`,
           onboardingStatus: OnboardingStatus.APPROVED,
+          storePublished: true,
         },
       });
       return tenant;

@@ -2,6 +2,7 @@ import type {
   DistributorBranchSummary,
   MasterSkuSummary,
   MerchantRecruitInviteCodeResponse,
+  PlatformAccountListItem,
   PlatformDashboardStats,
   PlatformDistributorSummary,
   PlatformFundsSummary,
@@ -77,6 +78,7 @@ export type DistributorBranch = DistributorBranchSummary;
 export type MasterSku = MasterSkuSummary;
 export type FundsSummary = PlatformFundsSummary;
 export type RecruitInviteCode = MerchantRecruitInviteCodeResponse;
+export type { PlatformAccountListItem };
 
 export interface AllocationOrderLine {
   id: string;

@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';
+import { PlatformAccountsModule } from './accounts/platform-accounts.module';
 import { PlatformAuthModule } from './auth/platform-auth.module';
 import { PlatformDashboardModule } from './dashboard/platform-dashboard.module';
 import { PlatformMerchantsModule } from './merchants/platform-merchants.module';
+import { PlatformUsersModule } from './users/platform-users.module';
 import { PlatformInventoryModule } from './inventory/platform-inventory.module';
 import { PlatformSettingsModule } from './settings/platform-settings.module';
 import { PlatformDistributorsModule } from './distributors/platform-distributors.module';
@@ -19,9 +21,11 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
 
 @Module({
   imports: [
+    PlatformAccountsModule,
     PlatformAuthModule,
     PlatformDashboardModule,
     PlatformMerchantsModule,
+    PlatformUsersModule,
     PlatformInventoryModule,
     PlatformSettingsModule,
     PlatformDistributorsModule,

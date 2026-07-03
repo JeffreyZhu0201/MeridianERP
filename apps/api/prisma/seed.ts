@@ -81,13 +81,22 @@ async function main() {
         businessName: 'Demo Store',
         contactEmail: 'demo@merchant.test',
         onboardingStatus: OnboardingStatus.APPROVED,
+        storePublished: true,
+      },
+    });
+    const account = await prisma.platformAccount.upsert({
+      where: { email: 'demo@merchant.test' },
+      update: {},
+      create: {
+        email: 'demo@merchant.test',
+        password: await bcrypt.hash('demo1234', 10),
       },
     });
     await prisma.user.create({
       data: {
         tenantId: tenant.id,
+        accountId: account.id,
         email: 'demo@merchant.test',
-        password: await bcrypt.hash('demo1234', 10),
         role: 'MERCHANT_OWNER',
       },
     });

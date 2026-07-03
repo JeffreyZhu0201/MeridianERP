@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MerchantProfile, OnboardingStatus, OrderStatus, Prisma } from '@prisma/client';
+import { MerchantProfile, MerchantRole, OnboardingStatus, OrderStatus, Prisma } from '@prisma/client';
 import type {
   MerchantCrmSummary,
   MerchantDistributorSummary,
@@ -13,6 +13,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
 import { slugify } from '../../common/utils/slug.util';
 import { dashboardWindowStart } from '../../common/date-range';
+import { PlatformAccountsService } from '../accounts/platform-accounts.service';
+import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 
@@ -21,6 +23,7 @@ export class PlatformMerchantsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailQueue: EmailQueueService,
+    private readonly platformAccounts: PlatformAccountsService,
   ) {}
 
   
@@ -69,6 +72,75 @@ export class PlatformMerchantsService {
       this.getDistributorSummaries(profile.tenantId),
     ]);
     return this.toPlatformMerchantDetail(profile, crmSummary, distributors);
+  }
+
+  async create(dto: CreatePlatformMerchantDto) {
+    const account = await this.platformAccounts.findById(dto.ownerAccountId);
+    if (!account) {
+      throw new NotFoundException('Owner account not found');
+    }
+    if (await this.platformAccounts.hasMerchantOwnerRole(account.id)) {
+      throw new BadRequestException('Account is already a merchant owner');
+    }
+
+    if (dto.recruitedByDistributorId) {
+      const distributor = await this.prisma.distributor.findFirst({
+        where: {
+          id: dto.recruitedByDistributorId,
+          tenantId: null,
+          isActive: true,
+        },
+      });
+      if (!distributor) {
+        throw new BadRequestException('Invalid platform distributor for recruitment');
+      }
+    }
+
+    const autoApprove = dto.autoApprove !== false;
+    const baseSlug = slugify(dto.slug ?? dto.businessName) || 'merchant';
+    let slug = baseSlug;
+    let suffix = 0;
+    while (await this.prisma.tenant.findUnique({ where: { slug } })) {
+      suffix += 1;
+      slug = `${baseSlug}-${suffix}`;
+    }
+
+    const tenant = await this.prisma.tenant.create({ data: { slug } });
+    const profile = await this.prisma.merchantProfile.create({
+      data: {
+        tenantId: tenant.id,
+        businessName: dto.businessName,
+        legalName: dto.legalName ?? null,
+        contactEmail: dto.contactEmail,
+        contactPhone: dto.contactPhone ?? null,
+        onboardingStatus: autoApprove
+          ? OnboardingStatus.APPROVED
+          : OnboardingStatus.DRAFT,
+        reviewedAt: autoApprove ? new Date() : null,
+        storePublished: autoApprove,
+        recruitedByDistributorId: dto.recruitedByDistributorId ?? null,
+        recruitedAt: dto.recruitedByDistributorId ? new Date() : null,
+      },
+    });
+
+    await this.prisma.user.create({
+      data: {
+        tenantId: tenant.id,
+        accountId: account.id,
+        email: account.email,
+        role: MerchantRole.MERCHANT_OWNER,
+      },
+    });
+
+    await this.platformAccounts.ensureCustomer(account.id, tenant.id, {
+      email: account.email,
+    });
+
+    if (autoApprove) {
+      await this.emailQueue.sendMerchantWelcome(dto.contactEmail, dto.businessName);
+    }
+
+    return profile;
   }
 
   

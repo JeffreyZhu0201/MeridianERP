@@ -7,10 +7,10 @@ import {
 } from '@nestjs/common';
 import { EnvService } from '../../config/env.service';
 import { JwtService } from '@nestjs/jwt';
-import { OnboardingStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { MerchantRole, OnboardingStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { draftSlug } from '../../common/utils/slug.util';
+import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { MerchantLoginDto, MerchantRegisterDto } from './dto/merchant-auth.dto';
 
 @Injectable()
@@ -19,6 +19,7 @@ export class MerchantAuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly env: EnvService,
+    private readonly platformAccounts: PlatformAccountsService,
   ) {}
 
   private signMerchantToken(userId: string, tenantId: string, role: string) {
@@ -34,10 +35,10 @@ export class MerchantAuthService {
   }
 
   async register(dto: MerchantRegisterDto) {
-    const existing = await this.prisma.user.findFirst({
-      where: { email: dto.email },
+    const existingOwner = await this.prisma.user.findFirst({
+      where: { email: dto.email, role: MerchantRole.MERCHANT_OWNER },
     });
-    if (existing) {
+    if (existingOwner) {
       throw new ConflictException('Email already registered');
     }
 
@@ -62,7 +63,22 @@ export class MerchantAuthService {
       pendingRecruitInviteCode = invite.code;
     }
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
+    let account = await this.platformAccounts.findByEmail(dto.email);
+    if (account) {
+      const valid = await this.platformAccounts.verifyPassword(account, dto.password);
+      if (!valid) {
+        throw new ConflictException('Email already registered');
+      }
+      if (await this.platformAccounts.hasMerchantOwnerRole(account.id)) {
+        throw new ConflictException('Email already registered as merchant owner');
+      }
+    } else {
+      account = await this.platformAccounts.createAccount({
+        email: dto.email,
+        password: dto.password,
+      });
+    }
+
     const contactEmail = dto.contactEmail ?? dto.email;
 
     const tenant = await this.prisma.tenant.create({
@@ -84,9 +100,9 @@ export class MerchantAuthService {
     const user = await this.prisma.user.create({
       data: {
         tenantId: tenant.id,
+        accountId: account.id,
         email: dto.email,
-        password: passwordHash,
-        role: 'MERCHANT_OWNER',
+        role: MerchantRole.MERCHANT_OWNER,
       },
     });
 
@@ -101,10 +117,14 @@ export class MerchantAuthService {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email },
       include: {
+        account: true,
         tenant: { include: { merchantProfile: true } },
       },
     });
-    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+    if (
+      !user ||
+      !(await this.platformAccounts.verifyPassword(user.account, dto.password))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
     const profile = user.tenant.merchantProfile;

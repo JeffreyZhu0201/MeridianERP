@@ -7,6 +7,7 @@ import { BindType, Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StoreAuthService } from '../auth/store-auth.service';
 import { StoreTenantService } from '../common/store-tenant.service';
 import { AddCartItemDto, UpdateCartItemDto } from './dto/cart.dto';
 
@@ -32,6 +33,7 @@ export class StoreCartService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
+    private readonly storeAuth: StoreAuthService,
   ) {}
 
   
@@ -43,16 +45,17 @@ export class StoreCartService {
     cart: Prisma.CartGetPayload<{ include: typeof CART_INCLUDE }>;
     sessionId: string | undefined;
   }> {
-    if (user?.userId && user.tenantId === tenantId) {
+    if (user?.userId) {
+      const customerId = await this.storeAuth.resolveCustomerId(user.userId, tenantId);
       let cart = await this.prisma.cart.findFirst({
-        where: { tenantId, customerId: user.userId },
+        where: { tenantId, customerId },
         include: CART_INCLUDE,
       });
       if (!cart) {
         cart = await this.prisma.cart.create({
           data: {
             tenantId,
-            customerId: user.userId,
+            customerId,
             sessionId: sessionId ?? null,
           },
           include: CART_INCLUDE,
@@ -68,7 +71,7 @@ export class StoreCartService {
         cart = await this.hydrateDistributorFromBinding(
           cart,
           tenantId,
-          user.userId,
+          customerId,
         );
       }
 

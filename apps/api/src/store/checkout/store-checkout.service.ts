@@ -14,6 +14,7 @@ import { PaymentService } from '../../payment/payment.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { InventoryQueueService } from '../../queue/inventory-queue.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
+import { StoreAuthService } from '../auth/store-auth.service';
 import { StoreTenantService } from '../common/store-tenant.service';
 import { CheckoutDto } from '../cart/dto/cart.dto';
 
@@ -39,6 +40,7 @@ export class StoreCheckoutService {
     private readonly inventoryService: InventoryService,
     private readonly inventoryQueue: InventoryQueueService,
     private readonly fulfillmentService: FulfillmentService,
+    private readonly storeAuth: StoreAuthService,
   ) {}
 
   
@@ -50,9 +52,11 @@ export class StoreCheckoutService {
   ) {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     let cart;
-    if (user?.userId && user.tenantId === tenant.id) {
+    let customerId: string | null = null;
+    if (user?.userId) {
+      customerId = await this.storeAuth.resolveCustomerId(user.userId, tenant.id);
       cart = await this.prisma.cart.findFirst({
-        where: { tenantId: tenant.id, customerId: user.userId },
+        where: { tenantId: tenant.id, customerId },
         include: CART_INCLUDE,
       });
     } else {
@@ -96,7 +100,7 @@ export class StoreCheckoutService {
     const order = await this.prisma.order.create({
       data: {
         tenantId: tenant.id,
-        customerId: user?.userId ?? null,
+        customerId: customerId ?? null,
         status: OrderStatus.PENDING_PAYMENT,  // 待支付状态
         fulfillmentType: dto.fulfillmentType,
         deliveryAddress:

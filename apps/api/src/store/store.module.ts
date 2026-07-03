@@ -6,7 +6,11 @@ import { FulfillmentModule } from '../fulfillment/fulfillment.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { PaymentModule } from '../payment/payment.module';
 import { QueueModule } from '../queue/queue.module';
-import { StoreAuthController } from './auth/store-auth.controller';
+import { PlatformAccountsModule } from '../platform/accounts/platform-accounts.module';
+import {
+  StoreAuthController,
+  StorePlatformAuthController,
+} from './auth/store-auth.controller';
 import { StoreAuthService } from './auth/store-auth.service';
 import { StoreBindingsController } from './bindings/store-bindings.controller';
 import { StoreBindingsService } from './bindings/store-bindings.service';
@@ -23,8 +27,9 @@ import { StoreStoresService } from './stores/store-stores.service';
 import { StoreTenantService } from './common/store-tenant.service';
 
 @Module({
-  imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule, FulfillmentModule],
+  imports: [AuthModule, BindingsModule, PaymentModule, CommissionModule, QueueModule, InventoryModule, FulfillmentModule, PlatformAccountsModule],
   controllers: [
+    StorePlatformAuthController,
     StoreAuthController,
     StoreBindingsController,
     StoreCatalogController,

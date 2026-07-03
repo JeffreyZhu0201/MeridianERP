@@ -19,9 +19,6 @@ export class CustomerJwtStrategy extends PassportStrategy(Strategy, 'store-jwt')
     if (payload.aud !== 'store') {
       throw new UnauthorizedException('Invalid token audience');
     }
-    if (!payload.tenantId) {
-      throw new UnauthorizedException('Missing tenant context');
-    }
 
     return {
       userId: payload.sub,

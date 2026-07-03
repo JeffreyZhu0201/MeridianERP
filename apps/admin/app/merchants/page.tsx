@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
+import { Button } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
@@ -85,6 +87,11 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
         <ListPageFrame
           title={t('title')}
           description={t('description')}
+          action={
+            <Button asChild>
+              <Link href="/merchants/new">{t('create')}</Link>
+            </Button>
+          }
           filters={
             <Suspense>
               <MerchantsFilters />

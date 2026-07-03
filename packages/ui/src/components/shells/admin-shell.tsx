@@ -29,6 +29,7 @@ import {
   IconReceipt,
   IconSettings,
   IconTruckDelivery,
+  IconUserCircle,
   IconUsers,
   IconWallet,
 } from '@tabler/icons-react';
@@ -85,6 +86,7 @@ type NavItem = {
  */
 const navItems: NavItem[] = [
   { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
+  { href: '/users', key: 'users', icon: IconUserCircle },
   { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
   { href: '/distributors', key: 'distributors', icon: IconUsers },
   { href: '/orders', key: 'orders', icon: IconReceipt },

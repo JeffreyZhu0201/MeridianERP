@@ -40,7 +40,10 @@ All portals share the NestJS API in `apps/api` on port 3001.
 
 ## Business Rules
 
-- Merchant onboarding: `DRAFT -> SUBMITTED -> UNDER_REVIEW -> APPROVED` or `REJECTED`; login is blocked until approval.
+- **Unified platform accounts:** End users register via the store portal (`/register`); credentials live on `PlatformAccount`. Merchant owners assigned by admin or self-service use the same email/password for merchant login.
+- **Admin merchant creation:** Platform admins can create merchants at `/merchants/new`, assign a registered user as `MERCHANT_OWNER`, and skip approval when `autoApprove` is used (default). Self-service merchant registration remains available at `/merchant/register`.
+- **Admin user directory:** Platform admins can view all `PlatformAccount` records and computed identity tags at `/users`.
+- Merchant onboarding: `DRAFT -> SUBMITTED -> UNDER_REVIEW -> APPROVED` or `REJECTED`; login is blocked until approval (self-service path). Admin-created merchants start `APPROVED`.
 - CRM pipeline: `NEW -> QUALIFIED -> WON` or `LOST`; activity types include `CALL`, `NOTE`, and `MEETING`.
 - QR binding uses HMAC-signed JWTs with `distributorId`, `tenantId`, `bindType`, and `exp`; default expiry is 7 days.
 - Distributor commission is attributed through `MerchantProfile.recruitedByDistributorId`.

@@ -109,4 +109,32 @@ describe('StoreAuth (e2e)', () => {
       .send({ email: 'shopper@example.com', password: 'wrongpassword' })
       .expect(401);
   });
+
+  it('registers globally without store slug', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({
+        email: 'global@example.com',
+        password: 'password12',
+        firstName: 'Global',
+      })
+      .expect(201);
+
+    expect(res.body.account.email).toBe('global@example.com');
+    expect(res.body.accessToken).toBeDefined();
+  });
+
+  it('logs in globally without store slug', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({ email: 'global@example.com', password: 'password12' })
+      .expect(201);
+
+    const login = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/login')
+      .send({ email: 'global@example.com', password: 'password12' })
+      .expect(201);
+
+    expect(login.body.account.email).toBe('global@example.com');
+  });
 });
