@@ -1,3 +1,13 @@
+/*
+ * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @Date: 2026-07-02 22:39:41
+ * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @LastEditTime: 2026-07-04 00:18:52
+ * @FilePath: /MeridianERP/apps/distributor/lib/api.ts
+ * @Description: Distributor API
+ * 
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ */
 import { ApiError } from '@meridian/shared';
 
 export { ApiError };

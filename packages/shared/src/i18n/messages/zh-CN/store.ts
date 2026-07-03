@@ -43,6 +43,13 @@ export const store = {
     cart: '购物车',
     account: '账户',
   },
+  shell: {
+    branchSelect: '取货分店',
+    branchSelectPlaceholder: '选择分店…',
+  },
+  catalog: {
+    outOfStock: '缺货',
+  },
   login: {
     title: '登录',
     subtitle: '客户账户',

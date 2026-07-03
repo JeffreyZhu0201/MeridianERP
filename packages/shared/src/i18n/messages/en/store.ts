@@ -43,6 +43,13 @@ export const store = {
     cart: 'Cart',
     account: 'Account',
   },
+  shell: {
+    branchSelect: 'Pickup branch',
+    branchSelectPlaceholder: 'Choose a branch…',
+  },
+  catalog: {
+    outOfStock: 'Out of stock',
+  },
   login: {
     title: 'Sign in',
     subtitle: 'Customer account',

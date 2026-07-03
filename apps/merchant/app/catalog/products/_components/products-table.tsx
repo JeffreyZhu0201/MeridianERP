@@ -49,6 +49,16 @@ export function ProductsTable({ products: initial, categories, token }: Products
   });
   const [error, setError] = useState('');
 
+  const isBranchCatalog = products.some((p) =>
+    p.variants.some((v) => v.masterSkuId),
+  );
+  const priceDeviationPercent = 10;
+
+  function getPriceBounds(suggested: number) {
+    const delta = suggested * (priceDeviationPercent / 100);
+    return { min: suggested - delta, max: suggested + delta };
+  }
+
   function openCreate() {
     setEditing(null);
     setForm({
@@ -125,9 +135,13 @@ export function ProductsTable({ products: initial, categories, token }: Products
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button onClick={openCreate}>{t('add')}</Button>
-      </div>
+      {!isBranchCatalog ? (
+        <div className="flex justify-end">
+          <Button onClick={openCreate}>{t('add')}</Button>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t('branchCatalogNote')}</p>
+      )}
 
       {products.length === 0 ? (
         <EmptyState title={t('empty')} action={<Button onClick={openCreate}>{t('emptyAction')}</Button>} />
@@ -153,7 +167,14 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     <TableCell>{product.name}</TableCell>
                     <TableCell className="font-mono text-xs">{product.slug}</TableCell>
                     <TableCell>{product.category?.name ?? '—'}</TableCell>
-                    <TableCell>{variant ? formatMoney(variant.price) : '—'}</TableCell>
+                    <TableCell>
+                      {variant?.masterSku?.retailPrice != null ? (
+                        <span className="text-xs text-muted-foreground">
+                          {t('suggestedRetail')}: {formatMoney(variant.masterSku.retailPrice)}
+                        </span>
+                      ) : null}
+                      <div>{variant ? formatMoney(variant.price) : '—'}</div>
+                    </TableCell>
                     <TableCell className="text-right font-mono text-sm tabular-nums">
                       {variant ? variant.inventory : '—'}
                     </TableCell>
@@ -277,6 +298,21 @@ export function ProductsTable({ products: initial, categories, token }: Products
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: e.target.value })}
                   />
+                  {editing?.variants[0]?.masterSku?.retailPrice != null ? (
+                    <p className="text-xs text-muted-foreground">
+                      {t('priceRangeHint', {
+                        percent: priceDeviationPercent,
+                        ...(() => {
+                          const suggested = Number(editing.variants[0].masterSku!.retailPrice);
+                          const bounds = getPriceBounds(suggested);
+                          return {
+                            min: formatMoney(bounds.min),
+                            max: formatMoney(bounds.max),
+                          };
+                        })(),
+                      })}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-2">
                   <Label>{t('sellableQuantity')}</Label>

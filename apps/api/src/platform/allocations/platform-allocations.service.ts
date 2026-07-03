@@ -6,6 +6,7 @@ import {
 import { AllocationOrderStatus, Prisma } from '@prisma/client';
 import { InventoryService } from '../../inventory/inventory.service';
 import { CommissionService } from '../../commission/commission.service';
+import { FlagshipCatalogService } from '../flagship-catalog/flagship-catalog.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -14,6 +15,7 @@ export class PlatformAllocationsService {
     private readonly prisma: PrismaService,
     private readonly inventoryService: InventoryService,
     private readonly commissionService: CommissionService,
+    private readonly flagshipCatalog: FlagshipCatalogService,
   ) {}
 
   
@@ -38,8 +40,9 @@ export class PlatformAllocationsService {
     unitCost: number;
     wholesalePrice: number;
     retailPrice: number;
+    flagshipPrice: number;
   }) {
-    return this.prisma.masterSku.create({
+    const sku = await this.prisma.masterSku.create({
       data: {
         skuCode: dto.skuCode,
         name: dto.name,
@@ -47,8 +50,11 @@ export class PlatformAllocationsService {
         unitCost: dto.unitCost,
         wholesalePrice: dto.wholesalePrice,
         retailPrice: dto.retailPrice,
+        flagshipPrice: dto.flagshipPrice,
       },
     });
+    await this.flagshipCatalog.syncMasterSkuToFlagship(sku.id);
+    return sku;
   }
 
   
@@ -60,15 +66,18 @@ export class PlatformAllocationsService {
       unitCost?: number;
       wholesalePrice?: number;
       retailPrice?: number;
+      flagshipPrice?: number;
       isActive?: boolean;
     },
   ) {
     const sku = await this.prisma.masterSku.findUnique({ where: { id } });
     if (!sku) throw new NotFoundException('Master SKU not found');
-    return this.prisma.masterSku.update({
+    const updated = await this.prisma.masterSku.update({
       where: { id },
       data: dto,
     });
+    await this.flagshipCatalog.syncMasterSkuToFlagship(id);
+    return updated;
   }
 
   

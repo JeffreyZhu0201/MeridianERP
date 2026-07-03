@@ -190,6 +190,9 @@ export const merchant = {
       manageStock: 'Manage stock',
       adjustViaInventory: 'Adjust via Inventory',
       deleteConfirm: 'Delete this product?',
+      suggestedRetail: 'Suggested retail',
+      priceRangeHint: 'Allowed range: ±{percent}% of suggested retail ({min} – {max})',
+      branchCatalogNote: 'Products are supplied via HQ allocation; only price can be adjusted.',
     },
     categories: {
       title: 'Categories',

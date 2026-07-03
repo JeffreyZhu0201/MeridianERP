@@ -11,10 +11,7 @@ import {
   Input,
   Label,
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  buttonVariants,
 } from '@meridian/ui';
 
 import {
@@ -178,24 +175,18 @@ export function CreateMerchantForm({ token, distributors }: CreateMerchantFormPr
         ) : null}
       </div>
       <div className="space-y-2">
-        <Label>{t('recruitedByPromoter')}</Label>
+        <Label htmlFor="recruitedByDistributorId">{t('recruitedByPromoter')}</Label>
         <Select
-          value={recruitedByDistributorId || 'none'}
-          onValueChange={(value) =>
-            setRecruitedByDistributorId(value === 'none' ? '' : value)
-          }
+          id="recruitedByDistributorId"
+          value={recruitedByDistributorId}
+          onChange={(e) => setRecruitedByDistributorId(e.target.value)}
         >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">{t('recruitedByNone')}</SelectItem>
-            {distributors.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
+          <option value="">{t('recruitedByNone')}</option>
+          {distributors.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
         </Select>
       </div>
       {error ? (
@@ -207,9 +198,9 @@ export function CreateMerchantForm({ token, distributors }: CreateMerchantFormPr
         <Button type="submit" disabled={loading || !ownerAccountId}>
           {loading ? tc('saving') : t('createSubmit')}
         </Button>
-        <Button type="button" variant="outline" asChild>
-          <Link href="/merchants">{tc('cancel')}</Link>
-        </Button>
+        <Link href="/merchants" className={buttonVariants({ variant: 'outline' })}>
+          {tc('cancel')}
+        </Link>
       </div>
     </form>
   );

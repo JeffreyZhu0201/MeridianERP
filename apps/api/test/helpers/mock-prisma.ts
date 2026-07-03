@@ -64,6 +64,7 @@ export function createMockPrisma() {
   const stockTransferLines = new Map<Id, StockTransferLineRecord>();
   const merchantRecruitInviteCodes = new Map<Id, MerchantRecruitInviteCodeRecord>();
   const withdrawalRequests = new Map<Id, WithdrawalRequestRecord>();
+  const masterSkus = new Map<Id, MasterSkuRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -242,6 +243,7 @@ export function createMockPrisma() {
   interface ProductVariantRecord {
     id: Id;
     productId: Id;
+    masterSkuId: Id | null;
     sku: string;
     name: string;
     price: Prisma.Decimal;
@@ -390,6 +392,22 @@ export function createMockPrisma() {
     supportEmail: string | null;
     distributorPortalEnabled: boolean;
     emailQueueEnabled: boolean;
+    maxRetailPriceDeviationPercent: number;
+    updatedAt: Date;
+  }
+
+  interface MasterSkuRecord {
+    id: Id;
+    skuCode: string;
+    name: string;
+    quantityOnHand: number;
+    cumulativeShippedQty: number;
+    unitCost: Prisma.Decimal;
+    wholesalePrice: Prisma.Decimal;
+    retailPrice: Prisma.Decimal;
+    flagshipPrice: Prisma.Decimal;
+    isActive: boolean;
+    createdAt: Date;
     updatedAt: Date;
   }
 
@@ -1086,6 +1104,12 @@ export function createMockPrisma() {
         }),
       );
     }
+    if (where.isFlagship !== undefined) {
+      filtered = filtered.filter((p) => p.isFlagship === where.isFlagship);
+    }
+    if (where.storePublished !== undefined) {
+      filtered = filtered.filter((p) => p.storePublished === where.storePublished);
+    }
     return filtered;
   };
 
@@ -1397,6 +1421,22 @@ export function createMockPrisma() {
             };
           }
           return { ...profile, tenant: tenantData };
+        }
+        return profile;
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where?: Record<string, unknown>;
+        include?: { tenant?: boolean };
+      } = {}) => {
+        const items = filterMerchantProfiles([...merchantProfiles.values()], where);
+        const profile = items[0];
+        if (!profile) return null;
+        if (include?.tenant) {
+          const tenant = tenants.get(profile.tenantId);
+          return { ...profile, tenant };
         }
         return profile;
       },
@@ -2335,6 +2375,7 @@ export function createMockPrisma() {
           for (const v of variants.create) {
             const variant: ProductVariantRecord = {
               ...v,
+              masterSkuId: v.masterSkuId ?? null,
               id: nextId('var'),
               productId: record.id,
               createdAt: now(),
@@ -2407,19 +2448,25 @@ export function createMockPrisma() {
       },
       findFirst: async ({
         where,
+        include,
       }: {
-        where: {
+        where?: {
           id?: string;
+          masterSkuId?: string;
           isActive?: boolean;
           product?: { tenantId?: string; isPublished?: boolean };
         };
-      }) => {
+        include?: { product?: boolean };
+      } = {}) => {
         let items = [...productVariants.values()];
-        if (where.id) items = items.filter((v) => v.id === where.id);
-        if (where.isActive !== undefined) {
+        if (where?.id) items = items.filter((v) => v.id === where.id);
+        if (where?.masterSkuId) {
+          items = items.filter((v) => v.masterSkuId === where.masterSkuId);
+        }
+        if (where?.isActive !== undefined) {
           items = items.filter((v) => v.isActive === where.isActive);
         }
-        if (where.product) {
+        if (where?.product) {
           items = items.filter((v) => {
             const product = products.get(v.productId);
             if (!product) return false;
@@ -2437,15 +2484,28 @@ export function createMockPrisma() {
         }
         const variant = items[0];
         if (!variant) return null;
+        if (include?.product) {
+          const product = products.get(variant.productId);
+          return { ...variant, product };
+        }
         return attachVariant(variant, { product: { select: { id: true, name: true, slug: true, isPublished: true } } });
       },
       findMany: async ({
         where,
         select,
+        include,
+        orderBy,
       }: {
-        where?: { product?: { tenantId?: string }; id?: { in: string[] } };
+        where?: {
+          product?: { tenantId?: string };
+          id?: { in: string[] };
+          masterSkuId?: { in: string[] } | string;
+          isActive?: boolean;
+        };
         select?: { id?: boolean; inventory?: boolean; reorderThreshold?: boolean };
-      }) => {
+        include?: { product?: { select?: Record<string, boolean> } };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+      } = {}) => {
         let items = [...productVariants.values()];
         if (where?.product?.tenantId) {
           items = items.filter((v) => {
@@ -2455,6 +2515,27 @@ export function createMockPrisma() {
         }
         if (where?.id?.in) {
           items = items.filter((v) => where.id!.in.includes(v.id));
+        }
+        if (where?.masterSkuId) {
+          if (typeof where.masterSkuId === 'string') {
+            items = items.filter((v) => v.masterSkuId === where.masterSkuId);
+          } else if (where.masterSkuId.in) {
+            items = items.filter(
+              (v) => v.masterSkuId && where.masterSkuId!.in.includes(v.masterSkuId),
+            );
+          }
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((v) => v.isActive === where.isActive);
+        }
+        if (orderBy?.createdAt) {
+          items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        if (include?.product) {
+          return items.map((v) => ({
+            ...v,
+            product: products.get(v.productId) ?? null,
+          }));
         }
         if (select) {
           return items.map((v) => {
@@ -2467,6 +2548,29 @@ export function createMockPrisma() {
         }
         return items;
       },
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Omit<ProductVariantRecord, 'id' | 'createdAt' | 'updatedAt'> & {
+          masterSkuId?: string | null;
+        };
+        include?: { product?: boolean };
+      }) => {
+        const record: ProductVariantRecord = {
+          ...data,
+          masterSkuId: data.masterSkuId ?? null,
+          id: nextId('var'),
+          createdAt: now(),
+          updatedAt: now(),
+          reorderThreshold: data.reorderThreshold ?? null,
+        };
+        productVariants.set(record.id, record);
+        if (include?.product) {
+          return { ...record, product: products.get(record.productId) ?? null };
+        }
+        return record;
+      },
       createMany: async ({
         data,
       }: {
@@ -2475,6 +2579,7 @@ export function createMockPrisma() {
         for (const item of data) {
           const record: ProductVariantRecord = {
             ...item,
+            masterSkuId: item.masterSkuId ?? null,
             id: nextId('var'),
             createdAt: now(),
             updatedAt: now(),
@@ -2619,6 +2724,19 @@ export function createMockPrisma() {
     platformSettings: {
       findUnique: async ({ where }: { where: { id: string } }) =>
         platformSettings.get(where.id) ?? null,
+      findFirst: async () => {
+        const first = [...platformSettings.values()][0];
+        if (first) return first;
+        return {
+          id: 'default',
+          platformName: 'MeridianERP',
+          supportEmail: null,
+          distributorPortalEnabled: true,
+          emailQueueEnabled: true,
+          maxRetailPriceDeviationPercent: 10,
+          updatedAt: now(),
+        };
+      },
       upsert: async ({
         where,
         create,
@@ -2640,6 +2758,7 @@ export function createMockPrisma() {
           supportEmail: create.supportEmail ?? null,
           distributorPortalEnabled: create.distributorPortalEnabled ?? true,
           emailQueueEnabled: create.emailQueueEnabled ?? true,
+          maxRetailPriceDeviationPercent: create.maxRetailPriceDeviationPercent ?? 10,
           updatedAt: now(),
         };
         platformSettings.set(record.id, record);
@@ -3603,25 +3722,73 @@ export function createMockPrisma() {
       },
     },
     masterSku: {
-      findMany: async () => [],
-      findUnique: async () => null,
-      findFirst: async () => null,
-      create: async ({ data }: { data: Record<string, unknown> }) => ({
-        id: nextId('msku'),
-        cumulativeShippedQty: 0,
-        isActive: true,
-        createdAt: now(),
-        updatedAt: now(),
-        ...data,
-      }),
+      findMany: async ({
+        where,
+        orderBy,
+        skip,
+        take,
+      }: {
+        where?: { id?: { in: string[] }; isActive?: boolean };
+        orderBy?: { skuCode?: 'asc' | 'desc' };
+        skip?: number;
+        take?: number;
+      } = {}) => {
+        let items = [...masterSkus.values()];
+        if (where?.id?.in) {
+          items = items.filter((s) => where.id!.in.includes(s.id));
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((s) => s.isActive === where.isActive);
+        }
+        if (orderBy?.skuCode) {
+          items.sort((a, b) => a.skuCode.localeCompare(b.skuCode));
+        }
+        if (skip) items = items.slice(skip);
+        if (take) items = items.slice(0, take);
+        return items;
+      },
+      findUnique: async ({ where }: { where: { id: string } }) =>
+        masterSkus.get(where.id) ?? null,
+      findFirst: async ({
+        where,
+      }: {
+        where?: { id?: string };
+      } = {}) => {
+        if (where?.id) return masterSkus.get(where.id) ?? null;
+        return [...masterSkus.values()][0] ?? null;
+      },
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: MasterSkuRecord = {
+          id: nextId('msku'),
+          skuCode: data.skuCode as string,
+          name: data.name as string,
+          quantityOnHand: (data.quantityOnHand as number) ?? 0,
+          cumulativeShippedQty: 0,
+          unitCost: data.unitCost as Prisma.Decimal,
+          wholesalePrice: data.wholesalePrice as Prisma.Decimal,
+          retailPrice: data.retailPrice as Prisma.Decimal,
+          flagshipPrice: (data.flagshipPrice as Prisma.Decimal) ?? (data.retailPrice as Prisma.Decimal),
+          isActive: (data.isActive as boolean) ?? true,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        masterSkus.set(record.id, record);
+        return record;
+      },
       update: async ({
         where,
         data,
       }: {
         where: { id: string };
         data: Record<string, unknown>;
-      }) => ({ id: where.id, ...data }),
-      count: async () => 0,
+      }) => {
+        const existing = masterSkus.get(where.id);
+        if (!existing) return null;
+        const updated = { ...existing, ...data, updatedAt: now() } as MasterSkuRecord;
+        masterSkus.set(where.id, updated);
+        return updated;
+      },
+      count: async () => masterSkus.size,
     },
     allocationOrder: {
       findMany: async () => [...allocationOrders.values()],
@@ -4104,6 +4271,91 @@ export function createMockPrisma() {
       };
       allocationOrders.set(allocId, record);
       return record;
+    },
+    _seedFlagshipCatalog: async (input: {
+      flagshipSlug: string;
+      branchSlug: string;
+      sku: {
+        skuCode: string;
+        name: string;
+        wholesalePrice: number;
+        retailPrice: number;
+        flagshipPrice: number;
+        branchInventory?: number;
+      };
+    }) => {
+      const flagshipTenant = await mock._seedApprovedTenant(input.flagshipSlug, 'Flagship');
+      await mock.merchantProfile.update({
+        where: { tenantId: flagshipTenant.id },
+        data: { isFlagship: true, storePublished: true },
+      });
+      const branchTenant = await mock._seedApprovedTenant(input.branchSlug, 'Branch');
+      await mock.merchantProfile.update({
+        where: { tenantId: branchTenant.id },
+        data: { storePublished: true },
+      });
+
+      const masterSku = await mock.masterSku.create({
+        data: {
+          skuCode: input.sku.skuCode,
+          name: input.sku.name,
+          quantityOnHand: 100,
+          unitCost: new Prisma.Decimal(10),
+          wholesalePrice: new Prisma.Decimal(input.sku.wholesalePrice),
+          retailPrice: new Prisma.Decimal(input.sku.retailPrice),
+          flagshipPrice: new Prisma.Decimal(input.sku.flagshipPrice),
+        },
+      });
+
+      const flagshipProduct = await mock.product.create({
+        data: {
+          tenantId: flagshipTenant.id,
+          name: input.sku.name,
+          slug: input.sku.skuCode.toLowerCase(),
+          isPublished: true,
+        },
+      });
+      const flagshipVariant = await mock.productVariant.create({
+        data: {
+          productId: flagshipProduct.id,
+          masterSkuId: masterSku.id,
+          sku: input.sku.skuCode,
+          name: input.sku.name,
+          price: new Prisma.Decimal(input.sku.flagshipPrice),
+          inventory: 0,
+          isActive: true,
+        },
+      });
+
+      const branchProduct = await mock.product.create({
+        data: {
+          tenantId: branchTenant.id,
+          name: input.sku.name,
+          slug: input.sku.skuCode.toLowerCase(),
+          isPublished: true,
+        },
+      });
+      const branchVariant = await mock.productVariant.create({
+        data: {
+          productId: branchProduct.id,
+          masterSkuId: masterSku.id,
+          sku: input.sku.skuCode,
+          name: input.sku.name,
+          price: new Prisma.Decimal(input.sku.retailPrice),
+          inventory: input.sku.branchInventory ?? 5,
+          isActive: true,
+        },
+      });
+
+      return {
+        masterSku,
+        flagshipTenant,
+        branchTenant,
+        flagshipProduct,
+        flagshipVariant,
+        branchProduct,
+        branchVariant,
+      };
     },
   };
 

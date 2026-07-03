@@ -46,6 +46,7 @@ export function AllocationsView({
   const [unitCost, setUnitCost] = useState('');
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
+  const [flagshipPrice, setFlagshipPrice] = useState('');
 
   const [editSku, setEditSku] = useState<MasterSku | null>(null);
   const [editSkuName, setEditSkuName] = useState('');
@@ -53,6 +54,7 @@ export function AllocationsView({
   const [editUnitCost, setEditUnitCost] = useState('');
   const [editWholesalePrice, setEditWholesalePrice] = useState('');
   const [editRetailPrice, setEditRetailPrice] = useState('');
+  const [editFlagshipPrice, setEditFlagshipPrice] = useState('');
 
   const [tenantId, setTenantId] = useState(merchants[0]?.tenantId ?? '');
   const [note, setNote] = useState('');
@@ -75,6 +77,7 @@ export function AllocationsView({
             unitCost: Number(unitCost),
             wholesalePrice: Number(wholesalePrice),
             retailPrice: Number(retailPrice),
+            flagshipPrice: Number(flagshipPrice),
           }),
         },
         token,
@@ -135,7 +138,18 @@ export function AllocationsView({
     setEditUnitCost(String(sku.unitCost));
     setEditWholesalePrice(String(sku.wholesalePrice));
     setEditRetailPrice(String(sku.retailPrice));
+    setEditFlagshipPrice(String(sku.flagshipPrice));
     setSkuEditOpen(true);
+  }
+
+  async function handleSyncAll() {
+    setError('');
+    try {
+      await apiFetch('/platform/flagship-catalog/sync', { method: 'POST' }, token);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('syncAllFailed'));
+    }
   }
 
   async function handleUpdateSku() {
@@ -153,6 +167,7 @@ export function AllocationsView({
             unitCost: Number(editUnitCost),
             wholesalePrice: Number(editWholesalePrice),
             retailPrice: Number(editRetailPrice),
+            flagshipPrice: Number(editFlagshipPrice),
           }),
         },
         token,
@@ -181,11 +196,17 @@ export function AllocationsView({
           onHand: t('skuColumns.onHand'),
           wholesale: t('skuColumns.wholesale'),
           retail: t('skuColumns.retail'),
+          flagship: t('skuColumns.flagship'),
+          syncStatus: t('skuColumns.syncStatus'),
+          synced: t('skuColumns.synced'),
+          notSynced: t('skuColumns.notSynced'),
           actions: t('skuColumns.actions'),
           edit: tc('edit'),
+          syncAll: t('syncAll'),
         }}
         onCreate={() => setSkuOpen(true)}
         onEdit={openEditSku}
+        onSyncAll={handleSyncAll}
       />
 
       <AllocationOrdersTable
@@ -217,6 +238,7 @@ export function AllocationsView({
         unitCost={unitCost}
         wholesalePrice={wholesalePrice}
         retailPrice={retailPrice}
+        flagshipPrice={flagshipPrice}
         submitting={submitting}
         onSkuCodeChange={setSkuCode}
         onSkuNameChange={setSkuName}
@@ -224,6 +246,7 @@ export function AllocationsView({
         onUnitCostChange={setUnitCost}
         onWholesalePriceChange={setWholesalePrice}
         onRetailPriceChange={setRetailPrice}
+        onFlagshipPriceChange={setFlagshipPrice}
         onSubmit={handleCreateSku}
       />
 
@@ -236,12 +259,14 @@ export function AllocationsView({
         unitCost={editUnitCost}
         wholesalePrice={editWholesalePrice}
         retailPrice={editRetailPrice}
+        flagshipPrice={editFlagshipPrice}
         submitting={submitting}
         onSkuNameChange={setEditSkuName}
         onOnHandChange={setEditOnHand}
         onUnitCostChange={setEditUnitCost}
         onWholesalePriceChange={setEditWholesalePrice}
         onRetailPriceChange={setEditRetailPrice}
+        onFlagshipPriceChange={setEditFlagshipPrice}
         onSubmit={handleUpdateSku}
       />
 

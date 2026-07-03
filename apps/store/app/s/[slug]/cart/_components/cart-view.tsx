@@ -21,9 +21,10 @@ interface CartViewProps {
   cart: Cart;
   storeSlug: string;
   token?: string;
+  shopBasePath?: string;
 }
 
-export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
+export function CartView({ cart: initial, storeSlug, token, shopBasePath }: CartViewProps) {
   const router = useRouter();
   const t = useTranslations('store');
   const [cart, setCart] = useState(initial);
@@ -139,7 +140,7 @@ export function CartView({ cart: initial, storeSlug, token }: CartViewProps) {
             <span>{t('cart.subtotal')}</span>
             <span>{formatMoney(subtotal)}</span>
           </div>
-          <Link href={`/s/${storeSlug}/checkout`} className="mt-4 block">
+          <Link href={`${shopBasePath ?? `/s/${storeSlug}`}/checkout`} className="mt-4 block">
             <Button className="w-full" size="lg">
               {t('cart.checkout')}
             </Button>

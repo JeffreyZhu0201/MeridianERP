@@ -10,6 +10,7 @@ export * from './distributor-portal.js';
 export * from './queues.js';
 export * from './settings.js';
 export * from './store.js';
+export * from './flagship-catalog.js';
 export * from './phase-5-distribution.js';
 export * from './phase-5-allocation.js';
 export * from './phase-5-fulfillment.js';

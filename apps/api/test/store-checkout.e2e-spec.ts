@@ -35,6 +35,10 @@ describe('StoreCheckout (e2e)', () => {
       'owner@acme.test',
       password,
     );
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant.id },
+      data: { isFlagship: true },
+    });
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const distributor = await prisma.distributor.create({
@@ -73,6 +77,12 @@ describe('StoreCheckout (e2e)', () => {
 
     expect(cart.body.itemCount).toBe(2);
     expect(cart.body.subtotal).toBe(100);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 20 })
+      .expect(400);
 
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
@@ -284,15 +294,7 @@ describe('StoreCheckout (e2e)', () => {
       .post('/api/v1/store/acme-store/cart/items')
       .set('X-Cart-Session', sessionId)
       .send({ variantId, quantity: 11 })
-      .expect(201);
-
-    const checkout = await request(app.getHttpServer())
-      .post('/api/v1/store/acme-store/checkout')
-      .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
       .expect(400);
-
-    expect(checkout.body.message).toMatch(/insufficient inventory/i);
 
     const products = await request(app.getHttpServer())
       .get('/api/v1/merchant/products')

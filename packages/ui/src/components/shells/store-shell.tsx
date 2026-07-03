@@ -48,6 +48,10 @@ export interface StoreShellProps {
   cartCount?: number;
   userEmail?: string;
   onLogout?: () => void;
+  /** Base path for nav links; defaults to `/s/{storeSlug}` */
+  basePath?: string;
+  /** Optional branch picker shown in the header */
+  branchSelect?: ReactNode;
 }
 
 export function StoreShell({
@@ -57,9 +61,11 @@ export function StoreShell({
   cartCount = 0,
   userEmail,
   onLogout,
+  basePath,
+  branchSelect,
 }: StoreShellProps) {
   const pathname = usePathname();
-  const base = `/s/${storeSlug}`;
+  const base = basePath ?? `/s/${storeSlug}`;
   const t = useTranslations('store.nav');
   const tc = useTranslations('common');
 
@@ -103,6 +109,7 @@ export function StoreShell({
           </nav>
 
           <div className="flex items-center gap-2">
+            {branchSelect}
             <LocaleToggle portal="store" />
             <ModeToggle />
             {userEmail ? (

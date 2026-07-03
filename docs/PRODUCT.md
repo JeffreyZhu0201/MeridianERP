@@ -1,6 +1,6 @@
 # MeridianERP Product State
 
-**Version:** 1.0.3  
+**Version:** 1.0.4  
 **Updated:** 2026-07-03  
 **Status:** Phase 1-5 complete; UI consistency cleanup in progress.
 
@@ -35,7 +35,7 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - Tenant isolation is enforced with `tenantId` on merchant-owned data and guarded API access.
 - Admin manages merchants, distributors, MasterSku catalog, allocations, delivery queue, platform CRM, and funds.
 - Merchant manages CRM, inventory, orders, pickup verification, funds, replenishment, and settings.
-- Store supports catalog browsing, cart, Stripe checkout, account orders, pickup, and delivery (no customer–distributor binding).
+- Store supports unified flagship catalog, header branch selector, cart, Stripe checkout, account orders, pickup, and delivery (no customer–distributor binding).
 - Sales promoters (platform `Distributor`) recruit branches via store-portal share links, self-service invite codes/QR on `apps/distributor`, performance views, commission ledger, and withdrawals.
 - Store open-shop flow (`/open-shop?invite=`) lets registered users apply to become branch owners; HQ approves in admin.
 - HQ withdrawal approval confirms disbursement (`APPROVED` + `reviewedAt`); no third-party payout integration in P0.
@@ -51,7 +51,10 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - **Branch recruitment:** Share link `{STORE_APP_URL}/open-shop?invite={CODE}` (admin or promoter portal self-service) or admin direct create with `recruitedByDistributorId`. Binding stored on `MerchantProfile.recruitedByDistributorId`.
 - **Promoter commission:** Accrued when a branch's **allocation order** reaches `CONFIRMED` — **only for the 1st and 2nd** commissionable allocations per recruited branch (`commissionSource=ALLOCATION`). Base = wholesale total of that allocation × promoter rate. Retail order fulfillment does **not** accrue new commission.
 - **Pickup margin:** Branch online pickup gross profit = order total minus wholesale cost snapshot on order lines (`unitWholesalePrice` at checkout).
-- **Flagship store:** One branch may be marked `isFlagship`; store picker lists it first and pre-selects it by default.
+- **Flagship catalog:** Admin MasterSku defines wholesale, suggested retail, and flagship selling price; flagship tenant catalog auto-syncs from HQ.
+- **Unified store:** Consumers browse flagship catalog at `/shop`; header dropdown selects fulfillment branch (inventory and branch price apply).
+- **Branch pricing:** Selling price defaults to suggested retail on allocation; merchant may tune within `maxRetailPriceDeviationPercent` (default 10%).
+- **Flagship store:** One branch marked `isFlagship`; remembered branch slug preferred in store header, else flagship default.
 - Commission balance equals settled commission minus approved withdrawals.
 - Pickup orders deduct branch inventory only when verified.
 - Delivery orders enter the HQ delivery queue and deduct MasterSku stock when shipped.

@@ -44,6 +44,7 @@ export class PlatformAllocationsController {
       unitCost: number;
       wholesalePrice: number;
       retailPrice: number;
+      flagshipPrice: number;
     },
   ) {
     return this.service.createMasterSku(dto);
@@ -60,6 +61,7 @@ export class PlatformAllocationsController {
       unitCost?: number;
       wholesalePrice?: number;
       retailPrice?: number;
+      flagshipPrice?: number;
       isActive?: boolean;
     },
   ) {

@@ -1,3 +1,5 @@
+'use client';
+
 import { Button,
   Card,
   CardContent,
@@ -19,17 +21,23 @@ interface MasterSkuTableProps {
   labels: {
     title: string;
     create: string;
+    syncAll: string;
     empty: string;
     code: string;
     name: string;
     onHand: string;
     wholesale: string;
     retail: string;
+    flagship: string;
+    syncStatus: string;
+    synced: string;
+    notSynced: string;
     actions: string;
     edit: string;
   };
   onCreate: () => void;
   onEdit: (sku: MasterSku) => void;
+  onSyncAll: () => void;
 }
 
 export function MasterSkuTable({
@@ -37,14 +45,20 @@ export function MasterSkuTable({
   labels,
   onCreate,
   onEdit,
+  onSyncAll,
 }: MasterSkuTableProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between gap-4">
         <CardTitle>{labels.title}</CardTitle>
-        <Button size="sm" onClick={onCreate}>
-          {labels.create}
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={onSyncAll}>
+            {labels.syncAll}
+          </Button>
+          <Button size="sm" onClick={onCreate}>
+            {labels.create}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {masterSkus.length === 0 ? (
@@ -59,6 +73,8 @@ export function MasterSkuTable({
                   <TableHead className="text-right">{labels.onHand}</TableHead>
                   <TableHead className="text-right">{labels.wholesale}</TableHead>
                   <TableHead className="text-right">{labels.retail}</TableHead>
+                  <TableHead className="text-right">{labels.flagship}</TableHead>
+                  <TableHead>{labels.syncStatus}</TableHead>
                   <TableHead className="text-right">{labels.actions}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -70,6 +86,10 @@ export function MasterSkuTable({
                     <TableCell className="text-right tabular-nums">{sku.quantityOnHand}</TableCell>
                     <TableCell className="text-right">{formatMoney(sku.wholesalePrice)}</TableCell>
                     <TableCell className="text-right">{formatMoney(sku.retailPrice)}</TableCell>
+                    <TableCell className="text-right">{formatMoney(sku.flagshipPrice)}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {sku.synced ? labels.synced : labels.notSynced}
+                    </TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" onClick={() => onEdit(sku)}>
                         {labels.edit}

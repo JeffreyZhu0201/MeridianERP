@@ -701,6 +701,7 @@ model PlatformSettings {
   supportEmail             String?                               // 客服邮箱
   distributorPortalEnabled Boolean  @default(true)              // 是否启用经销商门户
   emailQueueEnabled        Boolean  @default(true)              // 是否启用邮件队列
+  maxRetailPriceDeviationPercent Int @default(10)               // 分店售价相对建议零售价最大偏差（%）
   updatedAt                DateTime @updatedAt                  // 更新时间
 }
 
@@ -892,8 +893,9 @@ model MasterSku {
   quantityOnHand       Int                        @default(0)          // 在手数量
   cumulativeShippedQty Int                        @default(0)          // 累计发货数量
   unitCost             Decimal                    @db.Decimal(12, 2)   // 单位成本
-  wholesalePrice       Decimal                    @db.Decimal(12, 2)   // 批发价
-  retailPrice          Decimal                    @db.Decimal(12, 2)   // 零售价
+  wholesalePrice       Decimal                    @db.Decimal(12, 2)   // 批发价（拿货价）
+  retailPrice          Decimal                    @db.Decimal(12, 2)   // 建议零售价
+  flagshipPrice        Decimal                    @db.Decimal(12, 2)   // 总店 C 端销售价
   isActive             Boolean                    @default(true)       // 是否启用
   variants             ProductVariant[]                              // 关联变体
   allocationLines      AllocationOrderLine[]                         // 配额分配行

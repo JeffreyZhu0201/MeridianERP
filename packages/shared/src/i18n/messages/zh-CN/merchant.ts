@@ -179,6 +179,9 @@ export const merchant = {
       manageStock: '管理库存',
       adjustViaInventory: '通过库存调整',
       deleteConfirm: '删除此商品？',
+      suggestedRetail: '建议零售价',
+      priceRangeHint: '允许范围：建议零售价 ±{percent}%（{min} – {max}）',
+      branchCatalogNote: '商品由总部配货供应，分店仅可调整售价。',
     },
     categories: {
       title: '分类',

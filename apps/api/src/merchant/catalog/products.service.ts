@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -21,7 +22,13 @@ export class MerchantProductsService {
   findAll(tenantId: string) {
     return this.prisma.product.findMany({
       where: { tenantId },
-      include: { category: true, variants: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        category: true,
+        variants: {
+          orderBy: { createdAt: 'asc' },
+          include: { masterSku: { select: { retailPrice: true } } },
+        },
+      },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -29,7 +36,13 @@ export class MerchantProductsService {
   async findOne(tenantId: string, id: string) {
     const product = await this.prisma.product.findFirst({
       where: { id, tenantId },
-      include: { category: true, variants: { orderBy: { createdAt: 'asc' } } },
+      include: {
+        category: true,
+        variants: {
+          orderBy: { createdAt: 'asc' },
+          include: { masterSku: { select: { retailPrice: true } } },
+        },
+      },
     });
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -38,6 +51,14 @@ export class MerchantProductsService {
   }
 
   async create(tenantId: string, dto: CreateProductDto) {
+    const profile = await this.prisma.merchantProfile.findFirst({
+      where: { tenantId },
+    });
+    if (profile && !profile.isFlagship) {
+      throw new BadRequestException(
+        'Branch stores cannot create products manually; stock arrives via allocation',
+      );
+    }
     const slug = slugify(dto.name);
     const existing = await this.prisma.product.findFirst({
       where: { tenantId, slug },
@@ -112,17 +133,36 @@ export class MerchantProductsService {
     }
 
     if (dto.variants) {
-      await this.prisma.productVariant.deleteMany({ where: { productId: id } });
-      await this.prisma.productVariant.createMany({
-        data: dto.variants.map((v) => ({
-          productId: id,
-          sku: v.sku,
-          name: v.name,
-          price: v.price,
-          inventory: 0,
-          isActive: v.isActive ?? true,
-        })),
+      const existing = await this.findOne(tenantId, id);
+      const profile = await this.prisma.merchantProfile.findFirst({
+        where: { tenantId },
       });
+      const isBranch = profile && !profile.isFlagship;
+      const linkedVariants = existing.variants.filter((v) => v.masterSkuId);
+
+      if (isBranch && linkedVariants.length > 0) {
+        for (const existingVariant of linkedVariants) {
+          const incoming = dto.variants.find((v) => v.sku === existingVariant.sku);
+          if (!incoming) continue;
+          await this.assertBranchPriceAllowed(existingVariant.masterSkuId!, incoming.price);
+          await this.prisma.productVariant.update({
+            where: { id: existingVariant.id },
+            data: { price: incoming.price },
+          });
+        }
+      } else {
+        await this.prisma.productVariant.deleteMany({ where: { productId: id } });
+        await this.prisma.productVariant.createMany({
+          data: dto.variants.map((v) => ({
+            productId: id,
+            sku: v.sku,
+            name: v.name,
+            price: v.price,
+            inventory: 0,
+            isActive: v.isActive ?? true,
+          })),
+        });
+      }
     }
 
     return this.prisma.product.update({
@@ -136,5 +176,26 @@ export class MerchantProductsService {
     await this.findOne(tenantId, id);
     await this.prisma.product.delete({ where: { id } });
     return { deleted: true };
+  }
+
+  private async assertBranchPriceAllowed(masterSkuId: string, price: number) {
+    const masterSku = await this.prisma.masterSku.findUnique({
+      where: { id: masterSkuId },
+    });
+    if (!masterSku) {
+      throw new NotFoundException('Master SKU not found');
+    }
+    const settings = await this.prisma.platformSettings.findFirst();
+    const maxPct = settings?.maxRetailPriceDeviationPercent ?? 10;
+    const suggested = Number(masterSku.retailPrice);
+    if (suggested <= 0) {
+      throw new BadRequestException('Suggested retail price is not configured');
+    }
+    const deviation = Math.abs(price - suggested) / suggested;
+    if (deviation > maxPct / 100) {
+      throw new BadRequestException(
+        `Price must be within ±${maxPct}% of suggested retail price (${suggested})`,
+      );
+    }
   }
 }

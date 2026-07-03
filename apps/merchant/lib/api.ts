@@ -131,6 +131,8 @@ export interface ProductVariant {
   price: string | number;
   inventory: number;
   isActive: boolean;
+  masterSkuId?: string | null;
+  masterSku?: { retailPrice: string | number } | null;
 }
 
 export interface Product {

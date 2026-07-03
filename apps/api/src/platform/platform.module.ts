@@ -10,6 +10,7 @@ import { PlatformInventoryModule } from './inventory/platform-inventory.module';
 import { PlatformSettingsModule } from './settings/platform-settings.module';
 import { PlatformDistributorsModule } from './distributors/platform-distributors.module';
 import { PlatformAllocationsModule } from './allocations/platform-allocations.module';
+import { FlagshipCatalogModule } from './flagship-catalog/flagship-catalog.module';
 import { PlatformWithdrawalsModule } from './withdrawals/platform-withdrawals.module';
 import { PlatformReplenishmentModule } from './replenishment/platform-replenishment.module';
 import { PlatformFundsModule } from './funds/platform-funds.module';
@@ -30,6 +31,7 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
     PlatformSettingsModule,
     PlatformDistributorsModule,
     PlatformAllocationsModule,
+    FlagshipCatalogModule,
     PlatformWithdrawalsModule,
     PlatformReplenishmentModule,
     PlatformFundsModule,

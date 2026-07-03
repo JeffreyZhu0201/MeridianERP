@@ -6,6 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
+import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StoreAuthService } from '../auth/store-auth.service';
 import { StoreTenantService } from '../common/store-tenant.service';
@@ -34,6 +35,7 @@ export class StoreCartService {
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
     private readonly storeAuth: StoreAuthService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   
@@ -134,6 +136,11 @@ export class StoreCartService {
         cartId_variantId: { cartId: cart.id, variantId: dto.variantId },
       },
     });
+    const requestedQty = (existing?.quantity ?? 0) + dto.quantity;
+    const sellable = await this.inventoryService.getSellableQuantity(variant.id);
+    if (sellable < requestedQty) {
+      throw new BadRequestException('Insufficient inventory');
+    }
 
     if (existing) {
       await this.prisma.cartItem.update({
@@ -175,6 +182,10 @@ export class StoreCartService {
     });
     if (!item) {
       throw new NotFoundException('Cart item not found');
+    }
+    const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
+    if (sellable < dto.quantity) {
+      throw new BadRequestException('Insufficient inventory');
     }
     await this.prisma.cartItem.update({
       where: { id: itemId },

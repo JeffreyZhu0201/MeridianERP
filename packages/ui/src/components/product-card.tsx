@@ -38,6 +38,10 @@ export interface ProductCardProps {
   priceFrom: string | number;
   imageUrl?: string;
   className?: string;
+  /** Override product link base (default `/s/{storeSlug}/products/{slug}`) */
+  href?: string;
+  outOfStock?: boolean;
+  outOfStockLabel?: string;
 }
 
 /** 格式化价格显示（USD 格式） */
@@ -60,14 +64,18 @@ export function ProductCard({
   priceFrom,
   imageUrl,
   className,
+  href,
+  outOfStock,
+  outOfStockLabel = 'Out of stock',
 }: ProductCardProps) {
-  const href = `/s/${storeSlug}/products/${slug}`;
+  const linkHref = href ?? `/s/${storeSlug}/products/${slug}`;
 
   return (
     <Link
-      href={href}
+      href={linkHref}
       className={cn(
         'group flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-border transition-shadow hover:shadow-md',
+        outOfStock && 'opacity-75',
         className,
       )}
     >
@@ -90,7 +98,11 @@ export function ProductCard({
       {/* 商品信息 */}
       <div className="flex flex-1 flex-col gap-1 p-4">
         <h3 className="text-sm font-medium leading-snug group-hover:text-primary">{name}</h3>
-        <p className="text-sm text-muted-foreground">From {formatPrice(priceFrom)}</p>
+        {outOfStock ? (
+          <p className="text-xs font-medium text-destructive">{outOfStockLabel}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">From {formatPrice(priceFrom)}</p>
+        )}
       </div>
     </Link>
   );

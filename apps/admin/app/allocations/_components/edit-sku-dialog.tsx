@@ -14,12 +14,14 @@ interface EditSkuDialogProps {
   unitCost: string;
   wholesalePrice: string;
   retailPrice: string;
+  flagshipPrice: string;
   submitting: boolean;
   onSkuNameChange: (value: string) => void;
   onOnHandChange: (value: string) => void;
   onUnitCostChange: (value: string) => void;
   onWholesalePriceChange: (value: string) => void;
   onRetailPriceChange: (value: string) => void;
+  onFlagshipPriceChange: (value: string) => void;
   onSubmit: () => void;
 }
 
@@ -32,12 +34,14 @@ export function EditSkuDialog({
   unitCost,
   wholesalePrice,
   retailPrice,
+  flagshipPrice,
   submitting,
   onSkuNameChange,
   onOnHandChange,
   onUnitCostChange,
   onWholesalePriceChange,
   onRetailPriceChange,
+  onFlagshipPriceChange,
   onSubmit,
 }: EditSkuDialogProps) {
   const t = useTranslations('admin.allocations');
@@ -105,6 +109,17 @@ export function EditSkuDialog({
               step="0.01"
               value={retailPrice}
               onChange={(e) => onRetailPriceChange(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-sku-flagship">{t('form.flagshipPrice')}</Label>
+            <Input
+              id="edit-sku-flagship"
+              type="number"
+              min="0"
+              step="0.01"
+              value={flagshipPrice}
+              onChange={(e) => onFlagshipPriceChange(e.target.value)}
             />
           </div>
         </div>

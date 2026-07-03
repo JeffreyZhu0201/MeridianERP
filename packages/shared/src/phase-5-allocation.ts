@@ -22,7 +22,10 @@ export interface MasterSkuSummary {
   unitCost: string | number;
   wholesalePrice: string | number;
   retailPrice: string | number;
+  flagshipPrice: string | number;
   isActive: boolean;
+  synced?: boolean;
+  flagshipProductId?: string | null;
 }
 
 export interface CreateMasterSkuRequest {
@@ -32,6 +35,7 @@ export interface CreateMasterSkuRequest {
   unitCost: number;
   wholesalePrice: number;
   retailPrice: number;
+  flagshipPrice: number;
 }
 
 export interface AllocationOrderLineInput {

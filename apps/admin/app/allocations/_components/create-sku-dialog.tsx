@@ -12,6 +12,7 @@ interface CreateSkuDialogProps {
   unitCost: string;
   wholesalePrice: string;
   retailPrice: string;
+  flagshipPrice: string;
   submitting: boolean;
   onSkuCodeChange: (value: string) => void;
   onSkuNameChange: (value: string) => void;
@@ -19,6 +20,7 @@ interface CreateSkuDialogProps {
   onUnitCostChange: (value: string) => void;
   onWholesalePriceChange: (value: string) => void;
   onRetailPriceChange: (value: string) => void;
+  onFlagshipPriceChange: (value: string) => void;
   onSubmit: () => void;
 }
 
@@ -31,6 +33,7 @@ export function CreateSkuDialog({
   unitCost,
   wholesalePrice,
   retailPrice,
+  flagshipPrice,
   submitting,
   onSkuCodeChange,
   onSkuNameChange,
@@ -38,6 +41,7 @@ export function CreateSkuDialog({
   onUnitCostChange,
   onWholesalePriceChange,
   onRetailPriceChange,
+  onFlagshipPriceChange,
   onSubmit,
 }: CreateSkuDialogProps) {
   const t = useTranslations('admin.allocations');
@@ -108,6 +112,17 @@ export function CreateSkuDialog({
               step="0.01"
               value={retailPrice}
               onChange={(e) => onRetailPriceChange(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sku-flagship">{t('form.flagshipPrice')}</Label>
+            <Input
+              id="sku-flagship"
+              type="number"
+              min="0"
+              step="0.01"
+              value={flagshipPrice}
+              onChange={(e) => onFlagshipPriceChange(e.target.value)}
             />
           </div>
         </div>
