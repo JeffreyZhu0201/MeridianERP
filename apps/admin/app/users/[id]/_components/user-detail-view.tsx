@@ -42,8 +42,6 @@ interface UserDetailViewProps {
   approvedMerchants: ApprovedMerchantOption[];
 }
 
-type PlatformAdminRole = 'SUPER_ADMIN' | 'PLATFORM_OPS';
-
 function identityBadgeVariant(identity: UserIdentity) {
   switch (identity) {
     case 'MERCHANT_OWNER':
@@ -85,14 +83,8 @@ export function UserDetailView({
   const [lastName, setLastName] = useState(user.lastName ?? '');
   const [phone, setPhone] = useState(user.phone ?? '');
 
-  const hasPlatformAdmin = user.identities.includes('PLATFORM_ADMIN');
   const hasDistributor = user.identities.includes('DISTRIBUTOR');
 
-  const [platformAdminEnabled, setPlatformAdminEnabled] = useState(hasPlatformAdmin);
-  const [platformAdminRole, setPlatformAdminRole] = useState<PlatformAdminRole>(
-    initialUser.platformAdminRole ?? 'PLATFORM_OPS',
-  );
-  const [platformAdminRoleDirty, setPlatformAdminRoleDirty] = useState(false);
   const [distributorEnabled, setDistributorEnabled] = useState(hasDistributor);
   const [distributorCommission, setDistributorCommission] = useState(
     initialUser.distributorCommissionRate != null
@@ -154,9 +146,6 @@ export function UserDetailView({
     setFirstName(next.firstName ?? '');
     setLastName(next.lastName ?? '');
     setPhone(next.phone ?? '');
-    setPlatformAdminEnabled(next.identities.includes('PLATFORM_ADMIN'));
-    setPlatformAdminRole(next.platformAdminRole ?? 'PLATFORM_OPS');
-    setPlatformAdminRoleDirty(false);
     setDistributorEnabled(next.identities.includes('DISTRIBUTOR'));
     if (next.distributorCommissionRate != null) {
       setDistributorCommission(String(next.distributorCommissionRate * 100));
@@ -212,17 +201,9 @@ export function UserDetailView({
       }));
 
     const payload: {
-      platformAdminRole?: PlatformAdminRole | null;
       distributor?: { enabled: boolean; commissionRate?: number };
       merchantStaff?: Array<{ tenantId: string; enabled: boolean }>;
     } = {};
-
-    const isPlatformAdmin = user.identities.includes('PLATFORM_ADMIN');
-    if (platformAdminEnabled !== isPlatformAdmin) {
-      payload.platformAdminRole = platformAdminEnabled ? platformAdminRole : null;
-    } else if (platformAdminEnabled && platformAdminRoleDirty) {
-      payload.platformAdminRole = platformAdminRole;
-    }
 
     const isDistributor = user.identities.includes('DISTRIBUTOR');
     if (distributorEnabled !== isDistributor) {
@@ -236,7 +217,6 @@ export function UserDetailView({
     }
 
     if (
-      payload.platformAdminRole === undefined &&
       payload.distributor === undefined &&
       !payload.merchantStaff?.length
     ) {
@@ -392,34 +372,7 @@ export function UserDetailView({
               </div>
             ) : null}
 
-            <div className="space-y-3 rounded-xl border border-border p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm font-medium">{te('platformAdmin')}</p>
-                </div>
-                <Switch
-                  checked={platformAdminEnabled}
-                  onCheckedChange={setPlatformAdminEnabled}
-                  aria-label={te('platformAdmin')}
-                />
-              </div>
-              {platformAdminEnabled ? (
-                <div className="space-y-2">
-                  <Label htmlFor="platform-admin-role">{te('platformAdminRole')}</Label>
-                  <Select
-                    id="platform-admin-role"
-                    value={platformAdminRole}
-                    onChange={(e) => {
-                      setPlatformAdminRole(e.target.value as PlatformAdminRole);
-                      setPlatformAdminRoleDirty(true);
-                    }}
-                  >
-                    <option value="SUPER_ADMIN">{te('platformRoles.SUPER_ADMIN')}</option>
-                    <option value="PLATFORM_OPS">{te('platformRoles.PLATFORM_OPS')}</option>
-                  </Select>
-                </div>
-              ) : null}
-            </div>
+            <p className="text-sm text-muted-foreground">{te('platformAdminHint')}</p>
 
             <div className="space-y-3 rounded-xl border border-border p-4">
               <div className="flex items-center justify-between gap-4">

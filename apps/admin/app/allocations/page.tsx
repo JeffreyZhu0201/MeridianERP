@@ -4,7 +4,7 @@ import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server
 import { OnboardingStatus } from '@meridian/shared';
 
 import { ListPagination } from '@/components/list-pagination';
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import {
   apiFetch,
   type AllocationOrder,
@@ -90,7 +90,7 @@ export default async function AllocationsPage({ searchParams }: AllocationsPageP
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader metrics={metrics} />
         <ListPageFrame title={t('title')} description={t('description')}>
@@ -119,6 +119,6 @@ export default async function AllocationsPage({ searchParams }: AllocationsPageP
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

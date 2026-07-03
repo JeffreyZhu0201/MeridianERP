@@ -1,9 +1,12 @@
 import { Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { FlagshipCatalogService } from './flagship-catalog.service';
 
 @Controller('platform/flagship-catalog')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN')
 export class FlagshipCatalogController {
   constructor(private readonly service: FlagshipCatalogService) {}
 

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type MerchantDetail, type PaginatedResponse as ApiPaginatedResponse } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import type {
@@ -54,7 +54,7 @@ export default async function TenantInventoryPage({ params }: TenantInventoryPag
   const businessName = merchant?.businessName ?? `Tenant ${tenantId.slice(0, 8)}`;
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <Suspense>
         <TenantInventorySummary
           tenantId={tenantId}
@@ -64,6 +64,6 @@ export default async function TenantInventoryPage({ params }: TenantInventoryPag
           purchaseOrders={purchaseOrdersRes.items}
         />
       </Suspense>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

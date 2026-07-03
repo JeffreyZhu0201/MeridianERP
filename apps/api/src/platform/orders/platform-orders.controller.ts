@@ -8,17 +8,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PlatformOrdersService } from './platform-orders.service';
 
 @Controller('platform/orders')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
 export class PlatformOrdersController {
   constructor(private readonly ordersService: PlatformOrdersService) {}
 
   
   @Get()
+  @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -39,6 +42,7 @@ export class PlatformOrdersController {
 
   
   @Get(':id')
+  @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
@@ -46,6 +50,7 @@ export class PlatformOrdersController {
   
   @Post(':id/ship')
   @HttpCode(200)
+  @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
   ship(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.ordersService.ship(id, user.userId);
   }

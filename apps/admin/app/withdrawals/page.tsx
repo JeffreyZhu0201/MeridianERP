@@ -5,7 +5,7 @@ import { BentoListHeader, EmptyState, formatMoney, ListPageFrame } from '@meridi
 import type { PaginatedWithdrawalList, WithdrawalRequestRow } from '@meridian/shared';
 
 import { ListPagination } from '@/components/list-pagination';
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { WithdrawalsStatusTabs } from './_components/withdrawals-status-tabs';
@@ -68,7 +68,7 @@ export default async function WithdrawalsPage({
   ];
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader metrics={metrics} />
         <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-muted/40 px-4 py-3 text-sm">
@@ -102,6 +102,6 @@ export default async function WithdrawalsPage({
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

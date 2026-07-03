@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
 
 import { ListPagination } from '@/components/list-pagination';
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PaginatedResponse, type PlatformOrder } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { OrdersView } from './_components/orders-view';
@@ -66,7 +66,7 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   ];
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader metrics={metrics} />
         <ListPageFrame
@@ -95,6 +95,6 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { ListPagination } from '@/components/list-pagination';
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PaginatedResponse, type PlatformAccountListItem } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { UsersFilters } from './_components/users-filters';
@@ -43,7 +43,7 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
   const totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader
           metrics={[
@@ -75,6 +75,6 @@ export default async function UsersPage({ searchParams }: UsersPageProps) {
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

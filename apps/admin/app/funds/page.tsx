@@ -3,7 +3,7 @@ import { Alert, AlertDescription } from '@meridian/ui';
 import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import type { PlatformFundsSummary } from '@meridian/shared';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { FundsView } from './_components/funds-view';
@@ -32,7 +32,7 @@ export default async function FundsPage({
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         {summary ? (
           <BentoListHeader
@@ -58,6 +58,6 @@ export default async function FundsPage({
           )}
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

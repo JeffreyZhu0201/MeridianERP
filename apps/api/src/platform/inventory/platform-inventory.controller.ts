@@ -1,9 +1,12 @@
 import { Controller, Get, NotFoundException, Param, Query, UseGuards } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { PlatformInventoryService } from './platform-inventory.service';
 
 @Controller('platform/inventory')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN')
 export class PlatformInventoryController {
   constructor(private readonly inventoryService: PlatformInventoryService) {}
 

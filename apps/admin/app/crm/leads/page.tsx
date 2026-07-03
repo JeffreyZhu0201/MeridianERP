@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import type { PlatformCrmContact, PlatformCrmLead } from '@meridian/shared';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { LeadsTable } from './_components/leads-table';
@@ -38,7 +38,7 @@ export default async function CrmLeadsPage({
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader
           metrics={[{ title: t('title'), value: leads.length, description: t('description') }]}
@@ -49,6 +49,6 @@ export default async function CrmLeadsPage({
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

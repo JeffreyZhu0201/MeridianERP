@@ -37,8 +37,8 @@ export class UpdatePlatformAccountIdentitiesDto
 {
   @IsOptional()
   @ValidateIf((_, value) => value !== null)
-  @IsIn(['SUPER_ADMIN', 'PLATFORM_OPS'])
-  platformAdminRole?: 'SUPER_ADMIN' | 'PLATFORM_OPS' | null;
+  @IsIn(['SUPER_ADMIN', 'FINANCE', 'FULFILLMENT', 'REVIEWER'])
+  platformAdminRole?: 'SUPER_ADMIN' | 'FINANCE' | 'FULFILLMENT' | 'REVIEWER' | null;
 
   @IsOptional()
   @ValidateIf((_, value) => value !== null)

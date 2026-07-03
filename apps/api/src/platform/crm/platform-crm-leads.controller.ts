@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { LeadStage } from '@prisma/client';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import {
   CreatePlatformCrmLeadDto,
   UpdatePlatformCrmLeadDto,
@@ -19,7 +21,8 @@ import {
 import { PlatformCrmLeadsService } from './platform-crm-leads.service';
 
 @Controller('platform/crm/leads')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN')
 export class PlatformCrmLeadsController {
   constructor(private readonly service: PlatformCrmLeadsService) {}
 

@@ -11,12 +11,15 @@ import {
 } from '@nestjs/common';
 import { AllocationOrderStatus } from '@prisma/client';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PlatformAllocationsService } from './platform-allocations.service';
 
 @Controller('platform/allocations')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
 export class PlatformAllocationsController {
   constructor(private readonly service: PlatformAllocationsService) {}
 

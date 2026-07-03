@@ -10,11 +10,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { CreatePlatformDistributorDto } from './dto/create-platform-distributor.dto';
 import { PlatformDistributorsService } from './platform-distributors.service';
 
 @Controller('platform/distributors')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN')
 export class PlatformDistributorsController {
   constructor(private readonly service: PlatformDistributorsService) {}
 

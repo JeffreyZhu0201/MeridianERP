@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { MerchantDetailView } from './_components/merchant-detail';
@@ -27,8 +27,8 @@ export default async function MerchantDetailPage({ params }: MerchantDetailPageP
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <MerchantDetailView merchant={merchant} token={token} distributors={distributors} />
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

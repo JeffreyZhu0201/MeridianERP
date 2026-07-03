@@ -10,12 +10,15 @@ import {
 } from '@nestjs/common';
 import { WithdrawalRequestStatus } from '@prisma/client';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PlatformWithdrawalsService } from './platform-withdrawals.service';
 
 @Controller('platform/withdrawals')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN', 'FINANCE', 'REVIEWER')
 export class PlatformWithdrawalsController {
   constructor(private readonly service: PlatformWithdrawalsService) {}
 

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';
+import { PlatformAdminsModule } from './admins/platform-admins.module';
 import { PlatformAccountsModule } from './accounts/platform-accounts.module';
 import { PlatformAuthModule } from './auth/platform-auth.module';
 import { PlatformDashboardModule } from './dashboard/platform-dashboard.module';
@@ -23,6 +24,7 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
 @Module({
   imports: [
     PlatformAccountsModule,
+    PlatformAdminsModule,
     PlatformAuthModule,
     PlatformDashboardModule,
     PlatformMerchantsModule,

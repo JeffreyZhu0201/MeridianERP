@@ -59,7 +59,10 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 
 | Portal | URL | Account | Password |
 |---|---|---|---|
-| Admin | http://localhost:3000 | `admin@meridian.test` | `admin123` |
+| Admin (super) | http://localhost:3000 | `admin@meridian.test` | `admin123` |
+| Admin (finance) | http://localhost:3000 | `finance@meridian.test` | `finance123` |
+| Admin (fulfillment) | http://localhost:3000 | `fulfillment@meridian.test` | `fulfill123` |
+| Admin (reviewer) | http://localhost:3000 | `reviewer@meridian.test` | `review123` |
 | Merchant | http://localhost:3002 | `demo@merchant.test` | `demo1234` |
 | Store | http://localhost:3003/s/demo | Register at `/s/demo/register` | n/a |
 | Distributor | http://localhost:3005 | Create in Admin -> Distributors | n/a |

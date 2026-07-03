@@ -10,12 +10,15 @@ import {
 } from '@nestjs/common';
 import { ReplenishmentRequestStatus } from '@prisma/client';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PlatformReplenishmentService } from './platform-replenishment.service';
 
 @Controller('platform/replenishment')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN', 'FULFILLMENT', 'REVIEWER')
 export class PlatformReplenishmentController {
   constructor(private readonly service: PlatformReplenishmentService) {}
 

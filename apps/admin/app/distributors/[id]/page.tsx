@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type DistributorBranch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { DistributorDetailView } from './_components/distributor-detail';
@@ -54,8 +54,8 @@ export default async function DistributorDetailPage({ params }: DistributorDetai
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <DistributorDetailView distributor={distributor} branches={branches} token={token} />
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

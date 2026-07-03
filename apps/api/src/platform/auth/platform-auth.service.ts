@@ -18,6 +18,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import {
+  ADMIN_ROLE_HOME_PATH,
+  ADMIN_ROLE_PERMISSIONS,
+  type AdminPlatformRole,
+} from '@meridian/shared';
 import { EnvService } from '../../config/env.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformLoginDto } from './dto/platform-login.dto';
@@ -43,11 +48,34 @@ export class PlatformAuthService {
       aud: 'admin' as const,
       roles: [user.role],
     };
+    const role = user.role as AdminPlatformRole;
     return {
       accessToken: this.jwt.sign(payload, {
         secret: this.env.getOrThrow('JWT_SECRET'),
       }),
-      user: { email: user.email, role: user.role },
+      user: {
+        email: user.email,
+        role,
+        homePath: ADMIN_ROLE_HOME_PATH[role] ?? '/',
+      },
+    };
+  }
+
+  async me(userId: string) {
+    const user = await this.prisma.platformUser.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new UnauthorizedException('Admin not found');
+    }
+
+    const role = user.role as AdminPlatformRole;
+    return {
+      id: user.id,
+      email: user.email,
+      role,
+      permissions: ADMIN_ROLE_PERMISSIONS[role] ?? [],
+      homePath: ADMIN_ROLE_HOME_PATH[role] ?? '/',
     };
   }
 }

@@ -1,4 +1,5 @@
 export * from './frontend-api.js';
+export * from './admin-rbac.js';
 export * from './enums.js';
 export * from './inventory.js';
 export * from './platform.js';

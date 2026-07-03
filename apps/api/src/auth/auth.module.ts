@@ -9,6 +9,7 @@ import { MerchantJwtStrategy } from './strategies/merchant-jwt.strategy';
 import { DistributorAuthGuard } from './guards/distributor-auth.guard';
 import { OptionalStoreAuthGuard } from './guards/optional-store-auth.guard';
 import { PlatformAuthGuard } from './guards/platform-auth.guard';
+import { PlatformRolesGuard } from './guards/platform-roles.guard';
 import { MerchantAuthGuard } from './guards/merchant-auth.guard';
 import { StoreAuthGuard } from './guards/store-auth.guard';
 
@@ -29,15 +30,17 @@ import { StoreAuthGuard } from './guards/store-auth.guard';
     CustomerJwtStrategy,
     DistributorJwtStrategy,
     PlatformAuthGuard,
+    PlatformRolesGuard,
     MerchantAuthGuard,
     StoreAuthGuard,
     DistributorAuthGuard,
     OptionalStoreAuthGuard,
   ],
   exports: [
-    JwtModule,                    // JWT 处理能力
-    PlatformAuthGuard,            // 平台认证守卫
-    MerchantAuthGuard,            // 商户认证守卫
+    JwtModule,
+    PlatformAuthGuard,
+    PlatformRolesGuard,
+    MerchantAuthGuard,
     StoreAuthGuard,               // 商店认证守卫
     DistributorAuthGuard,         // 经销商认证守卫
     OptionalStoreAuthGuard,       // 可选商店守卫

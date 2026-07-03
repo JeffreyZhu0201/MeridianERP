@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { OnboardingStatus } from '@meridian/shared';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import {
   apiFetch,
   type ApprovedMerchantOption,
@@ -43,8 +43,8 @@ export default async function UserDetailPage({ params }: UserDetailPageProps) {
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <UserDetailView user={user} token={token} approvedMerchants={approvedMerchants} />
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

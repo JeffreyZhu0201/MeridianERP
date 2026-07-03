@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import type { PlatformOrderDetail } from '@meridian/shared';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { OrderDetailView } from './_components/order-detail-view';
@@ -26,8 +26,8 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <OrderDetailView order={order} locale={locale} />
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

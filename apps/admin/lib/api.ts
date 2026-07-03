@@ -1,4 +1,6 @@
 import type {
+  AdminPermission,
+  AdminPlatformRole,
   DistributorBranchAllocationSummary,
   DistributorBranchSummary,
   MasterSkuSummary,
@@ -24,6 +26,22 @@ export interface PaginatedResponse<T> {
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 export const AUTH_COOKIE = 'admin_token';
+export const ADMIN_ROLE_COOKIE = 'admin_role';
+
+export interface AdminSession {
+  id: string;
+  email: string;
+  role: AdminPlatformRole;
+  permissions: AdminPermission[];
+  homePath: string;
+}
+
+export interface PlatformAdmin {
+  id: string;
+  email: string;
+  role: AdminPlatformRole;
+  createdAt: string;
+}
 
 export async function apiFetch<T>(
   path: string,
@@ -62,7 +80,8 @@ export type DashboardStats = PlatformDashboardStats;
 
 export interface AuthResponse {
   accessToken: string;
-  user: { id: string; email: string; role: string };
+  user: { id: string; email: string; role: AdminPlatformRole };
+  homePath?: string;
 }
 
 export interface PlatformOrder {

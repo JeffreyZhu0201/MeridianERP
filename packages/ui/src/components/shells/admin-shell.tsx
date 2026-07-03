@@ -29,14 +29,17 @@ import {
   IconPackage,
   IconReceipt,
   IconSettings,
+  IconShield,
   IconTruckDelivery,
   IconUserCircle,
   IconUsers,
   IconWallet,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import { adminRoleHasPermission, type AdminPermission } from '@meridian/shared';
 import { ErpShell } from '../frameworks/erp-shell';
 import { cn } from '../../lib/utils';
+import { Badge } from '../ui/badge';
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -58,6 +61,8 @@ import {
 export interface AdminShellProps {
   children: ReactNode;
   userEmail?: string;
+  role?: string;
+  permissions?: AdminPermission[];
   onLogout?: () => void;
 }
 
@@ -88,6 +93,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
   { href: '/users', key: 'users', icon: IconUserCircle },
+  { href: '/admins', key: 'admins', icon: IconShield },
   { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
   { href: '/merchants?status=APPROVED', key: 'inventory', icon: IconBox },
   { href: '/distributors', key: 'distributors', icon: IconUsers },
@@ -119,20 +125,34 @@ function AdminNav({
   pathname,
   openSections,
   toggleSection,
+  role,
+  permissions,
 }: {
   pathname: string;
   openSections: Record<string, boolean>;
   toggleSection: (key: string) => void;
+  role?: string;
+  permissions?: AdminPermission[];
 }) {
   const t = useTranslations('admin.nav');
   const tc = useTranslations('common');
+
+  const visibleItems = navItems.filter(({ key }) => {
+    if (permissions?.length) {
+      return permissions.includes(key as AdminPermission);
+    }
+    if (role) {
+      return adminRoleHasPermission(role, key as AdminPermission);
+    }
+    return true;
+  });
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{tc('platform')}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {navItems.map(({ href, key, icon: Icon, children }) => {
+          {visibleItems.map(({ href, key, icon: Icon, children }) => {
             const label = t(key);
             const prefix = sectionPrefix(href);
             const active =
@@ -195,11 +215,16 @@ function AdminNav({
   );
 }
 
-export function AdminShell({ children, userEmail, onLogout }: AdminShellProps) {
+export function AdminShell({ children, userEmail, role, permissions, onLogout }: AdminShellProps) {
   const pathname = usePathname();
   const t = useTranslations('admin');
   const tc = useTranslations('common');
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  const roleLabel =
+    role && ['SUPER_ADMIN', 'FINANCE', 'FULFILLMENT', 'REVIEWER'].includes(role)
+      ? t(`roles.${role}` as 'roles.SUPER_ADMIN')
+      : role;
 
   const initialOpen = useMemo(
     () => ({
@@ -230,11 +255,18 @@ export function AdminShell({ children, userEmail, onLogout }: AdminShellProps) {
           pathname={pathname}
           openSections={mergedOpen}
           toggleSection={toggleSection}
+          role={role}
+          permissions={permissions}
         />
       }
       headerStart={<span className="text-sm font-medium text-muted-foreground">{tc('platform')}</span>}
       headerEnd={
         <>
+          {roleLabel ? (
+            <Badge variant="secondary" className="font-normal">
+              {roleLabel}
+            </Badge>
+          ) : null}
           {userEmail ? <span className="text-sm text-muted-foreground">{userEmail}</span> : null}
           {onLogout ? (
             <button

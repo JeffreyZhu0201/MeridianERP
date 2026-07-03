@@ -16,8 +16,11 @@
  * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
  */
 
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { Public } from '../../auth/decorators/public.decorator';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
 import { PlatformLoginDto } from './dto/platform-login.dto';
 import { PlatformAuthService } from './platform-auth.service';
 
@@ -25,11 +28,16 @@ import { PlatformAuthService } from './platform-auth.service';
 export class PlatformAuthController {
   constructor(private readonly authService: PlatformAuthService) {}
 
-  
   @Public()
   @Post('login')
   @HttpCode(201)
   login(@Body() dto: PlatformLoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Get('me')
+  @UseGuards(PlatformAuthGuard)
+  me(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.me(user.userId);
   }
 }

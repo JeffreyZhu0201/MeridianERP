@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { FormPageFrame } from '@meridian/ui/server';
 import type { PlatformSettingsDto } from '@meridian/shared';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { ApiError, apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 
@@ -41,7 +41,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <FormPageFrame title={t('title')} description={t('description')}>
           {loadError ? (
@@ -56,6 +56,6 @@ export default async function SettingsPage() {
         </FormPageFrame>
         {!loadError ? <PlatformSettingsPayments settings={settings} /> : null}
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

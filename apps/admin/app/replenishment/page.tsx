@@ -2,7 +2,7 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { ReplenishmentStatusTabs } from './_components/replenishment-status-tabs';
@@ -52,7 +52,7 @@ export default async function ReplenishmentPage({ searchParams }: ReplenishmentP
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader metrics={[{ title: t('title'), value: requests.length }]} />
         <Suspense fallback={null}>
@@ -62,6 +62,6 @@ export default async function ReplenishmentPage({ searchParams }: ReplenishmentP
           <ReplenishmentView requests={requests} token={token} status={status} />
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

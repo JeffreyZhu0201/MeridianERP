@@ -1,10 +1,13 @@
 import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import { ExportSettlementDto } from './dto/settlement.dto';
 import { PlatformSettlementsService } from './platform-settlements.service';
 
 @Controller('platform/settlements')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN', 'FINANCE')
 export class PlatformSettlementsController {
   constructor(private readonly settlementsService: PlatformSettlementsService) {}
 

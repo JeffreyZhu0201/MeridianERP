@@ -51,7 +51,9 @@ enum BindType {
 // 平台用户角色
 enum PlatformRole {
   SUPER_ADMIN   // 超级管理员
-  PLATFORM_OPS  // 平台运营
+  FINANCE       // 财务
+  FULFILLMENT   // 发货员
+  REVIEWER      // 审核员
 }
 
 // 商户用户角色

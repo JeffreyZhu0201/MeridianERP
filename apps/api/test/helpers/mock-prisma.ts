@@ -1182,6 +1182,97 @@ export function createMockPrisma() {
         }
         return null;
       },
+      findMany: async ({
+        where,
+        orderBy,
+        select,
+      }: {
+        where?: { role?: PlatformRole };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+        select?: Record<string, boolean>;
+      } = {}) => {
+        let list = [...platformUsers.values()];
+        if (where?.role) {
+          list = list.filter((u) => u.role === where.role);
+        }
+        if (orderBy?.createdAt === 'desc') {
+          list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        } else if (orderBy?.createdAt === 'asc') {
+          list.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        if (select) {
+          return list.map((user) => {
+            const row: Record<string, unknown> = {};
+            for (const key of Object.keys(select)) {
+              if (select[key]) {
+                row[key] = user[key as keyof PlatformUserRecord];
+              }
+            }
+            return row;
+          });
+        }
+        return list;
+      },
+      count: async ({ where }: { where?: { role?: PlatformRole } } = {}) => {
+        let list = [...platformUsers.values()];
+        if (where?.role) {
+          list = list.filter((u) => u.role === where.role);
+        }
+        return list.length;
+      },
+      create: async ({
+        data,
+        select,
+      }: {
+        data: Omit<PlatformUserRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        select?: Record<string, boolean>;
+      }) => {
+        const existing = [...platformUsers.values()].find((u) => u.email === data.email);
+        if (existing) {
+          throw new Error('Unique constraint failed on email');
+        }
+        const record: PlatformUserRecord = {
+          id: nextId('pu'),
+          createdAt: now(),
+          updatedAt: now(),
+          ...data,
+        };
+        platformUsers.set(record.id, record);
+        if (select) {
+          const row: Record<string, unknown> = {};
+          for (const key of Object.keys(select)) {
+            if (select[key]) {
+              row[key] = record[key as keyof PlatformUserRecord];
+            }
+          }
+          return row;
+        }
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+        select,
+      }: {
+        where: { id: string };
+        data: Partial<PlatformUserRecord>;
+        select?: Record<string, boolean>;
+      }) => {
+        const existing = platformUsers.get(where.id);
+        if (!existing) throw new Error('PlatformUser not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        platformUsers.set(existing.id, updated);
+        if (select) {
+          const row: Record<string, unknown> = {};
+          for (const key of Object.keys(select)) {
+            if (select[key]) {
+              row[key] = updated[key as keyof PlatformUserRecord];
+            }
+          }
+          return row;
+        }
+        return updated;
+      },
       upsert: async ({
         where,
         create,

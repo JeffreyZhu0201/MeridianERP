@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { PlatformCrmCompany } from '@meridian/shared';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { CompaniesTable } from './_components/companies-table';
@@ -20,7 +20,7 @@ export default async function CrmCompaniesPage() {
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader
           metrics={[{ title: t('title'), value: companies.length, description: t('description') }]}
@@ -29,6 +29,6 @@ export default async function CrmCompaniesPage() {
           <CompaniesTable companies={companies} token={token} />
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

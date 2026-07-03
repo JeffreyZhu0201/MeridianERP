@@ -139,11 +139,11 @@ describe('PlatformUsers (e2e)', () => {
     const updated = await request(app.getHttpServer())
       .patch(`/api/v1/platform/users/${accountId}/identities`)
       .set('Authorization', `Bearer ${platformToken}`)
-      .send({ platformAdminRole: 'PLATFORM_OPS' })
+      .send({ platformAdminRole: 'REVIEWER' })
       .expect(200);
 
     expect(updated.body.identities).toContain('PLATFORM_ADMIN');
-    expect(updated.body.platformAdminRole).toBe('PLATFORM_OPS');
+    expect(updated.body.platformAdminRole).toBe('REVIEWER');
     expect(updated.body.merchantRoles).toEqual([]);
   });
 
@@ -157,7 +157,7 @@ describe('PlatformUsers (e2e)', () => {
     await request(app.getHttpServer())
       .patch(`/api/v1/platform/users/${accountId}/identities`)
       .set('Authorization', `Bearer ${platformToken}`)
-      .send({ platformAdminRole: 'PLATFORM_OPS' })
+      .send({ platformAdminRole: 'REVIEWER' })
       .expect(200);
 
     const revoked = await request(app.getHttpServer())

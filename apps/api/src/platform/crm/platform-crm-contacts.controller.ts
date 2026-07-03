@@ -10,6 +10,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
+import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
+import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
 import {
   CreatePlatformCrmContactDto,
   UpdatePlatformCrmContactDto,
@@ -17,7 +19,8 @@ import {
 import { PlatformCrmContactsService } from './platform-crm-contacts.service';
 
 @Controller('platform/crm/contacts')
-@UseGuards(PlatformAuthGuard)
+@UseGuards(PlatformAuthGuard, PlatformRolesGuard)
+@PlatformRoles('SUPER_ADMIN')
 export class PlatformCrmContactsController {
   constructor(private readonly service: PlatformCrmContactsService) {}
 

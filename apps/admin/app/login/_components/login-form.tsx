@@ -5,7 +5,13 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { AuthLayout, Button, Input, Label } from '@meridian/ui';
 
-import { API_URL, AUTH_COOKIE, type AuthResponse } from '@/lib/api';
+import {
+  ADMIN_ROLE_COOKIE,
+  API_URL,
+  AUTH_COOKIE,
+  type AuthResponse,
+} from '@/lib/api';
+import { ADMIN_ROLE_HOME_PATH, adminCanAccessPath, type AdminPlatformRole } from '@meridian/shared';
 
 export function LoginForm() {
   const router = useRouter();
@@ -34,9 +40,16 @@ export function LoginForm() {
       }
 
       const data = (await res.json()) as AuthResponse;
-      document.cookie = `${AUTH_COOKIE}=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-      const from = searchParams.get('from') ?? '/';
-      router.push(from);
+      const role = data.user.role;
+      const cookieOpts = `path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+      document.cookie = `${AUTH_COOKIE}=${data.accessToken}; ${cookieOpts}`;
+      document.cookie = `${ADMIN_ROLE_COOKIE}=${role}; ${cookieOpts}`;
+      const homePath =
+        data.homePath ?? ADMIN_ROLE_HOME_PATH[role as AdminPlatformRole] ?? '/';
+      const from = searchParams.get('from');
+      const destination =
+        from && adminCanAccessPath(role, from) ? from : homePath;
+      router.push(destination);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('failed'));

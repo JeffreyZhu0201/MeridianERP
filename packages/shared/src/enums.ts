@@ -31,7 +31,9 @@ export enum BindType {
 
 export enum PlatformRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
-  PLATFORM_OPS = 'PLATFORM_OPS',
+  FINANCE = 'FINANCE',
+  FULFILLMENT = 'FULFILLMENT',
+  REVIEWER = 'REVIEWER',
 }
 
 export enum MerchantRole {

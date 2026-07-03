@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame, buttonVariants } from '@meridian/ui/server';
 import { OnboardingStatus } from '@meridian/shared';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PaginatedResponse, type MerchantListItem, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { MerchantsFilters } from './_components/merchants-filters';
@@ -80,7 +80,7 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
   });
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <div className="space-y-6">
         <BentoListHeader metrics={metrics} />
         <ListPageFrame
@@ -108,6 +108,6 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
           </Suspense>
         </ListPageFrame>
       </div>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

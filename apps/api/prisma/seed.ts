@@ -71,6 +71,23 @@ async function main() {
     },
   });
 
+  const roleSeeds = [
+    { email: 'finance@meridian.test', password: 'finance123', role: 'FINANCE' as const },
+    { email: 'fulfillment@meridian.test', password: 'fulfill123', role: 'FULFILLMENT' as const },
+    { email: 'reviewer@meridian.test', password: 'review123', role: 'REVIEWER' as const },
+  ];
+  for (const entry of roleSeeds) {
+    await prisma.platformUser.upsert({
+      where: { email: entry.email },
+      update: { role: entry.role },
+      create: {
+        email: entry.email,
+        password: await bcrypt.hash(entry.password, 10),
+        role: entry.role,
+      },
+    });
+  }
+
   const demoSlug = 'demo';
   const existingTenant = await prisma.tenant.findUnique({ where: { slug: demoSlug } });
   if (!existingTenant) {

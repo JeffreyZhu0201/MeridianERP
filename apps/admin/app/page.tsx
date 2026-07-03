@@ -1,12 +1,25 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { BentoDashboardFrame, BentoMetricTile, BentoTile, EmptyState, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui/server';
+import {
+  BentoDashboardFrame,
+  BentoMetricTile,
+  BentoTile,
+  EmptyState,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  formatMoney,
+} from '@meridian/ui/server';
 import { BentoChartTile } from '@meridian/ui/client-widgets';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { RoleDashboardHints } from '@/app/_components/role-dashboard-hints';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { StatusBadge } from '@/components/status-badge';
 import { apiFetch, ApiError, type DashboardStats } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { getAdminSession, getToken } from '@/lib/auth';
 
 async function loadDashboard(
   token: string,
@@ -22,6 +35,9 @@ async function loadDashboard(
 }
 
 export default async function DashboardPage() {
+  const session = await getAdminSession();
+  if (!session) return null;
+
   const token = await getToken();
   if (!token) return null;
 
@@ -31,7 +47,7 @@ export default async function DashboardPage() {
   const { stats, error } = await loadDashboard(token, t('loadFailed'));
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession session={session}>
       <BentoDashboardFrame
         title={t('title')}
         alert={
@@ -46,9 +62,9 @@ export default async function DashboardPage() {
           ) : undefined
         }
       >
+        <RoleDashboardHints role={session.role} />
         {stats ? (
           <>
-          
             <BentoMetricTile title={t('totalMerchants')} value={stats.totalMerchants} />
             <Link href="/merchants?status=SUBMITTED" className="block transition-opacity hover:opacity-90">
               <BentoMetricTile title={t('pendingMerchants')} value={stats.pendingReview} />
@@ -125,6 +141,6 @@ export default async function DashboardPage() {
           </>
         ) : null}
       </BentoDashboardFrame>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }

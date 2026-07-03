@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { ListPageFrame } from '@meridian/ui/server';
 
-import { AdminShellWrapper } from '@/components/admin-shell-wrapper';
+import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PlatformDistributor } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { CreateMerchantForm } from './_components/create-merchant-form';
@@ -19,10 +19,10 @@ export default async function CreateMerchantPage() {
   }
 
   return (
-    <AdminShellWrapper>
+    <AdminShellWithSession>
       <ListPageFrame title={t('createTitle')} description={t('createDescription')}>
         <CreateMerchantForm token={token} distributors={distributors} />
       </ListPageFrame>
-    </AdminShellWrapper>
+    </AdminShellWithSession>
   );
 }
