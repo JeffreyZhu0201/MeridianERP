@@ -14,100 +14,93 @@ datasource db {
 
 // 商户入驻状态
 enum OnboardingStatus {
-  DRAFT        // 草稿（未提交）
-  SUBMITTED    // 已提交审核
+  DRAFT // 草稿（未提交）
+  SUBMITTED // 已提交审核
   UNDER_REVIEW // 审核中
-  APPROVED     // 审核通过
-  REJECTED     // 审核拒绝
+  APPROVED // 审核通过
+  REJECTED // 审核拒绝
 }
 
 // 线索阶段
 enum LeadStage {
-  NEW       // 新线索
+  NEW // 新线索
   QUALIFIED // 已Qualified
-  WON       // 赢单
-  LOST      // 输单
+  WON // 赢单
+  LOST // 输单
 }
 
 // CRM 活动类型
 enum ActivityType {
-  CALL    // 电话
-  NOTE    // 笔记
+  CALL // 电话
+  NOTE // 笔记
   MEETING // 会议
 }
 
 // 佣金类型
 enum CommissionType {
   PERCENT // 按比例
-  FIXED   // 固定金额
-}
-
-// 绑定类型（经销商绑定商户 or 消费者）
-enum BindType {
-  MERCHANT  // 绑定商户
-  CUSTOMER  // 绑定消费者
+  FIXED // 固定金额
 }
 
 // 平台用户角色
 enum PlatformRole {
-  SUPER_ADMIN   // 超级管理员
-  FINANCE       // 财务
-  FULFILLMENT   // 发货员
-  REVIEWER      // 审核员
+  SUPER_ADMIN // 超级管理员
+  FINANCE // 财务
+  FULFILLMENT // 发货员
+  REVIEWER // 审核员
 }
 
 // 商户用户角色
 enum MerchantRole {
-  MERCHANT_OWNER  // 商户老板
-  MERCHANT_STAFF  // 商户员工
+  MERCHANT_OWNER // 商户老板
+  MERCHANT_STAFF // 商户员工
 }
 
 // 订单状态
 enum OrderStatus {
   PENDING_PAYMENT // 待支付
-  PAID            // 已支付
-  FULFILLED       // 已完成
-  CANCELLED       // 已取消
-  REFUNDED        // 已退款
+  PAID // 已支付
+  FULFILLED // 已完成
+  CANCELLED // 已取消
+  REFUNDED // 已退款
 }
 
 // 佣金账本状态
 enum LedgerStatus {
-  ACCRUED  // 应计（待结算）
-  SETTLED  // 已结算
-  VOID     // 已作废
+  ACCRUED // 应计（待结算）
+  SETTLED // 已结算
+  VOID // 已作废
 }
 
 // 佣金来源
 enum CommissionSource {
   ALLOCATION // 配货进货佣金
-  RETAIL     // 零售订单佣金（历史）
 }
 
 // 结算批次状态
 enum SettlementBatchStatus {
-  DRAFT    // 草稿
+  DRAFT // 草稿
   EXPORTED // 已导出
-  PAID     // 已支付
+  PAID // 已支付
 }
 
 // 采购单状态
 enum PurchaseOrderStatus {
-  DRAFT              // 草稿
-  ORDERED            // 已下单
+  DRAFT // 草稿
+  ORDERED // 已下单
   PARTIALLY_RECEIVED // 部分收货
-  RECEIVED           // 已收货
-  CANCELLED          // 已取消
+  RECEIVED // 已收货
+  CANCELLED // 已取消
 }
 
 // 库存调整原因
 enum StockAdjustmentReason {
-  DAMAGE            // 损坏
-  COUNT_CORRECTION  // 盘点修正
-  RETURN            // 退货
-  TRANSFER_OUT      // 转出
-  TRANSFER_IN       // 转入
-  OTHER             // 其他
+  DAMAGE // 损坏
+  COUNT_CORRECTION // 盘点修正
+  RETURN // 退货
+  TRANSFER_OUT // 转出
+  TRANSFER_IN // 转入
+  OTHER // 其他
 }
 
 // 库存调拨状态
@@ -118,45 +111,45 @@ enum StockTransferStatus {
 
 // 履约类型
 enum FulfillmentType {
-  PICKUP   // 自提
+  PICKUP // 自提
   DELIVERY // 配送
 }
 
 // 配额分配单状态
 enum AllocationOrderStatus {
-  DRAFT     // 草稿
-  ISSUED    // 已下发
+  DRAFT // 草稿
+  ISSUED // 已下发
   CONFIRMED // 已确认
   CANCELLED // 已取消
 }
 
 // 补货请求状态
 enum ReplenishmentRequestStatus {
-  PENDING   // 待审核
-  APPROVED  // 已批准
-  REJECTED  // 已拒绝
+  PENDING // 待审核
+  APPROVED // 已批准
+  REJECTED // 已拒绝
   FULFILLED // 已完成
 }
 
 // 分店向总店进货单状态
 enum BranchPurchaseOrderStatus {
   PENDING_PAYMENT // 待支付
-  PAID            // 已支付
-  PROCESSING      // 总店处理中
-  SHIPPED         // 已发货
-  RECEIVED        // 已收货
-  CANCELLED       // 已取消
+  PAID // 已支付
+  PROCESSING // 总店处理中
+  SHIPPED // 已发货
+  RECEIVED // 已收货
+  CANCELLED // 已取消
 }
 
 // 分店进货支付状态
 enum BranchPurchaseOrderPaymentStatus {
   SUCCEEDED // 支付成功
-  FAILED    // 支付失败
+  FAILED // 支付失败
 }
 
 // 提现请求状态
 enum WithdrawalRequestStatus {
-  PENDING  // 待审核
+  PENDING // 待审核
   APPROVED // 已批准
   REJECTED // 已拒绝
 }
@@ -168,27 +161,27 @@ enum WithdrawalRequestStatus {
 // 平台用户（超级管理员 / 平台运营）
 model PlatformUser {
   id        String       @id @default(cuid()) // 主键
-  email     String       @unique               // 邮箱（唯一）
-  password  String                              // 密码（哈希）
-  role      PlatformRole                        // 角色
-  createdAt DateTime     @default(now())       // 创建时间
-  updatedAt DateTime     @updatedAt            // 更新时间
+  email     String       @unique // 邮箱（唯一）
+  password  String // 密码（哈希）
+  role      PlatformRole // 角色
+  createdAt DateTime     @default(now()) // 创建时间
+  updatedAt DateTime     @updatedAt // 更新时间
 }
 
 // 平台统一账号（商店注册入口；商户/消费者身份挂载于此）
 model PlatformAccount {
   id        String   @id @default(cuid()) // 主键
-  email     String   @unique               // 邮箱（全局唯一）
-  password  String                          // 密码（哈希）
-  firstName String?                         // 名
-  lastName  String?                         // 姓
-  phone     String?                         // 电话
-  createdAt DateTime @default(now())       // 创建时间
-  updatedAt DateTime @updatedAt            // 更新时间
+  email     String   @unique // 邮箱（全局唯一）
+  password  String // 密码（哈希）
+  firstName String? // 名
+  lastName  String? // 姓
+  phone     String? // 电话
+  createdAt DateTime @default(now()) // 创建时间
+  updatedAt DateTime @updatedAt // 更新时间
 
-  customers     Customer[]    // 各租户消费者档案
-  merchantUsers User[]        // 商户门户用户
-  distributor   Distributor?  // 拓店员身份（可选）
+  customers     Customer[] // 各租户消费者档案
+  merchantUsers User[] // 商户门户用户
+  distributor   Distributor? // 拓店员身份（可选）
 }
 
 // ============================================================
@@ -197,38 +190,37 @@ model PlatformAccount {
 
 // 租户（根实体，所有业务数据按 tenantId 隔离）
 model Tenant {
-  id                        String                     @id @default(cuid()) // 主键
-  slug                      String                     @unique                // 租户 slug（URL 友好，唯一）
-  merchantProfile           MerchantProfile?                               // 商户档案（一对一）
-  users                     User[]                                          // 商户用户
-  companies                 CrmCompany[]                                     // CRM 公司
-  contacts                  CrmContact[]                                    // CRM 联系人
-  leads                     CrmLead[]                                        // CRM 线索
-  activities                CrmActivity[]                                    // CRM 活动
-  distributors              Distributor[]                                    // 渠道经销商
-  bindings                  Binding[]                                        // 绑定关系
-  customers                 Customer[]                                       // 消费者
-  categories                Category[]                                       // 商品分类
-  products                  Product[]                                        // 商品
-  carts                     Cart[]                                           // 购物车
-  orders                    Order[]                                          // 订单
-  commissionEntries         CommissionLedger[]                               // 佣金账本
-  inventorySettings         TenantInventorySettings?                        // 库存设置
-  tenantSettings            TenantSettings?                                  // 租户设置
-  warehouses                Warehouse[]                                      // 仓库
-  stockLevels               StockLevel[]                                     // 库存水平
-  adjustments               StockAdjustment[]                                // 库存调整
-  purchaseOrders            PurchaseOrder[]                                  // 采购单
-  purchaseOrderReceipts     PurchaseOrderReceipt[]                           // 采购收货
-  stockTransfers            StockTransfer[]                                  // 库存调拨
-  allocationOrders          AllocationOrder[]                                // 配额分配单
-  replenishmentRequests     ReplenishmentRequest[]                           // 补货请求
-  branchPurchaseOrders      BranchPurchaseOrder[]                            // 向总店进货单
-  procurementReceivingAddresses ProcurementReceivingAddress[]              // 进货收货地址
-  deliveryAllocationLedgers DeliveryAllocationLedger[]                       // 配送配额账本
-  tenantPlugins             TenantPlugin[]                                   // 已安装插件
-  createdAt                 DateTime                   @default(now())        // 创建时间
-  updatedAt                 DateTime                   @updatedAt             // 更新时间
+  id                            String                        @id @default(cuid()) // 主键
+  slug                          String                        @unique // 租户 slug（URL 友好，唯一）
+  merchantProfile               MerchantProfile? // 商户档案（一对一）
+  users                         User[] // 商户用户
+  companies                     CrmCompany[] // CRM 公司
+  contacts                      CrmContact[] // CRM 联系人
+  leads                         CrmLead[] // CRM 线索
+  activities                    CrmActivity[] // CRM 活动
+  distributors                  Distributor[] // 渠道经销商
+  customers                     Customer[] // 消费者
+  categories                    Category[] // 商品分类
+  products                      Product[] // 商品
+  carts                         Cart[] // 购物车
+  orders                        Order[] // 订单
+  commissionEntries             CommissionLedger[] // 佣金账本
+  inventorySettings             TenantInventorySettings? // 库存设置
+  tenantSettings                TenantSettings? // 租户设置
+  warehouses                    Warehouse[] // 仓库
+  stockLevels                   StockLevel[] // 库存水平
+  adjustments                   StockAdjustment[] // 库存调整
+  purchaseOrders                PurchaseOrder[] // 采购单
+  purchaseOrderReceipts         PurchaseOrderReceipt[] // 采购收货
+  stockTransfers                StockTransfer[] // 库存调拨
+  allocationOrders              AllocationOrder[] // 配额分配单
+  replenishmentRequests         ReplenishmentRequest[] // 补货请求
+  branchPurchaseOrders          BranchPurchaseOrder[] // 向总店进货单
+  procurementReceivingAddresses ProcurementReceivingAddress[] // 进货收货地址
+  deliveryAllocationLedgers     DeliveryAllocationLedger[] // 配送配额账本
+  tenantPlugins                 TenantPlugin[] // 已安装插件
+  createdAt                     DateTime                      @default(now()) // 创建时间
+  updatedAt                     DateTime                      @updatedAt // 更新时间
 }
 
 // ============================================================
@@ -238,25 +230,25 @@ model Tenant {
 // 商户店铺信息
 model MerchantProfile {
   id                       String               @id @default(cuid()) // 主键
-  tenantId                 String               @unique               // 租户 ID（唯一）
+  tenantId                 String               @unique // 租户 ID（唯一）
   tenant                   Tenant               @relation(fields: [tenantId], references: [id]) // 所属租户
-  businessName             String                                   // 商铺名称
-  legalName                String?                                  // 法人名称
-  contactEmail             String                                   // 联系邮箱
-  contactPhone             String?                                  // 联系电话
-  onboardingStatus         OnboardingStatus     @default(DRAFT)     // 入驻状态
-  rejectionReason          String?                                  // 拒绝原因
-  submittedAt              DateTime?                                // 提交审核时间
-  reviewedAt              DateTime?                                // 审核时间
-  recruitedByDistributorId String?                                  // 招募渠道经销商 ID
+  businessName             String // 商铺名称
+  legalName                String? // 法人名称
+  contactEmail             String // 联系邮箱
+  contactPhone             String? // 联系电话
+  onboardingStatus         OnboardingStatus     @default(DRAFT) // 入驻状态
+  rejectionReason          String? // 拒绝原因
+  submittedAt              DateTime? // 提交审核时间
+  reviewedAt               DateTime? // 审核时间
+  recruitedByDistributorId String? // 招募渠道经销商 ID
   recruitedByDistributor   Distributor?         @relation("RecruitedMerchants", fields: [recruitedByDistributorId], references: [id]) // 招募渠道经销商
-  recruitedAt              DateTime?                                // 招募时间
-  pendingRecruitInviteCode String?                                  // 待生效的招募邀请码
-  storePublished           Boolean              @default(false)     // 店铺是否已发布
-  isFlagship               Boolean              @default(false)     // 是否为总店（旗舰店）
-  recruiterChangeLogs      RecruiterChangeLog[]                     // 招募人变更日志
-  createdAt                DateTime             @default(now())     // 创建时间
-  updatedAt                DateTime             @updatedAt          // 更新时间
+  recruitedAt              DateTime? // 招募时间
+  pendingRecruitInviteCode String? // 待生效的招募邀请码
+  storePublished           Boolean              @default(false) // 店铺是否已发布
+  isFlagship               Boolean              @default(false) // 是否为总店（旗舰店）
+  recruiterChangeLogs      RecruiterChangeLog[] // 招募人变更日志
+  createdAt                DateTime             @default(now()) // 创建时间
+  updatedAt                DateTime             @updatedAt // 更新时间
 
   @@index([recruitedByDistributorId])
 }
@@ -264,13 +256,13 @@ model MerchantProfile {
 // 招募人变更日志
 model RecruiterChangeLog {
   id                      String          @id @default(cuid()) // 主键
-  merchantProfileId       String                                 // 商户档案 ID
+  merchantProfileId       String // 商户档案 ID
   merchantProfile         MerchantProfile @relation(fields: [merchantProfileId], references: [id]) // 所属商户档案
-  previousDistributorId   String?                                // 前渠道经销商 ID
-  newDistributorId        String?                                // 新渠道经销商 ID
-  reason                  String                                 // 变更原因
-  changedByPlatformUserId String?                                // 变更操作人（平台用户 ID）
-  createdAt               DateTime        @default(now())        // 创建时间
+  previousDistributorId   String? // 前渠道经销商 ID
+  newDistributorId        String? // 新渠道经销商 ID
+  reason                  String // 变更原因
+  changedByPlatformUserId String? // 变更操作人（平台用户 ID）
+  createdAt               DateTime        @default(now()) // 创建时间
 
   @@index([merchantProfileId])
 }
@@ -281,22 +273,22 @@ model RecruiterChangeLog {
 
 // 商户用户
 model User {
-  id                     String                 @id @default(cuid()) // 主键
-  tenantId               String                                      // 租户 ID
-  tenant                 Tenant                 @relation(fields: [tenantId], references: [id]) // 所属租户
-  accountId              String                                      // 平台账号 ID
-  account                PlatformAccount          @relation(fields: [accountId], references: [id]) // 平台账号
-  email                  String                                       // 邮箱
-  role                   MerchantRole                                 // 角色（老板/员工）
-  stockAdjustments       StockAdjustment[]                            // 库存调整记录
-  purchaseOrdersCreated       PurchaseOrder[]        @relation("PurchaseOrderCreatedBy")       // 创建的采购单
+  id                          String                 @id @default(cuid()) // 主键
+  tenantId                    String // 租户 ID
+  tenant                      Tenant                 @relation(fields: [tenantId], references: [id]) // 所属租户
+  accountId                   String // 平台账号 ID
+  account                     PlatformAccount        @relation(fields: [accountId], references: [id]) // 平台账号
+  email                       String // 邮箱
+  role                        MerchantRole // 角色（老板/员工）
+  stockAdjustments            StockAdjustment[] // 库存调整记录
+  purchaseOrdersCreated       PurchaseOrder[]        @relation("PurchaseOrderCreatedBy") // 创建的采购单
   branchPurchaseOrdersCreated BranchPurchaseOrder[]  @relation("BranchPurchaseOrderCreatedBy") // 创建的进货单
-  purchaseOrdersReceived      PurchaseOrderReceipt[] @relation("PurchaseOrderReceivedBy")     // 收货的采购单
-  stockTransfersCreated  StockTransfer[]        @relation("StockTransferCreatedBy")   // 创建的调拨单
-  createdAt              DateTime               @default(now())      // 创建时间
-  updatedAt              DateTime               @updatedAt           // 更新时间
+  purchaseOrdersReceived      PurchaseOrderReceipt[] @relation("PurchaseOrderReceivedBy") // 收货的采购单
+  stockTransfersCreated       StockTransfer[]        @relation("StockTransferCreatedBy") // 创建的调拨单
+  createdAt                   DateTime               @default(now()) // 创建时间
+  updatedAt                   DateTime               @updatedAt // 更新时间
 
-  @@unique([tenantId, email])    // 同一租户下邮箱唯一
+  @@unique([tenantId, email]) // 同一租户下邮箱唯一
   @@index([tenantId])
   @@index([accountId])
 }
@@ -308,13 +300,13 @@ model User {
 // CRM 公司
 model CrmCompany {
   id        String       @id @default(cuid()) // 主键
-  tenantId  String                                // 租户 ID
+  tenantId  String // 租户 ID
   tenant    Tenant       @relation(fields: [tenantId], references: [id]) // 所属租户
-  name      String                                 // 公司名称
-  website   String?                                // 公司网站
-  contacts  CrmContact[]                          // 联系人
-  createdAt DateTime     @default(now())          // 创建时间
-  updatedAt DateTime     @updatedAt               // 更新时间
+  name      String // 公司名称
+  website   String? // 公司网站
+  contacts  CrmContact[] // 联系人
+  createdAt DateTime     @default(now()) // 创建时间
+  updatedAt DateTime     @updatedAt // 更新时间
 
   @@index([tenantId])
 }
@@ -322,18 +314,18 @@ model CrmCompany {
 // CRM 联系人
 model CrmContact {
   id         String        @id @default(cuid()) // 主键
-  tenantId   String                                // 租户 ID
+  tenantId   String // 租户 ID
   tenant     Tenant        @relation(fields: [tenantId], references: [id]) // 所属租户
-  companyId  String?                               // 公司 ID
+  companyId  String? // 公司 ID
   company    CrmCompany?   @relation(fields: [companyId], references: [id]) // 所属公司
-  firstName  String                                // 名
-  lastName   String                                // 姓
-  email      String?                               // 邮箱
-  phone      String?                               // 电话
-  leads      CrmLead[]                             // 线索
-  activities CrmActivity[]                         // 活动
-  createdAt  DateTime      @default(now())        // 创建时间
-  updatedAt  DateTime      @updatedAt             // 更新时间
+  firstName  String // 名
+  lastName   String // 姓
+  email      String? // 邮箱
+  phone      String? // 电话
+  leads      CrmLead[] // 线索
+  activities CrmActivity[] // 活动
+  createdAt  DateTime      @default(now()) // 创建时间
+  updatedAt  DateTime      @updatedAt // 更新时间
 
   @@index([tenantId])
 }
@@ -341,17 +333,17 @@ model CrmContact {
 // CRM 线索
 model CrmLead {
   id            String       @id @default(cuid()) // 主键
-  tenantId      String                                // 租户 ID
+  tenantId      String // 租户 ID
   tenant        Tenant       @relation(fields: [tenantId], references: [id]) // 所属租户
-  contactId     String?                               // 联系人 ID
+  contactId     String? // 联系人 ID
   contact       CrmContact?  @relation(fields: [contactId], references: [id]) // 所属联系人
-  title         String                                // 线索标题
-  stage         LeadStage    @default(NEW)           // 阶段
-  source        String?                               // 来源
-  distributorId String?                               // 关联经销商 ID
+  title         String // 线索标题
+  stage         LeadStage    @default(NEW) // 阶段
+  source        String? // 来源
+  distributorId String? // 关联经销商 ID
   distributor   Distributor? @relation(fields: [distributorId], references: [id]) // 关联经销商
-  createdAt     DateTime     @default(now())         // 创建时间
-  updatedAt     DateTime     @updatedAt             // 更新时间
+  createdAt     DateTime     @default(now()) // 创建时间
+  updatedAt     DateTime     @updatedAt // 更新时间
 
   @@index([tenantId])
   @@index([stage])
@@ -360,14 +352,14 @@ model CrmLead {
 // CRM 活动
 model CrmActivity {
   id        String       @id @default(cuid()) // 主键
-  tenantId  String                                // 租户 ID
+  tenantId  String // 租户 ID
   tenant    Tenant       @relation(fields: [tenantId], references: [id]) // 所属租户
-  contactId String?                               // 联系人 ID
-  contact   CrmContact? @relation(fields: [contactId], references: [id]) // 所属联系人
-  leadId    String?                               // 线索 ID
-  type      ActivityType                           // 活动类型
-  note      String                                // 备注内容
-  createdAt DateTime     @default(now())         // 创建时间
+  contactId String? // 联系人 ID
+  contact   CrmContact?  @relation(fields: [contactId], references: [id]) // 所属联系人
+  leadId    String? // 线索 ID
+  type      ActivityType // 活动类型
+  note      String // 备注内容
+  createdAt DateTime     @default(now()) // 创建时间
 
   @@index([tenantId])
 }
@@ -379,30 +371,26 @@ model CrmActivity {
 // 渠道经销商
 model Distributor {
   id                 String                      @id @default(cuid()) // 主键
-  tenantId           String?                                // 租户 ID（可选，平台级经销商可能为空）
+  tenantId           String? // 租户 ID（可选，平台级经销商可能为空）
   tenant             Tenant?                     @relation(fields: [tenantId], references: [id]) // 所属租户
-  accountId          String?                     @unique               // 关联平台账号（拓店员）
+  accountId          String?                     @unique // 关联平台账号（拓店员）
   account            PlatformAccount?            @relation(fields: [accountId], references: [id]) // 平台账号
-  name               String                                  // 经销商名称
-  email              String?                                 // 邮箱
-  phone              String?                                 // 电话
-  passwordHash       String?                                 // 密码哈希
+  name               String // 经销商名称
+  email              String? // 邮箱
+  phone              String? // 电话
+  passwordHash       String? // 密码哈希
   portalEnabled      Boolean                     @default(false) // 是否启用门户
-  lastLoginAt        DateTime?                               // 最后登录时间
+  lastLoginAt        DateTime? // 最后登录时间
   commissionRate     Decimal                     @db.Decimal(10, 4) // 佣金比例/金额
   commissionType     CommissionType              @default(PERCENT) // 佣金类型
-  isActive           Boolean                     @default(true)  // 是否启用
-  qrCodes            DistributorQrCode[]                      // 二维码列表
-  bindings           Binding[]                                  // 绑定关系
-  leads              CrmLead[]                                  // 线索
-  orders             Order[]                                    // 订单
-  carts              Cart[]                                     // 购物车
-  commissionEntries  CommissionLedger[]                         // 佣金账本
-  recruitedMerchants MerchantProfile[]         @relation("RecruitedMerchants") // 招募的商户
-  recruitInviteCodes MerchantRecruitInviteCode[]               // 招募邀请码
-  withdrawalRequests WithdrawalRequest[]                       // 提现请求
+  isActive           Boolean                     @default(true) // 是否启用
+  leads              CrmLead[] // 线索
+  commissionEntries  CommissionLedger[] // 佣金账本
+  recruitedMerchants MerchantProfile[]           @relation("RecruitedMerchants") // 招募的商户
+  recruitInviteCodes MerchantRecruitInviteCode[] // 招募邀请码
+  withdrawalRequests WithdrawalRequest[] // 提现请求
   createdAt          DateTime                    @default(now()) // 创建时间
-  updatedAt          DateTime                    @updatedAt    // 更新时间
+  updatedAt          DateTime                    @updatedAt // 更新时间
 
   @@index([tenantId])
 }
@@ -410,47 +398,15 @@ model Distributor {
 // 招募邀请码
 model MerchantRecruitInviteCode {
   id            String      @id @default(cuid()) // 主键
-  code          String      @unique               // 邀请码（唯一）
-  distributorId String                                // 经销商 ID
+  code          String      @unique // 邀请码（唯一）
+  distributorId String // 经销商 ID
   distributor   Distributor @relation(fields: [distributorId], references: [id]) // 所属经销商
-  revokedAt     DateTime?                             // 撤销时间
-  expiresAt     DateTime?                             // 过期时间
-  useCount      Int         @default(0)            // 已使用次数
-  createdAt     DateTime    @default(now())        // 创建时间
+  revokedAt     DateTime? // 撤销时间
+  expiresAt     DateTime? // 过期时间
+  useCount      Int         @default(0) // 已使用次数
+  createdAt     DateTime    @default(now()) // 创建时间
 
   @@index([distributorId])
-}
-
-// 经销商二维码
-model DistributorQrCode {
-  id            String      @id @default(cuid()) // 主键
-  distributorId String                                // 经销商 ID
-  distributor   Distributor @relation(fields: [distributorId], references: [id]) // 所属经销商
-  token         String      @unique               // 二维码 token（唯一）
-  bindType      BindType    @default(MERCHANT)     // 绑定类型
-  expiresAt     DateTime                            // 过期时间
-  revokedAt     DateTime?                           // 撤销时间
-  createdAt     DateTime    @default(now())        // 创建时间
-
-  @@index([distributorId])
-  @@index([distributorId, bindType])
-}
-
-// 绑定关系（经销商 ↔ 商户/消费者）
-model Binding {
-  id            String      @id @default(cuid()) // 主键
-  tenantId      String                                // 租户 ID
-  tenant        Tenant      @relation(fields: [tenantId], references: [id]) // 所属租户
-  distributorId String                                // 经销商 ID
-  distributor   Distributor @relation(fields: [distributorId], references: [id]) // 所属经销商
-  bindableType  BindType                               // 绑定类型
-  bindableId    String                                // 被绑定方 ID（商户或消费者）
-  boundAt       DateTime    @default(now())           // 绑定时间
-
-  @@unique([bindableType, bindableId]) // 同类型下 ID 唯一
-  @@index([tenantId])
-  @@index([distributorId])
-  @@index([tenantId, distributorId, boundAt])
 }
 
 // ============================================================
@@ -460,17 +416,17 @@ model Binding {
 // 消费者
 model Customer {
   id        String          @id @default(cuid()) // 主键
-  tenantId  String                            // 租户 ID
+  tenantId  String // 租户 ID
   tenant    Tenant          @relation(fields: [tenantId], references: [id]) // 所属租户
-  accountId String                            // 平台账号 ID
+  accountId String // 平台账号 ID
   account   PlatformAccount @relation(fields: [accountId], references: [id]) // 平台账号
-  email     String                            // 邮箱
-  firstName String?                           // 名
-  lastName  String?                           // 姓
-  orders    Order[]                           // 订单
-  carts     Cart[]                            // 购物车
-  createdAt DateTime @default(now())          // 创建时间
-  updatedAt DateTime @updatedAt               // 更新时间
+  email     String // 邮箱
+  firstName String? // 名
+  lastName  String? // 姓
+  orders    Order[] // 订单
+  carts     Cart[] // 购物车
+  createdAt DateTime        @default(now()) // 创建时间
+  updatedAt DateTime        @updatedAt // 更新时间
 
   @@unique([tenantId, email]) // 同一租户下邮箱唯一
   @@index([tenantId])
@@ -484,16 +440,16 @@ model Customer {
 // 商品分类
 model Category {
   id        String     @id @default(cuid()) // 主键
-  tenantId  String                                // 租户 ID
+  tenantId  String // 租户 ID
   tenant    Tenant     @relation(fields: [tenantId], references: [id]) // 所属租户
-  parentId  String?                               // 父分类 ID
+  parentId  String? // 父分类 ID
   parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id]) // 父分类
-  children  Category[] @relation("CategoryTree")                        // 子分类
-  name      String                                 // 分类名称
-  slug      String                                 // 分类 slug
-  products  Product[]                              // 商品
-  createdAt DateTime   @default(now())             // 创建时间
-  updatedAt DateTime   @updatedAt                 // 更新时间
+  children  Category[] @relation("CategoryTree") // 子分类
+  name      String // 分类名称
+  slug      String // 分类 slug
+  products  Product[] // 商品
+  createdAt DateTime   @default(now()) // 创建时间
+  updatedAt DateTime   @updatedAt // 更新时间
 
   @@unique([tenantId, slug]) // 同一租户下 slug 唯一
   @@index([tenantId])
@@ -502,17 +458,17 @@ model Category {
 // 商品
 model Product {
   id          String           @id @default(cuid()) // 主键
-  tenantId    String                                // 租户 ID
+  tenantId    String // 租户 ID
   tenant      Tenant           @relation(fields: [tenantId], references: [id]) // 所属租户
-  categoryId  String?                               // 分类 ID
+  categoryId  String? // 分类 ID
   category    Category?        @relation(fields: [categoryId], references: [id]) // 所属分类
-  name        String                                 // 商品名称
-  slug        String                                 // 商品 slug
-  description String?                                // 商品描述
-  isPublished Boolean              @default(false)  // 是否上架
-  variants    ProductVariant[]                      // SKU 变体
-  createdAt   DateTime         @default(now())     // 创建时间
-  updatedAt   DateTime         @updatedAt          // 更新时间
+  name        String // 商品名称
+  slug        String // 商品 slug
+  description String? // 商品描述
+  isPublished Boolean          @default(false) // 是否上架
+  variants    ProductVariant[] // SKU 变体
+  createdAt   DateTime         @default(now()) // 创建时间
+  updatedAt   DateTime         @updatedAt // 更新时间
 
   @@unique([tenantId, slug]) // 同一租户下 slug 唯一
   @@index([tenantId])
@@ -522,24 +478,24 @@ model Product {
 // SKU 变体
 model ProductVariant {
   id                 String              @id @default(cuid()) // 主键
-  productId          String                                // 商品 ID
+  productId          String // 商品 ID
   product            Product             @relation(fields: [productId], references: [id], onDelete: Cascade) // 所属商品（级联删除）
-  masterSkuId        String?                               // 主 SKU ID
+  masterSkuId        String? // 主 SKU ID
   masterSku          MasterSku?          @relation(fields: [masterSkuId], references: [id]) // 关联主 SKU
-  sku                String                                 // SKU 编码
-  name               String                                 // 变体名称（如颜色/尺寸）
+  sku                String // SKU 编码
+  name               String // 变体名称（如颜色/尺寸）
   price              Decimal             @db.Decimal(12, 2) // 零售价
-  inventory          Int                 @default(0)        // 库存数量
-  reorderThreshold   Int?                                  // 补货阈值
-  isActive           Boolean              @default(true)   // 是否启用
-  cartItems          CartItem[]                            // 购物车项
-  orderLines         OrderLine[]                           // 订单行
-  stockLevels        StockLevel[]                          // 库存水平
-  adjustments        StockAdjustment[]                      // 库存调整
-  purchaseOrderLines PurchaseOrderLine[]                    // 采购单行
-  stockTransferLines StockTransferLine[]                    // 调拨单行
-  createdAt          DateTime            @default(now())   // 创建时间
-  updatedAt          DateTime            @updatedAt         // 更新时间
+  inventory          Int                 @default(0) // 库存数量
+  reorderThreshold   Int? // 补货阈值
+  isActive           Boolean             @default(true) // 是否启用
+  cartItems          CartItem[] // 购物车项
+  orderLines         OrderLine[] // 订单行
+  stockLevels        StockLevel[] // 库存水平
+  adjustments        StockAdjustment[] // 库存调整
+  purchaseOrderLines PurchaseOrderLine[] // 采购单行
+  stockTransferLines StockTransferLine[] // 调拨单行
+  createdAt          DateTime            @default(now()) // 创建时间
+  updatedAt          DateTime            @updatedAt // 更新时间
 
   @@unique([productId, sku]) // 同一商品下 SKU 唯一
   @@index([productId])
@@ -552,17 +508,15 @@ model ProductVariant {
 
 // 购物车
 model Cart {
-  id            String       @id @default(cuid()) // 主键
-  tenantId      String                                // 租户 ID
-  tenant        Tenant       @relation(fields: [tenantId], references: [id]) // 所属租户
-  customerId    String?                               // 消费者 ID
-  customer      Customer?    @relation(fields: [customerId], references: [id]) // 所属消费者
-  sessionId     String?                               // Session ID（游客）
-  distributorId String?                               // 渠道经销商 ID（通过分销链接）
-  distributor   Distributor? @relation(fields: [distributorId], references: [id]) // 所属经销商
-  items         CartItem[]                            // 购物车项
-  createdAt     DateTime     @default(now())         // 创建时间
-  updatedAt     DateTime     @updatedAt               // 更新时间
+  id         String     @id @default(cuid()) // 主键
+  tenantId   String // 租户 ID
+  tenant     Tenant     @relation(fields: [tenantId], references: [id]) // 所属租户
+  customerId String? // 消费者 ID
+  customer   Customer?  @relation(fields: [customerId], references: [id]) // 所属消费者
+  sessionId  String? // Session ID（游客）
+  items      CartItem[] // 购物车项
+  createdAt  DateTime   @default(now()) // 创建时间
+  updatedAt  DateTime   @updatedAt // 更新时间
 
   @@index([tenantId])
   @@index([customerId])
@@ -572,13 +526,13 @@ model Cart {
 // 购物车项
 model CartItem {
   id        String         @id @default(cuid()) // 主键
-  cartId    String                                // 购物车 ID
+  cartId    String // 购物车 ID
   cart      Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade) // 所属购物车
-  variantId String                                // SKU 变体 ID
+  variantId String // SKU 变体 ID
   variant   ProductVariant @relation(fields: [variantId], references: [id]) // 关联 SKU
-  quantity  Int            @default(1)           // 数量
-  createdAt DateTime       @default(now())       // 创建时间
-  updatedAt DateTime       @updatedAt             // 更新时间
+  quantity  Int            @default(1) // 数量
+  createdAt DateTime       @default(now()) // 创建时间
+  updatedAt DateTime       @updatedAt // 更新时间
 
   @@unique([cartId, variantId]) // 同一购物车下 SKU 唯一
   @@index([cartId])
@@ -591,55 +545,51 @@ model CartItem {
 // 订单
 model Order {
   id                        String                     @id @default(cuid()) // 主键
-  tenantId                  String                                // 租户 ID
+  tenantId                  String // 租户 ID
   tenant                    Tenant                     @relation(fields: [tenantId], references: [id]) // 所属租户
-  customerId                String?                               // 消费者 ID
+  customerId                String? // 消费者 ID
   customer                  Customer?                  @relation(fields: [customerId], references: [id]) // 所属消费者
-  distributorId             String?                              // 渠道经销商 ID
-  distributor               Distributor?               @relation(fields: [distributorId], references: [id]) // 所属经销商
   status                    OrderStatus                @default(PENDING_PAYMENT) // 订单状态
-  fulfillmentType           FulfillmentType            @default(PICKUP)          // 履约类型
-  currency                  String                     @default("CNY")           // 币种
-  subtotal                  Decimal                    @db.Decimal(12, 2)        // 小计
+  fulfillmentType           FulfillmentType            @default(PICKUP) // 履约类型
+  currency                  String                     @default("CNY") // 币种
+  subtotal                  Decimal                    @db.Decimal(12, 2) // 小计
   tax                       Decimal                    @default(0) @db.Decimal(12, 2) // 税费
-  total                     Decimal                    @db.Decimal(12, 2)        // 总计
-  guestEmail                String?                                   // 访客邮箱
-  stripePaymentIntentId     String?                       @unique    // Stripe Payment Intent ID
-  pickupCode                String?                       @unique    // 自提码
-  pickupVerifiedAt          DateTime?                                 // 自提核销时间
-  pickupVerifiedByUserId    String?                                 // 核销人 ID
-  deliveryAddress           Json?                                    // 配送地址
-  shippedAt                 DateTime?                                 // 发货时间
-  shippedByPlatformUserId   String?                                 // 平台发货操作人 ID
-  shippedByMerchantUserId   String?                                 // 分店配送发货操作人 ID
-  lines                     OrderLine[]                               // 订单行
-  commissionEntry           CommissionLedger?                        // 佣金账本
-  deliveryAllocationLedgers DeliveryAllocationLedger[]               // 配送配额账本
+  total                     Decimal                    @db.Decimal(12, 2) // 总计
+  guestEmail                String? // 访客邮箱
+  stripePaymentIntentId     String?                    @unique // Stripe Payment Intent ID
+  pickupCode                String?                    @unique // 自提码
+  pickupVerifiedAt          DateTime? // 自提核销时间
+  pickupVerifiedByUserId    String? // 核销人 ID
+  deliveryAddress           Json? // 配送地址
+  shippedAt                 DateTime? // 发货时间
+  shippedByPlatformUserId   String? // 平台发货操作人 ID
+  shippedByMerchantUserId   String? // 分店配送发货操作人 ID
+  lines                     OrderLine[] // 订单行
+  deliveryAllocationLedgers DeliveryAllocationLedger[] // 配送配额账本
   createdAt                 DateTime                   @default(now()) // 创建时间
-  updatedAt                 DateTime                   @updatedAt     // 更新时间
+  updatedAt                 DateTime                   @updatedAt // 更新时间
+  commissionLedger          CommissionLedger?
 
   @@index([tenantId])
   @@index([customerId])
   @@index([status])
-  @@index([distributorId])
-  @@index([tenantId, distributorId, status, createdAt])
   @@index([tenantId, fulfillmentType, status])
   @@index([fulfillmentType, status])
 }
 
 // 订单行
 model OrderLine {
-  id          String          @id @default(cuid()) // 主键
-  orderId     String                                // 订单 ID
-  order       Order           @relation(fields: [orderId], references: [id], onDelete: Cascade) // 所属订单
-  variantId   String?                               // SKU 变体 ID
-  variant     ProductVariant? @relation(fields: [variantId], references: [id]) // 关联 SKU
-  productName String                                // 商品名称（冗余）
-  variantName String                                // 变体名称（冗余）
-  quantity    Int                                   // 数量
-  unitPrice          Decimal         @db.Decimal(12, 2)   // 单价
-  unitWholesalePrice Decimal?        @db.Decimal(12, 2)   // 拿货价快照（checkout 时）
-  lineTotal          Decimal         @db.Decimal(12, 2)   // 行合计
+  id                 String          @id @default(cuid()) // 主键
+  orderId            String // 订单 ID
+  order              Order           @relation(fields: [orderId], references: [id], onDelete: Cascade) // 所属订单
+  variantId          String? // SKU 变体 ID
+  variant            ProductVariant? @relation(fields: [variantId], references: [id]) // 关联 SKU
+  productName        String // 商品名称（冗余）
+  variantName        String // 变体名称（冗余）
+  quantity           Int // 数量
+  unitPrice          Decimal         @db.Decimal(12, 2) // 单价
+  unitWholesalePrice Decimal?        @db.Decimal(12, 2) // 拿货价快照（checkout 时）
+  lineTotal          Decimal         @db.Decimal(12, 2) // 行合计
 
   @@index([orderId])
 }
@@ -650,26 +600,26 @@ model OrderLine {
 
 // 佣金账本
 model CommissionLedger {
-  id                        String            @id @default(cuid()) // 主键
-  tenantId                  String                                // 租户 ID
-  tenant                    Tenant            @relation(fields: [tenantId], references: [id]) // 所属租户
-  orderId                   String?           @unique               // 订单 ID（零售佣金，历史）
-  order                     Order?            @relation(fields: [orderId], references: [id]) // 关联订单
-  allocationOrderId         String?           @unique               // 配货单 ID（进货佣金）
-  allocationOrder           AllocationOrder?  @relation(fields: [allocationOrderId], references: [id]) // 关联配货单
-  distributorId             String                                // 经销商 ID
-  distributor               Distributor       @relation(fields: [distributorId], references: [id]) // 所属经销商
-  customerId                String?                               // 消费者 ID（零售历史）
-  customerOrderSequence     Int?                                  // 零售历史：第几笔履约单
-  merchantAllocationSequence Int?                                 // 进货佣金：第几笔配货（1 或 2）
-  commissionSource          CommissionSource  @default(ALLOCATION) // 佣金来源
-  amount                    Decimal           @db.Decimal(12, 2)   // 佣金金额
-  status                    LedgerStatus      @default(ACCRUED)    // 状态
-  settlementBatchId         String?                               // 结算批次 ID
-  settlementBatch           SettlementBatch?  @relation(fields: [settlementBatchId], references: [id]) // 所属结算批次
-  settledAt                 DateTime?                             // 结算时间
-  createdAt                 DateTime          @default(now())      // 创建时间
-  updatedAt                 DateTime          @updatedAt           // 更新时间
+  id                         String           @id @default(cuid()) // 主键
+  tenantId                   String // 租户 ID
+  tenant                     Tenant           @relation(fields: [tenantId], references: [id]) // 所属租户
+  orderId                    String?          @unique // 订单 ID（零售佣金，历史）
+  order                      Order?           @relation(fields: [orderId], references: [id]) // 关联订单
+  allocationOrderId          String?          @unique // 配货单 ID（进货佣金）
+  allocationOrder            AllocationOrder? @relation(fields: [allocationOrderId], references: [id]) // 关联配货单
+  distributorId              String // 经销商 ID
+  distributor                Distributor      @relation(fields: [distributorId], references: [id]) // 所属经销商
+  customerId                 String? // 消费者 ID（零售历史）
+  customerOrderSequence      Int? // 零售历史：第几笔履约单
+  merchantAllocationSequence Int? // 进货佣金：第几笔配货（1 或 2）
+  commissionSource           CommissionSource @default(ALLOCATION) // 佣金来源
+  amount                     Decimal          @db.Decimal(12, 2) // 佣金金额
+  status                     LedgerStatus     @default(ACCRUED) // 状态
+  settlementBatchId          String? // 结算批次 ID
+  settlementBatch            SettlementBatch? @relation(fields: [settlementBatchId], references: [id]) // 所属结算批次
+  settledAt                  DateTime? // 结算时间
+  createdAt                  DateTime         @default(now()) // 创建时间
+  updatedAt                  DateTime         @updatedAt // 更新时间
 
   @@index([tenantId])
   @@index([distributorId])
@@ -683,13 +633,13 @@ model CommissionLedger {
 // 结算批次
 model SettlementBatch {
   id          String                @id @default(cuid()) // 主键
-  periodStart DateTime                                // 结算周期开始
-  periodEnd   DateTime                                // 结算周期结束
-  status      SettlementBatchStatus @default(DRAFT)  // 状态
-  exportedAt  DateTime?                               // 导出时间
-  entries     CommissionLedger[]                       // 佣金条目
-  createdAt   DateTime              @default(now())  // 创建时间
-  updatedAt   DateTime              @updatedAt       // 更新时间
+  periodStart DateTime // 结算周期开始
+  periodEnd   DateTime // 结算周期结束
+  status      SettlementBatchStatus @default(DRAFT) // 状态
+  exportedAt  DateTime? // 导出时间
+  entries     CommissionLedger[] // 佣金条目
+  createdAt   DateTime              @default(now()) // 创建时间
+  updatedAt   DateTime              @updatedAt // 更新时间
 }
 
 // ============================================================
@@ -698,34 +648,33 @@ model SettlementBatch {
 
 // 租户库存设置
 model TenantInventorySettings {
-  tenantId                String   @id              // 租户 ID（主键）
+  tenantId                String   @id // 租户 ID（主键）
   tenant                  Tenant   @relation(fields: [tenantId], references: [id]) // 所属租户
-  defaultReorderThreshold Int      @default(5)      // 默认补货阈值
-  createdAt               DateTime @default(now())  // 创建时间
-  updatedAt               DateTime @updatedAt      // 更新时间
+  defaultReorderThreshold Int      @default(5) // 默认补货阈值
+  createdAt               DateTime @default(now()) // 创建时间
+  updatedAt               DateTime @updatedAt // 更新时间
 }
 
 // 租户设置
 model TenantSettings {
-  tenantId              String          @id              // 租户 ID（主键）
+  tenantId              String          @id // 租户 ID（主键）
   tenant                Tenant          @relation(fields: [tenantId], references: [id]) // 所属租户
   defaultCommissionRate Decimal?        @db.Decimal(10, 4) // 默认佣金比例
-  defaultCommissionType CommissionType?                   // 默认佣金类型
-  notifyOnBinding       Boolean         @default(true)   // 绑定时通知
-  notifyOnCommission    Boolean         @default(true)   // 佣金到账通知
-  createdAt             DateTime        @default(now())  // 创建时间
-  updatedAt             DateTime        @updatedAt       // 更新时间
+  defaultCommissionType CommissionType? // 默认佣金类型
+  notifyOnCommission    Boolean         @default(true) // 佣金到账通知
+  createdAt             DateTime        @default(now()) // 创建时间
+  updatedAt             DateTime        @updatedAt // 更新时间
 }
 
 // 平台设置
 model PlatformSettings {
-  id                       String   @id @default("singleton") // 主键（单例）
-  platformName             String   @default("MeridianERP")   // 平台名称
-  supportEmail             String?                               // 客服邮箱
-  distributorPortalEnabled Boolean  @default(true)              // 是否启用经销商门户
-  emailQueueEnabled        Boolean  @default(true)              // 是否启用邮件队列
-  maxRetailPriceDeviationPercent Int @default(10)               // 分店售价相对建议零售价最大偏差（%）
-  updatedAt                DateTime @updatedAt                  // 更新时间
+  id                             String   @id @default("singleton") // 主键（单例）
+  platformName                   String   @default("MeridianERP") // 平台名称
+  supportEmail                   String? // 客服邮箱
+  distributorPortalEnabled       Boolean  @default(true) // 是否启用经销商门户
+  emailQueueEnabled              Boolean  @default(true) // 是否启用邮件队列
+  maxRetailPriceDeviationPercent Int      @default(10) // 分店售价相对建议零售价最大偏差（%）
+  updatedAt                      DateTime @updatedAt // 更新时间
 }
 
 // ============================================================
@@ -734,21 +683,21 @@ model PlatformSettings {
 
 // 仓库
 model Warehouse {
-  id                 String            @id @default(cuid()) // 主键
-  tenantId           String                                // 租户 ID
-  tenant             Tenant            @relation(fields: [tenantId], references: [id]) // 所属租户
-  name               String                                  // 仓库名称
-  address            String?                                 // 仓库地址
-  isDefault          Boolean              @default(false)  // 是否默认仓库
-  isActive           Boolean              @default(true)   // 是否启用
-  stockLevels        StockLevel[]                            // 库存水平
-  adjustments        StockAdjustment[]                        // 库存调整
-  purchaseOrders        PurchaseOrder[]         // 采购单
-  branchPurchaseOrders  BranchPurchaseOrder[]   // 向总店进货单
-  stockTransfersFrom StockTransfer[]   @relation("TransferFromWarehouse") // 调出
-  stockTransfersTo   StockTransfer[]   @relation("TransferToWarehouse")   // 调入
-  createdAt          DateTime            @default(now())    // 创建时间
-  updatedAt          DateTime            @updatedAt          // 更新时间
+  id                   String                @id @default(cuid()) // 主键
+  tenantId             String // 租户 ID
+  tenant               Tenant                @relation(fields: [tenantId], references: [id]) // 所属租户
+  name                 String // 仓库名称
+  address              String? // 仓库地址
+  isDefault            Boolean               @default(false) // 是否默认仓库
+  isActive             Boolean               @default(true) // 是否启用
+  stockLevels          StockLevel[] // 库存水平
+  adjustments          StockAdjustment[] // 库存调整
+  purchaseOrders       PurchaseOrder[] // 采购单
+  branchPurchaseOrders BranchPurchaseOrder[] // 向总店进货单
+  stockTransfersFrom   StockTransfer[]       @relation("TransferFromWarehouse") // 调出
+  stockTransfersTo     StockTransfer[]       @relation("TransferToWarehouse") // 调入
+  createdAt            DateTime              @default(now()) // 创建时间
+  updatedAt            DateTime              @updatedAt // 更新时间
 
   @@index([tenantId])
   @@index([tenantId, isDefault])
@@ -757,15 +706,15 @@ model Warehouse {
 // 库存水平
 model StockLevel {
   id             String         @id @default(cuid()) // 主键
-  tenantId       String                                // 租户 ID
+  tenantId       String // 租户 ID
   tenant         Tenant         @relation(fields: [tenantId], references: [id]) // 所属租户
-  warehouseId    String                                // 仓库 ID
+  warehouseId    String // 仓库 ID
   warehouse      Warehouse      @relation(fields: [warehouseId], references: [id]) // 所属仓库
-  variantId      String                                // SKU 变体 ID
+  variantId      String // SKU 变体 ID
   variant        ProductVariant @relation(fields: [variantId], references: [id]) // 关联 SKU
-  quantityOnHand Int            @default(0)           // 在手数量
-  createdAt      DateTime       @default(now())       // 创建时间
-  updatedAt      DateTime       @updatedAt           // 更新时间
+  quantityOnHand Int            @default(0) // 在手数量
+  createdAt      DateTime       @default(now()) // 创建时间
+  updatedAt      DateTime       @updatedAt // 更新时间
 
   @@unique([warehouseId, variantId]) // 仓库+SKU 唯一
   @@index([tenantId])
@@ -776,19 +725,19 @@ model StockLevel {
 // 库存调整
 model StockAdjustment {
   id             String                @id @default(cuid()) // 主键
-  tenantId       String                                // 租户 ID
+  tenantId       String // 租户 ID
   tenant         Tenant                @relation(fields: [tenantId], references: [id]) // 所属租户
-  warehouseId    String                                // 仓库 ID
+  warehouseId    String // 仓库 ID
   warehouse      Warehouse             @relation(fields: [warehouseId], references: [id]) // 所属仓库
-  variantId      String                                // SKU 变体 ID
+  variantId      String // SKU 变体 ID
   variant        ProductVariant        @relation(fields: [variantId], references: [id]) // 关联 SKU
-  actorId        String                                // 操作人 ID
+  actorId        String // 操作人 ID
   actor          User                  @relation(fields: [actorId], references: [id]) // 操作人
-  reason         StockAdjustmentReason                   // 调整原因
-  note           String?                                 // 备注
-  quantityDelta  Int                                   // 变化数量（正/负）
-  quantityBefore Int                                   // 调整前数量
-  quantityAfter  Int                                   // 调整后数量
+  reason         StockAdjustmentReason // 调整原因
+  note           String? // 备注
+  quantityDelta  Int // 变化数量（正/负）
+  quantityBefore Int // 调整前数量
+  quantityAfter  Int // 调整后数量
   createdAt      DateTime              @default(now()) // 创建时间
 
   @@index([tenantId, createdAt])
@@ -803,20 +752,20 @@ model StockAdjustment {
 // 采购单
 model PurchaseOrder {
   id           String                 @id @default(cuid()) // 主键
-  tenantId     String                                 // 租户 ID
+  tenantId     String // 租户 ID
   tenant       Tenant                 @relation(fields: [tenantId], references: [id]) // 所属租户
-  warehouseId  String                                 // 仓库 ID
+  warehouseId  String // 仓库 ID
   warehouse    Warehouse              @relation(fields: [warehouseId], references: [id]) // 目标仓库
-  supplierName String                                 // 供应商名称
+  supplierName String // 供应商名称
   status       PurchaseOrderStatus    @default(DRAFT) // 状态
-  poNumber     String                                 // 采购单号
-  createdById  String                                 // 创建人 ID
+  poNumber     String // 采购单号
+  createdById  String // 创建人 ID
   createdBy    User                   @relation("PurchaseOrderCreatedBy", fields: [createdById], references: [id]) // 创建人
-  orderedAt    DateTime?                              // 下单时间
-  lines        PurchaseOrderLine[]                    // 采购行
-  receipts     PurchaseOrderReceipt[]                 // 收货记录
+  orderedAt    DateTime? // 下单时间
+  lines        PurchaseOrderLine[] // 采购行
+  receipts     PurchaseOrderReceipt[] // 收货记录
   createdAt    DateTime               @default(now()) // 创建时间
-  updatedAt    DateTime               @updatedAt      // 更新时间
+  updatedAt    DateTime               @updatedAt // 更新时间
 
   @@unique([tenantId, poNumber]) // 租户下采购单号唯一
   @@index([tenantId, status])
@@ -826,15 +775,15 @@ model PurchaseOrder {
 // 采购单行
 model PurchaseOrderLine {
   id               String                     @id @default(cuid()) // 主键
-  purchaseOrderId  String                                       // 采购单 ID
+  purchaseOrderId  String // 采购单 ID
   purchaseOrder    PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade) // 所属采购单
-  variantId        String                                       // SKU 变体 ID
+  variantId        String // SKU 变体 ID
   variant          ProductVariant             @relation(fields: [variantId], references: [id]) // 关联 SKU
-  quantityOrdered  Int                                          // 订购数量
-  quantityReceived Int                        @default(0)      // 已收货数量
-  receiptLines     PurchaseOrderReceiptLine[]                   // 收货行
-  createdAt        DateTime                   @default(now())  // 创建时间
-  updatedAt        DateTime                   @updatedAt        // 更新时间
+  quantityOrdered  Int // 订购数量
+  quantityReceived Int                        @default(0) // 已收货数量
+  receiptLines     PurchaseOrderReceiptLine[] // 收货行
+  createdAt        DateTime                   @default(now()) // 创建时间
+  updatedAt        DateTime                   @updatedAt // 更新时间
 
   @@unique([purchaseOrderId, variantId]) // 采购单+SKU 唯一
   @@index([purchaseOrderId])
@@ -843,15 +792,15 @@ model PurchaseOrderLine {
 // 采购收货
 model PurchaseOrderReceipt {
   id              String                     @id @default(cuid()) // 主键
-  tenantId        String                                      // 租户 ID
-  tenant          Tenant               @relation(fields: [tenantId], references: [id]) // 所属租户
-  purchaseOrderId String                                      // 采购单 ID
-  purchaseOrder   PurchaseOrder        @relation(fields: [purchaseOrderId], references: [id]) // 所属采购单
-  receivedById    String                                      // 收货人 ID
-  receivedBy      User                 @relation("PurchaseOrderReceivedBy", fields: [receivedById], references: [id]) // 收货人
-  note            String?                                     // 备注
-  lines           PurchaseOrderReceiptLine[]                  // 收货行
-  createdAt       DateTime             @default(now())       // 创建时间
+  tenantId        String // 租户 ID
+  tenant          Tenant                     @relation(fields: [tenantId], references: [id]) // 所属租户
+  purchaseOrderId String // 采购单 ID
+  purchaseOrder   PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id]) // 所属采购单
+  receivedById    String // 收货人 ID
+  receivedBy      User                       @relation("PurchaseOrderReceivedBy", fields: [receivedById], references: [id]) // 收货人
+  note            String? // 备注
+  lines           PurchaseOrderReceiptLine[] // 收货行
+  createdAt       DateTime                   @default(now()) // 创建时间
 
   @@index([tenantId, purchaseOrderId])
   @@index([purchaseOrderId, createdAt])
@@ -860,11 +809,11 @@ model PurchaseOrderReceipt {
 // 采购收货行
 model PurchaseOrderReceiptLine {
   id                  String               @id @default(cuid()) // 主键
-  receiptId           String                                 // 收货 ID
+  receiptId           String // 收货 ID
   receipt             PurchaseOrderReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade) // 所属收货
-  purchaseOrderLineId String                                 // 采购单行 ID
+  purchaseOrderLineId String // 采购单行 ID
   purchaseOrderLine   PurchaseOrderLine    @relation(fields: [purchaseOrderLineId], references: [id]) // 关联采购单行
-  quantityReceived    Int                                        // 本次收货数量
+  quantityReceived    Int // 本次收货数量
 
   @@index([receiptId])
   @@index([purchaseOrderLineId])
@@ -877,18 +826,18 @@ model PurchaseOrderReceiptLine {
 // 库存调拨
 model StockTransfer {
   id              String              @id @default(cuid()) // 主键
-  tenantId        String                                // 租户 ID
+  tenantId        String // 租户 ID
   tenant          Tenant              @relation(fields: [tenantId], references: [id]) // 所属租户
-  fromWarehouseId String                                // 源仓库 ID
+  fromWarehouseId String // 源仓库 ID
   fromWarehouse   Warehouse           @relation("TransferFromWarehouse", fields: [fromWarehouseId], references: [id]) // 源仓库
-  toWarehouseId   String                                // 目标仓库 ID
+  toWarehouseId   String // 目标仓库 ID
   toWarehouse     Warehouse           @relation("TransferToWarehouse", fields: [toWarehouseId], references: [id]) // 目标仓库
   status          StockTransferStatus @default(COMPLETED) // 状态
-  note            String?                               // 备注
-  createdById     String                                // 创建人 ID
+  note            String? // 备注
+  createdById     String // 创建人 ID
   createdBy       User                @relation("StockTransferCreatedBy", fields: [createdById], references: [id]) // 创建人
-  lines           StockTransferLine[]                   // 调拨行
-  createdAt       DateTime          @default(now())    // 创建时间
+  lines           StockTransferLine[] // 调拨行
+  createdAt       DateTime            @default(now()) // 创建时间
 
   @@index([tenantId, createdAt])
 }
@@ -896,11 +845,11 @@ model StockTransfer {
 // 库存调拨行
 model StockTransferLine {
   id         String         @id @default(cuid()) // 主键
-  transferId String                               // 调拨单 ID
+  transferId String // 调拨单 ID
   transfer   StockTransfer  @relation(fields: [transferId], references: [id], onDelete: Cascade) // 所属调拨单
-  variantId  String                               // SKU 变体 ID
+  variantId  String // SKU 变体 ID
   variant    ProductVariant @relation(fields: [variantId], references: [id]) // 关联 SKU
-  quantity   Int                                   // 调拨数量
+  quantity   Int // 调拨数量
 
   @@index([transferId])
 }
@@ -911,41 +860,41 @@ model StockTransferLine {
 
 // 主 SKU
 model MasterSku {
-  id                   String                     @id @default(cuid()) // 主键
-  skuCode              String                     @unique               // SKU 编码（唯一）
-  name                 String                                       // SKU 名称
-  quantityOnHand       Int                        @default(0)          // 在手数量
-  cumulativeShippedQty Int                        @default(0)          // 累计发货数量
-  unitCost             Decimal                    @db.Decimal(12, 2)   // 单位成本
-  wholesalePrice       Decimal                    @db.Decimal(12, 2)   // 批发价（拿货价）
-  retailPrice          Decimal                    @db.Decimal(12, 2)   // 建议零售价
-  flagshipPrice        Decimal                    @db.Decimal(12, 2)   // 总店 C 端销售价
-  isActive             Boolean                    @default(true)       // 是否启用
-  variants             ProductVariant[]                              // 关联变体
-  allocationLines      AllocationOrderLine[]                         // 配额分配行
-  replenishmentLines      ReplenishmentRequestLine[]                    // 补货请求行
-  branchPurchaseOrderLines BranchPurchaseOrderLine[]                    // 分店进货行
-  deliveryLedgers         DeliveryAllocationLedger[]                    // 配送配额账本
-  createdAt            DateTime                   @default(now())     // 创建时间
-  updatedAt            DateTime                   @updatedAt           // 更新时间
+  id                       String                     @id @default(cuid()) // 主键
+  skuCode                  String                     @unique // SKU 编码（唯一）
+  name                     String // SKU 名称
+  quantityOnHand           Int                        @default(0) // 在手数量
+  cumulativeShippedQty     Int                        @default(0) // 累计发货数量
+  unitCost                 Decimal                    @db.Decimal(12, 2) // 单位成本
+  wholesalePrice           Decimal                    @db.Decimal(12, 2) // 批发价（拿货价）
+  retailPrice              Decimal                    @db.Decimal(12, 2) // 建议零售价
+  flagshipPrice            Decimal                    @db.Decimal(12, 2) // 总店 C 端销售价
+  isActive                 Boolean                    @default(true) // 是否启用
+  variants                 ProductVariant[] // 关联变体
+  allocationLines          AllocationOrderLine[] // 配额分配行
+  replenishmentLines       ReplenishmentRequestLine[] // 补货请求行
+  branchPurchaseOrderLines BranchPurchaseOrderLine[] // 分店进货行
+  deliveryLedgers          DeliveryAllocationLedger[] // 配送配额账本
+  createdAt                DateTime                   @default(now()) // 创建时间
+  updatedAt                DateTime                   @updatedAt // 更新时间
 }
 
 // 配额分配单
 model AllocationOrder {
   id                     String                @id @default(cuid()) // 主键
-  tenantId               String                                // 租户 ID
+  tenantId               String // 租户 ID
   tenant                 Tenant                @relation(fields: [tenantId], references: [id]) // 所属租户
-  status                 AllocationOrderStatus @default(DRAFT)   // 状态
-  issuedAt               DateTime?                              // 下发时间
-  confirmedAt            DateTime?                              // 确认时间
-  issuedByPlatformUserId String?                               // 下发人 ID
-  confirmedByUserId      String?                               // 确认人 ID
-  note                   String?                               // 备注
-  lines                  AllocationOrderLine[]                 // 配额行
-  commissionEntry        CommissionLedger?                     // 进货佣金（如有）
-  branchPurchaseOrder    BranchPurchaseOrder?                  // 关联分店进货单
+  status                 AllocationOrderStatus @default(DRAFT) // 状态
+  issuedAt               DateTime? // 下发时间
+  confirmedAt            DateTime? // 确认时间
+  issuedByPlatformUserId String? // 下发人 ID
+  confirmedByUserId      String? // 确认人 ID
+  note                   String? // 备注
+  lines                  AllocationOrderLine[] // 配额行
+  commissionEntry        CommissionLedger? // 进货佣金（如有）
+  branchPurchaseOrder    BranchPurchaseOrder? // 关联分店进货单
   createdAt              DateTime              @default(now()) // 创建时间
-  updatedAt              DateTime              @updatedAt       // 更新时间
+  updatedAt              DateTime              @updatedAt // 更新时间
 
   @@index([tenantId, status])
 }
@@ -953,12 +902,12 @@ model AllocationOrder {
 // 配额分配行
 model AllocationOrderLine {
   id                String          @id @default(cuid()) // 主键
-  allocationOrderId String                                // 分配单 ID
+  allocationOrderId String // 分配单 ID
   allocationOrder   AllocationOrder @relation(fields: [allocationOrderId], references: [id], onDelete: Cascade) // 所属分配单
-  masterSkuId       String                                // 主 SKU ID
+  masterSkuId       String // 主 SKU ID
   masterSku         MasterSku       @relation(fields: [masterSkuId], references: [id]) // 关联主 SKU
-  quantity          Int                                   // 分配数量
-  wholesalePrice    Decimal         @db.Decimal(12, 2)   // 批发价
+  quantity          Int // 分配数量
+  wholesalePrice    Decimal         @db.Decimal(12, 2) // 批发价
 
   @@index([allocationOrderId])
 }
@@ -966,16 +915,16 @@ model AllocationOrderLine {
 // 补货请求
 model ReplenishmentRequest {
   id                       String                     @id @default(cuid()) // 主键
-  tenantId                 String                                // 租户 ID
+  tenantId                 String // 租户 ID
   tenant                   Tenant                     @relation(fields: [tenantId], references: [id]) // 所属租户
   status                   ReplenishmentRequestStatus @default(PENDING) // 状态
-  note                     String?                               // 备注
-  rejectionReason          String?                               // 拒绝原因
-  reviewedAt               DateTime?                             // 审核时间
-  reviewedByPlatformUserId String?                               // 审核人 ID
-  lines                    ReplenishmentRequestLine[]           // 补货行
+  note                     String? // 备注
+  rejectionReason          String? // 拒绝原因
+  reviewedAt               DateTime? // 审核时间
+  reviewedByPlatformUserId String? // 审核人 ID
+  lines                    ReplenishmentRequestLine[] // 补货行
   createdAt                DateTime                   @default(now()) // 创建时间
-  updatedAt                DateTime                   @updatedAt    // 更新时间
+  updatedAt                DateTime                   @updatedAt // 更新时间
 
   @@index([tenantId, status])
 }
@@ -983,38 +932,38 @@ model ReplenishmentRequest {
 // 补货请求行
 model ReplenishmentRequestLine {
   id                     String               @id @default(cuid()) // 主键
-  replenishmentRequestId String                                 // 补货请求 ID
+  replenishmentRequestId String // 补货请求 ID
   replenishmentRequest   ReplenishmentRequest @relation(fields: [replenishmentRequestId], references: [id], onDelete: Cascade) // 所属补货请求
-  masterSkuId            String                                 // 主 SKU ID
+  masterSkuId            String // 主 SKU ID
   masterSku              MasterSku            @relation(fields: [masterSkuId], references: [id]) // 关联主 SKU
-  quantity               Int                                   // 补货数量
+  quantity               Int // 补货数量
 
   @@index([replenishmentRequestId])
 }
 
 // 分店向总店进货单
 model BranchPurchaseOrder {
-  id                String                    @id @default(cuid())
-  tenantId          String
-  tenant            Tenant                    @relation(fields: [tenantId], references: [id])
-  warehouseId       String
-  warehouse         Warehouse                 @relation(fields: [warehouseId], references: [id])
-  orderNumber       String
-  status            BranchPurchaseOrderStatus @default(PENDING_PAYMENT)
-  totalAmount       Decimal                   @db.Decimal(12, 2)
-  note              String?
-  paidAt            DateTime?
-  receivingAddressId String?
-  receivingAddress   ProcurementReceivingAddress? @relation(fields: [receivingAddressId], references: [id], onDelete: SetNull)
+  id                       String                       @id @default(cuid())
+  tenantId                 String
+  tenant                   Tenant                       @relation(fields: [tenantId], references: [id])
+  warehouseId              String
+  warehouse                Warehouse                    @relation(fields: [warehouseId], references: [id])
+  orderNumber              String
+  status                   BranchPurchaseOrderStatus    @default(PENDING_PAYMENT)
+  totalAmount              Decimal                      @db.Decimal(12, 2)
+  note                     String?
+  paidAt                   DateTime?
+  receivingAddressId       String?
+  receivingAddress         ProcurementReceivingAddress? @relation(fields: [receivingAddressId], references: [id], onDelete: SetNull)
   receivingAddressSnapshot Json?
-  allocationOrderId String?                   @unique
-  allocationOrder   AllocationOrder?          @relation(fields: [allocationOrderId], references: [id])
-  createdById       String
-  createdBy         User                      @relation("BranchPurchaseOrderCreatedBy", fields: [createdById], references: [id])
-  lines             BranchPurchaseOrderLine[]
-  payment           BranchPurchaseOrderPayment?
-  createdAt         DateTime                  @default(now())
-  updatedAt         DateTime                  @updatedAt
+  allocationOrderId        String?                      @unique
+  allocationOrder          AllocationOrder?             @relation(fields: [allocationOrderId], references: [id])
+  createdById              String
+  createdBy                User                         @relation("BranchPurchaseOrderCreatedBy", fields: [createdById], references: [id])
+  lines                    BranchPurchaseOrderLine[]
+  payment                  BranchPurchaseOrderPayment?
+  createdAt                DateTime                     @default(now())
+  updatedAt                DateTime                     @updatedAt
 
   @@unique([tenantId, orderNumber])
   @@index([tenantId, status])
@@ -1050,18 +999,18 @@ model BranchPurchaseOrderPayment {
 
 // 分店进货收货地址
 model ProcurementReceivingAddress {
-  id           String   @id @default(cuid())
-  tenantId     String
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  label        String
-  contactName  String
-  contactPhone String
-  address      String
-  isDefault    Boolean  @default(false)
-  isActive     Boolean  @default(true)
+  id                   String                @id @default(cuid())
+  tenantId             String
+  tenant               Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  label                String
+  contactName          String
+  contactPhone         String
+  address              String
+  isDefault            Boolean               @default(false)
+  isActive             Boolean               @default(true)
   branchPurchaseOrders BranchPurchaseOrder[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 
   @@index([tenantId, isActive])
   @@index([tenantId, isDefault])
@@ -1074,16 +1023,16 @@ model ProcurementReceivingAddress {
 // 提现请求
 model WithdrawalRequest {
   id                       String                  @id @default(cuid()) // 主键
-  distributorId            String                                // 经销商 ID
+  distributorId            String // 经销商 ID
   distributor              Distributor             @relation(fields: [distributorId], references: [id]) // 所属经销商
   amount                   Decimal                 @db.Decimal(12, 2) // 提现金额
   status                   WithdrawalRequestStatus @default(PENDING) // 状态
-  note                     String?                               // 备注
-  reviewedByPlatformUserId String?                              // 审核人 ID
-  rejectionReason          String?                               // 拒绝原因
-  reviewedAt               DateTime?                             // 审核时间
+  note                     String? // 备注
+  reviewedByPlatformUserId String? // 审核人 ID
+  rejectionReason          String? // 拒绝原因
+  reviewedAt               DateTime? // 审核时间
   createdAt                DateTime                @default(now()) // 创建时间
-  updatedAt                DateTime                @updatedAt      // 更新时间
+  updatedAt                DateTime                @updatedAt // 更新时间
 
   @@index([distributorId, status])
 }
@@ -1091,16 +1040,16 @@ model WithdrawalRequest {
 // 配送配额账本
 model DeliveryAllocationLedger {
   id             String    @id @default(cuid()) // 主键
-  orderId        String                                // 订单 ID
+  orderId        String // 订单 ID
   order          Order     @relation(fields: [orderId], references: [id]) // 关联订单
-  tenantId       String                                // 租户 ID
+  tenantId       String // 租户 ID
   tenant         Tenant    @relation(fields: [tenantId], references: [id]) // 所属租户
-  masterSkuId    String                                // 主 SKU ID
+  masterSkuId    String // 主 SKU ID
   masterSku      MasterSku @relation(fields: [masterSkuId], references: [id]) // 关联主 SKU
-  quantity       Int                                   // 数量
-  wholesalePrice Decimal   @db.Decimal(12, 2)        // 批发价
-  lineTotal      Decimal   @db.Decimal(12, 2)        // 行合计
-  createdAt      DateTime  @default(now())           // 创建时间
+  quantity       Int // 数量
+  wholesalePrice Decimal   @db.Decimal(12, 2) // 批发价
+  lineTotal      Decimal   @db.Decimal(12, 2) // 行合计
+  createdAt      DateTime  @default(now()) // 创建时间
 
   @@index([orderId])
   @@index([tenantId])
@@ -1113,37 +1062,37 @@ model DeliveryAllocationLedger {
 // 平台 CRM 公司
 model PlatformCrmCompany {
   id        String               @id @default(cuid()) // 主键
-  name      String                                 // 公司名称
-  website   String?                                // 公司网站
-  contacts  PlatformCrmContact[]                   // 联系人
-  createdAt DateTime             @default(now())  // 创建时间
-  updatedAt DateTime             @updatedAt       // 更新时间
+  name      String // 公司名称
+  website   String? // 公司网站
+  contacts  PlatformCrmContact[] // 联系人
+  createdAt DateTime             @default(now()) // 创建时间
+  updatedAt DateTime             @updatedAt // 更新时间
 }
 
 // 平台 CRM 联系人
 model PlatformCrmContact {
   id        String              @id @default(cuid()) // 主键
-  companyId String?                               // 公司 ID
+  companyId String? // 公司 ID
   company   PlatformCrmCompany? @relation(fields: [companyId], references: [id]) // 所属公司
-  firstName String                                // 名
-  lastName  String                                // 姓
-  email     String?                               // 邮箱
-  phone     String?                               // 电话
-  leads     PlatformCrmLead[]                     // 线索
-  createdAt DateTime            @default(now())  // 创建时间
-  updatedAt DateTime            @updatedAt       // 更新时间
+  firstName String // 名
+  lastName  String // 姓
+  email     String? // 邮箱
+  phone     String? // 电话
+  leads     PlatformCrmLead[] // 线索
+  createdAt DateTime            @default(now()) // 创建时间
+  updatedAt DateTime            @updatedAt // 更新时间
 }
 
 // 平台 CRM 线索
 model PlatformCrmLead {
   id        String              @id @default(cuid()) // 主键
-  contactId String?                               // 联系人 ID
+  contactId String? // 联系人 ID
   contact   PlatformCrmContact? @relation(fields: [contactId], references: [id]) // 所属联系人
-  title     String                                // 线索标题
-  stage     LeadStage           @default(NEW)    // 阶段
-  source    String?                               // 来源
-  createdAt DateTime            @default(now())  // 创建时间
-  updatedAt DateTime            @updatedAt       // 更新时间
+  title     String // 线索标题
+  stage     LeadStage           @default(NEW) // 阶段
+  source    String? // 来源
+  createdAt DateTime            @default(now()) // 创建时间
+  updatedAt DateTime            @updatedAt // 更新时间
 
   @@index([stage])
 }

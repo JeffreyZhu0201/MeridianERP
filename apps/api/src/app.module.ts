@@ -4,7 +4,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
-import { BindingsModule } from './bindings/bindings.module';
 import { CommissionModule } from './commission/commission.module';
 import { EnvModule } from './config/env.module';
 import { InventoryModule } from './inventory/inventory.module';
@@ -31,7 +30,6 @@ import { PluginModule } from './plugins/plugin.module';
     PluginModule,
     PlatformModule,
     MerchantModule,
-    BindingsModule,
     StoreModule,
     DistributorModule,
   ],

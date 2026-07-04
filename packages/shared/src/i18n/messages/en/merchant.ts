@@ -308,6 +308,7 @@ export const merchant = {
     backToOrders: 'Back to orders',
     customer: 'Customer',
     distributor: 'Distributor',
+    orderStore: 'Order store',
     total: 'Total',
     guest: 'Guest',
     product: 'Product',

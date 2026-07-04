@@ -1,9 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
-import { COMMISSION_QUEUE, EMAIL_QUEUE } from '@meridian/shared';
+import { EMAIL_QUEUE } from '@meridian/shared';
 import { EnvService } from '../config/env.service';
 import { PrismaModule } from '../prisma/prisma.module';
-import { CommissionQueueService } from './commission-queue.service';
 import { EmailProcessor } from './email.processor';
 import { EmailQueueService } from './email-queue.service';
 import { InventoryQueueService } from './inventory-queue.service';
@@ -23,13 +22,11 @@ const bullImports = isTest
       }),
       BullModule.registerQueue(
         { name: EMAIL_QUEUE },
-        { name: COMMISSION_QUEUE },
       ),
     ];
 
 const queueProviders = [
   EmailQueueService,
-  CommissionQueueService,
   InventoryQueueService,
   ...(isTest ? [] : [EmailProcessor]),
 ];
@@ -37,6 +34,6 @@ const queueProviders = [
 @Module({
   imports: [...bullImports, PrismaModule],
   providers: queueProviders,
-  exports: [EmailQueueService, CommissionQueueService, InventoryQueueService],
+  exports: [EmailQueueService, InventoryQueueService],
 })
 export class QueueModule {}

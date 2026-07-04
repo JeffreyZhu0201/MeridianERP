@@ -1,27 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { CommissionSource, LedgerStatus, OrderStatus } from '@prisma/client';
+import { CommissionSource, LedgerStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import { sumAllocationLineCost } from '@meridian/shared';
 import { PrismaService } from '../prisma/prisma.service';
-import { CommissionQueueService } from '../queue/commission-queue.service';
 import { EmailQueueService } from '../queue/email-queue.service';
 
 @Injectable()
 export class CommissionService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly commissionQueue: CommissionQueueService,
     private readonly emailQueue: EmailQueueService,
   ) {}
-
-  async accrueOnPaid(_orderId: string): Promise<void> {
-    return;
-  }
-
-  /** @deprecated Retail commission disabled — use accrueOnAllocationConfirmed */
-  async accrueOnFulfilled(_orderId: string): Promise<void> {
-    return;
-  }
 
   async accrueOnAllocationConfirmed(allocationOrderId: string): Promise<void> {
     const allocation = await this.prisma.allocationOrder.findUnique({
@@ -87,8 +76,6 @@ export class CommissionService {
         status: LedgerStatus.ACCRUED,
       },
     });
-
-    await this.commissionQueue.enqueueAccrual(allocationOrderId);
 
     const settings = await this.prisma.tenantSettings.findUnique({
       where: { tenantId: allocation.tenantId },

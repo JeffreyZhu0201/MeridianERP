@@ -67,8 +67,8 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
               value: order.customer?.email ?? order.guestEmail ?? t('guest'),
             },
             {
-              title: t('distributor'),
-              value: order.distributor?.name ?? '—',
+              title: t('orderStore'),
+              value: profile?.businessName ?? '—',
             },
             {
               title: t('total'),

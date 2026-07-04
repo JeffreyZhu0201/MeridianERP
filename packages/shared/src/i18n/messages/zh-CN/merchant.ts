@@ -306,6 +306,7 @@ export const merchant = {
     backToOrders: '返回订单列表',
     customer: '顾客',
     distributor: '分销商',
+    orderStore: '下单商铺',
     total: '合计',
     guest: '访客',
     product: '商品',

@@ -22,8 +22,6 @@ import { LeadsService } from './crm/leads/leads.service';
 import { ActivitiesController } from './crm/activities/activities.controller';
 import { ActivitiesService } from './crm/activities/activities.service';
 import { CommissionsModule } from './commissions/commissions.module';
-import { DistributorsController } from './distributors/distributors.controller';
-import { DistributorsService } from './distributors/distributors.service';
 import { InventoryModule } from '../inventory/inventory.module';
 import { MerchantInventoryModule } from './inventory/merchant-inventory.module';
 import { MerchantOrdersController } from './orders/merchant-orders.controller';
@@ -61,7 +59,6 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     StoreCustomersController,
     LeadsController,
     ActivitiesController,
-    DistributorsController,
     MerchantCategoriesController,
     MerchantProductsController,
     MerchantOrdersController,
@@ -77,7 +74,6 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     StoreCustomersService,
     LeadsService,
     ActivitiesService,
-    DistributorsService,
     MerchantCategoriesService,
     MerchantProductsService,
     MerchantOrdersService,
