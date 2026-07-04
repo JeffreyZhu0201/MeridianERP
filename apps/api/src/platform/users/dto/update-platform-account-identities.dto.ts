@@ -32,13 +32,16 @@ class MerchantStaffAssignmentDto {
   enabled!: boolean;
 }
 
-export class UpdatePlatformAccountIdentitiesDto
-  implements UpdatePlatformAccountIdentitiesRequest
-{
+export class UpdatePlatformAccountIdentitiesDto implements UpdatePlatformAccountIdentitiesRequest {
   @IsOptional()
   @ValidateIf((_, value) => value !== null)
   @IsIn(['SUPER_ADMIN', 'FINANCE', 'FULFILLMENT', 'REVIEWER'])
-  platformAdminRole?: 'SUPER_ADMIN' | 'FINANCE' | 'FULFILLMENT' | 'REVIEWER' | null;
+  platformAdminRole?:
+    | 'SUPER_ADMIN'
+    | 'FINANCE'
+    | 'FULFILLMENT'
+    | 'REVIEWER'
+    | null;
 
   @IsOptional()
   @ValidateIf((_, value) => value !== null)

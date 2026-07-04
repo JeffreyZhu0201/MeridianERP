@@ -13,10 +13,16 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { MerchantAuthGuard } from '../../auth/guards/merchant-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
+import { DistributorsService } from './distributors.service';
+import { DistributorPerformanceQueryDto } from './dto/distributor-performance-query.dto';
 
 @Controller('merchant/distributors')
 @UseGuards(MerchantAuthGuard)
 export class DistributorsController {
+  constructor(private readonly distributorsService: DistributorsService) {}
+
   private deny() {
     throw new ForbiddenException(
       'Distributor management has moved to platform admin (Phase 5)',
@@ -40,8 +46,12 @@ export class DistributorsController {
   }
 
   @Get(':id/performance')
-  getPerformance() {
-    return this.deny();
+  getPerformance(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+    @Query() query: DistributorPerformanceQueryDto,
+  ) {
+    return this.distributorsService.getPerformance(user.tenantId!, id, query);
   }
 
   @Get(':id')

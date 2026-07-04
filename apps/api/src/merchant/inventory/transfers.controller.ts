@@ -32,7 +32,10 @@ export class MerchantTransfersController {
   }
 
   @Get('transfers')
-  list(@CurrentUser() user: AuthenticatedUser, @Query() query: StockTransferListQueryDto) {
+  list(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: StockTransferListQueryDto,
+  ) {
     return this.transfersService.listTransfers(user.tenantId!, query);
   }
 

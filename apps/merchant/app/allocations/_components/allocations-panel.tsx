@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from '@meridian/ui';
 import {
   Badge,
   Button,
@@ -45,11 +46,19 @@ export function AllocationsPanel({ allocations, token }: AllocationsPanelProps) 
 
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
 
+  function statusLabel(status: string): string {
+    if (status === 'DRAFT' || status === 'ISSUED' || status === 'CONFIRMED' || status === 'CANCELLED') {
+      return t(`orderStatus.${status as 'DRAFT' | 'ISSUED' | 'CONFIRMED' | 'CANCELLED'}`);
+    }
+    return status;
+  }
+
   async function handleConfirm(id: string) {
     setConfirmingId(id);
     setError('');
     try {
       await apiFetch(`/merchant/allocations/${id}/confirm`, { method: 'POST' }, token);
+      toast.success(t('confirmSuccess'));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('confirmFailed'));
@@ -93,7 +102,7 @@ export function AllocationsPanel({ allocations, token }: AllocationsPanelProps) 
                     </TableCell>
                     <TableCell className="tabular-nums">{formatCNY(total)}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{order.status}</Badge>
+                      <Badge variant="secondary">{statusLabel(order.status)}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       {order.status === 'ISSUED' ? (

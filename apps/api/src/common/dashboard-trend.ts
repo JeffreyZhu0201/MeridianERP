@@ -15,7 +15,11 @@ export function buildOrderTrend(
 ): PerformanceTrendPoint[] {
   const trendMap = new Map<
     string,
-    { orderCount: number; orderRevenue: Prisma.Decimal; commissionAccrued: Prisma.Decimal }
+    {
+      orderCount: number;
+      orderRevenue: Prisma.Decimal;
+      commissionAccrued: Prisma.Decimal;
+    }
   >();
   for (const day of eachUtcDay(from, to)) {
     trendMap.set(day, {
@@ -31,7 +35,9 @@ export function buildOrderTrend(
     bucket.orderCount += 1;
     bucket.orderRevenue = bucket.orderRevenue.plus(order.total);
     if (order.commissionEntry?.status === LedgerStatus.ACCRUED) {
-      bucket.commissionAccrued = bucket.commissionAccrued.plus(order.commissionEntry.amount);
+      bucket.commissionAccrued = bucket.commissionAccrued.plus(
+        order.commissionEntry.amount,
+      );
     }
   }
   return [...trendMap.entries()].map(([date, bucket]) => ({

@@ -1,8 +1,10 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from '@meridian/ui';
 import { LeadStage, type PlatformCrmContact, type PlatformCrmLead } from '@meridian/shared';
 import {
   Badge,
@@ -119,7 +121,7 @@ export function LeadsTable({
       );
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : tc('errors.saveFailed'));
+      toast.error(err instanceof Error ? err.message : tc('errors.saveFailed'));
     }
   }
 
@@ -168,7 +170,14 @@ export function LeadsTable({
             <TableBody>
               {initial.map((lead) => (
                 <TableRow key={lead.id}>
-                  <TableCell className="font-medium">{lead.title}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/crm/leads/${lead.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {lead.title}
+                    </Link>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={stageVariant[lead.stage] ?? 'secondary'}>
                       {stageLabel(lead.stage)}

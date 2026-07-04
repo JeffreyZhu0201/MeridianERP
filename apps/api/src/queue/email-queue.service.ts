@@ -23,29 +23,27 @@ export class EmailQueueService {
     @Optional() @InjectQueue(EMAIL_QUEUE) private readonly queue?: Queue,
   ) {}
 
-  
-  async sendMerchantWelcome(email: string, businessName: string): Promise<void> {
+  async sendMerchantWelcome(
+    email: string,
+    businessName: string,
+  ): Promise<void> {
     await this.enqueue(EmailJobName.MERCHANT_WELCOME, { email, businessName });
   }
 
-  
   async sendMerchantRejected(email: string, reason: string): Promise<void> {
     await this.enqueue(EmailJobName.MERCHANT_REJECTED, { email, reason });
   }
 
-  
   async sendBindingCreated(payload: BindingCreatedEmailPayload): Promise<void> {
     await this.enqueue(EmailJobName.DISTRIBUTOR_BINDING_CREATED, payload);
   }
 
-  
   async sendCommissionAccrued(
     payload: CommissionAccruedEmailPayload,
   ): Promise<void> {
     await this.enqueue(EmailJobName.COMMISSION_ACCRUED, payload);
   }
 
-  
   async sendOrderConfirmation(
     tenantId: string,
     orderId: string,
@@ -58,7 +56,6 @@ export class EmailQueueService {
     });
   }
 
-  
   private async enqueue(name: string, payload: unknown): Promise<void> {
     if (this.queue) {
       await this.queue.add(name, payload, DEFAULT_JOB_OPTIONS);

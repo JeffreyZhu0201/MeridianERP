@@ -27,11 +27,13 @@ export default defineConfig({
     {
       name: 'store',
       testMatch: /phase-2-store\.spec\.ts|gaps-store\.spec\.ts|i18n-locale\.spec\.ts/,
+      grepInvert: /@merchant-app/,
       use: { ...devices['Desktop Chrome'], baseURL: STORE_URL },
     },
     {
       name: 'merchant',
       testMatch: /phase-3-inventory\.spec\.ts|i18n-locale\.spec\.ts/,
+      grepInvert: /@store-app/,
       use: { ...devices['Desktop Chrome'], baseURL: MERCHANT_URL },
     },
   ],

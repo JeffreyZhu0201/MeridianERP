@@ -108,6 +108,11 @@ export const merchant = {
       lastName: 'Last name',
       company: 'Company',
       deleteConfirm: 'Delete this contact?',
+      detail: {
+        profile: 'Contact profile',
+        email: 'Email',
+        phone: 'Phone',
+      },
     },
     companies: {
       title: 'Companies',
@@ -119,9 +124,18 @@ export const merchant = {
       website: 'Website',
       contacts: 'Contacts',
       deleteConfirm: 'Delete this company?',
+      detail: {
+        profile: 'Company profile',
+        linkedContacts: 'Linked contacts',
+        noContacts: 'No linked contacts',
+        contactName: 'Name',
+        email: 'Email',
+        phone: 'Phone',
+      },
     },
     leads: {
       title: 'Leads',
+      description: 'Track pipeline opportunities and link them to contacts.',
       stageFilter: 'Stage',
       all: 'All',
       add: 'Add Lead',
@@ -139,6 +153,9 @@ export const merchant = {
         QUALIFIED: 'Qualified',
         WON: 'Won',
         LOST: 'Lost',
+      },
+      detail: {
+        profile: 'Lead profile',
       },
     },
     activities: {
@@ -212,6 +229,8 @@ export const merchant = {
     title: 'Orders',
     description: 'Store orders for your tenant',
     notFound: 'Order not found',
+    notFoundDescription: 'This order could not be found or you do not have access.',
+    orderTitle: 'Order {id}…',
     backToOrders: 'Back to orders',
     customer: 'Customer',
     distributor: 'Distributor',
@@ -221,6 +240,13 @@ export const merchant = {
     variant: 'Variant',
     qty: 'Qty',
     lineTotal: 'Line total',
+    status: {
+      PENDING_PAYMENT: 'Pending payment',
+      PAID: 'Paid',
+      FULFILLED: 'Fulfilled',
+      CANCELLED: 'Cancelled',
+      REFUNDED: 'Refunded',
+    },
     table: {
       empty: 'No orders yet',
       emptyHint: 'Orders appear here when customers checkout on your store.',
@@ -231,6 +257,7 @@ export const merchant = {
       date: 'Date',
       fulfillment: 'Fulfillment',
       action: 'Action',
+      view: 'View',
     },
     tabs: {
       all: 'All orders',
@@ -244,6 +271,7 @@ export const merchant = {
     },
     verifyPickup: {
       failed: 'Verification failed',
+      success: 'Pickup verified successfully',
     },
   },
   funds: {
@@ -273,6 +301,13 @@ export const merchant = {
     confirm: 'Confirm receipt',
     confirming: 'Confirming…',
     confirmFailed: 'Confirm failed',
+    confirmSuccess: 'Allocation receipt confirmed',
+    orderStatus: {
+      DRAFT: 'Draft',
+      ISSUED: 'Issued',
+      CONFIRMED: 'Confirmed',
+      CANCELLED: 'Cancelled',
+    },
     columns: {
       id: 'Order',
       lines: 'Lines',
@@ -298,6 +333,13 @@ export const merchant = {
     lines: 'Lines',
     created: 'Created',
     selectSku: 'Select SKU',
+    statusPending: 'Pending',
+    requestStatus: {
+      PENDING: 'Pending',
+      APPROVED: 'Approved',
+      REJECTED: 'Rejected',
+      FULFILLED: 'Fulfilled',
+    },
   },
   distributors: {
     title: 'Distributors',
@@ -426,6 +468,7 @@ export const merchant = {
     emptyTitle: 'No commission entries yet',
     emptyDescription:
       'Commission appears here after branches confirm incoming allocations.',
+    pagination: 'Page {page} of {totalPages} ({total} entries)',
     summary: {
       accrued: 'Accrued',
       settled: 'Settled',
@@ -435,6 +478,8 @@ export const merchant = {
     filters: {
       distributor: 'Distributor',
       allDistributors: 'All distributors',
+      distributorMovedNote:
+        'Distributor filtering is managed on the platform admin portal. Filter by status and date range here.',
       allStatuses: 'All statuses',
       accrued: 'Accrued',
       settled: 'Settled',
@@ -573,6 +618,11 @@ export const merchant = {
       created: 'Created',
       lineCount: 'Lines',
       createdBy: 'Created by',
+      status: {
+        PENDING: 'Pending',
+        TRANSFERRED: 'Transferred',
+        CANCELLED: 'Cancelled',
+      },
     },
     alerts: {
       title: 'Low stock alerts',
@@ -671,6 +721,8 @@ export const merchant = {
       DAMAGE: 'Damage',
       COUNT_CORRECTION: 'Count correction',
       RETURN: 'Return',
+      TRANSFER_OUT: 'Transfer out',
+      TRANSFER_IN: 'Transfer in',
       OTHER: 'Other',
     },
   },

@@ -18,13 +18,11 @@ import { AddCartItemDto, UpdateCartItemDto } from './dto/cart.dto';
 import { StoreCartService } from './store-cart.service';
 
 @Controller('store/:slug/cart')
-@Public()  // 允许公开访问
-@UseGuards(OptionalStoreAuthGuard)  // 可选认证：支持游客和已登录用户
+@Public() // 允许公开访问
+@UseGuards(OptionalStoreAuthGuard) // 可选认证：支持游客和已登录用户
 export class StoreCartController {
-  
   constructor(private readonly cartService: StoreCartService) {}
 
-  
   @Get()
   getCart(
     @Param('slug') slug: string,
@@ -34,7 +32,6 @@ export class StoreCartController {
     return this.cartService.getCart(slug, sessionId, user);
   }
 
-  
   @Post('items')
   @HttpCode(201)
   addItem(
@@ -46,7 +43,6 @@ export class StoreCartController {
     return this.cartService.addItem(slug, dto, sessionId, user);
   }
 
-  
   @Patch('items/:itemId')
   updateItem(
     @Param('slug') slug: string,
@@ -58,7 +54,6 @@ export class StoreCartController {
     return this.cartService.updateItem(slug, itemId, dto, sessionId, user);
   }
 
-  
   @Delete('items/:itemId')
   removeItem(
     @Param('slug') slug: string,

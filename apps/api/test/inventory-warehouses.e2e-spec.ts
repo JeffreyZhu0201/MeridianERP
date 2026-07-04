@@ -25,7 +25,12 @@ describe('InventoryWarehouses (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('acme-store', 'Acme Store', 'owner@acme.test', password);
+    await prisma._seedMerchantOwner(
+      'acme-store',
+      'Acme Store',
+      'owner@acme.test',
+      password,
+    );
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const product = await request(app.getHttpServer())
@@ -34,7 +39,9 @@ describe('InventoryWarehouses (e2e)', () => {
       .send({
         name: 'Widget',
         isPublished: true,
-        variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 25 }],
+        variants: [
+          { sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 25 },
+        ],
       })
       .expect(201);
 
@@ -85,7 +92,9 @@ describe('InventoryWarehouses (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    const defaults = list.body.filter((w: { isDefault: boolean }) => w.isDefault);
+    const defaults = list.body.filter(
+      (w: { isDefault: boolean }) => w.isDefault,
+    );
     expect(defaults).toHaveLength(1);
     expect(defaults[0].name).toBe('East Coast DC');
   });
@@ -114,7 +123,10 @@ describe('InventoryWarehouses (e2e)', () => {
       .expect(200);
 
     const byWarehouse = levels.body.data.reduce(
-      (acc: Record<string, number>, row: { warehouseId: string; quantityOnHand: number }) => {
+      (
+        acc: Record<string, number>,
+        row: { warehouseId: string; quantityOnHand: number },
+      ) => {
         acc[row.warehouseId] = row.quantityOnHand;
         return acc;
       },
@@ -123,7 +135,8 @@ describe('InventoryWarehouses (e2e)', () => {
 
     expect(byWarehouse[east.body.id]).toBe(8);
     const defaultWarehouse = levels.body.data.find(
-      (row: { warehouse: { name: string } }) => row.warehouse.name === 'Default Warehouse',
+      (row: { warehouse: { name: string } }) =>
+        row.warehouse.name === 'Default Warehouse',
     );
     expect(defaultWarehouse.quantityOnHand).toBe(25);
   });

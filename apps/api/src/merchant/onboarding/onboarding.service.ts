@@ -12,7 +12,6 @@ import { UpdateOnboardingDto } from './dto/update-onboarding.dto';
 export class OnboardingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async getProfile(tenantId: string) {
     const profile = await this.prisma.merchantProfile.findUnique({
       where: { tenantId },
@@ -23,14 +22,15 @@ export class OnboardingService {
     return profile;
   }
 
-  
   async updateProfile(tenantId: string, dto: UpdateOnboardingDto) {
     const profile = await this.getProfile(tenantId);
     if (
       profile.onboardingStatus !== OnboardingStatus.DRAFT &&
       profile.onboardingStatus !== OnboardingStatus.REJECTED
     ) {
-      throw new BadRequestException('Profile cannot be edited in current status');
+      throw new BadRequestException(
+        'Profile cannot be edited in current status',
+      );
     }
     return this.prisma.merchantProfile.update({
       where: { tenantId },
@@ -38,7 +38,6 @@ export class OnboardingService {
     });
   }
 
-  
   async submit(tenantId: string) {
     const profile = await this.getProfile(tenantId);
     if (profile.onboardingStatus !== OnboardingStatus.DRAFT) {

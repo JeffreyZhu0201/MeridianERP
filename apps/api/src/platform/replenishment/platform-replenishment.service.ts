@@ -14,7 +14,6 @@ export class PlatformReplenishmentService {
     private readonly allocationsService: PlatformAllocationsService,
   ) {}
 
-  
   async list(status?: ReplenishmentRequestStatus) {
     return this.prisma.replenishmentRequest.findMany({
       where: status ? { status } : undefined,
@@ -26,7 +25,6 @@ export class PlatformReplenishmentService {
     });
   }
 
-  
   async approve(id: string, platformUserId: string) {
     const req = await this.prisma.replenishmentRequest.findUnique({
       where: { id },
@@ -43,10 +41,15 @@ export class PlatformReplenishmentService {
         masterSkuId: l.masterSkuId,
         quantity: l.quantity,
       })),
-      req.note ? `From replenishment ${req.id}: ${req.note}` : `From replenishment ${req.id}`,
+      req.note
+        ? `From replenishment ${req.id}: ${req.note}`
+        : `From replenishment ${req.id}`,
     );
 
-    await this.allocationsService.issueAllocation(allocation.id, platformUserId);
+    await this.allocationsService.issueAllocation(
+      allocation.id,
+      platformUserId,
+    );
 
     return this.prisma.replenishmentRequest.update({
       where: { id },
@@ -62,7 +65,6 @@ export class PlatformReplenishmentService {
     });
   }
 
-  
   async reject(id: string, platformUserId: string, reason: string) {
     const req = await this.prisma.replenishmentRequest.findUnique({
       where: { id },

@@ -10,10 +10,11 @@ export class PlatformInventoryService {
     private readonly inventory: InventoryService,
   ) {}
 
-  
   async getTenantSummary(tenantId: string) {
     await this.inventory.migrateTenantInventory(tenantId);
-    const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+    });
     if (!tenant) {
       return null;
     }
@@ -41,7 +42,8 @@ export class PlatformInventoryService {
         variants.map((v) => [v.id, v.reorderThreshold ?? defaultThreshold]),
       );
       for (const sl of defaultWarehouse.stockLevels) {
-        const threshold = thresholdByVariant.get(sl.variantId) ?? defaultThreshold;
+        const threshold =
+          thresholdByVariant.get(sl.variantId) ?? defaultThreshold;
         if (sl.quantityOnHand <= threshold) lowStockCount++;
       }
     }
@@ -71,60 +73,76 @@ export class PlatformInventoryService {
     };
   }
 
-  
   async listAdjustments(
     tenantId: string,
-    limit = 50,
-    from?: string,
-    to?: string,
+    query: { page?: number; limit?: number; from?: string; to?: string } = {},
   ) {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 50));
+    const skip = (page - 1) * limit;
+
     const where: Prisma.StockAdjustmentWhereInput = { tenantId };
-    if (from || to) {
+    if (query.from || query.to) {
       where.createdAt = {};
-      if (from) where.createdAt.gte = new Date(from);
-      if (to) where.createdAt.lte = new Date(to);
+      if (query.from) where.createdAt.gte = new Date(query.from);
+      if (query.to) where.createdAt.lte = new Date(query.to);
     }
 
-    const items = await this.prisma.stockAdjustment.findMany({
-      where,
-      take: Math.min(limit, 100),
-      orderBy: { createdAt: 'desc' },
-      include: {
-        actor: { select: { id: true, email: true } },
-        warehouse: { select: { id: true, name: true } },
-        variant: {
-          select: {
-            id: true,
-            sku: true,
-            name: true,
-            product: { select: { name: true } },
+    const [items, total] = await Promise.all([
+      this.prisma.stockAdjustment.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          actor: { select: { id: true, email: true } },
+          warehouse: { select: { id: true, name: true } },
+          variant: {
+            select: {
+              id: true,
+              sku: true,
+              name: true,
+              product: { select: { name: true } },
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.stockAdjustment.count({ where }),
+    ]);
 
     return {
       data: items.map((a) => this.inventory.mapAdjustment(a)),
-      meta: { total: items.length, limit },
+      meta: { total, page, limit },
     };
   }
 
-  
-  async listPurchaseOrders(tenantId: string, status?: string, limit = 50) {
+  async listPurchaseOrders(
+    tenantId: string,
+    query: { page?: number; status?: string; limit?: number } = {},
+  ) {
+    const page = Math.max(1, query.page ?? 1);
+    const limit = Math.min(100, Math.max(1, query.limit ?? 50));
+    const skip = (page - 1) * limit;
+
     const where: Prisma.PurchaseOrderWhereInput = { tenantId };
-    if (status) {
-      where.status = status as Prisma.EnumPurchaseOrderStatusFilter['equals'];
+    if (query.status) {
+      where.status =
+        query.status as Prisma.EnumPurchaseOrderStatusFilter['equals'];
     }
 
-    const items = await this.prisma.purchaseOrder.findMany({
-      where,
-      take: Math.min(limit, 100),
-      orderBy: { createdAt: 'desc' },
-      include: {
-        warehouse: { select: { id: true, name: true } },
-        createdBy: { select: { id: true, email: true } },
-      },
-    });
+    const [items, total] = await Promise.all([
+      this.prisma.purchaseOrder.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          warehouse: { select: { id: true, name: true } },
+          createdBy: { select: { id: true, email: true } },
+        },
+      }),
+      this.prisma.purchaseOrder.count({ where }),
+    ]);
 
     return {
       data: items.map((po) => ({
@@ -141,7 +159,7 @@ export class PlatformInventoryService {
         warehouse: po.warehouse,
         createdBy: po.createdBy,
       })),
-      meta: { total: items.length, limit },
+      meta: { total, page, limit },
     };
   }
 }

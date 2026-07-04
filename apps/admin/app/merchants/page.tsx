@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
-import { BentoListHeader, EmptyState, ListPageFrame, buttonVariants } from '@meridian/ui/server';
+import { EmptyState, ErpListPage, buttonVariants } from '@meridian/ui/server';
+import { ListPagination } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PaginatedResponse, type MerchantListItem, type PlatformDistributor } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { MerchantsFilters } from './_components/merchants-filters';
-import { MerchantsPagination } from './_components/merchants-pagination';
 import { MerchantsTable } from './_components/merchants-table';
 
 interface MerchantsPageProps {
@@ -16,8 +16,7 @@ interface MerchantsPageProps {
 }
 
 export default async function MerchantsPage({ searchParams }: MerchantsPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.merchants');
   const params = await searchParams;
@@ -81,33 +80,41 @@ export default async function MerchantsPage({ searchParams }: MerchantsPageProps
 
   return (
     <AdminShellWithSession>
-      <div className="space-y-6">
-        <BentoListHeader metrics={metrics} />
-        <ListPageFrame
-          title={t('title')}
-          description={t('description')}
-          action={
-            <Link href="/merchants/new" className={buttonVariants()}>
-              {t('create')}
-            </Link>
-          }
-          filters={
-            <Suspense>
-              <MerchantsFilters />
-            </Suspense>
-          }
-          emptyState={
-            merchants.length === 0 ? (
-              <EmptyState title={t('empty')} description={t('emptyDescription')} />
-            ) : undefined
-          }
-        >
-          <MerchantsTable merchants={merchants} token={token} distributors={distributors} />
+      <ErpListPage
+        metrics={metrics}
+        title={t('title')}
+        description={t('description')}
+        action={
+          <Link href="/merchants/new" className={buttonVariants()}>
+            {t('create')}
+          </Link>
+        }
+        filters={
           <Suspense>
-            <MerchantsPagination total={meta.total} page={meta.page} limit={meta.limit} />
+            <MerchantsFilters />
           </Suspense>
-        </ListPageFrame>
-      </div>
+        }
+        emptyState={
+          merchants.length === 0 ? (
+            <EmptyState title={t('empty')} description={t('emptyDescription')} />
+          ) : undefined
+        }
+      >
+        <MerchantsTable merchants={merchants} token={token} distributors={distributors} />
+        <Suspense>
+          <ListPagination
+            basePath="/merchants"
+            total={meta.total}
+            page={meta.page}
+            limit={meta.limit}
+            summary={t('pagination', {
+              page: meta.page,
+              totalPages: Math.max(1, Math.ceil(meta.total / meta.limit)),
+              total: meta.total,
+            })}
+          />
+        </Suspense>
+      </ErpListPage>
     </AdminShellWithSession>
   );
 }

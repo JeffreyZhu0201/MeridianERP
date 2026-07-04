@@ -3,13 +3,11 @@ import { Suspense } from 'react';
 import { BentoListHeader, EmptyState, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import { LedgerStatus, type CommissionListQuery } from '@meridian/shared';
 
+import { ListPagination } from '@meridian/ui';
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import {
   apiFetch,
-  asList,
-  type Distributor,
   type OnboardingProfile,
-  type PaginatedResponse,
 } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import {
@@ -40,7 +38,6 @@ function parseQuery(
   return {
     page: page ? Number(page) : 1,
     limit: limit ? Number(limit) : 20,
-    distributorId: str('distributorId'),
     status:
       status === LedgerStatus.ACCRUED || status === LedgerStatus.SETTLED ? status : undefined,
     from: str('from') ?? defaults.from,
@@ -57,16 +54,17 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
 
   const rawParams = await searchParams;
   const query = parseQuery(rawParams);
+  const limit = query.limit ?? 20;
+  const page = query.page ?? 1;
 
   const [commissionsRes, summaryRes, profile] = await Promise.all([
     fetchCommissions(token, query).catch(() => ({
       items: [],
       total: 0,
-      page: query.page ?? 1,
-      limit: query.limit ?? 20,
+      page,
+      limit,
     })),
     fetchCommissionSummary(token, {
-      distributorId: query.distributorId,
       status: query.status,
       from: query.from,
       to: query.to,
@@ -82,38 +80,48 @@ export default async function CommissionsPage({ searchParams }: CommissionsPageP
   ]);
 
   const isEmpty = commissionsRes.items.length === 0;
+  const totalPages = Math.max(1, Math.ceil(commissionsRes.total / limit));
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <ListPageFrame
-        title={t('title')}
-        description={t('description')}
-        filters={
-          <Suspense fallback={null}>
-            <CommissionsFilters distributors={[]} />
-          </Suspense>
-        }
-        emptyState={
-          isEmpty ? (
-            <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
-          ) : undefined
-        }
-      >
-        <div className="space-y-6">
-          <BentoListHeader
-            metrics={[
-              { title: tSummary('accrued'), value: formatMoney(summaryRes.accruedTotal, locale) },
-              { title: tSummary('settled'), value: formatMoney(summaryRes.settledTotal, locale) },
-              {
-                title: tSummary('totalCommission'),
-                value: formatMoney(summaryRes.totalCommission, locale),
-              },
-              { title: tSummary('entries'), value: summaryRes.entryCount },
-            ]}
-          />
+      <div className="space-y-6">
+        <BentoListHeader
+          metrics={[
+            { title: tSummary('accrued'), value: formatMoney(summaryRes.accruedTotal, locale) },
+            { title: tSummary('settled'), value: formatMoney(summaryRes.settledTotal, locale) },
+            {
+              title: tSummary('totalCommission'),
+              value: formatMoney(summaryRes.totalCommission, locale),
+            },
+            { title: tSummary('entries'), value: summaryRes.entryCount },
+          ]}
+        />
+        <ListPageFrame
+          title={t('title')}
+          description={t('description')}
+          filters={
+            <Suspense fallback={null}>
+              <CommissionsFilters />
+            </Suspense>
+          }
+          emptyState={
+            isEmpty ? (
+              <EmptyState title={t('emptyTitle')} description={t('emptyDescription')} />
+            ) : undefined
+          }
+        >
           <CommissionsTable items={commissionsRes.items} />
-        </div>
-      </ListPageFrame>
+          <Suspense>
+            <ListPagination
+              basePath="/commissions"
+              total={commissionsRes.total}
+              page={page}
+              limit={limit}
+              summary={t('pagination', { page, totalPages, total: commissionsRes.total })}
+            />
+          </Suspense>
+        </ListPageFrame>
+      </div>
     </MerchantShellWrapper>
   );
 }

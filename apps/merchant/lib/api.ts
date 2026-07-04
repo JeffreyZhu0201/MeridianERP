@@ -77,7 +77,7 @@ export interface Lead {
   title: string;
   stage: string;
   source?: string;
-  contact?: { firstName: string; lastName: string };
+  contact?: { id: string; firstName: string; lastName: string };
   distributor?: { name: string };
   updatedAt: string;
 }

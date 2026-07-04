@@ -1,19 +1,23 @@
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { Badge,
+import {
+  Badge,
   BentoDetailHero,
   DetailPageFrame,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-  formatMoney, } from '@meridian/ui/server';
+  formatMoney,
+} from '@meridian/ui/server';
+import type { MerchantOrderDetail, OrderStatus } from '@meridian/shared';
+
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
 import { apiFetch, type OnboardingProfile } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import type { MerchantOrderDetail } from '@meridian/shared';
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -33,21 +37,28 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   if (!order) {
     return (
       <MerchantShellWrapper businessName={profile?.businessName}>
-        <p className="text-muted-foreground">{t('notFound')}</p>
-        <Link href="/orders" className="mt-4 text-sm text-primary hover:underline">
-          {t('backToOrders')}
-        </Link>
+        <EmptyState
+          title={t('notFound')}
+          description={t('notFoundDescription')}
+          action={
+            <Link href="/orders" className="text-sm text-primary hover:underline">
+              {t('backToOrders')}
+            </Link>
+          }
+        />
       </MerchantShellWrapper>
     );
   }
 
+  const statusKey = `status.${order.status}` as `status.${OrderStatus}`;
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
       <DetailPageFrame
-        title={`Order ${order.id.slice(0, 8)}…`}
+        title={t('orderTitle', { id: order.id.slice(0, 8) })}
         backHref="/orders"
         backLabel={t('title')}
-        badges={<Badge>{order.status}</Badge>}
+        badges={<Badge>{t(statusKey)}</Badge>}
       >
         <BentoDetailHero
           metrics={[

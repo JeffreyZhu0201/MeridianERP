@@ -1,4 +1,11 @@
-import { Body, Controller, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { StoreAuthGuard } from '../../auth/guards/store-auth.guard';
@@ -46,7 +53,10 @@ export class StoreAuthController {
   @Post('session')
   @HttpCode(201)
   @UseGuards(StoreAuthGuard)
-  attachSession(@Param('slug') slug: string, @CurrentUser() user: AuthenticatedUser) {
+  attachSession(
+    @Param('slug') slug: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     return this.authService.attachSession(slug, user.userId);
   }
 }

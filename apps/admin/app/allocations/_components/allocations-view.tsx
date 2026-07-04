@@ -282,6 +282,11 @@ export function AllocationsView({
           created: t('orderColumns.created'),
           actions: t('orderColumns.actions'),
           issue: t('issue'),
+          lineSku: t('orderColumns.lineSku'),
+          lineQty: t('orderColumns.lineQty'),
+          linePrice: t('orderColumns.linePrice'),
+          expandLines: t('orderColumns.expandLines'),
+          collapseLines: t('orderColumns.collapseLines'),
         }}
         onCreate={() => setAllocOpen(true)}
         onIssue={handleIssue}

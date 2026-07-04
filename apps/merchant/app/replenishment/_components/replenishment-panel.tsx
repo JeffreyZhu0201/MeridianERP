@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
   Badge,
@@ -40,6 +40,7 @@ function statusVariant(status: string): 'default' | 'secondary' | 'destructive' 
 }
 
 export function ReplenishmentPanel({ requests, skus, token }: ReplenishmentPanelProps) {
+  const locale = useLocale();
   const t = useTranslations('merchant.replenishment');
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
@@ -85,6 +86,18 @@ export function ReplenishmentPanel({ requests, skus, token }: ReplenishmentPanel
     } finally {
       setSaving(false);
     }
+  }
+
+  function statusLabel(status: string): string {
+    if (
+      status === 'PENDING' ||
+      status === 'APPROVED' ||
+      status === 'REJECTED' ||
+      status === 'FULFILLED'
+    ) {
+      return t(`requestStatus.${status}` as 'requestStatus.PENDING');
+    }
+    return status;
   }
 
   return (
@@ -167,14 +180,14 @@ export function ReplenishmentPanel({ requests, skus, token }: ReplenishmentPanel
               {requests.map((req) => (
                 <TableRow key={req.id}>
                   <TableCell>
-                    <Badge variant={statusVariant(req.status)}>{req.status}</Badge>
+                    <Badge variant={statusVariant(req.status)}>{statusLabel(req.status)}</Badge>
                   </TableCell>
                   <TableCell>{req.lineCount}</TableCell>
                   <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
                     {req.note ?? '—'}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
-                    {new Date(req.createdAt).toLocaleDateString()}
+                    {new Date(req.createdAt).toLocaleDateString(locale)}
                   </TableCell>
                 </TableRow>
               ))}

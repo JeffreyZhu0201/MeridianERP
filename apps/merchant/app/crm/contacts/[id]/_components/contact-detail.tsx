@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
+  BentoDetailHero,
   Button,
   Card,
   CardContent,
@@ -62,6 +63,8 @@ export function ContactDetail({ contact, token }: ContactDetailProps) {
     }
   }
 
+  const emptyDash = tc('emptyDash');
+
   return (
     <>
       <DetailPageFrame
@@ -70,9 +73,20 @@ export function ContactDetail({ contact, token }: ContactDetailProps) {
         backLabel={t('title')}
         actions={<Button onClick={openEdit}>{tc('edit')}</Button>}
       >
+        <BentoDetailHero
+          metrics={[
+            { title: t('detail.email'), value: contact.email ?? emptyDash },
+            { title: t('detail.phone'), value: contact.phone ?? emptyDash },
+            {
+              title: t('company'),
+              value: contact.company?.name ?? emptyDash,
+            },
+          ]}
+        />
+
         <Card>
           <CardHeader>
-            <CardTitle>{t('title')}</CardTitle>
+            <CardTitle>{t('detail.profile')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
@@ -85,18 +99,29 @@ export function ContactDetail({ contact, token }: ContactDetailProps) {
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{tc('email')}</span>
-              <span>{contact.email ?? '—'}</span>
+              <span>{contact.email ?? emptyDash}</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{tc('phone')}</span>
-              <span>{contact.phone ?? '—'}</span>
+              <span>{contact.phone ?? emptyDash}</span>
             </div>
-            {contact.company ? (
-              <div className="flex justify-between gap-4">
-                <span className="text-muted-foreground">{t('company')}</span>
-                <span>{contact.company.name}</span>
-              </div>
-            ) : null}
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">{t('company')}</span>
+              <span>
+                {contact.company && contact.companyId ? (
+                  <Link
+                    href={`/crm/companies/${contact.companyId}`}
+                    className="text-primary hover:underline"
+                  >
+                    {contact.company.name}
+                  </Link>
+                ) : contact.company ? (
+                  contact.company.name
+                ) : (
+                  emptyDash
+                )}
+              </span>
+            </div>
           </CardContent>
         </Card>
       </DetailPageFrame>

@@ -9,7 +9,6 @@ export class DistributorAuthGuard extends AuthGuard('distributor-jwt') {
     super();
   }
 
-  
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),

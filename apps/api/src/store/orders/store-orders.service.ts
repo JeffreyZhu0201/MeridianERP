@@ -1,5 +1,13 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import type { DeliveryAddress, StoreOrderDetail, StoreOrderListItem } from '@meridian/shared';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import type {
+  DeliveryAddress,
+  StoreOrderDetail,
+  StoreOrderListItem,
+} from '@meridian/shared';
 import { FulfillmentType, OrderStatus } from '@prisma/client';
 import { OrderStatus as SharedOrderStatus } from '@meridian/shared';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
@@ -8,14 +16,12 @@ import { StoreTenantService } from '../common/store-tenant.service';
 
 @Injectable()
 export class StoreOrdersService {
-  
   constructor(
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
     private readonly fulfillmentService: FulfillmentService,
   ) {}
 
-  
   async listForCustomer(
     slug: string,
     customerId: string,
@@ -23,8 +29,8 @@ export class StoreOrdersService {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     const orders = await this.prisma.order.findMany({
       where: { tenantId: tenant.id, customerId },
-      include: { _count: { select: { lines: true } } },  // 统计订单商品数量
-      orderBy: { createdAt: 'desc' },  // 最新订单在前
+      include: { _count: { select: { lines: true } } }, // 统计订单商品数量
+      orderBy: { createdAt: 'desc' }, // 最新订单在前
     });
     return orders.map((order) => ({
       id: order.id,
@@ -37,7 +43,6 @@ export class StoreOrdersService {
     }));
   }
 
-  
   async getForCustomer(
     slug: string,
     customerId: string,
@@ -46,7 +51,7 @@ export class StoreOrdersService {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId: tenant.id, customerId },
-      include: { lines: true },  // 包含商品明细
+      include: { lines: true }, // 包含商品明细
     });
 
     if (!order) {
@@ -61,7 +66,8 @@ export class StoreOrdersService {
       subtotal: Number(order.subtotal),
       tax: Number(order.tax),
       pickupCode:
-        order.fulfillmentType === FulfillmentType.PICKUP && !order.pickupVerifiedAt
+        order.fulfillmentType === FulfillmentType.PICKUP &&
+        !order.pickupVerifiedAt
           ? order.pickupCode
           : null,
       pickupVerifiedAt: order.pickupVerifiedAt?.toISOString() ?? null,
@@ -80,7 +86,6 @@ export class StoreOrdersService {
     };
   }
 
-  
   async getPickupToken(slug: string, customerId: string, orderId: string) {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     const order = await this.prisma.order.findFirst({

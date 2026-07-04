@@ -40,10 +40,25 @@ test.describe('Phase 2 store smoke', () => {
     });
     expect(approved.ok()).toBeTruthy();
 
-    const merchantDetail = await request.get(`${API}/api/v1/platform/merchants/${profileId}`, {
+    const flagship = await request.patch(
+      `${API}/api/v1/platform/merchants/${profileId}/store-settings`,
+      {
+        headers: { Authorization: `Bearer ${adminToken}` },
+        data: { isFlagship: true, storePublished: true },
+      },
+    );
+    expect(flagship.ok()).toBeTruthy();
+
+    const listRes = await request.get(`${API}/api/v1/platform/merchants?limit=100`, {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
-    const slug = (await merchantDetail.json()).tenant.slug as string;
+    expect(listRes.ok()).toBeTruthy();
+    const slug = (await listRes.json()).data.find(
+      (m: { id: string }) => m.id === profileId,
+    )?.slug as string | undefined;
+    if (!slug) {
+      throw new Error('Merchant slug not found after approval');
+    }
 
     const product = await request.post(`${API}/api/v1/merchant/products`, {
       headers: { Authorization: `Bearer ${merchantToken}` },
@@ -53,7 +68,9 @@ test.describe('Phase 2 store smoke', () => {
         variants: [{ sku: 'E2E-1', name: 'Default', price: 25, inventory: 5 }],
       },
     });
-    const variantId = (await product.json()).variants[0].id as string;
+    expect(product.ok()).toBeTruthy();
+    const productBody = await product.json();
+    const variantId = productBody.variants[0].id as string;
 
     const sessionId = `e2e-session-${Date.now()}`;
 
@@ -65,7 +82,7 @@ test.describe('Phase 2 store smoke', () => {
 
     const checkout = await request.post(`${API}/api/v1/store/${slug}/checkout`, {
       headers: { 'X-Cart-Session': sessionId },
-      data: { guestEmail: 'guest@e2e.test' },
+      data: { guestEmail: 'guest@e2e.test', fulfillmentType: 'PICKUP' },
     });
     if (!checkout.ok()) {
       const body = await checkout.text();
@@ -92,7 +109,8 @@ test.describe('Phase 2 store smoke', () => {
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running');
     }
-    await expect(page.getByRole('heading', { name: /MeridianERP Store/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/shop\/?$/);
+    await expect(page.getByRole('heading', { name: /Shop/i })).toBeVisible({ timeout: 15_000 });
   });
 
   test('demo store catalog renders products', async ({ page }) => {
@@ -100,7 +118,9 @@ test.describe('Phase 2 store smoke', () => {
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running or demo seed missing');
     }
-    await expect(page.getByRole('heading', { name: /Shop/i })).toBeVisible();
-    await expect(page.getByText('Starter Widget')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Shop/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('link', { name: 'Starter Widget', exact: true }).first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 });

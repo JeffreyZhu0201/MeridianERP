@@ -6,10 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { BindType as PrismaBindType } from '@prisma/client';
 import { BindType } from '@meridian/shared';
-import type {
-  BindVerifyResponse,
-  BindingRecord,
-} from '@meridian/shared';
+import type { BindVerifyResponse, BindingRecord } from '@meridian/shared';
 import { EnvService } from '../config/env.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailQueueService } from '../queue/email-queue.service';

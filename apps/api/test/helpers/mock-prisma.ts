@@ -59,10 +59,16 @@ export function createMockPrisma() {
   const purchaseOrders = new Map<Id, PurchaseOrderRecord>();
   const purchaseOrderLines = new Map<Id, PurchaseOrderLineRecord>();
   const purchaseOrderReceipts = new Map<Id, PurchaseOrderReceiptRecord>();
-  const purchaseOrderReceiptLines = new Map<Id, PurchaseOrderReceiptLineRecord>();
+  const purchaseOrderReceiptLines = new Map<
+    Id,
+    PurchaseOrderReceiptLineRecord
+  >();
   const stockTransfers = new Map<Id, StockTransferRecord>();
   const stockTransferLines = new Map<Id, StockTransferLineRecord>();
-  const merchantRecruitInviteCodes = new Map<Id, MerchantRecruitInviteCodeRecord>();
+  const merchantRecruitInviteCodes = new Map<
+    Id,
+    MerchantRecruitInviteCodeRecord
+  >();
   const withdrawalRequests = new Map<Id, WithdrawalRequestRecord>();
   const masterSkus = new Map<Id, MasterSkuRecord>();
 
@@ -506,12 +512,18 @@ export function createMockPrisma() {
 
   const now = () => new Date();
 
-  const attachVariant = (variant: ProductVariantRecord, include?: Record<string, unknown>) => {
+  const attachVariant = (
+    variant: ProductVariantRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...variant };
     if (include?.product) {
       const product = products.get(variant.productId);
       if (product) {
-        if (typeof include.product === 'object' && 'select' in include.product) {
+        if (
+          typeof include.product === 'object' &&
+          'select' in include.product
+        ) {
           const select = include.product.select as Record<string, boolean>;
           result.product = Object.fromEntries(
             Object.keys(select)
@@ -526,19 +538,33 @@ export function createMockPrisma() {
     return result;
   };
 
-  const attachProduct = (product: ProductRecord, include?: Record<string, unknown>) => {
+  const attachProduct = (
+    product: ProductRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...product };
     if (include?.category) {
-      result.category = product.categoryId ? categories.get(product.categoryId) ?? null : null;
+      result.category = product.categoryId
+        ? (categories.get(product.categoryId) ?? null)
+        : null;
     }
     if (include?.variants) {
-      let variants = [...productVariants.values()].filter((v) => v.productId === product.id);
-      const variantInclude = include.variants as { where?: { isActive?: boolean }; orderBy?: { createdAt: string } };
+      let variants = [...productVariants.values()].filter(
+        (v) => v.productId === product.id,
+      );
+      const variantInclude = include.variants as {
+        where?: { isActive?: boolean };
+        orderBy?: { createdAt: string };
+      };
       if (variantInclude.where?.isActive !== undefined) {
-        variants = variants.filter((v) => v.isActive === variantInclude.where!.isActive);
+        variants = variants.filter(
+          (v) => v.isActive === variantInclude.where!.isActive,
+        );
       }
       if (variantInclude.orderBy?.createdAt === 'asc') {
-        variants = variants.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        variants = variants.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        );
       }
       result.variants = variants;
     }
@@ -548,10 +574,15 @@ export function createMockPrisma() {
   const attachCart = (cart: CartRecord, include?: Record<string, unknown>) => {
     const result: Record<string, unknown> = { ...cart };
     if (include?.items) {
-      const itemsInclude = include.items as { include?: { variant?: { include?: { product?: boolean } } }; orderBy?: { createdAt: string } };
+      const itemsInclude = include.items as {
+        include?: { variant?: { include?: { product?: boolean } } };
+        orderBy?: { createdAt: string };
+      };
       let items = [...cartItems.values()].filter((i) => i.cartId === cart.id);
       if (itemsInclude.orderBy?.createdAt === 'asc') {
-        items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        items = items.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+        );
       }
       result.items = items.map((item) => {
         const row: Record<string, unknown> = { ...item };
@@ -559,9 +590,15 @@ export function createMockPrisma() {
           const variant = productVariants.get(item.variantId);
           if (variant) {
             if (itemsInclude.include.variant.include?.product) {
-              row.variant = { ...variant, product: products.get(variant.productId) };
+              row.variant = {
+                ...variant,
+                product: products.get(variant.productId),
+              };
             } else {
-              row.variant = attachVariant(variant, itemsInclude.include.variant as Record<string, unknown>);
+              row.variant = attachVariant(
+                variant,
+                itemsInclude.include.variant,
+              );
             }
           }
         }
@@ -570,7 +607,7 @@ export function createMockPrisma() {
     }
     if (include?.distributor) {
       result.distributor = cart.distributorId
-        ? distributors.get(cart.distributorId) ?? null
+        ? (distributors.get(cart.distributorId) ?? null)
         : null;
     }
     return result;
@@ -597,14 +634,19 @@ export function createMockPrisma() {
     }
     if (include?.commissionEntry) {
       const entry =
-        [...commissionLedgers.values()].find((e) => e.orderId === order.id) ?? null;
+        [...commissionLedgers.values()].find((e) => e.orderId === order.id) ??
+        null;
       if (
         entry &&
         typeof include.commissionEntry === 'object' &&
         'include' in include.commissionEntry
       ) {
-        const nested = (include.commissionEntry as { include?: Record<string, unknown> }).include;
-        const enriched: CommissionLedgerRecord & Record<string, unknown> = { ...entry };
+        const nested = (
+          include.commissionEntry as { include?: Record<string, unknown> }
+        ).include;
+        const enriched: CommissionLedgerRecord & Record<string, unknown> = {
+          ...entry,
+        };
         if (nested?.distributor) {
           const distributor = distributors.get(entry.distributorId);
           if (
@@ -612,7 +654,9 @@ export function createMockPrisma() {
             typeof nested.distributor === 'object' &&
             'select' in nested.distributor
           ) {
-            const select = (nested.distributor as { select?: Record<string, boolean> }).select ?? {};
+            const select =
+              (nested.distributor as { select?: Record<string, boolean> })
+                .select ?? {};
             enriched.distributor = Object.fromEntries(
               Object.keys(select)
                 .filter((k) => select[k])
@@ -634,7 +678,9 @@ export function createMockPrisma() {
         typeof include.distributor === 'object' &&
         'select' in include.distributor
       ) {
-        const select = (include.distributor as { select?: Record<string, boolean> }).select ?? {};
+        const select =
+          (include.distributor as { select?: Record<string, boolean> })
+            .select ?? {};
         result.distributor = Object.fromEntries(
           Object.keys(select)
             .filter((k) => select[k])
@@ -648,7 +694,8 @@ export function createMockPrisma() {
       const countInclude = include._count as { select?: { lines?: boolean } };
       if (countInclude.select?.lines) {
         result._count = {
-          lines: [...orderLines.values()].filter((l) => l.orderId === order.id).length,
+          lines: [...orderLines.values()].filter((l) => l.orderId === order.id)
+            .length,
         };
       }
     }
@@ -674,7 +721,9 @@ export function createMockPrisma() {
     entry: CommissionLedgerRecord,
     include?: Record<string, unknown>,
   ): CommissionLedgerRecord & Record<string, unknown> => {
-    const result: CommissionLedgerRecord & Record<string, unknown> = { ...entry };
+    const result: CommissionLedgerRecord & Record<string, unknown> = {
+      ...entry,
+    };
     if (include?.distributor) {
       result.distributor = distributors.get(entry.distributorId);
     }
@@ -699,19 +748,26 @@ export function createMockPrisma() {
       const allocation = allocationOrders.get(entry.allocationOrderId);
       if (allocation && typeof include.allocationOrder === 'object') {
         if ('include' in include.allocationOrder) {
-          const nested = include.allocationOrder.include as Record<string, unknown>;
+          const nested = include.allocationOrder.include as Record<
+            string,
+            unknown
+          >;
           result.allocationOrder = {
             ...allocation,
             lines:
               nested.lines && allocation.lines
                 ? allocation.lines.map((line) => {
-                    const lineSelect = (nested.lines as { select?: Record<string, boolean> })
-                      .select;
+                    const lineSelect = (
+                      nested.lines as { select?: Record<string, boolean> }
+                    ).select;
                     if (!lineSelect) return line;
                     return Object.fromEntries(
                       Object.keys(lineSelect)
                         .filter((k) => lineSelect[k])
-                        .map((k) => [k, line[k as keyof AllocationOrderLineRecord]]),
+                        .map((k) => [
+                          k,
+                          line[k as keyof AllocationOrderLineRecord],
+                        ]),
                     );
                   })
                 : allocation.lines,
@@ -737,8 +793,9 @@ export function createMockPrisma() {
         if (tenant && select.merchantProfile) {
           const profileId = profileByTenant.get(entry.tenantId);
           const profile = profileId ? merchantProfiles.get(profileId) : null;
-          const mpSelect = (select.merchantProfile as { select?: Record<string, boolean> })
-            ?.select;
+          const mpSelect = (
+            select.merchantProfile as { select?: Record<string, boolean> }
+          )?.select;
           const merchantProfile =
             profile && mpSelect
               ? Object.fromEntries(
@@ -771,7 +828,9 @@ export function createMockPrisma() {
   ) => {
     const result: Record<string, unknown> = { ...batch };
     if (include?.entries) {
-      const entriesInclude = include.entries as { include?: Record<string, unknown> };
+      const entriesInclude = include.entries as {
+        include?: Record<string, unknown>;
+      };
       result.entries = [...commissionLedgers.values()]
         .filter((e) => e.settlementBatchId === batch.id)
         .map((e) => attachCommissionEntry(e, entriesInclude.include));
@@ -779,10 +838,7 @@ export function createMockPrisma() {
     return result;
   };
 
-  const applyDateRange = (
-    date: Date,
-    range?: { gte?: Date; lte?: Date },
-  ) => {
+  const applyDateRange = (date: Date, range?: { gte?: Date; lte?: Date }) => {
     if (!range) return true;
     if (range.gte && date < range.gte) return false;
     if (range.lte && date > range.lte) return false;
@@ -817,7 +873,8 @@ export function createMockPrisma() {
 
   const filterBindings = (where: Record<string, unknown>) => {
     let items = [...bindings.values()];
-    if (where.tenantId) items = items.filter((b) => b.tenantId === where.tenantId);
+    if (where.tenantId)
+      items = items.filter((b) => b.tenantId === where.tenantId);
     if (where.distributorId) {
       items = items.filter((b) => b.distributorId === where.distributorId);
     }
@@ -834,7 +891,8 @@ export function createMockPrisma() {
 
   const filterOrders = (where: Record<string, unknown>) => {
     let items = [...orders.values()];
-    if (where.tenantId) items = items.filter((o) => o.tenantId === where.tenantId);
+    if (where.tenantId)
+      items = items.filter((o) => o.tenantId === where.tenantId);
     if (where.distributorId) {
       items = items.filter((o) => o.distributorId === where.distributorId);
     }
@@ -856,19 +914,29 @@ export function createMockPrisma() {
     }
     if (where.fulfillmentType) {
       items = items.filter(
-        (o) => (o as OrderRecord & { fulfillmentType?: string }).fulfillmentType === where.fulfillmentType,
+        (o) =>
+          (o as OrderRecord & { fulfillmentType?: string }).fulfillmentType ===
+          where.fulfillmentType,
       );
     }
     if (where.guestEmail) {
-      const guestEmail = where.guestEmail as { contains?: string; mode?: string };
+      const guestEmail = where.guestEmail as {
+        contains?: string;
+        mode?: string;
+      };
       if (guestEmail.contains) {
         const needle = guestEmail.contains.toLowerCase();
-        items = items.filter((o) => o.guestEmail?.toLowerCase().includes(needle));
+        items = items.filter((o) =>
+          o.guestEmail?.toLowerCase().includes(needle),
+        );
       }
     }
     if (where.createdAt) {
       items = items.filter((o) =>
-        applyDateRange(o.createdAt, where.createdAt as { gte?: Date; lte?: Date }),
+        applyDateRange(
+          o.createdAt,
+          where.createdAt as { gte?: Date; lte?: Date },
+        ),
       );
     }
     return items;
@@ -876,7 +944,8 @@ export function createMockPrisma() {
 
   const filterCommissionLedgers = (where: Record<string, unknown>) => {
     let items = [...commissionLedgers.values()];
-    if (where.tenantId) items = items.filter((e) => e.tenantId === where.tenantId);
+    if (where.tenantId)
+      items = items.filter((e) => e.tenantId === where.tenantId);
     if (where.distributorId) {
       items = items.filter((e) => e.distributorId === where.distributorId);
     }
@@ -892,17 +961,24 @@ export function createMockPrisma() {
     }
     if (where.createdAt) {
       items = items.filter((e) =>
-        applyDateRange(e.createdAt, where.createdAt as { gte?: Date; lte?: Date }),
+        applyDateRange(
+          e.createdAt,
+          where.createdAt as { gte?: Date; lte?: Date },
+        ),
       );
     }
     if (where.settlementBatchId === null) {
       items = items.filter((e) => e.settlementBatchId === null);
     }
     if (where.commissionSource) {
-      items = items.filter((e) => e.commissionSource === where.commissionSource);
+      items = items.filter(
+        (e) => e.commissionSource === where.commissionSource,
+      );
     }
     if (where.allocationOrderId) {
-      items = items.filter((e) => e.allocationOrderId === where.allocationOrderId);
+      items = items.filter(
+        (e) => e.allocationOrderId === where.allocationOrderId,
+      );
     }
     return items;
   };
@@ -919,8 +995,15 @@ export function createMockPrisma() {
       const entry =
         [...commissionLedgers.values()].find((e) => e.orderId === order.id) ??
         null;
-      if (entry && typeof select.commissionEntry === 'object' && 'select' in select.commissionEntry) {
-        const entrySelect = select.commissionEntry.select as Record<string, boolean>;
+      if (
+        entry &&
+        typeof select.commissionEntry === 'object' &&
+        'select' in select.commissionEntry
+      ) {
+        const entrySelect = select.commissionEntry.select as Record<
+          string,
+          boolean
+        >;
         result.commissionEntry = entry
           ? Object.fromEntries(
               Object.keys(entrySelect)
@@ -937,18 +1020,28 @@ export function createMockPrisma() {
 
   const filterStockLevels = (where: Record<string, unknown>) => {
     let items = [...stockLevels.values()];
-    if (where.tenantId) items = items.filter((sl) => sl.tenantId === where.tenantId);
-    if (where.warehouseId) items = items.filter((sl) => sl.warehouseId === where.warehouseId);
-    if (where.variantId) items = items.filter((sl) => sl.variantId === where.variantId);
+    if (where.tenantId)
+      items = items.filter((sl) => sl.tenantId === where.tenantId);
+    if (where.warehouseId)
+      items = items.filter((sl) => sl.warehouseId === where.warehouseId);
+    if (where.variantId)
+      items = items.filter((sl) => sl.variantId === where.variantId);
     return items;
   };
 
-  const attachStockLevel = (sl: StockLevelRecord, include?: Record<string, unknown>) => {
+  const attachStockLevel = (
+    sl: StockLevelRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...sl };
     if (include?.warehouse) {
       const warehouse = warehouses.get(sl.warehouseId);
       if (warehouse) {
-        result.warehouse = { id: warehouse.id, name: warehouse.name, isDefault: warehouse.isDefault };
+        result.warehouse = {
+          id: warehouse.id,
+          name: warehouse.name,
+          isDefault: warehouse.isDefault,
+        };
       }
     }
     if (include?.variant) {
@@ -966,21 +1059,27 @@ export function createMockPrisma() {
 
   const filterAdjustments = (where: Record<string, unknown>) => {
     let items = [...stockAdjustments.values()];
-    if (where.tenantId) items = items.filter((a) => a.tenantId === where.tenantId);
-    if (where.warehouseId) items = items.filter((a) => a.warehouseId === where.warehouseId);
-    if (where.variantId) items = items.filter((a) => a.variantId === where.variantId);
+    if (where.tenantId)
+      items = items.filter((a) => a.tenantId === where.tenantId);
+    if (where.warehouseId)
+      items = items.filter((a) => a.warehouseId === where.warehouseId);
+    if (where.variantId)
+      items = items.filter((a) => a.variantId === where.variantId);
     if (where.reason) items = items.filter((a) => a.reason === where.reason);
     if (where.createdAt && typeof where.createdAt === 'object') {
       const createdAt = where.createdAt as { gte?: Date; lte?: Date };
-      if (createdAt.gte) items = items.filter((a) => a.createdAt >= createdAt.gte!);
-      if (createdAt.lte) items = items.filter((a) => a.createdAt <= createdAt.lte!);
+      if (createdAt.gte)
+        items = items.filter((a) => a.createdAt >= createdAt.gte!);
+      if (createdAt.lte)
+        items = items.filter((a) => a.createdAt <= createdAt.lte!);
     }
     return items;
   };
 
   const filterStockTransfers = (where: Record<string, unknown>) => {
     let items = [...stockTransfers.values()];
-    if (where.tenantId) items = items.filter((t) => t.tenantId === where.tenantId);
+    if (where.tenantId)
+      items = items.filter((t) => t.tenantId === where.tenantId);
     if (where.id) items = items.filter((t) => t.id === where.id);
     if (where.fromWarehouseId) {
       items = items.filter((t) => t.fromWarehouseId === where.fromWarehouseId);
@@ -991,15 +1090,20 @@ export function createMockPrisma() {
     return items;
   };
 
-  const attachStockTransfer = (transfer: StockTransferRecord, include?: Record<string, unknown>) => {
+  const attachStockTransfer = (
+    transfer: StockTransferRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...transfer };
     if (include?.fromWarehouse) {
       const warehouse = warehouses.get(transfer.fromWarehouseId);
-      if (warehouse) result.fromWarehouse = { id: warehouse.id, name: warehouse.name };
+      if (warehouse)
+        result.fromWarehouse = { id: warehouse.id, name: warehouse.name };
     }
     if (include?.toWarehouse) {
       const warehouse = warehouses.get(transfer.toWarehouseId);
-      if (warehouse) result.toWarehouse = { id: warehouse.id, name: warehouse.name };
+      if (warehouse)
+        result.toWarehouse = { id: warehouse.id, name: warehouse.name };
     }
     if (include?.createdBy) {
       const user = users.get(transfer.createdById);
@@ -1032,7 +1136,10 @@ export function createMockPrisma() {
     return result;
   };
 
-  const attachAdjustment = (adj: StockAdjustmentRecord, include?: Record<string, unknown>) => {
+  const attachAdjustment = (
+    adj: StockAdjustmentRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...adj };
     if (include?.actor) {
       const actor = users.get(adj.actorId);
@@ -1040,7 +1147,8 @@ export function createMockPrisma() {
     }
     if (include?.warehouse) {
       const warehouse = warehouses.get(adj.warehouseId);
-      if (warehouse) result.warehouse = { id: warehouse.id, name: warehouse.name };
+      if (warehouse)
+        result.warehouse = { id: warehouse.id, name: warehouse.name };
     }
     if (include?.variant) {
       const variant = productVariants.get(adj.variantId);
@@ -1059,18 +1167,24 @@ export function createMockPrisma() {
 
   const filterPurchaseOrders = (where: Record<string, unknown>) => {
     let items = [...purchaseOrders.values()];
-    if (where.tenantId) items = items.filter((po) => po.tenantId === where.tenantId);
+    if (where.tenantId)
+      items = items.filter((po) => po.tenantId === where.tenantId);
     if (where.id) items = items.filter((po) => po.id === where.id);
     if (where.status) items = items.filter((po) => po.status === where.status);
-    if (where.warehouseId) items = items.filter((po) => po.warehouseId === where.warehouseId);
+    if (where.warehouseId)
+      items = items.filter((po) => po.warehouseId === where.warehouseId);
     return items;
   };
 
-  const attachPurchaseOrder = (po: PurchaseOrderRecord, include?: Record<string, unknown>) => {
+  const attachPurchaseOrder = (
+    po: PurchaseOrderRecord,
+    include?: Record<string, unknown>,
+  ) => {
     const result: Record<string, unknown> = { ...po };
     if (include?.warehouse) {
       const warehouse = warehouses.get(po.warehouseId);
-      if (warehouse) result.warehouse = { id: warehouse.id, name: warehouse.name };
+      if (warehouse)
+        result.warehouse = { id: warehouse.id, name: warehouse.name };
     }
     if (include?.createdBy) {
       const user = users.get(po.createdById);
@@ -1110,7 +1224,9 @@ export function createMockPrisma() {
               ...line,
               purchaseOrderLine: (() => {
                 const pol = purchaseOrderLines.get(line.purchaseOrderLineId);
-                return pol ? { id: pol.id, variantId: pol.variantId } : undefined;
+                return pol
+                  ? { id: pol.id, variantId: pol.variantId }
+                  : undefined;
               })(),
             })),
         }));
@@ -1137,11 +1253,15 @@ export function createMockPrisma() {
     if (!where) return items;
     let filtered = items;
     if (where.onboardingStatus) {
-      const status = where.onboardingStatus as OnboardingStatus | { in?: OnboardingStatus[] };
+      const status = where.onboardingStatus as
+        | OnboardingStatus
+        | { in?: OnboardingStatus[] };
       if (typeof status === 'string') {
         filtered = filtered.filter((p) => p.onboardingStatus === status);
       } else if (status.in) {
-        filtered = filtered.filter((p) => status.in!.includes(p.onboardingStatus));
+        filtered = filtered.filter((p) =>
+          status.in!.includes(p.onboardingStatus),
+        );
       }
     }
     if (where.OR && Array.isArray(where.OR)) {
@@ -1151,7 +1271,9 @@ export function createMockPrisma() {
           for (const [field, cond] of Object.entries(clause)) {
             const c = cond as { contains?: string; mode?: string };
             if (c.contains) {
-              const value = String((p as unknown as Record<string, unknown>)[field] ?? '').toLowerCase();
+              const value = String(
+                (p as unknown as Record<string, unknown>)[field] ?? '',
+              ).toLowerCase();
               if (!value.includes(c.contains.toLowerCase())) return false;
             }
           }
@@ -1163,7 +1285,9 @@ export function createMockPrisma() {
       filtered = filtered.filter((p) => p.isFlagship === where.isFlagship);
     }
     if (where.storePublished !== undefined) {
-      filtered = filtered.filter((p) => p.storePublished === where.storePublished);
+      filtered = filtered.filter(
+        (p) => p.storePublished === where.storePublished,
+      );
     }
     return filtered;
   };
@@ -1173,9 +1297,16 @@ export function createMockPrisma() {
     onModuleDestroy: jest.fn(),
     $transaction: runTransaction,
     platformUser: {
-      findUnique: async ({ where }: { where: { email?: string; id?: string } }) => {
+      findUnique: async ({
+        where,
+      }: {
+        where: { email?: string; id?: string };
+      }) => {
         if (where.email) {
-          return [...platformUsers.values()].find((u) => u.email === where.email) ?? null;
+          return (
+            [...platformUsers.values()].find((u) => u.email === where.email) ??
+            null
+          );
         }
         if (where.id) {
           return platformUsers.get(where.id) ?? null;
@@ -1227,7 +1358,9 @@ export function createMockPrisma() {
         data: Omit<PlatformUserRecord, 'id' | 'createdAt' | 'updatedAt'>;
         select?: Record<string, boolean>;
       }) => {
-        const existing = [...platformUsers.values()].find((u) => u.email === data.email);
+        const existing = [...platformUsers.values()].find(
+          (u) => u.email === data.email,
+        );
         if (existing) {
           throw new Error('Unique constraint failed on email');
         }
@@ -1282,7 +1415,9 @@ export function createMockPrisma() {
         create: Omit<PlatformUserRecord, 'id' | 'createdAt' | 'updatedAt'>;
         update: Partial<PlatformUserRecord>;
       }) => {
-        const existing = [...platformUsers.values()].find((u) => u.email === where.email);
+        const existing = [...platformUsers.values()].find(
+          (u) => u.email === where.email,
+        );
         if (existing) {
           const updated = { ...existing, ...update, updatedAt: now() };
           platformUsers.set(existing.id, updated);
@@ -1326,7 +1461,7 @@ export function createMockPrisma() {
           return {
             ...account,
             customers: [...customers.values()]
-              .filter((c) => c.accountId === account!.id)
+              .filter((c) => c.accountId === account.id)
               .map((c) => ({
                 ...c,
                 tenant: {
@@ -1336,10 +1471,12 @@ export function createMockPrisma() {
                     return pid ? merchantProfiles.get(pid) : null;
                   })(),
                 },
-                orders: [...orders.values()].filter((o) => o.customerId === c.id),
+                orders: [...orders.values()].filter(
+                  (o) => o.customerId === c.id,
+                ),
               })),
             merchantUsers: [...users.values()]
-              .filter((u) => u.accountId === account!.id)
+              .filter((u) => u.accountId === account.id)
               .map((u) => ({
                 ...u,
                 tenant: {
@@ -1403,18 +1540,25 @@ export function createMockPrisma() {
         if (where?.merchantUsers?.some?.role) {
           rows = rows.filter((a) =>
             [...users.values()].some(
-              (u) => u.accountId === a.id && u.role === where.merchantUsers!.some.role,
+              (u) =>
+                u.accountId === a.id &&
+                u.role === where.merchantUsers!.some.role,
             ),
           );
         }
         if (orderBy?.createdAt === 'desc') {
           rows.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         }
-        const slice = rows.slice(skip, take === undefined ? undefined : skip + take);
+        const slice = rows.slice(
+          skip,
+          take === undefined ? undefined : skip + take,
+        );
         if (include) {
           return slice.map((account) => ({
             ...account,
-            customers: [...customers.values()].filter((c) => c.accountId === account.id),
+            customers: [...customers.values()].filter(
+              (c) => c.accountId === account.id,
+            ),
             merchantUsers: [...users.values()]
               .filter((u) => u.accountId === account.id)
               .map((u) => ({
@@ -1432,7 +1576,9 @@ export function createMockPrisma() {
         return slice;
       },
       count: async ({ where }: { where?: Record<string, unknown> }) => {
-        const rows = await mock.platformAccount.findMany({ where: where as never });
+        const rows = await mock.platformAccount.findMany({
+          where: where,
+        });
         return rows.length;
       },
       create: async ({
@@ -1478,14 +1624,24 @@ export function createMockPrisma() {
         tenants.set(record.id, record);
         return record;
       },
-      findUnique: async ({ where }: { where: { id?: string; slug?: string } }) => {
+      findUnique: async ({
+        where,
+      }: {
+        where: { id?: string; slug?: string };
+      }) => {
         if (where.id) return tenants.get(where.id) ?? null;
         if (where.slug) {
-          return [...tenants.values()].find((t) => t.slug === where.slug) ?? null;
+          return (
+            [...tenants.values()].find((t) => t.slug === where.slug) ?? null
+          );
         }
         return null;
       },
-      findUniqueOrThrow: async ({ where }: { where: { id?: string; slug?: string } }) => {
+      findUniqueOrThrow: async ({
+        where,
+      }: {
+        where: { id?: string; slug?: string };
+      }) => {
         const tenant = await mock.tenant.findUnique({ where });
         if (!tenant) throw new Error('Tenant not found');
         return tenant;
@@ -1569,7 +1725,9 @@ export function createMockPrisma() {
           ) {
             tenantData = {
               ...tenantData,
-              users: [...users.values()].filter((u) => u.tenantId === profile!.tenantId),
+              users: [...users.values()].filter(
+                (u) => u.tenantId === profile.tenantId,
+              ),
             };
           }
           return { ...profile, tenant: tenantData };
@@ -1583,7 +1741,10 @@ export function createMockPrisma() {
         where?: Record<string, unknown>;
         include?: { tenant?: boolean };
       } = {}) => {
-        const items = filterMerchantProfiles([...merchantProfiles.values()], where);
+        const items = filterMerchantProfiles(
+          [...merchantProfiles.values()],
+          where,
+        );
         const profile = items[0];
         if (!profile) return null;
         if (include?.tenant) {
@@ -1622,11 +1783,18 @@ export function createMockPrisma() {
           submittedAt?: boolean;
         };
       }) => {
-        let items = filterMerchantProfiles([...merchantProfiles.values()], where);
+        let items = filterMerchantProfiles(
+          [...merchantProfiles.values()],
+          where,
+        );
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         } else if (orderBy?.createdAt === 'asc') {
-          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          items = items.sort(
+            (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+          );
         }
         items = items.slice(skip, skip + take);
         if (select) {
@@ -1635,7 +1803,8 @@ export function createMockPrisma() {
             if (select.id) row.id = p.id;
             if (select.businessName) row.businessName = p.businessName;
             if (select.contactEmail) row.contactEmail = p.contactEmail;
-            if (select.onboardingStatus) row.onboardingStatus = p.onboardingStatus;
+            if (select.onboardingStatus)
+              row.onboardingStatus = p.onboardingStatus;
             if (select.submittedAt) row.submittedAt = p.submittedAt;
             return row;
           });
@@ -1649,7 +1818,8 @@ export function createMockPrisma() {
         return items;
       },
       count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
-        return filterMerchantProfiles([...merchantProfiles.values()], where).length;
+        return filterMerchantProfiles([...merchantProfiles.values()], where)
+          .length;
       },
       update: async ({
         where,
@@ -1681,7 +1851,10 @@ export function createMockPrisma() {
       }) => {
         let count = 0;
         for (const [id, profile] of merchantProfiles.entries()) {
-          if (where.isFlagship !== undefined && profile.isFlagship !== where.isFlagship) {
+          if (
+            where.isFlagship !== undefined &&
+            profile.isFlagship !== where.isFlagship
+          ) {
             continue;
           }
           if (where.id?.not && id === where.id.not) continue;
@@ -1708,12 +1881,13 @@ export function createMockPrisma() {
           account?: boolean;
         };
       }) => {
-        let user =
+        const user =
           [...users.values()].find((u) => {
             if (where.email && u.email !== where.email) return false;
             if (where.id && u.id !== where.id) return false;
             if (where.tenantId && u.tenantId !== where.tenantId) return false;
-            if (where.accountId && u.accountId !== where.accountId) return false;
+            if (where.accountId && u.accountId !== where.accountId)
+              return false;
             if (where.role && u.role !== where.role) return false;
             return true;
           }) ?? null;
@@ -1726,7 +1900,9 @@ export function createMockPrisma() {
             const profileId = profileByTenant.get(user.tenantId);
             tenantData = {
               ...tenantData,
-              merchantProfile: profileId ? merchantProfiles.get(profileId) : null,
+              merchantProfile: profileId
+                ? merchantProfiles.get(profileId)
+                : null,
             };
           }
           result = { ...result, tenant: tenantData };
@@ -1749,12 +1925,20 @@ export function createMockPrisma() {
       }: {
         where?: { tenantId?: string };
         orderBy?: { createdAt?: 'asc' | 'desc' };
-        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+        select?: {
+          id?: boolean;
+          email?: boolean;
+          role?: boolean;
+          createdAt?: boolean;
+        };
       }) => {
         let items = [...users.values()];
-        if (where?.tenantId) items = items.filter((u) => u.tenantId === where.tenantId);
+        if (where?.tenantId)
+          items = items.filter((u) => u.tenantId === where.tenantId);
         if (orderBy?.createdAt === 'asc') {
-          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          items = items.sort(
+            (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+          );
         }
         if (select) {
           return items.map((u) => {
@@ -1773,7 +1957,12 @@ export function createMockPrisma() {
         select,
       }: {
         where: { id: string };
-        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+        select?: {
+          id?: boolean;
+          email?: boolean;
+          role?: boolean;
+          createdAt?: boolean;
+        };
       }) => {
         const user = users.get(where.id);
         if (!user) throw new Error('User not found');
@@ -1797,7 +1986,12 @@ export function createMockPrisma() {
           role: MerchantRole;
           password?: string;
         };
-        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+        select?: {
+          id?: boolean;
+          email?: boolean;
+          role?: boolean;
+          createdAt?: boolean;
+        };
       }) => {
         let accountId = data.accountId;
         if (!accountId) {
@@ -1846,7 +2040,12 @@ export function createMockPrisma() {
       }: {
         where: { id: string };
         data: Partial<UserRecord>;
-        select?: { id?: boolean; email?: boolean; role?: boolean; createdAt?: boolean };
+        select?: {
+          id?: boolean;
+          email?: boolean;
+          role?: boolean;
+          createdAt?: boolean;
+        };
       }) => {
         const existing = users.get(where.id);
         if (!existing) throw new Error('User not found');
@@ -1872,14 +2071,24 @@ export function createMockPrisma() {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...companies.values()].filter((c) => c.tenantId === where.tenantId),
       count: async ({ where }: { where: { tenantId: string } }) =>
-        [...companies.values()].filter((c) => c.tenantId === where.tenantId).length,
-      findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
-        [...companies.values()].find((c) => c.id === where.id && c.tenantId === where.tenantId) ??
-        null,
+        [...companies.values()].filter((c) => c.tenantId === where.tenantId)
+          .length,
+      findFirst: async ({
+        where,
+      }: {
+        where: { id: string; tenantId: string };
+      }) =>
+        [...companies.values()].find(
+          (c) => c.id === where.id && c.tenantId === where.tenantId,
+        ) ?? null,
       create: async ({
         data,
       }: {
-        data: MockCreateInput<CrmCompanyRecord, 'id' | 'createdAt' | 'updatedAt', 'website'>;
+        data: MockCreateInput<
+          CrmCompanyRecord,
+          'id' | 'createdAt' | 'updatedAt',
+          'website'
+        >;
       }) => {
         const record: CrmCompanyRecord = {
           ...data,
@@ -1891,7 +2100,13 @@ export function createMockPrisma() {
         companies.set(record.id, record);
         return record;
       },
-      update: async ({ where, data }: { where: { id: string }; data: Partial<CrmCompanyRecord> }) => {
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<CrmCompanyRecord>;
+      }) => {
         const existing = companies.get(where.id);
         if (!existing) throw new Error('Not found');
         const updated = { ...existing, ...data, updatedAt: now() };
@@ -1908,10 +2123,16 @@ export function createMockPrisma() {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...contacts.values()].filter((c) => c.tenantId === where.tenantId),
       count: async ({ where }: { where: { tenantId: string } }) =>
-        [...contacts.values()].filter((c) => c.tenantId === where.tenantId).length,
-      findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
-        [...contacts.values()].find((c) => c.id === where.id && c.tenantId === where.tenantId) ??
-        null,
+        [...contacts.values()].filter((c) => c.tenantId === where.tenantId)
+          .length,
+      findFirst: async ({
+        where,
+      }: {
+        where: { id: string; tenantId: string };
+      }) =>
+        [...contacts.values()].find(
+          (c) => c.id === where.id && c.tenantId === where.tenantId,
+        ) ?? null,
       create: async ({
         data,
       }: {
@@ -1933,7 +2154,13 @@ export function createMockPrisma() {
         contacts.set(record.id, record);
         return record;
       },
-      update: async ({ where, data }: { where: { id: string }; data: Partial<CrmContactRecord> }) => {
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<CrmContactRecord>;
+      }) => {
         const existing = contacts.get(where.id);
         if (!existing) throw new Error('Not found');
         const updated = { ...existing, ...data, updatedAt: now() };
@@ -1951,8 +2178,14 @@ export function createMockPrisma() {
         [...leads.values()].filter((l) => l.tenantId === where.tenantId),
       count: async ({ where }: { where: { tenantId: string } }) =>
         [...leads.values()].filter((l) => l.tenantId === where.tenantId).length,
-      findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
-        [...leads.values()].find((l) => l.id === where.id && l.tenantId === where.tenantId) ?? null,
+      findFirst: async ({
+        where,
+      }: {
+        where: { id: string; tenantId: string };
+      }) =>
+        [...leads.values()].find(
+          (l) => l.id === where.id && l.tenantId === where.tenantId,
+        ) ?? null,
       create: async ({
         data,
       }: {
@@ -1975,7 +2208,13 @@ export function createMockPrisma() {
         leads.set(record.id, record);
         return record;
       },
-      update: async ({ where, data }: { where: { id: string }; data: Partial<CrmLeadRecord> }) => {
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<CrmLeadRecord>;
+      }) => {
         const existing = leads.get(where.id);
         if (!existing) throw new Error('Not found');
         const updated = { ...existing, ...data, updatedAt: now() };
@@ -1991,9 +2230,14 @@ export function createMockPrisma() {
     crmActivity: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
         [...activities.values()].filter((a) => a.tenantId === where.tenantId),
-      findFirst: async ({ where }: { where: { id: string; tenantId: string } }) =>
-        [...activities.values()].find((a) => a.id === where.id && a.tenantId === where.tenantId) ??
-        null,
+      findFirst: async ({
+        where,
+      }: {
+        where: { id: string; tenantId: string };
+      }) =>
+        [...activities.values()].find(
+          (a) => a.id === where.id && a.tenantId === where.tenantId,
+        ) ?? null,
       create: async ({
         data,
       }: {
@@ -2039,7 +2283,10 @@ export function createMockPrisma() {
           const recruitedMerchantCount = [...merchantProfiles.values()].filter(
             (m) => m.recruitedByDistributorId === distributor.id,
           ).length;
-          row = { ...row, _count: { recruitedMerchants: recruitedMerchantCount } };
+          row = {
+            ...row,
+            _count: { recruitedMerchants: recruitedMerchantCount },
+          };
         }
         if (include?.account) {
           const account = distributor.accountId
@@ -2049,8 +2296,12 @@ export function createMockPrisma() {
             row = {
               ...row,
               account: {
-                ...(include.account.select?.id === false ? {} : { id: account.id }),
-                ...(include.account.select?.email === false ? {} : { email: account.email }),
+                ...(include.account.select?.id === false
+                  ? {}
+                  : { id: account.id }),
+                ...(include.account.select?.email === false
+                  ? {}
+                  : { email: account.email }),
               },
             };
           } else {
@@ -2061,247 +2312,270 @@ export function createMockPrisma() {
       };
 
       return {
-      findMany: async ({
-        where,
-        orderBy,
-        select,
-        include,
-      }: {
-        where?: {
-          tenantId?: string;
-          email?: string;
-          portalEnabled?: boolean;
-          isActive?: boolean;
-          tenant?: { slug?: string };
-        };
-        orderBy?: { name: 'asc' | 'desc'; boundAt?: 'desc' };
-        select?: { id?: boolean; name?: boolean; isActive?: boolean };
-        include?: { tenant?: boolean };
-      } = {}) => {
-        let items = [...distributors.values()];
-        if (where?.tenantId !== undefined) {
-          items = items.filter((d) => d.tenantId === where.tenantId);
-        }
-        if (where?.OR) {
-          const orClauses = where.OR as Array<Record<string, unknown>>;
-          items = items.filter((d) =>
-            orClauses.some((clause) => {
-              if (clause.email && d.email === clause.email) return true;
-              const accountClause = clause.account as { email?: string } | undefined;
-              if (accountClause?.email && d.accountId) {
-                const account = platformAccounts.get(d.accountId);
-                return account?.email === accountClause.email;
-              }
-              return false;
-            }),
-          );
-        }
-        if (where?.email) {
-          items = items.filter((d) => d.email === where.email);
-        }
-        if (where?.portalEnabled !== undefined) {
-          items = items.filter((d) => d.portalEnabled === where.portalEnabled);
-        }
-        if (where?.isActive !== undefined) {
-          items = items.filter((d) => d.isActive === where.isActive);
-        }
-        if (where?.tenant?.slug) {
-          items = items.filter((d) => {
-            const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
-            return tenant?.slug === where.tenant!.slug;
-          });
-        }
-        if (orderBy?.name === 'asc') {
-          items = items.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (orderBy?.name === 'desc') {
-          items = items.sort((a, b) => b.name.localeCompare(a.name));
-        }
-        if (select) {
-          return items.map((d) => {
-            const row: Record<string, unknown> = {};
-            if (select.id) row.id = d.id;
-            if (select.name) row.name = d.name;
-            if (select.isActive) row.isActive = d.isActive;
-            return row;
-          });
-        }
-        if (include?.tenant) {
-          return items.map((d) => ({
-            ...d,
-            tenant: d.tenantId ? (tenants.get(d.tenantId) ?? null) : null,
-          }));
-        }
-        if (include?.account) {
-          return items.map((d) => ({
-            ...d,
-            account: d.accountId ? (platformAccounts.get(d.accountId) ?? null) : null,
-          }));
-        }
-        return items;
-      },
-      count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
-        let items = [...distributors.values()];
-        if (where?.tenantId) {
-          items = items.filter((d) => d.tenantId === where.tenantId);
-        }
-        if (where?.isActive !== undefined) {
-          items = items.filter((d) => d.isActive === where.isActive);
-        }
-        return items.length;
-      },
-      findFirst: async ({
-        where,
-        include,
-      }: {
-        where: {
-          id?: string;
-          tenantId?: string | null;
-          email?: string | { equals: string; mode?: string };
-          isActive?: boolean;
-          portalEnabled?: boolean;
-          tenant?: { slug?: string };
-          account?: { email?: string };
-        };
-        include?: {
-          tenant?: boolean;
-          qrCodes?: { take?: number };
-          account?: { select?: { password?: boolean } };
-        };
-      }) => {
-        let items = [...distributors.values()];
-        if (where.id) items = items.filter((d) => d.id === where.id);
-        if (where.tenantId !== undefined) {
-          items = items.filter((d) => d.tenantId === where.tenantId);
-        }
-        if (where.account?.email) {
-          items = items.filter((d) => {
-            if (!d.accountId) return false;
-            const account = platformAccounts.get(d.accountId);
-            return account?.email === where.account!.email;
-          });
-        }
-        if (where.email) {
-          const target =
-            typeof where.email === 'string'
-              ? where.email
-              : where.email.equals.toLowerCase();
-          items = items.filter((d) =>
-            typeof where.email === 'string'
-              ? d.email === where.email
-              : d.email?.toLowerCase() === target,
-          );
-        }
-        if (where.isActive !== undefined) {
-          items = items.filter((d) => d.isActive === where.isActive);
-        }
-        if (where.portalEnabled !== undefined) {
-          items = items.filter((d) => d.portalEnabled === where.portalEnabled);
-        }
-        if (where.tenant?.slug) {
-          items = items.filter((d) => {
-            const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
-            return tenant?.slug === where.tenant!.slug;
-          });
-        }
-        const distributor = items[0] ?? null;
-        if (!distributor) return null;
-        if (include?.qrCodes) {
-          const codes = [...qrCodes.values()]
-            .filter((q) => q.distributorId === distributor.id)
-            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-            .slice(0, include.qrCodes.take ?? 5);
-          return { ...distributor, qrCodes: codes };
-        }
-        if (include?.tenant) {
-          return {
-            ...distributor,
-            tenant: distributor.tenantId ? (tenants.get(distributor.tenantId) ?? null) : null,
+        findMany: async ({
+          where,
+          orderBy,
+          select,
+          include,
+        }: {
+          where?: {
+            tenantId?: string;
+            email?: string;
+            portalEnabled?: boolean;
+            isActive?: boolean;
+            tenant?: { slug?: string };
           };
-        }
-        if (include?.account) {
-          const account = distributor.accountId
-            ? (platformAccounts.get(distributor.accountId) ?? null)
-            : null;
-          const select = include.account.select;
-          if (select?.password && account) {
+          orderBy?: { name: 'asc' | 'desc'; boundAt?: 'desc' };
+          select?: { id?: boolean; name?: boolean; isActive?: boolean };
+          include?: { tenant?: boolean };
+        } = {}) => {
+          let items = [...distributors.values()];
+          if (where?.tenantId !== undefined) {
+            items = items.filter((d) => d.tenantId === where.tenantId);
+          }
+          if (where?.OR) {
+            const orClauses = where.OR as Array<Record<string, unknown>>;
+            items = items.filter((d) =>
+              orClauses.some((clause) => {
+                if (clause.email && d.email === clause.email) return true;
+                const accountClause = clause.account as
+                  | { email?: string }
+                  | undefined;
+                if (accountClause?.email && d.accountId) {
+                  const account = platformAccounts.get(d.accountId);
+                  return account?.email === accountClause.email;
+                }
+                return false;
+              }),
+            );
+          }
+          if (where?.email) {
+            items = items.filter((d) => d.email === where.email);
+          }
+          if (where?.portalEnabled !== undefined) {
+            items = items.filter(
+              (d) => d.portalEnabled === where.portalEnabled,
+            );
+          }
+          if (where?.isActive !== undefined) {
+            items = items.filter((d) => d.isActive === where.isActive);
+          }
+          if (where?.tenant?.slug) {
+            items = items.filter((d) => {
+              const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
+              return tenant?.slug === where.tenant!.slug;
+            });
+          }
+          if (orderBy?.name === 'asc') {
+            items = items.sort((a, b) => a.name.localeCompare(b.name));
+          } else if (orderBy?.name === 'desc') {
+            items = items.sort((a, b) => b.name.localeCompare(a.name));
+          }
+          if (select) {
+            return items.map((d) => {
+              const row: Record<string, unknown> = {};
+              if (select.id) row.id = d.id;
+              if (select.name) row.name = d.name;
+              if (select.isActive) row.isActive = d.isActive;
+              return row;
+            });
+          }
+          if (include?.tenant) {
+            return items.map((d) => ({
+              ...d,
+              tenant: d.tenantId ? (tenants.get(d.tenantId) ?? null) : null,
+            }));
+          }
+          if (include?.account) {
+            return items.map((d) => ({
+              ...d,
+              account: d.accountId
+                ? (platformAccounts.get(d.accountId) ?? null)
+                : null,
+            }));
+          }
+          return items;
+        },
+        count: async ({ where }: { where?: Record<string, unknown> } = {}) => {
+          let items = [...distributors.values()];
+          if (where?.tenantId) {
+            items = items.filter((d) => d.tenantId === where.tenantId);
+          }
+          if (where?.isActive !== undefined) {
+            items = items.filter((d) => d.isActive === where.isActive);
+          }
+          return items.length;
+        },
+        findFirst: async ({
+          where,
+          include,
+        }: {
+          where: {
+            id?: string;
+            tenantId?: string | null;
+            email?: string | { equals: string; mode?: string };
+            isActive?: boolean;
+            portalEnabled?: boolean;
+            tenant?: { slug?: string };
+            account?: { email?: string };
+          };
+          include?: {
+            tenant?: boolean;
+            qrCodes?: { take?: number };
+            account?: { select?: { password?: boolean } };
+          };
+        }) => {
+          let items = [...distributors.values()];
+          if (where.id) items = items.filter((d) => d.id === where.id);
+          if (where.tenantId !== undefined) {
+            items = items.filter((d) => d.tenantId === where.tenantId);
+          }
+          if (where.account?.email) {
+            items = items.filter((d) => {
+              if (!d.accountId) return false;
+              const account = platformAccounts.get(d.accountId);
+              return account?.email === where.account!.email;
+            });
+          }
+          if (where.email) {
+            const target =
+              typeof where.email === 'string'
+                ? where.email
+                : where.email.equals.toLowerCase();
+            items = items.filter((d) =>
+              typeof where.email === 'string'
+                ? d.email === where.email
+                : d.email?.toLowerCase() === target,
+            );
+          }
+          if (where.isActive !== undefined) {
+            items = items.filter((d) => d.isActive === where.isActive);
+          }
+          if (where.portalEnabled !== undefined) {
+            items = items.filter(
+              (d) => d.portalEnabled === where.portalEnabled,
+            );
+          }
+          if (where.tenant?.slug) {
+            items = items.filter((d) => {
+              const tenant = d.tenantId ? tenants.get(d.tenantId) : null;
+              return tenant?.slug === where.tenant!.slug;
+            });
+          }
+          const distributor = items[0] ?? null;
+          if (!distributor) return null;
+          if (include?.qrCodes) {
+            const codes = [...qrCodes.values()]
+              .filter((q) => q.distributorId === distributor.id)
+              .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+              .slice(0, include.qrCodes.take ?? 5);
+            return { ...distributor, qrCodes: codes };
+          }
+          if (include?.tenant) {
             return {
               ...distributor,
-              account: { password: account.password },
+              tenant: distributor.tenantId
+                ? (tenants.get(distributor.tenantId) ?? null)
+                : null,
             };
           }
-          return { ...distributor, account };
-        }
-        return distributor;
-      },
-      create: async ({
-        data,
-        include,
-      }: {
-        data: MockCreateInput<
-          DistributorRecord,
-          'id' | 'createdAt' | 'updatedAt' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt',
-          'tenantId' | 'email' | 'phone' | 'isActive' | 'passwordHash' | 'portalEnabled' | 'lastLoginAt'
-        >;
-        include?: {
-          _count?: { select: { recruitedMerchants?: boolean } };
-          account?: { select: { id?: boolean; email?: boolean } };
-        };
-      }) => {
-        const record: DistributorRecord = {
-          ...data,
-          id: nextId('dist'),
-          tenantId: data.tenantId ?? null,
-          accountId: data.accountId ?? null,
-          email: data.email ?? null,
-          phone: data.phone ?? null,
-          isActive: data.isActive ?? true,
-          passwordHash: data.passwordHash ?? null,
-          portalEnabled: data.portalEnabled ?? false,
-          lastLoginAt: data.lastLoginAt ?? null,
-          createdAt: now(),
-          updatedAt: now(),
-        };
-        distributors.set(record.id, record);
-        return attachDistributorIncludes(record, include);
-      },
-      update: async ({
-        where,
-        data,
-        include,
-      }: {
-        where: { id: string };
-        data: Partial<DistributorRecord>;
-        include?: {
-          _count?: { select: { recruitedMerchants?: boolean } };
-          account?: { select: { id?: boolean; email?: boolean } };
-        };
-      }) => {
-        const existing = distributors.get(where.id);
-        if (!existing) throw new Error('Not found');
-        const updated = { ...existing, ...data, updatedAt: now() };
-        distributors.set(where.id, updated);
-        return attachDistributorIncludes(updated, include);
-      },
-      delete: async ({ where }: { where: { id: string } }) => {
-        const existing = distributors.get(where.id);
-        distributors.delete(where.id);
-        return existing;
-      },
-      findUnique: async ({
-        where,
-      }: {
-        where: { id?: string; accountId?: string };
-      }) => {
-        if (where.id) return distributors.get(where.id) ?? null;
-        if (where.accountId) {
-          return (
-            [...distributors.values()].find((d) => d.accountId === where.accountId) ??
-            null
-          );
-        }
-        return null;
-      },
-    };
+          if (include?.account) {
+            const account = distributor.accountId
+              ? (platformAccounts.get(distributor.accountId) ?? null)
+              : null;
+            const select = include.account.select;
+            if (select?.password && account) {
+              return {
+                ...distributor,
+                account: { password: account.password },
+              };
+            }
+            return { ...distributor, account };
+          }
+          return distributor;
+        },
+        create: async ({
+          data,
+          include,
+        }: {
+          data: MockCreateInput<
+            DistributorRecord,
+            | 'id'
+            | 'createdAt'
+            | 'updatedAt'
+            | 'isActive'
+            | 'passwordHash'
+            | 'portalEnabled'
+            | 'lastLoginAt',
+            | 'tenantId'
+            | 'email'
+            | 'phone'
+            | 'isActive'
+            | 'passwordHash'
+            | 'portalEnabled'
+            | 'lastLoginAt'
+          >;
+          include?: {
+            _count?: { select: { recruitedMerchants?: boolean } };
+            account?: { select: { id?: boolean; email?: boolean } };
+          };
+        }) => {
+          const record: DistributorRecord = {
+            ...data,
+            id: nextId('dist'),
+            tenantId: data.tenantId ?? null,
+            accountId: data.accountId ?? null,
+            email: data.email ?? null,
+            phone: data.phone ?? null,
+            isActive: data.isActive ?? true,
+            passwordHash: data.passwordHash ?? null,
+            portalEnabled: data.portalEnabled ?? false,
+            lastLoginAt: data.lastLoginAt ?? null,
+            createdAt: now(),
+            updatedAt: now(),
+          };
+          distributors.set(record.id, record);
+          return attachDistributorIncludes(record, include);
+        },
+        update: async ({
+          where,
+          data,
+          include,
+        }: {
+          where: { id: string };
+          data: Partial<DistributorRecord>;
+          include?: {
+            _count?: { select: { recruitedMerchants?: boolean } };
+            account?: { select: { id?: boolean; email?: boolean } };
+          };
+        }) => {
+          const existing = distributors.get(where.id);
+          if (!existing) throw new Error('Not found');
+          const updated = { ...existing, ...data, updatedAt: now() };
+          distributors.set(where.id, updated);
+          return attachDistributorIncludes(updated, include);
+        },
+        delete: async ({ where }: { where: { id: string } }) => {
+          const existing = distributors.get(where.id);
+          distributors.delete(where.id);
+          return existing;
+        },
+        findUnique: async ({
+          where,
+        }: {
+          where: { id?: string; accountId?: string };
+        }) => {
+          if (where.id) return distributors.get(where.id) ?? null;
+          if (where.accountId) {
+            return (
+              [...distributors.values()].find(
+                (d) => d.accountId === where.accountId,
+              ) ?? null
+            );
+          }
+          return null;
+        },
+      };
     })(),
     distributorQrCode: {
       create: async ({
@@ -2363,7 +2637,7 @@ export function createMockPrisma() {
         skip?: number;
         take?: number;
       }) => {
-        let rows = [...qrCodes.values()].filter((qr) => {
+        const rows = [...qrCodes.values()].filter((qr) => {
           if (qr.distributorId !== where.distributorId) return false;
           if (where.bindType && qr.bindType !== where.bindType) return false;
           return true;
@@ -2409,7 +2683,11 @@ export function createMockPrisma() {
           if (where.expiresAt?.gt && qr.expiresAt <= where.expiresAt.gt) {
             continue;
           }
-          qrCodes.set(id, { ...qr, ...data, revokedAt: data.revokedAt ?? nowDate });
+          qrCodes.set(id, {
+            ...qr,
+            ...data,
+            revokedAt: data.revokedAt ?? nowDate,
+          });
           count++;
         }
         return { count };
@@ -2425,7 +2703,8 @@ export function createMockPrisma() {
           [...customers.values()].find((c) => {
             if (where.id && c.id !== where.id) return false;
             if (where.tenantId && c.tenantId !== where.tenantId) return false;
-            if (where.accountId && c.accountId !== where.accountId) return false;
+            if (where.accountId && c.accountId !== where.accountId)
+              return false;
             return true;
           }) ?? null
         );
@@ -2450,7 +2729,9 @@ export function createMockPrisma() {
       create: async ({
         data,
       }: {
-        data: Partial<Omit<CustomerRecord, 'id' | 'createdAt' | 'updatedAt'>> & {
+        data: Partial<
+          Omit<CustomerRecord, 'id' | 'createdAt' | 'updatedAt'>
+        > & {
           tenantId: string;
           email: string;
           password?: string;
@@ -2503,11 +2784,17 @@ export function createMockPrisma() {
       findFirst: async ({
         where,
       }: {
-        where: { id?: string; tenantId?: string; slug?: string; NOT?: { id: string } };
+        where: {
+          id?: string;
+          tenantId?: string;
+          slug?: string;
+          NOT?: { id: string };
+        };
       }) => {
         let items = [...categories.values()];
         if (where.id) items = items.filter((c) => c.id === where.id);
-        if (where.tenantId) items = items.filter((c) => c.tenantId === where.tenantId);
+        if (where.tenantId)
+          items = items.filter((c) => c.tenantId === where.tenantId);
         if (where.slug) items = items.filter((c) => c.slug === where.slug);
         if (where.NOT?.id) items = items.filter((c) => c.id !== where.NOT!.id);
         return items[0] ?? null;
@@ -2542,7 +2829,9 @@ export function createMockPrisma() {
           ...data,
           parentId:
             data.parent?.connect?.id ??
-            (data.parent?.disconnect ? null : (data.parentId ?? existing.parentId)),
+            (data.parent?.disconnect
+              ? null
+              : (data.parentId ?? existing.parentId)),
           updatedAt: now(),
         };
         categories.set(where.id, updated);
@@ -2561,15 +2850,25 @@ export function createMockPrisma() {
         orderBy,
       }: {
         where: { tenantId: string; isPublished?: boolean };
-        include?: { category?: boolean; variants?: { where?: { isActive?: boolean }; orderBy?: { createdAt: string } } };
+        include?: {
+          category?: boolean;
+          variants?: {
+            where?: { isActive?: boolean };
+            orderBy?: { createdAt: string };
+          };
+        };
         orderBy?: { createdAt: 'desc' | 'asc' };
       }) => {
-        let items = [...products.values()].filter((p) => p.tenantId === where.tenantId);
+        let items = [...products.values()].filter(
+          (p) => p.tenantId === where.tenantId,
+        );
         if (where.isPublished !== undefined) {
           items = items.filter((p) => p.isPublished === where.isPublished);
         }
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         return items.map((p) => attachProduct(p, include));
       },
@@ -2584,11 +2883,18 @@ export function createMockPrisma() {
           isPublished?: boolean;
           NOT?: { id: string };
         };
-        include?: { category?: boolean | { select: Record<string, boolean> }; variants?: { where?: { isActive?: boolean }; orderBy?: { createdAt: string } } };
+        include?: {
+          category?: boolean | { select: Record<string, boolean> };
+          variants?: {
+            where?: { isActive?: boolean };
+            orderBy?: { createdAt: string };
+          };
+        };
       }) => {
         let items = [...products.values()];
         if (where.id) items = items.filter((p) => p.id === where.id);
-        if (where.tenantId) items = items.filter((p) => p.tenantId === where.tenantId);
+        if (where.tenantId)
+          items = items.filter((p) => p.tenantId === where.tenantId);
         if (where.slug) items = items.filter((p) => p.slug === where.slug);
         if (where.isPublished !== undefined) {
           items = items.filter((p) => p.isPublished === where.isPublished);
@@ -2603,7 +2909,14 @@ export function createMockPrisma() {
         include,
       }: {
         data: Omit<ProductRecord, 'id' | 'createdAt' | 'updatedAt'> & {
-          variants?: { create: Array<Omit<ProductVariantRecord, 'id' | 'productId' | 'createdAt' | 'updatedAt'>> };
+          variants?: {
+            create: Array<
+              Omit<
+                ProductVariantRecord,
+                'id' | 'productId' | 'createdAt' | 'updatedAt'
+              >
+            >;
+          };
         };
         include?: { category?: boolean; variants?: boolean };
       }) => {
@@ -2639,8 +2952,13 @@ export function createMockPrisma() {
         include,
       }: {
         where: { id: string };
-        data: Partial<ProductRecord> & { category?: { connect?: { id: string }; disconnect?: boolean } };
-        include?: { category?: boolean; variants?: { orderBy?: { createdAt: string } } };
+        data: Partial<ProductRecord> & {
+          category?: { connect?: { id: string }; disconnect?: boolean };
+        };
+        include?: {
+          category?: boolean;
+          variants?: { orderBy?: { createdAt: string } };
+        };
       }) => {
         const existing = products.get(where.id);
         if (!existing) throw new Error('Product not found');
@@ -2649,7 +2967,9 @@ export function createMockPrisma() {
           ...data,
           categoryId:
             data.category?.connect?.id ??
-            (data.category?.disconnect ? null : (data.categoryId ?? existing.categoryId)),
+            (data.category?.disconnect
+              ? null
+              : (data.categoryId ?? existing.categoryId)),
           updatedAt: now(),
         };
         products.set(where.id, updated);
@@ -2683,9 +3003,7 @@ export function createMockPrisma() {
           const product = products.get(variant.productId);
           return {
             ...variant,
-            product: product
-              ? { tenantId: product.tenantId }
-              : null,
+            product: product ? { tenantId: product.tenantId } : null,
           };
         }
         return variant;
@@ -2714,7 +3032,10 @@ export function createMockPrisma() {
           items = items.filter((v) => {
             const product = products.get(v.productId);
             if (!product) return false;
-            if (where.product?.tenantId && product.tenantId !== where.product.tenantId) {
+            if (
+              where.product?.tenantId &&
+              product.tenantId !== where.product.tenantId
+            ) {
               return false;
             }
             if (
@@ -2732,7 +3053,11 @@ export function createMockPrisma() {
           const product = products.get(variant.productId);
           return { ...variant, product };
         }
-        return attachVariant(variant, { product: { select: { id: true, name: true, slug: true, isPublished: true } } });
+        return attachVariant(variant, {
+          product: {
+            select: { id: true, name: true, slug: true, isPublished: true },
+          },
+        });
       },
       findMany: async ({
         where,
@@ -2746,7 +3071,11 @@ export function createMockPrisma() {
           masterSkuId?: { in: string[] } | string;
           isActive?: boolean;
         };
-        select?: { id?: boolean; inventory?: boolean; reorderThreshold?: boolean };
+        select?: {
+          id?: boolean;
+          inventory?: boolean;
+          reorderThreshold?: boolean;
+        };
         include?: { product?: { select?: Record<string, boolean> } };
         orderBy?: { createdAt?: 'asc' | 'desc' };
       } = {}) => {
@@ -2765,7 +3094,8 @@ export function createMockPrisma() {
             items = items.filter((v) => v.masterSkuId === where.masterSkuId);
           } else if (where.masterSkuId.in) {
             items = items.filter(
-              (v) => v.masterSkuId && where.masterSkuId!.in.includes(v.masterSkuId),
+              (v) =>
+                v.masterSkuId && where.masterSkuId!.in.includes(v.masterSkuId),
             );
           }
         }
@@ -2786,7 +3116,8 @@ export function createMockPrisma() {
             const row: Record<string, unknown> = {};
             if (select.id) row.id = v.id;
             if (select.inventory) row.inventory = v.inventory;
-            if (select.reorderThreshold) row.reorderThreshold = v.reorderThreshold;
+            if (select.reorderThreshold)
+              row.reorderThreshold = v.reorderThreshold;
             return row;
           });
         }
@@ -2818,7 +3149,9 @@ export function createMockPrisma() {
       createMany: async ({
         data,
       }: {
-        data: Array<Omit<ProductVariantRecord, 'id' | 'createdAt' | 'updatedAt'>>;
+        data: Array<
+          Omit<ProductVariantRecord, 'id' | 'createdAt' | 'updatedAt'>
+        >;
       }) => {
         for (const item of data) {
           const record: ProductVariantRecord = {
@@ -2848,14 +3181,20 @@ export function createMockPrisma() {
         data,
       }: {
         where: { id: string };
-        data: Partial<ProductVariantRecord> & { inventory?: { decrement: number } | number };
+        data: Partial<ProductVariantRecord> & {
+          inventory?: { decrement: number } | number;
+        };
       }) => {
         const existing = productVariants.get(where.id);
         if (!existing) throw new Error('Variant not found');
         let inventory = existing.inventory;
         if (typeof data.inventory === 'number') {
           inventory = data.inventory;
-        } else if (data.inventory && typeof data.inventory === 'object' && 'decrement' in data.inventory) {
+        } else if (
+          data.inventory &&
+          typeof data.inventory === 'object' &&
+          'decrement' in data.inventory
+        ) {
           inventory -= (data.inventory as { decrement: number }).decrement;
         }
         const updated = {
@@ -3002,7 +3341,8 @@ export function createMockPrisma() {
           supportEmail: create.supportEmail ?? null,
           distributorPortalEnabled: create.distributorPortalEnabled ?? true,
           emailQueueEnabled: create.emailQueueEnabled ?? true,
-          maxRetailPriceDeviationPercent: create.maxRetailPriceDeviationPercent ?? 10,
+          maxRetailPriceDeviationPercent:
+            create.maxRetailPriceDeviationPercent ?? 10,
           updatedAt: now(),
         };
         platformSettings.set(record.id, record);
@@ -3020,7 +3360,8 @@ export function createMockPrisma() {
         orderBy?: Array<{ isDefault?: 'desc' | 'asc'; name?: 'asc' }>;
       }) => {
         let items = [...warehouses.values()];
-        if (where.tenantId) items = items.filter((w) => w.tenantId === where.tenantId);
+        if (where.tenantId)
+          items = items.filter((w) => w.tenantId === where.tenantId);
         if (orderBy) {
           for (const ob of orderBy) {
             if (ob.isDefault) {
@@ -3040,7 +3381,10 @@ export function createMockPrisma() {
           if (include?.stockLevels) {
             row.stockLevels = [...stockLevels.values()]
               .filter((sl) => sl.warehouseId === w.id)
-              .map((sl) => ({ quantityOnHand: sl.quantityOnHand, variantId: sl.variantId }));
+              .map((sl) => ({
+                quantityOnHand: sl.quantityOnHand,
+                variantId: sl.variantId,
+              }));
           }
           return row;
         });
@@ -3057,7 +3401,8 @@ export function createMockPrisma() {
       }) => {
         let items = [...warehouses.values()];
         if (where.id) items = items.filter((w) => w.id === where.id);
-        if (where.tenantId) items = items.filter((w) => w.tenantId === where.tenantId);
+        if (where.tenantId)
+          items = items.filter((w) => w.tenantId === where.tenantId);
         if (where.isDefault !== undefined) {
           items = items.filter((w) => w.isDefault === where.isDefault);
         }
@@ -3106,7 +3451,8 @@ export function createMockPrisma() {
         let count = 0;
         for (const [id, w] of warehouses) {
           if (where.tenantId && w.tenantId !== where.tenantId) continue;
-          if (where.isDefault !== undefined && w.isDefault !== where.isDefault) continue;
+          if (where.isDefault !== undefined && w.isDefault !== where.isDefault)
+            continue;
           warehouses.set(id, { ...w, ...data, updatedAt: now() });
           count++;
         }
@@ -3129,7 +3475,9 @@ export function createMockPrisma() {
       }) => {
         let items = filterStockLevels(where);
         if (orderBy?.updatedAt === 'desc') {
-          items = items.sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+          items = items.sort(
+            (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3141,12 +3489,15 @@ export function createMockPrisma() {
       findUnique: async ({
         where,
       }: {
-        where: { warehouseId_variantId: { warehouseId: string; variantId: string } };
+        where: {
+          warehouseId_variantId: { warehouseId: string; variantId: string };
+        };
       }) => {
         const { warehouseId, variantId } = where.warehouseId_variantId;
         return (
           [...stockLevels.values()].find(
-            (sl) => sl.warehouseId === warehouseId && sl.variantId === variantId,
+            (sl) =>
+              sl.warehouseId === warehouseId && sl.variantId === variantId,
           ) ?? null
         );
       },
@@ -3155,7 +3506,9 @@ export function createMockPrisma() {
         create,
         update,
       }: {
-        where: { warehouseId_variantId: { warehouseId: string; variantId: string } };
+        where: {
+          warehouseId_variantId: { warehouseId: string; variantId: string };
+        };
         create: Omit<StockLevelRecord, 'id' | 'createdAt' | 'updatedAt'>;
         update: Partial<StockLevelRecord>;
       }) => {
@@ -3204,7 +3557,9 @@ export function createMockPrisma() {
       }) => {
         let items = filterAdjustments(where);
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3245,7 +3600,9 @@ export function createMockPrisma() {
       }) => {
         let items = filterStockTransfers(where);
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3270,7 +3627,9 @@ export function createMockPrisma() {
         include,
       }: {
         data: Omit<StockTransferRecord, 'id' | 'createdAt'> & {
-          lines?: { create: Array<Omit<StockTransferLineRecord, 'id' | 'transferId'>> };
+          lines?: {
+            create: Array<Omit<StockTransferLineRecord, 'id' | 'transferId'>>;
+          };
         };
         include?: Record<string, unknown>;
       }) => {
@@ -3310,7 +3669,9 @@ export function createMockPrisma() {
       }) => {
         let items = filterPurchaseOrders(where);
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3335,7 +3696,18 @@ export function createMockPrisma() {
         include,
       }: {
         data: Omit<PurchaseOrderRecord, 'id' | 'createdAt' | 'updatedAt'> & {
-          lines?: { create: Array<Omit<PurchaseOrderLineRecord, 'id' | 'purchaseOrderId' | 'createdAt' | 'updatedAt' | 'quantityReceived'>> };
+          lines?: {
+            create: Array<
+              Omit<
+                PurchaseOrderLineRecord,
+                | 'id'
+                | 'purchaseOrderId'
+                | 'createdAt'
+                | 'updatedAt'
+                | 'quantityReceived'
+              >
+            >;
+          };
         };
         include?: Record<string, unknown>;
       }) => {
@@ -3383,7 +3755,9 @@ export function createMockPrisma() {
       findMany: async ({ where }: { where: { purchaseOrderId?: string } }) => {
         let items = [...purchaseOrderLines.values()];
         if (where.purchaseOrderId) {
-          items = items.filter((l) => l.purchaseOrderId === where.purchaseOrderId);
+          items = items.filter(
+            (l) => l.purchaseOrderId === where.purchaseOrderId,
+          );
         }
         return items;
       },
@@ -3400,7 +3774,12 @@ export function createMockPrisma() {
       createMany: async ({
         data,
       }: {
-        data: Array<Omit<PurchaseOrderLineRecord, 'id' | 'createdAt' | 'updatedAt' | 'quantityReceived'>>;
+        data: Array<
+          Omit<
+            PurchaseOrderLineRecord,
+            'id' | 'createdAt' | 'updatedAt' | 'quantityReceived'
+          >
+        >;
       }) => {
         for (const item of data) {
           const record: PurchaseOrderLineRecord = {
@@ -3434,7 +3813,12 @@ export function createMockPrisma() {
         include,
       }: {
         data: Omit<PurchaseOrderReceiptRecord, 'id' | 'createdAt'> & {
-          lines?: { create: Array<{ purchaseOrderLineId: string; quantityReceived: number }> };
+          lines?: {
+            create: Array<{
+              purchaseOrderLineId: string;
+              quantityReceived: number;
+            }>;
+          };
         };
         include?: { lines?: boolean };
       }) => {
@@ -3475,11 +3859,13 @@ export function createMockPrisma() {
       }) => {
         let items = [...carts.values()];
         if (where.id) items = items.filter((c) => c.id === where.id);
-        if (where.tenantId) items = items.filter((c) => c.tenantId === where.tenantId);
+        if (where.tenantId)
+          items = items.filter((c) => c.tenantId === where.tenantId);
         if (where.customerId !== undefined) {
           items = items.filter((c) => c.customerId === where.customerId);
         }
-        if (where.sessionId) items = items.filter((c) => c.sessionId === where.sessionId);
+        if (where.sessionId)
+          items = items.filter((c) => c.sessionId === where.sessionId);
         const cart = items[0];
         if (!cart) return null;
         return attachCart(cart, include);
@@ -3550,7 +3936,8 @@ export function createMockPrisma() {
       }) => {
         let items = [...cartItems.values()];
         if (where.id) items = items.filter((i) => i.id === where.id);
-        if (where.cartId) items = items.filter((i) => i.cartId === where.cartId);
+        if (where.cartId)
+          items = items.filter((i) => i.cartId === where.cartId);
         return items[0] ?? null;
       },
       create: async ({
@@ -3614,10 +4001,14 @@ export function createMockPrisma() {
       }) => {
         let items = filterOrders(where ?? {});
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (orderBy?.createdAt === 'asc') {
-          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          items = items.sort(
+            (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3787,7 +4178,9 @@ export function createMockPrisma() {
           items = items.filter((e) => e.orderId === where.orderId);
         }
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
@@ -3852,7 +4245,11 @@ export function createMockPrisma() {
         for (const id of where.id.in) {
           const existing = commissionLedgers.get(id);
           if (existing) {
-            commissionLedgers.set(id, { ...existing, ...data, updatedAt: now() });
+            commissionLedgers.set(id, {
+              ...existing,
+              ...data,
+              updatedAt: now(),
+            });
             count++;
           }
         }
@@ -3869,14 +4266,19 @@ export function createMockPrisma() {
       }) => {
         let items = [...settlementBatches.values()];
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         return items.map((b) => attachSettlementBatch(b, include));
       },
       create: async ({
         data,
       }: {
-        data: Omit<SettlementBatchRecord, 'id' | 'createdAt' | 'updatedAt' | 'exportedAt'> & {
+        data: Omit<
+          SettlementBatchRecord,
+          'id' | 'createdAt' | 'updatedAt' | 'exportedAt'
+        > & {
           exportedAt?: Date | null;
         };
       }) => {
@@ -3906,12 +4308,18 @@ export function createMockPrisma() {
       findUnique: async ({
         where,
       }: {
-        where: { bindableType_bindableId: { bindableType: BindType; bindableId: string } };
+        where: {
+          bindableType_bindableId: {
+            bindableType: BindType;
+            bindableId: string;
+          };
+        };
       }) => {
         const { bindableType, bindableId } = where.bindableType_bindableId;
         return (
           [...bindings.values()].find(
-            (b) => b.bindableType === bindableType && b.bindableId === bindableId,
+            (b) =>
+              b.bindableType === bindableType && b.bindableId === bindableId,
           ) ?? null
         );
       },
@@ -3926,7 +4334,9 @@ export function createMockPrisma() {
       }) => {
         let items = filterBindings(where ?? {});
         if (orderBy?.boundAt === 'desc') {
-          items = items.sort((a, b) => b.boundAt.getTime() - a.boundAt.getTime());
+          items = items.sort(
+            (a, b) => b.boundAt.getTime() - a.boundAt.getTime(),
+          );
         }
         return items.map((binding) => attachBinding(binding, include));
       },
@@ -3944,7 +4354,10 @@ export function createMockPrisma() {
         const items = filterBindings(where ?? {});
         const counts = new Map<string, number>();
         for (const binding of items) {
-          counts.set(binding.distributorId, (counts.get(binding.distributorId) ?? 0) + 1);
+          counts.set(
+            binding.distributorId,
+            (counts.get(binding.distributorId) ?? 0) + 1,
+          );
         }
         return [...counts.entries()].map(([distributorId, count]) => ({
           distributorId,
@@ -4011,7 +4424,9 @@ export function createMockPrisma() {
           unitCost: data.unitCost as Prisma.Decimal,
           wholesalePrice: data.wholesalePrice as Prisma.Decimal,
           retailPrice: data.retailPrice as Prisma.Decimal,
-          flagshipPrice: (data.flagshipPrice as Prisma.Decimal) ?? (data.retailPrice as Prisma.Decimal),
+          flagshipPrice:
+            (data.flagshipPrice as Prisma.Decimal) ??
+            (data.retailPrice as Prisma.Decimal),
           isActive: (data.isActive as boolean) ?? true,
           createdAt: now(),
           updatedAt: now(),
@@ -4028,7 +4443,11 @@ export function createMockPrisma() {
       }) => {
         const existing = masterSkus.get(where.id);
         if (!existing) return null;
-        const updated = { ...existing, ...data, updatedAt: now() } as MasterSkuRecord;
+        const updated = {
+          ...existing,
+          ...data,
+          updatedAt: now(),
+        };
         masterSkus.set(where.id, updated);
         return updated;
       },
@@ -4055,9 +4474,13 @@ export function createMockPrisma() {
           items = items.filter((o) => where.status!.in!.includes(o.status));
         }
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         } else if (orderBy?.createdAt === 'asc') {
-          items = items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+          items = items.sort(
+            (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+          );
         }
         if (include?.lines) {
           return items.map((o) => ({ ...o, lines: o.lines }));
@@ -4109,7 +4532,11 @@ export function createMockPrisma() {
               ...order,
               lines: order.lines.map((line) => ({
                 ...line,
-                masterSku: { id: line.masterSkuId, skuCode: 'SKU', name: 'Item' },
+                masterSku: {
+                  id: line.masterSkuId,
+                  skuCode: 'SKU',
+                  name: 'Item',
+                },
               })),
             };
           }
@@ -4144,7 +4571,7 @@ export function createMockPrisma() {
           ...existing,
           ...data,
           updatedAt: now(),
-        } as AllocationOrderRecord;
+        };
         allocationOrders.set(where.id, updated);
         return updated;
       },
@@ -4156,7 +4583,13 @@ export function createMockPrisma() {
     replenishmentRequest: {
       findMany: async () => [],
       findUnique: async () => null,
-      create: async ({ data, include }: { data: Record<string, unknown>; include?: unknown }) => ({
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Record<string, unknown>;
+        include?: unknown;
+      }) => ({
         id: nextId('repl'),
         status: 'PENDING',
         lines: [],
@@ -4225,13 +4658,17 @@ export function createMockPrisma() {
           items = items.filter((w) => w.status === where.status);
         }
         if (orderBy?.createdAt === 'desc') {
-          items = items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          items = items.sort(
+            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+          );
         }
         if (skip !== undefined && take !== undefined) {
           items = items.slice(skip, skip + take);
         }
         return items.map((row) => {
-          const result: WithdrawalRequestRecord & Record<string, unknown> = { ...row };
+          const result: WithdrawalRequestRecord & Record<string, unknown> = {
+            ...row,
+          };
           if (include?.distributor) {
             const distributor = distributors.get(row.distributorId);
             const select = include.distributor.select;
@@ -4289,7 +4726,10 @@ export function createMockPrisma() {
         const row = withdrawalRequests.get(where.id) ?? null;
         if (!row) return null;
         if (include?.distributor) {
-          return { ...row, distributor: distributors.get(row.distributorId) ?? null };
+          return {
+            ...row,
+            distributor: distributors.get(row.distributorId) ?? null,
+          };
         }
         return row;
       },
@@ -4334,7 +4774,9 @@ export function createMockPrisma() {
           updatedAt: now(),
         };
         withdrawalRequests.set(where.id, updated);
-        const result: WithdrawalRequestRecord & Record<string, unknown> = { ...updated };
+        const result: WithdrawalRequestRecord & Record<string, unknown> = {
+          ...updated,
+        };
         if (include?.distributor) {
           const distributor = distributors.get(updated.distributorId);
           const select = include.distributor.select;
@@ -4349,6 +4791,55 @@ export function createMockPrisma() {
           }
         }
         return result;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where?: { id?: string; status?: WithdrawalRequestStatus };
+        data: Partial<WithdrawalRequestRecord>;
+      }) => {
+        let count = 0;
+        for (const [id, row] of withdrawalRequests.entries()) {
+          if (where?.id && row.id !== where.id) continue;
+          if (where?.status && row.status !== where.status) continue;
+          withdrawalRequests.set(id, {
+            ...row,
+            ...data,
+            updatedAt: now(),
+          });
+          count++;
+        }
+        return { count };
+      },
+      findUniqueOrThrow: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: { distributor?: { select?: Record<string, boolean> } };
+      }) => {
+        const row = withdrawalRequests.get(where.id);
+        if (!row) throw new Error('Withdrawal not found');
+        if (include?.distributor) {
+          const distributor = distributors.get(row.distributorId);
+          const select = include.distributor.select;
+          return {
+            ...row,
+            distributor:
+              distributor && select
+                ? Object.fromEntries(
+                    Object.keys(select)
+                      .filter((k) => select[k])
+                      .map((k) => [
+                        k,
+                        distributor[k as keyof DistributorRecord],
+                      ]),
+                  )
+                : (distributor ?? null),
+          };
+        }
+        return row;
       },
     },
     merchantRecruitInviteCode: {
@@ -4395,14 +4886,18 @@ export function createMockPrisma() {
       findUnique: async ({ where }: { where: { code?: string } }) => {
         if (!where.code) return null;
         return (
-          [...merchantRecruitInviteCodes.values()].find((c) => c.code === where.code) ??
-          null
+          [...merchantRecruitInviteCodes.values()].find(
+            (c) => c.code === where.code,
+          ) ?? null
         );
       },
       create: async ({
         data,
       }: {
-        data: Omit<MerchantRecruitInviteCodeRecord, 'id' | 'createdAt' | 'useCount'> & {
+        data: Omit<
+          MerchantRecruitInviteCodeRecord,
+          'id' | 'createdAt' | 'useCount'
+        > & {
           useCount?: number;
         };
       }) => {
@@ -4494,7 +4989,11 @@ export function createMockPrisma() {
       }) => ({ id: where.id, ...data }),
       delete: async () => ({}),
     },
-    _seedPlatformAdmin: async (email: string, password: string, role: PlatformRole) => {
+    _seedPlatformAdmin: async (
+      email: string,
+      password: string,
+      role: PlatformRole,
+    ) => {
       await mock.platformUser.upsert({
         where: { email },
         create: { email, password, role },
@@ -4519,8 +5018,15 @@ export function createMockPrisma() {
       businessName: string,
       email: string,
       password: string,
+      options?: { isFlagship?: boolean },
     ) => {
       const tenant = await mock._seedApprovedTenant(slug, businessName);
+      if (options?.isFlagship !== false) {
+        await mock.merchantProfile.update({
+          where: { tenantId: tenant.id },
+          data: { isFlagship: true },
+        });
+      }
       const user = await mock.user.create({
         data: {
           tenantId: tenant.id,
@@ -4543,13 +5049,15 @@ export function createMockPrisma() {
       lines: Array<{ quantity: number; wholesalePrice: number }>;
     }) => {
       const allocId = nextId('alloc');
-      const lines: AllocationOrderLineRecord[] = input.lines.map((line, index) => ({
-        id: nextId('alloc-line'),
-        allocationOrderId: allocId,
-        masterSkuId: nextId('msku'),
-        quantity: line.quantity,
-        wholesalePrice: new Prisma.Decimal(line.wholesalePrice),
-      }));
+      const lines: AllocationOrderLineRecord[] = input.lines.map(
+        (line, index) => ({
+          id: nextId('alloc-line'),
+          allocationOrderId: allocId,
+          masterSkuId: nextId('msku'),
+          quantity: line.quantity,
+          wholesalePrice: new Prisma.Decimal(line.wholesalePrice),
+        }),
+      );
       const record: AllocationOrderRecord = {
         id: allocId,
         tenantId: input.tenantId,
@@ -4575,12 +5083,18 @@ export function createMockPrisma() {
         branchInventory?: number;
       };
     }) => {
-      const flagshipTenant = await mock._seedApprovedTenant(input.flagshipSlug, 'Flagship');
+      const flagshipTenant = await mock._seedApprovedTenant(
+        input.flagshipSlug,
+        'Flagship',
+      );
       await mock.merchantProfile.update({
         where: { tenantId: flagshipTenant.id },
         data: { isFlagship: true, storePublished: true },
       });
-      const branchTenant = await mock._seedApprovedTenant(input.branchSlug, 'Branch');
+      const branchTenant = await mock._seedApprovedTenant(
+        input.branchSlug,
+        'Branch',
+      );
       await mock.merchantProfile.update({
         where: { tenantId: branchTenant.id },
         data: { storePublished: true },

@@ -7,7 +7,6 @@ import { DistributorAuthService } from './distributor-auth.service';
 export class DistributorAuthController {
   constructor(private readonly authService: DistributorAuthService) {}
 
-  
   @Public()
   @Post('login')
   @HttpCode(200)

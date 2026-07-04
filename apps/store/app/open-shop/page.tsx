@@ -137,18 +137,12 @@ function OpenShopWizard() {
         </p>
         <p className="mt-4 text-sm">{t('openShop.signInRequired')}</p>
         <div className="mt-6 flex flex-col gap-2">
-          <Link
-            href={loginHref}
-            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
-          >
-            {t('login.submit')}
-          </Link>
-          <Link
-            href={registerHref}
-            className="inline-flex h-10 w-full items-center justify-center rounded-md border border-border px-4 text-sm font-medium"
-          >
-            {t('register.submit')}
-          </Link>
+          <Button asChild className="w-full">
+            <Link href={loginHref}>{t('login.submit')}</Link>
+          </Button>
+          <Button asChild variant="outline" className="w-full">
+            <Link href={registerHref}>{t('register.submit')}</Link>
+          </Button>
         </div>
       </AuthLayout>
     );

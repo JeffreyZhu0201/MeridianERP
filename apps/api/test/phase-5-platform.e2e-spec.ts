@@ -36,7 +36,12 @@ describe('Phase5 Platform (e2e)', () => {
     platformToken = await loginPlatform(app);
 
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('branch-one', 'Branch One', 'owner@branch.test', password);
+    await prisma._seedMerchantOwner(
+      'branch-one',
+      'Branch One',
+      'owner@branch.test',
+      password,
+    );
     merchantToken = await loginMerchant(app, 'owner@branch.test', 'secret12');
   });
 
@@ -91,7 +96,9 @@ describe('Phase5 Platform (e2e)', () => {
   });
 
   it('platform allocation routes require auth', async () => {
-    await request(app.getHttpServer()).get('/api/v1/platform/allocations').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/allocations')
+      .expect(401);
   });
 
   it('GET /platform/replenishment returns list for admin', async () => {

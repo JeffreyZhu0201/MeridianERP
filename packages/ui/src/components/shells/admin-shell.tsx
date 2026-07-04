@@ -25,12 +25,13 @@ import {
   IconBuildingStore,
   IconCash,
   IconChevronRight,
+  IconClipboardList,
   IconLayoutDashboard,
   IconPackage,
   IconReceipt,
+  IconReportMoney,
   IconSettings,
   IconShield,
-  IconTruckDelivery,
   IconUserCircle,
   IconUsers,
   IconWallet,
@@ -64,6 +65,7 @@ export interface AdminShellProps {
   role?: string;
   permissions?: AdminPermission[];
   onLogout?: () => void;
+  headerStart?: ReactNode;
 }
 
 /** 导航子项类型 - 二级菜单项 */
@@ -95,13 +97,13 @@ const navItems: NavItem[] = [
   { href: '/users', key: 'users', icon: IconUserCircle },
   { href: '/admins', key: 'admins', icon: IconShield },
   { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
-  { href: '/merchants?status=APPROVED', key: 'inventory', icon: IconBox },
+  { href: '/inventory', key: 'inventory', icon: IconBox },
   { href: '/distributors', key: 'distributors', icon: IconUsers },
   { href: '/orders', key: 'orders', icon: IconReceipt },
   { href: '/allocations', key: 'allocations', icon: IconPackage },
-  { href: '/replenishment', key: 'replenishment', icon: IconBuildingStore },
+  { href: '/replenishment', key: 'replenishment', icon: IconClipboardList },
   { href: '/withdrawals', key: 'withdrawals', icon: IconCash },
-  { href: '/funds', key: 'funds', icon: IconTruckDelivery },
+  { href: '/funds', key: 'funds', icon: IconReportMoney },
   { href: '/settlements', key: 'settlements', icon: IconWallet },
   {
     href: '/crm/contacts',
@@ -215,7 +217,14 @@ function AdminNav({
   );
 }
 
-export function AdminShell({ children, userEmail, role, permissions, onLogout }: AdminShellProps) {
+export function AdminShell({
+  children,
+  userEmail,
+  role,
+  permissions,
+  onLogout,
+  headerStart,
+}: AdminShellProps) {
   const pathname = usePathname();
   const t = useTranslations('admin');
   const tc = useTranslations('common');
@@ -259,7 +268,11 @@ export function AdminShell({ children, userEmail, role, permissions, onLogout }:
           permissions={permissions}
         />
       }
-      headerStart={<span className="text-sm font-medium text-muted-foreground">{tc('platform')}</span>}
+      headerStart={
+        headerStart ?? (
+          <span className="text-sm font-medium text-muted-foreground">{tc('platform')}</span>
+        )
+      }
       headerEnd={
         <>
           {roleLabel ? (

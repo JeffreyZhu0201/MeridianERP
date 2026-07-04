@@ -21,11 +21,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isPublic && token && pathname === '/login') {
-    const home = ADMIN_ROLE_HOME_PATH[role] ?? '/';
-    return NextResponse.redirect(new URL(home, request.url));
-  }
-
   if (token && !isPublic && !adminCanAccessPath(role, pathname)) {
     const home = ADMIN_ROLE_HOME_PATH[role] ?? '/';
     return NextResponse.redirect(new URL(home, request.url));

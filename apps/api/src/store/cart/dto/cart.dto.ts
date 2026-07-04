@@ -54,7 +54,9 @@ export class UpdateCartItemDto {
 export class CheckoutDto {
   @IsEnum(FulfillmentType)
   fulfillmentType!: FulfillmentType;
-  @ValidateIf((o: CheckoutDto) => o.fulfillmentType === FulfillmentType.DELIVERY)
+  @ValidateIf(
+    (o: CheckoutDto) => o.fulfillmentType === FulfillmentType.DELIVERY,
+  )
   @ValidateNested()
   @Type(() => DeliveryAddressDto)
   deliveryAddress?: DeliveryAddressDto;

@@ -4,9 +4,10 @@ import type { AuthenticatedUser } from '../interfaces/jwt-payload.interface';
 
 @Injectable()
 export class OptionalStoreAuthGuard extends AuthGuard('store-jwt') {
-  
   canActivate(context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest<{ headers: { authorization?: string } }>();
+    const request = context
+      .switchToHttp()
+      .getRequest<{ headers: { authorization?: string } }>();
     const authHeader = request.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
       return true;
@@ -14,7 +15,6 @@ export class OptionalStoreAuthGuard extends AuthGuard('store-jwt') {
     return super.canActivate(context);
   }
 
-  
   handleRequest<TUser = AuthenticatedUser>(
     err: Error | null,
     user: TUser | false,

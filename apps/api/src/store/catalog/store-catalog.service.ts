@@ -3,7 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { UnifiedStoreCatalogResponse, UnifiedStoreProduct } from '@meridian/shared';
+import type {
+  UnifiedStoreCatalogResponse,
+  UnifiedStoreProduct,
+} from '@meridian/shared';
 import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FlagshipCatalogService } from '../../platform/flagship-catalog/flagship-catalog.service';
@@ -49,11 +52,14 @@ export class StoreCatalogService {
     return product;
   }
 
-  async listUnifiedCatalog(fulfillmentSlug: string): Promise<UnifiedStoreCatalogResponse> {
+  async listUnifiedCatalog(
+    fulfillmentSlug: string,
+  ): Promise<UnifiedStoreCatalogResponse> {
     if (!fulfillmentSlug) {
       throw new BadRequestException('fulfillment query parameter is required');
     }
-    const flagshipTenantId = await this.flagshipCatalog.resolveFlagshipTenantId();
+    const flagshipTenantId =
+      await this.flagshipCatalog.resolveFlagshipTenantId();
     const { tenant: fulfillmentTenant } =
       await this.storeTenant.resolveApprovedTenant(fulfillmentSlug);
 
@@ -80,7 +86,9 @@ export class StoreCatalogService {
     const masterSkuIds = [
       ...new Set(
         products.flatMap((p) =>
-          p.variants.map((v) => v.masterSkuId).filter((id): id is string => Boolean(id)),
+          p.variants
+            .map((v) => v.masterSkuId)
+            .filter((id): id is string => Boolean(id)),
         ),
       ),
     ];
@@ -110,18 +118,23 @@ export class StoreCatalogService {
           const branchVariant = branchByMaster.get(masterSkuId);
           let inventory = 0;
           if (branchVariant) {
-            inventory = await this.inventoryService.getSellableQuantity(branchVariant.id);
+            inventory = await this.inventoryService.getSellableQuantity(
+              branchVariant.id,
+            );
           }
           return {
             id: flagshipVariant.id,
             masterSkuId,
             sku: flagshipVariant.sku,
             name: flagshipVariant.name,
-            flagshipPrice: flagshipVariant.price,
-            suggestedRetailPrice: masterSku?.retailPrice ?? flagshipVariant.price,
-            wholesalePrice: masterSku?.wholesalePrice ?? 0,
+            flagshipPrice: Number(flagshipVariant.price),
+            suggestedRetailPrice: Number(
+              masterSku?.retailPrice ?? flagshipVariant.price,
+            ),
+            wholesalePrice: Number(masterSku?.wholesalePrice ?? 0),
             branchVariantId: branchVariant?.id ?? null,
-            branchPrice: branchVariant?.price ?? null,
+            branchPrice:
+              branchVariant?.price != null ? Number(branchVariant.price) : null,
             inventory,
             inStock: Boolean(branchVariant) && inventory > 0,
           };

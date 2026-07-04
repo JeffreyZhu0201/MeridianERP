@@ -32,7 +32,10 @@ export class ContactsController {
 
   @Post()
   @HttpCode(201)
-  create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateContactDto) {
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateContactDto,
+  ) {
     return this.contactsService.create(user.tenantId!, dto);
   }
 

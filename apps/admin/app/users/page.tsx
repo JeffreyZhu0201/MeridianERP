@@ -2,10 +2,10 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
-import { ListPagination } from '@/components/list-pagination';
+import { ListPagination } from '@meridian/ui';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PaginatedResponse, type PlatformAccountListItem } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { UsersFilters } from './_components/users-filters';
 import { UsersTable } from './_components/users-table';
 
@@ -14,8 +14,7 @@ interface UsersPageProps {
 }
 
 export default async function UsersPage({ searchParams }: UsersPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.users');
   const tc = await getTranslations('common');

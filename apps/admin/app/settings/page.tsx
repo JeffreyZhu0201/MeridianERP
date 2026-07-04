@@ -4,7 +4,7 @@ import type { PlatformSettingsDto } from '@meridian/shared';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { ApiError, apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 
 import { PlatformSettingsForm, PlatformSettingsPayments } from './_components/platform-settings-form';
 
@@ -21,8 +21,7 @@ const DEFAULT_SETTINGS: PlatformSettingsDto = {
 };
 
 export default async function SettingsPage() {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.settings');
 

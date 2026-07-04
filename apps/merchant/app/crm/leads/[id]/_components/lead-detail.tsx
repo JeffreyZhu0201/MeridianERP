@@ -1,10 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import {
   Badge,
   BentoDetailHero,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   DetailPageFrame,
   Select,
 } from '@meridian/ui';
@@ -26,7 +31,9 @@ const stageVariant: Record<string, 'default' | 'warning' | 'success' | 'destruct
 
 export function LeadDetail({ lead, token }: LeadDetailProps) {
   const router = useRouter();
+  const locale = useLocale();
   const t = useTranslations('merchant.crm.leads');
+  const tc = useTranslations('common');
 
   function stageLabel(stage: string): string {
     return t(`stage.${stage as 'NEW' | 'QUALIFIED' | 'WON' | 'LOST'}`);
@@ -39,6 +46,8 @@ export function LeadDetail({ lead, token }: LeadDetailProps) {
     }, token);
     router.refresh();
   }
+
+  const emptyDash = tc('emptyDash');
 
   return (
     <DetailPageFrame
@@ -63,28 +72,44 @@ export function LeadDetail({ lead, token }: LeadDetailProps) {
       <BentoDetailHero
         metrics={[
           { title: t('tableStage'), value: stageLabel(lead.stage) },
-          { title: t('tableSource'), value: lead.source ?? '—' },
-          { title: t('tableUpdated'), value: new Date(lead.updatedAt).toLocaleDateString() },
+          { title: t('tableSource'), value: lead.source ?? emptyDash },
+          {
+            title: t('tableUpdated'),
+            value: new Date(lead.updatedAt).toLocaleDateString(locale),
+          },
         ]}
       />
 
-      <div className="space-y-4">
-        {lead.contact ? (
-          <div className="rounded-xl ring-1 ring-border p-4">
-            <p className="text-sm font-medium">{t('tableContact')}</p>
-            <p className="mt-1">
-              {lead.contact.firstName} {lead.contact.lastName}
-            </p>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('detail.profile')}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm">
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">{t('tableStage')}</span>
+            <Badge variant={stageVariant[lead.stage] ?? 'secondary'}>{stageLabel(lead.stage)}</Badge>
           </div>
-        ) : null}
-
-        {lead.distributor ? (
-          <div className="rounded-xl ring-1 ring-border p-4">
-            <p className="text-sm font-medium">{t('tableDistributor')}</p>
-            <p className="mt-1">{lead.distributor.name}</p>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">{t('tableSource')}</span>
+            <span>{lead.source ?? emptyDash}</span>
           </div>
-        ) : null}
-      </div>
+          <div className="flex justify-between gap-4">
+            <span className="text-muted-foreground">{t('tableContact')}</span>
+            <span>
+              {lead.contact ? (
+                <Link
+                  href={`/crm/contacts/${lead.contact.id}`}
+                  className="text-primary hover:underline"
+                >
+                  {lead.contact.firstName} {lead.contact.lastName}
+                </Link>
+              ) : (
+                emptyDash
+              )}
+            </span>
+          </div>
+        </CardContent>
+      </Card>
     </DetailPageFrame>
   );
 }

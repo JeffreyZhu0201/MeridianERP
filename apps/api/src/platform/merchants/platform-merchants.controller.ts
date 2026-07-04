@@ -23,7 +23,9 @@ import { PlatformMerchantsService } from './platform-merchants.service';
 @Controller('platform/merchants')
 @UseGuards(PlatformAuthGuard, PlatformRolesGuard)
 export class PlatformMerchantsController {
-  constructor(private readonly platformMerchantsService: PlatformMerchantsService) {}
+  constructor(
+    private readonly platformMerchantsService: PlatformMerchantsService,
+  ) {}
 
   @Get()
   @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
@@ -44,7 +46,6 @@ export class PlatformMerchantsController {
     return this.platformMerchantsService.getById(id);
   }
 
-  
   @Post(':id/approve')
   @HttpCode(201)
   @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
@@ -55,7 +56,6 @@ export class PlatformMerchantsController {
     return this.platformMerchantsService.approve(id, dto);
   }
 
-  
   @Post(':id/reject')
   @HttpCode(201)
   @PlatformRoles('SUPER_ADMIN')
@@ -63,7 +63,6 @@ export class PlatformMerchantsController {
     return this.platformMerchantsService.reject(id, dto);
   }
 
-  
   @Patch(':id/recruiter')
   @PlatformRoles('SUPER_ADMIN')
   updateRecruiter(
@@ -71,11 +70,7 @@ export class PlatformMerchantsController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: { recruitedByDistributorId: string | null; reason: string },
   ) {
-    return this.platformMerchantsService.updateRecruiter(
-      id,
-      dto,
-      user.userId,
-    );
+    return this.platformMerchantsService.updateRecruiter(id, dto, user.userId);
   }
 
   @Patch(':id/store-settings')

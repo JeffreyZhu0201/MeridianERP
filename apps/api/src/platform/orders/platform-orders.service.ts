@@ -86,12 +86,10 @@ export class PlatformOrdersService {
     };
   }
 
-  
   async ship(orderId: string, platformUserId: string) {
     return this.fulfillmentService.shipDelivery(orderId, platformUserId);
   }
 
-  
   async findOne(orderId: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },

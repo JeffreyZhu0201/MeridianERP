@@ -29,7 +29,9 @@ export class RecruitInviteService {
       throw new BadRequestException('Invite code has expired');
     }
     if (!invite.distributor.isActive || invite.distributor.tenantId !== null) {
-      throw new BadRequestException('Invite code is not valid for branch registration');
+      throw new BadRequestException(
+        'Invite code is not valid for branch registration',
+      );
     }
     return {
       code: invite.code,

@@ -2,10 +2,12 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
 
-import { ListPagination } from '@/components/list-pagination';
+import { OnboardingStatus } from '@meridian/shared';
+
+import { ListPagination } from '@meridian/ui';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
-import { apiFetch, type PaginatedResponse, type PlatformOrder } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { apiFetch, type MerchantListItem, type PaginatedResponse, type PlatformOrder } from '@/lib/api';
+import { requireToken } from '@/lib/auth';
 import { OrdersView } from './_components/orders-view';
 
 interface OrdersPageProps {
@@ -20,8 +22,7 @@ interface OrdersPageProps {
 }
 
 export default async function OrdersPage({ searchParams }: OrdersPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.orders');
   const tc = await getTranslations('common');
@@ -39,14 +40,21 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
   let orders: PlatformOrder[] = [];
   let meta = { total: 0, page: 1, limit: 20 };
+  let orderMerchants: Array<{ tenantId: string; businessName: string }> = [];
   try {
-    const res = await apiFetch<PaginatedResponse<PlatformOrder>>(
-      `/platform/orders?${query.toString()}`,
-      {},
-      token,
-    );
-    orders = res.data;
-    meta = res.meta;
+    const [ordersRes, merchantsRes] = await Promise.all([
+      apiFetch<PaginatedResponse<PlatformOrder>>(`/platform/orders?${query.toString()}`, {}, token),
+      apiFetch<PaginatedResponse<MerchantListItem>>(
+        `/platform/merchants?status=${OnboardingStatus.APPROVED}&limit=500`,
+        {},
+        token,
+      ),
+    ]);
+    orders = ordersRes.data;
+    meta = ordersRes.meta;
+    orderMerchants = merchantsRes.data
+      .filter((m) => m.tenantId)
+      .map((m) => ({ tenantId: m.tenantId, businessName: m.businessName }));
   } catch {
     orders = [];
   }
@@ -82,6 +90,9 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
               token={token}
               activeTab={activeTab}
               statusFilter={statusFilter}
+              tenantIdFilter={params.tenantId ?? ''}
+              guestEmailFilter={params.guestEmail ?? ''}
+              merchants={orderMerchants}
             />
           </Suspense>
           <Suspense>

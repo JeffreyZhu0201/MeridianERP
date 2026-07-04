@@ -59,8 +59,11 @@ export function LoginForm() {
   }
 
   return (
-    <AuthLayout subtitle={t('subtitle')} showThemeToggle={false}>
+    <AuthLayout subtitle={t('subtitle')}>
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1 text-center">
+          <h1 className="text-lg font-semibold tracking-tight">{t('title')}</h1>
+        </div>
         <div className="space-y-2">
           <Label htmlFor="email">{t('email')}</Label>
           <Input

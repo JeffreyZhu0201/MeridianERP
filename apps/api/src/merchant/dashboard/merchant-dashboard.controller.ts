@@ -10,7 +10,10 @@ export class MerchantDashboardController {
   constructor(private readonly dashboardService: MerchantDashboardService) {}
 
   @Get()
-  getStats(@CurrentUser() user: AuthenticatedUser, @Query('days') days?: string) {
+  getStats(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('days') days?: string,
+  ) {
     const windowDays = days ? parseInt(days, 10) : 30;
     return this.dashboardService.getStats(user.tenantId!, windowDays);
   }

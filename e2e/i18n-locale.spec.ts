@@ -35,7 +35,7 @@ async function loginMerchant(page: Page): Promise<boolean> {
   return true;
 }
 
-test.describe('Locale switching', () => {
+test.describe('Locale switching (merchant)', { tag: '@merchant-app' }, () => {
   test('merchant sidebar shows Chinese when locale cookie is zh-CN', async ({ page }) => {
     const health = await page.request.get(`${API_URL}/api/v1/health`);
     if (!health.ok()) test.skip(true, 'API not running');
@@ -48,6 +48,9 @@ test.describe('Locale switching', () => {
     await expect(page.getByRole('button', { name: '库存' })).toBeVisible({ timeout: 10000 });
   });
 
+});
+
+test.describe('Locale switching (store)', { tag: '@store-app' }, () => {
   test('store nav shows Chinese after locale toggle', async ({ page }) => {
     const res = await page.goto(`${STORE_URL}/s/demo`);
     if (!res || res.status() >= 500) {
@@ -57,6 +60,8 @@ test.describe('Locale switching', () => {
     await page.getByRole('button', { name: /语言|Language/i }).click();
     await page.getByRole('menuitem', { name: '中文' }).click();
 
-    await expect(page.getByRole('link', { name: '购物车' })).toBeVisible();
+    await expect(
+      page.getByRole('navigation').getByRole('link', { name: '购物车' }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

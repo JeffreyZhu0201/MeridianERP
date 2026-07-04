@@ -8,7 +8,10 @@ const ALLOWED_TRANSITIONS: Record<LeadStage, LeadStage[]> = {
   [LeadStage.LOST]: [],
 };
 
-export function assertLeadStageTransition(from: LeadStage, to: LeadStage): void {
+export function assertLeadStageTransition(
+  from: LeadStage,
+  to: LeadStage,
+): void {
   if (from === to) return;
   const allowed = ALLOWED_TRANSITIONS[from];
   if (!allowed.includes(to)) {

@@ -8,7 +8,13 @@ export class ListPlatformUsersQueryDto {
   search?: string;
 
   @IsOptional()
-  @IsEnum(['CONSUMER', 'MERCHANT_OWNER', 'MERCHANT_STAFF', 'DISTRIBUTOR', 'PLATFORM_ADMIN'])
+  @IsEnum([
+    'CONSUMER',
+    'MERCHANT_OWNER',
+    'MERCHANT_STAFF',
+    'DISTRIBUTOR',
+    'PLATFORM_ADMIN',
+  ])
   identity?: UserIdentity;
 
   @IsOptional()

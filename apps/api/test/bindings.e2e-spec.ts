@@ -81,7 +81,12 @@ describe('Bindings (e2e)', () => {
   });
 
   it('verifies token and claims MERCHANT binding', async () => {
-    const token = await seedMerchantBindToken(app, prisma, tenantId, distributorId);
+    const token = await seedMerchantBindToken(
+      app,
+      prisma,
+      tenantId,
+      distributorId,
+    );
 
     const verify = await request(app.getHttpServer())
       .get(`/api/v1/bindings/verify/${token}`)
@@ -139,7 +144,12 @@ describe('Bindings (e2e)', () => {
     expect(unknown.body.valid).toBe(false);
     expect(unknown.body.error).toBeDefined();
 
-    const token = await seedMerchantBindToken(app, prisma, tenantId, distributorId);
+    const token = await seedMerchantBindToken(
+      app,
+      prisma,
+      tenantId,
+      distributorId,
+    );
     prisma._expireQrToken(token);
 
     const expired = await request(app.getHttpServer())

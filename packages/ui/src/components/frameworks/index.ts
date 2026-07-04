@@ -40,3 +40,6 @@ export { DashboardPageFrame, type DashboardPageFrameProps } from './dashboard-pa
 
 /** 认证状态页框架 */
 export { AuthStatusFrame, type AuthStatusFrameProps } from './auth-status-frame';
+
+/** ERP 列表页组合框架 */
+export { ErpListPage, type ErpListPageProps } from './erp-list-page';

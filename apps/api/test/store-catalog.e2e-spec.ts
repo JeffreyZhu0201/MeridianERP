@@ -44,7 +44,9 @@ describe('StoreCatalog (e2e)', () => {
         name: 'Blue Widget',
         description: 'A fine widget',
         isPublished: true,
-        variants: [{ sku: 'WIDGET-1', name: 'Default', price: 29.99, inventory: 10 }],
+        variants: [
+          { sku: 'WIDGET-1', name: 'Default', price: 29.99, inventory: 10 },
+        ],
       })
       .expect(201);
 
@@ -56,7 +58,9 @@ describe('StoreCatalog (e2e)', () => {
       .send({
         name: 'Draft Gadget',
         isPublished: false,
-        variants: [{ sku: 'GADGET-1', name: 'Default', price: 9.99, inventory: 5 }],
+        variants: [
+          { sku: 'GADGET-1', name: 'Default', price: 9.99, inventory: 5 },
+        ],
       })
       .expect(201);
   });

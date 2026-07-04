@@ -3,13 +3,12 @@ import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server'
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PlatformDistributor } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { CreateDistributorForm } from './_components/create-distributor-form';
 import { DistributorsTable } from './_components/distributors-table';
 
 export default async function DistributorsPage() {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.distributors');
   let distributors: PlatformDistributor[] = [];

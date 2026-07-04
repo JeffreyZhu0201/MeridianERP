@@ -26,7 +26,12 @@ describe('InventoryPurchaseOrders (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('acme-store', 'Acme Store', 'owner@acme.test', password);
+    await prisma._seedMerchantOwner(
+      'acme-store',
+      'Acme Store',
+      'owner@acme.test',
+      password,
+    );
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const product = await request(app.getHttpServer())
@@ -35,7 +40,9 @@ describe('InventoryPurchaseOrders (e2e)', () => {
       .send({
         name: 'Widget',
         isPublished: true,
-        variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 5 }],
+        variants: [
+          { sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 5 },
+        ],
       })
       .expect(201);
 
@@ -46,7 +53,9 @@ describe('InventoryPurchaseOrders (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    warehouseId = warehouses.body.find((w: { isDefault: boolean }) => w.isDefault).id;
+    warehouseId = warehouses.body.find(
+      (w: { isDefault: boolean }) => w.isDefault,
+    ).id;
   });
 
   afterEach(async () => {

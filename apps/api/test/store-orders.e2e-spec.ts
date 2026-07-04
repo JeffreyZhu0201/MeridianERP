@@ -26,7 +26,12 @@ describe('StoreOrders (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('acme-store', 'Acme Store', 'owner@acme.test', password);
+    await prisma._seedMerchantOwner(
+      'acme-store',
+      'Acme Store',
+      'owner@acme.test',
+      password,
+    );
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const product = await request(app.getHttpServer())
@@ -55,11 +60,13 @@ describe('StoreOrders (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/checkout')
       .set('Authorization', `Bearer ${customerToken}`)
-      .send({})
+      .send({ fulfillmentType: 'PICKUP' })
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .post(
+        `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
+      )
       .expect(200);
   });
 
@@ -100,7 +107,9 @@ describe('StoreOrders (e2e)', () => {
   });
 
   it('rejects unauthenticated list', async () => {
-    await request(app.getHttpServer()).get('/api/v1/store/acme-store/orders').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/v1/store/acme-store/orders')
+      .expect(401);
   });
 
   it('returns 404 for unknown order id', async () => {

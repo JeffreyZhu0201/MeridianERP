@@ -57,7 +57,9 @@ describe('StoreCheckout (e2e)', () => {
       .send({
         name: 'Blue Widget',
         isPublished: true,
-        variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 }],
+        variants: [
+          { sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 },
+        ],
       })
       .expect(201);
 
@@ -95,7 +97,9 @@ describe('StoreCheckout (e2e)', () => {
     expect(checkout.body.mockPayment).toBe(true);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .post(
+        `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
+      )
       .expect(200);
 
     const merchantOrders = await request(app.getHttpServer())
@@ -109,7 +113,9 @@ describe('StoreCheckout (e2e)', () => {
   });
 
   it('does not accrue retail commission after pickup verify when branch has recruiter', async () => {
-    const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
+    const tenant = await prisma.tenant.findUnique({
+      where: { slug: 'acme-store' },
+    });
     const platformDist = await prisma.distributor.create({
       data: {
         tenantId: null,
@@ -143,7 +149,9 @@ describe('StoreCheckout (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .post(
+        `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
+      )
       .expect(200);
 
     const paidOrder = await prisma.order.findUnique({
@@ -168,7 +176,9 @@ describe('StoreCheckout (e2e)', () => {
   });
 
   it('does not accrue retail commission on repeated fulfilled orders', async () => {
-    const tenant = await prisma.tenant.findUnique({ where: { slug: 'acme-store' } });
+    const tenant = await prisma.tenant.findUnique({
+      where: { slug: 'acme-store' },
+    });
     const platformDist = await prisma.distributor.create({
       data: {
         tenantId: null,
@@ -203,7 +213,9 @@ describe('StoreCheckout (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+        .post(
+          `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
+        )
         .expect(200);
 
       const paidOrder = await prisma.order.findUnique({
@@ -239,6 +251,34 @@ describe('StoreCheckout (e2e)', () => {
       .expect(400);
   });
 
+  it('rejects checkout without fulfillmentType', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/checkout')
+      .set('X-Cart-Session', sessionId)
+      .send({ guestEmail: 'guest@example.com' })
+      .expect(400);
+  });
+
+  it('rejects delivery checkout without deliveryAddress', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/checkout')
+      .set('X-Cart-Session', sessionId)
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'DELIVERY' })
+      .expect(400);
+  });
+
   it('decrements inventory on pickup verify', async () => {
     await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/cart/items')
@@ -253,7 +293,9 @@ describe('StoreCheckout (e2e)', () => {
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .post(
+        `/api/v1/store/acme-store/orders/${checkout.body.order.id}/simulate-payment`,
+      )
       .expect(200);
 
     const paidOrder = await prisma.order.findUnique({

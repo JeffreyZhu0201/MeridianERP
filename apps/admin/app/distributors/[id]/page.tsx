@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type DistributorBranch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { DistributorDetailView } from './_components/distributor-detail';
 
 export interface DistributorDetailResponse {
@@ -33,8 +33,7 @@ interface DistributorDetailPageProps {
 }
 
 export default async function DistributorDetailPage({ params }: DistributorDetailPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const { id } = await params;
 

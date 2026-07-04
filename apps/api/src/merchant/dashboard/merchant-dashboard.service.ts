@@ -127,7 +127,9 @@ export class MerchantDashboardService {
       recentBindings,
       ordersLast30Days: orderAgg._count._all,
       revenueLast30Days: decimalSumToString(orderAgg._sum.total),
-      commissionAccruedLast30Days: decimalSumToString(commissionAccruedAgg._sum.amount),
+      commissionAccruedLast30Days: decimalSumToString(
+        commissionAccruedAgg._sum.amount,
+      ),
       lowStockCount,
       trend: buildOrderTrend(windowStart, windowEnd, trendOrders),
       recentLeads: recentLeads.map((lead) => ({
@@ -141,7 +143,6 @@ export class MerchantDashboardService {
     };
   }
 
-  
   private async countLowStock(tenantId: string): Promise<number> {
     const settings = await this.prisma.tenantInventorySettings.findUnique({
       where: { tenantId },
@@ -163,7 +164,6 @@ export class MerchantDashboardService {
     }).length;
   }
 
-  
   private buildRecentActivity(
     bindings: Array<{
       distributorId: string;
@@ -172,7 +172,7 @@ export class MerchantDashboardService {
       distributor: { id: string; name: string };
     }>,
     commissions: Array<{
-      orderId: string;
+      orderId: string | null;
       distributorId: string;
       amount: { toString(): string };
       createdAt: Date;
@@ -202,7 +202,7 @@ export class MerchantDashboardService {
         occurredAt: entry.createdAt.toISOString(),
         distributorId: entry.distributorId,
         distributorName: entry.distributor.name,
-        orderId: entry.orderId,
+        orderId: entry.orderId ?? undefined,
         amount: entry.amount.toString(),
       }),
     );

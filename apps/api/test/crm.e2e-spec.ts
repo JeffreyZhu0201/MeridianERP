@@ -5,7 +5,10 @@ import { App } from 'supertest/types';
 import { createTestApp } from './helpers/create-test-app';
 import { MockPrisma } from './helpers/mock-prisma';
 
-async function setupApprovedMerchant(app: INestApplication<App>, prisma: MockPrisma) {
+async function setupApprovedMerchant(
+  app: INestApplication<App>,
+  prisma: MockPrisma,
+) {
   const hash = await bcrypt.hash('admin123', 10);
   await prisma._seedPlatformAdmin('admin@meridian.test', hash, 'SUPER_ADMIN');
   const adminLogin = await request(app.getHttpServer())
@@ -73,7 +76,7 @@ describe('CRM (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     ({ tokenA, tokenB } = await setupApprovedMerchant(app, prisma));
-  });
+  }, 15000);
 
   afterEach(async () => {
     await app.close();

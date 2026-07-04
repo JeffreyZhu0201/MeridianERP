@@ -127,7 +127,9 @@ describe('Platform orders (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    expect(byEmail.body.data.some((o: { id: string }) => o.id === orderId)).toBe(true);
+    expect(
+      byEmail.body.data.some((o: { id: string }) => o.id === orderId),
+    ).toBe(true);
 
     const byTenant = await request(app.getHttpServer())
       .get('/api/v1/platform/orders')
@@ -135,9 +137,11 @@ describe('Platform orders (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    expect(byTenant.body.data.every((o: { tenantId: string }) => o.tenantId === tenantId)).toBe(
-      true,
-    );
+    expect(
+      byTenant.body.data.every(
+        (o: { tenantId: string }) => o.tenantId === tenantId,
+      ),
+    ).toBe(true);
   });
 
   it('GET /platform/orders/:id returns admin detail fields', async () => {

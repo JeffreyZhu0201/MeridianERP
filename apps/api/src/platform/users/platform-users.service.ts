@@ -3,7 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CommissionType, MerchantRole, PlatformAccount, PlatformRole, Prisma } from '@prisma/client';
+import {
+  CommissionType,
+  MerchantRole,
+  PlatformAccount,
+  PlatformRole,
+  Prisma,
+} from '@prisma/client';
 import type {
   PlatformAccountDetail,
   PlatformAccountListItem,
@@ -67,11 +73,14 @@ export class PlatformUsersService {
     );
 
     let filteredItems = items;
-    if (query.identity === 'DISTRIBUTOR' || query.identity === 'PLATFORM_ADMIN') {
+    if (
+      query.identity === 'DISTRIBUTOR' ||
+      query.identity === 'PLATFORM_ADMIN'
+    ) {
       filteredItems = [];
       for (const account of accounts) {
         const item = await this.toListItem(account);
-        if (item.identities.includes(query.identity!)) {
+        if (item.identities.includes(query.identity)) {
           filteredItems.push(item);
         }
       }
@@ -79,9 +88,20 @@ export class PlatformUsersService {
 
     return {
       data: filteredItems,
-      meta: { total: query.identity === 'DISTRIBUTOR' || query.identity === 'PLATFORM_ADMIN' ? filteredItems.length : total, page, limit },
+      meta: {
+        total:
+          query.identity === 'DISTRIBUTOR' ||
+          query.identity === 'PLATFORM_ADMIN'
+            ? filteredItems.length
+            : total,
+        page,
+        limit,
+      },
       items: filteredItems,
-      total: query.identity === 'DISTRIBUTOR' || query.identity === 'PLATFORM_ADMIN' ? filteredItems.length : total,
+      total:
+        query.identity === 'DISTRIBUTOR' || query.identity === 'PLATFORM_ADMIN'
+          ? filteredItems.length
+          : total,
       page,
       limit,
     };
@@ -140,7 +160,9 @@ export class PlatformUsersService {
   }
 
   private async requireAccount(id: string) {
-    const account = await this.prisma.platformAccount.findUnique({ where: { id } });
+    const account = await this.prisma.platformAccount.findUnique({
+      where: { id },
+    });
     if (!account) {
       throw new NotFoundException('User not found');
     }
@@ -215,14 +237,16 @@ export class PlatformUsersService {
         customerId: customer.id,
         tenantId: customer.tenantId,
         tenantSlug: customer.tenant.slug,
-        businessName: customer.tenant.merchantProfile?.businessName ?? customer.tenant.slug,
+        businessName:
+          customer.tenant.merchantProfile?.businessName ?? customer.tenant.slug,
         orderCount: customer.orders.length,
       })),
       merchantRoles: account.merchantUsers.map((user) => ({
         userId: user.id,
         tenantId: user.tenantId,
         tenantSlug: user.tenant.slug,
-        businessName: user.tenant.merchantProfile?.businessName ?? user.tenant.slug,
+        businessName:
+          user.tenant.merchantProfile?.businessName ?? user.tenant.slug,
         role: user.role,
         onboardingStatus:
           user.tenant.merchantProfile?.onboardingStatus ?? 'DRAFT',
@@ -369,7 +393,9 @@ export class PlatformUsersService {
       return;
     }
     if (existing.role === MerchantRole.MERCHANT_OWNER) {
-      throw new BadRequestException('Cannot remove merchant owner via this endpoint');
+      throw new BadRequestException(
+        'Cannot remove merchant owner via this endpoint',
+      );
     }
     await this.prisma.user.delete({ where: { id: existing.id } });
   }
@@ -377,7 +403,9 @@ export class PlatformUsersService {
   private async toListItem(
     account: Prisma.PlatformAccountGetPayload<{
       include: {
-        merchantUsers: { include: { tenant: { include: { merchantProfile: true } } } };
+        merchantUsers: {
+          include: { tenant: { include: { merchantProfile: true } } };
+        };
         customers: true;
       };
     }>,

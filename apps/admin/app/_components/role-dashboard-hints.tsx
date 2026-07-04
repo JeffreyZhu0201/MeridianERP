@@ -31,7 +31,13 @@ export async function RoleDashboardHints({ role }: RoleDashboardHintsProps) {
           { href: '/withdrawals?status=PENDING', label: t('reviewer.withdrawals') },
         ];
       case 'SUPER_ADMIN':
-        return [{ href: '/admins', label: t('superAdmin.admins') }];
+        return [
+          { href: '/merchants', label: t('superAdmin.merchants') },
+          { href: '/orders', label: t('superAdmin.orders') },
+          { href: '/users', label: t('superAdmin.users') },
+          { href: '/inventory', label: t('superAdmin.inventory') },
+          { href: '/admins', label: t('superAdmin.admins') },
+        ];
       default:
         return [];
     }

@@ -46,12 +46,20 @@ describe('Platform dashboard (e2e)', () => {
   });
 
   it('GET /platform/dashboard returns 401 without platform token', async () => {
-    await request(app.getHttpServer()).get('/api/v1/platform/dashboard').expect(401);
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/dashboard')
+      .expect(401);
   });
 
   it('returns live cross-tenant dashboard metrics', async () => {
-    const tenantA = await prisma._seedApprovedTenant('tenant-a', 'Tenant A Corp');
-    const tenantB = await prisma._seedApprovedTenant('tenant-b', 'Tenant B Corp');
+    const tenantA = await prisma._seedApprovedTenant(
+      'tenant-a',
+      'Tenant A Corp',
+    );
+    const tenantB = await prisma._seedApprovedTenant(
+      'tenant-b',
+      'Tenant B Corp',
+    );
 
     await prisma.merchantProfile.create({
       data: {

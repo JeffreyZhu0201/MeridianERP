@@ -1,29 +1,39 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import {
+  BentoDetailHero,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   DetailPageFrame,
+  EmptyState,
   Input,
   Label,
   Sheet,
   SheetFooter,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@meridian/ui';
 
-import { apiFetch, type Company } from '@/lib/api';
+import { apiFetch, type Company, type Contact } from '@/lib/api';
 
 interface CompanyDetailProps {
   company: Company;
+  contacts: Contact[];
   token: string;
 }
 
-export function CompanyDetail({ company, token }: CompanyDetailProps) {
+export function CompanyDetail({ company, contacts, token }: CompanyDetailProps) {
   const router = useRouter();
   const t = useTranslations('merchant.crm.companies');
   const tc = useTranslations('common');
@@ -51,6 +61,8 @@ export function CompanyDetail({ company, token }: CompanyDetailProps) {
     }
   }
 
+  const emptyDash = tc('emptyDash');
+
   return (
     <>
       <DetailPageFrame
@@ -59,9 +71,16 @@ export function CompanyDetail({ company, token }: CompanyDetailProps) {
         backLabel={t('title')}
         actions={<Button onClick={openEdit}>{tc('edit')}</Button>}
       >
+        <BentoDetailHero
+          metrics={[
+            { title: t('contacts'), value: contacts.length },
+            { title: t('website'), value: company.website ?? emptyDash },
+          ]}
+        />
+
         <Card>
           <CardHeader>
-            <CardTitle>{t('title')}</CardTitle>
+            <CardTitle>{t('detail.profile')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
@@ -70,12 +89,49 @@ export function CompanyDetail({ company, token }: CompanyDetailProps) {
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{t('website')}</span>
-              <span>{company.website ?? '—'}</span>
+              <span>{company.website ?? emptyDash}</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">{t('contacts')}</span>
-              <span>{company._count?.contacts ?? 0}</span>
+              <span>{contacts.length}</span>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('detail.linkedContacts')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {contacts.length === 0 ? (
+              <EmptyState title={t('detail.noContacts')} />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('detail.contactName')}</TableHead>
+                    <TableHead>{t('detail.email')}</TableHead>
+                    <TableHead>{t('detail.phone')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {contacts.map((contact) => (
+                    <TableRow key={contact.id}>
+                      <TableCell>
+                        <Link
+                          href={`/crm/contacts/${contact.id}`}
+                          className="font-medium text-primary hover:underline"
+                        >
+                          {contact.firstName} {contact.lastName}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{contact.email ?? emptyDash}</TableCell>
+                      <TableCell>{contact.phone ?? emptyDash}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </DetailPageFrame>

@@ -12,8 +12,8 @@
  * - 平台管理员刷新令牌
  * - 平台管理员验证令牌
  * - 平台管理员验证令牌
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ *
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved.
  */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -35,7 +35,6 @@ export class PlatformAuthService {
     private readonly env: EnvService,
   ) {}
 
-  
   async login(dto: PlatformLoginDto) {
     const user = await this.prisma.platformUser.findUnique({
       where: { email: dto.email },
@@ -48,7 +47,7 @@ export class PlatformAuthService {
       aud: 'admin' as const,
       roles: [user.role],
     };
-    const role = user.role as AdminPlatformRole;
+    const role = user.role;
     return {
       accessToken: this.jwt.sign(payload, {
         secret: this.env.getOrThrow('JWT_SECRET'),
@@ -69,7 +68,7 @@ export class PlatformAuthService {
       throw new UnauthorizedException('Admin not found');
     }
 
-    const role = user.role as AdminPlatformRole;
+    const role = user.role;
     return {
       id: user.id,
       email: user.email,

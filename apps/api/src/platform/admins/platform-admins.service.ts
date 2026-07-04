@@ -41,7 +41,7 @@ export class PlatformAdminsService {
       data: {
         email: dto.email,
         password,
-        role: dto.role as PlatformRole,
+        role: dto.role,
       },
       select: {
         id: true,
@@ -70,7 +70,7 @@ export class PlatformAdminsService {
 
     const data: { role?: PlatformRole; password?: string } = {};
     if (dto.role !== undefined) {
-      data.role = dto.role as PlatformRole;
+      data.role = dto.role;
     }
     if (dto.password !== undefined) {
       data.password = await bcrypt.hash(dto.password, 10);

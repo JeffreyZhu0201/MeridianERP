@@ -14,7 +14,9 @@ export class MerchantOrdersService {
       where: { tenantId },
       include: {
         lines: true,
-        customer: { select: { id: true, email: true, firstName: true, lastName: true } },
+        customer: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
         commissionEntry: true,
       },
       orderBy: { createdAt: 'desc' },
@@ -25,8 +27,18 @@ export class MerchantOrdersService {
     return this.fulfillmentService.listPickupPending(tenantId);
   }
 
-  verifyPickup(tenantId: string, orderId: string, code: string, userId: string) {
-    return this.fulfillmentService.verifyPickup(tenantId, orderId, code, userId);
+  verifyPickup(
+    tenantId: string,
+    orderId: string,
+    code: string,
+    userId: string,
+  ) {
+    return this.fulfillmentService.verifyPickup(
+      tenantId,
+      orderId,
+      code,
+      userId,
+    );
   }
 
   async findOne(tenantId: string, id: string) {
@@ -34,7 +46,9 @@ export class MerchantOrdersService {
       where: { id, tenantId },
       include: {
         lines: { include: { variant: true } },
-        customer: { select: { id: true, email: true, firstName: true, lastName: true } },
+        customer: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
         commissionEntry: true,
       },
     });

@@ -15,26 +15,23 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class DistributorMeService {
-  
   constructor(
     private readonly prisma: PrismaService,
     private readonly withdrawalsService: PlatformWithdrawalsService,
     private readonly inviteCodes: RecruitInviteCodesService,
   ) {}
 
-  
   private distributorId(user: AuthenticatedUser) {
     return user.userId;
   }
 
-  
   private async loadDistributor(user: AuthenticatedUser) {
     const distributor = await this.prisma.distributor.findFirst({
       where: {
-        id: this.distributorId(user),    // 用户ID必须匹配
-        portalEnabled: true,            // 门户访问必须已启用
-        isActive: true,                 // 账户必须处于激活状态
-        tenantId: null,                 // 必须是平台级经销商（tenantId为null）
+        id: this.distributorId(user), // 用户ID必须匹配
+        portalEnabled: true, // 门户访问必须已启用
+        isActive: true, // 账户必须处于激活状态
+        tenantId: null, // 必须是平台级经销商（tenantId为null）
       },
     });
     if (!distributor) {
@@ -43,7 +40,6 @@ export class DistributorMeService {
     return distributor;
   }
 
-  
   private defaultRangeQuery() {
     const to = new Date();
     const from = new Date(to);
@@ -51,12 +47,11 @@ export class DistributorMeService {
     from.setUTCHours(0, 0, 0, 0);
     to.setUTCHours(23, 59, 59, 999);
     return parseDateRangeQuery({
-      from: from.toISOString().slice(0, 10),  // 格式：YYYY-MM-DD
-      to: to.toISOString().slice(0, 10),      // 格式：YYYY-MM-DD
+      from: from.toISOString().slice(0, 10), // 格式：YYYY-MM-DD
+      to: to.toISOString().slice(0, 10), // 格式：YYYY-MM-DD
     });
   }
 
-  
   async getDashboard(user: AuthenticatedUser) {
     const distributor = await this.loadDistributor(user);
     const range = this.defaultRangeQuery();
@@ -68,23 +63,23 @@ export class DistributorMeService {
     });
     const tenantIds = recruitedTenants.map((m) => m.tenantId);
     const orderWhere = {
-      tenantId: { in: tenantIds },                                // 必须在招募的分店中
-      status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] },  // 订单状态过滤
-      createdAt: boundAtFilter,                                   // 日期范围过滤
+      tenantId: { in: tenantIds }, // 必须在招募的分店中
+      status: { in: [OrderStatus.PAID, OrderStatus.FULFILLED] }, // 订单状态过滤
+      createdAt: boundAtFilter, // 日期范围过滤
     };
     const ledgerWhere = {
-      distributorId,                      // 必须是当前经销商的记录
-      createdAt: boundAtFilter,           // 日期范围过滤
+      distributorId, // 必须是当前经销商的记录
+      createdAt: boundAtFilter, // 日期范围过滤
       status: { not: LedgerStatus.VOID }, // 排除已作废的记录
     };
     const [
-      branchCount,                       // 分店数量（该经销商招募的分店总数）
-      orderAgg,                          // 订单聚合（数量和总额）
-      commissionAccruedAgg,              // 应计佣金聚合（ACCRUED 状态的佣金总额）
-      commissionSettledAgg,              // 已结算佣金聚合（SETTLED 状态的佣金总额）
-      entryCount,                        // 佣金条目数量（所有非作废的佣金记录数）
-      trendOrders,                       // 用于趋势计算的订单列表
-      availableBalance,                  // 可用余额（可提现金额）
+      branchCount, // 分店数量（该经销商招募的分店总数）
+      orderAgg, // 订单聚合（数量和总额）
+      commissionAccruedAgg, // 应计佣金聚合（ACCRUED 状态的佣金总额）
+      commissionSettledAgg, // 已结算佣金聚合（SETTLED 状态的佣金总额）
+      entryCount, // 佣金条目数量（所有非作废的佣金记录数）
+      trendOrders, // 用于趋势计算的订单列表
+      availableBalance, // 可用余额（可提现金额）
     ] = await Promise.all([
       this.prisma.merchantProfile.count({
         where: { recruitedByDistributorId: distributorId },
@@ -92,8 +87,8 @@ export class DistributorMeService {
       tenantIds.length
         ? this.prisma.order.aggregate({
             where: orderWhere,
-            _count: { _all: true },     // 统计订单总数量
-            _sum: { total: true },       // 汇总订单总额
+            _count: { _all: true }, // 统计订单总数量
+            _sum: { total: true }, // 汇总订单总额
           })
         : Promise.resolve({ _count: { _all: 0 }, _sum: { total: null } }),
       this.prisma.commissionLedger.aggregate({
@@ -109,8 +104,8 @@ export class DistributorMeService {
         ? this.prisma.order.findMany({
             where: orderWhere,
             select: {
-              createdAt: true,                               // 订单创建时间
-              total: true,                                   // 订单总金额
+              createdAt: true, // 订单创建时间
+              total: true, // 订单总金额
               commissionEntry: { select: { amount: true, status: true } }, // 关联的佣金条目
             },
           })
@@ -124,25 +119,24 @@ export class DistributorMeService {
       .toString();
 
     return {
-      distributorId: distributor.id,                          // 经销商ID
-      distributorName: distributor.name,                      // 经销商名称
-      branchCount,                                             // 分店数量
-      attributedOrderCount: orderAgg._count._all,              // 归因订单数量（指定日期范围内的已支付/已完成订单）
+      distributorId: distributor.id, // 经销商ID
+      distributorName: distributor.name, // 经销商名称
+      branchCount, // 分店数量
+      attributedOrderCount: orderAgg._count._all, // 归因订单数量（指定日期范围内的已支付/已完成订单）
       attributedOrderRevenue: decimalSumToString(orderAgg._sum.total), // 归因订单营收
-      availableBalance: availableBalance.toString(),            // 可用余额
+      availableBalance: availableBalance.toString(), // 可用余额
       commissionSummary: {
-        accruedTotal,           // 应计佣金总额（已产生但尚未结算的佣金）
-        settledTotal,           // 已结算佣金总额（已支付给经销商的佣金）
-        totalCommission,        // 佣金总额 = 应计 + 已结算
-        entryCount,             // 佣金条目数量
-        from: range.fromIso,    // 统计起始日期
-        to: range.toIso,        // 统计结束日期
+        accruedTotal, // 应计佣金总额（已产生但尚未结算的佣金）
+        settledTotal, // 已结算佣金总额（已支付给经销商的佣金）
+        totalCommission, // 佣金总额 = 应计 + 已结算
+        entryCount, // 佣金条目数量
+        from: range.fromIso, // 统计起始日期
+        to: range.toIso, // 统计结束日期
       },
       trend: buildOrderTrend(range.from, range.to, trendOrders),
     };
   }
 
-  
   async listBranches(user: AuthenticatedUser) {
     const distributor = await this.loadDistributor(user);
     const windowStart = new Date();
@@ -202,7 +196,6 @@ export class DistributorMeService {
     return this.inviteCodes.revokeInviteCode(distributor.id, codeId);
   }
 
-  
   async listWithdrawals(user: AuthenticatedUser) {
     const distributor = await this.loadDistributor(user);
     const rows = await this.prisma.withdrawalRequest.findMany({
@@ -222,7 +215,6 @@ export class DistributorMeService {
     }));
   }
 
-  
   async createWithdrawal(
     user: AuthenticatedUser,
     amount: number,
@@ -232,13 +224,15 @@ export class DistributorMeService {
     return this.withdrawalsService.createRequest(distributor.id, amount, note);
   }
 
-  
-  async listCommissions(user: AuthenticatedUser, query: CommissionListQueryDto) {
+  async listCommissions(
+    user: AuthenticatedUser,
+    query: CommissionListQueryDto,
+  ) {
     const distributor = await this.loadDistributor(user);
     const range = parseDateRangeQuery(query);
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 20));
-    const skip = (page - 1) * limit;  // 计算分页偏移量
+    const skip = (page - 1) * limit; // 计算分页偏移量
     const statusFilter = query.status
       ? { status: query.status }
       : { status: { not: LedgerStatus.VOID } };
@@ -272,18 +266,18 @@ export class DistributorMeService {
           },
           settlementBatch: true,
         },
-        orderBy: { createdAt: 'desc' },  // 按创建时间倒序
-        skip,                            // 跳过前 N 条（分页偏移量）
-        take: limit,                     // 返回最多 N 条记录
+        orderBy: { createdAt: 'desc' }, // 按创建时间倒序
+        skip, // 跳过前 N 条（分页偏移量）
+        take: limit, // 返回最多 N 条记录
       }),
       this.prisma.commissionLedger.count({ where }),
     ]);
 
     return {
       items: rows.map(mapCommissionStatementRow), // 映射后的佣金记录列表
-      total,                                      // 总记录数
-      page,                                       // 当前页码
-      limit,                                      // 每页条数
+      total, // 总记录数
+      page, // 当前页码
+      limit, // 每页条数
     };
   }
 }

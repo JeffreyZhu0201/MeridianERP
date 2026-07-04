@@ -18,7 +18,10 @@ describe('Store published list (e2e)', () => {
   });
 
   it('GET /store/stores lists flagship first when marked', async () => {
-    const flagship = await prisma._seedApprovedTenant('flagship-shop', 'Flagship Shop');
+    const flagship = await prisma._seedApprovedTenant(
+      'flagship-shop',
+      'Flagship Shop',
+    );
     await prisma.merchantProfile.update({
       where: { tenantId: flagship.id },
       data: { isFlagship: true },
@@ -35,7 +38,9 @@ describe('Store published list (e2e)', () => {
 
   it('GET /store/stores returns APPROVED tenants only', async () => {
     const approved = await prisma._seedApprovedTenant('demo-shop', 'Demo Shop');
-    const pendingTenant = await prisma.tenant.create({ data: { slug: 'pending-shop' } });
+    const pendingTenant = await prisma.tenant.create({
+      data: { slug: 'pending-shop' },
+    });
     await prisma.merchantProfile.create({
       data: {
         tenantId: pendingTenant.id,

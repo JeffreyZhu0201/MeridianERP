@@ -11,7 +11,10 @@ export class MerchantStockLevelsController {
   constructor(private readonly inventoryService: MerchantInventoryService) {}
 
   @Get()
-  list(@CurrentUser() user: AuthenticatedUser, @Query() query: StockLevelListQueryDto) {
+  list(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: StockLevelListQueryDto,
+  ) {
     return this.inventoryService.listStockLevels(user.tenantId!, query);
   }
 

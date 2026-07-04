@@ -41,10 +41,7 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
     FulfillmentModule,
     AuthModule,
   ],
-  controllers: [
-    PlatformOrdersController,
-    PlatformSettlementsController,
-  ],
+  controllers: [PlatformOrdersController, PlatformSettlementsController],
   providers: [PlatformOrdersService, PlatformSettlementsService],
 })
 export class PlatformModule {}

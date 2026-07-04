@@ -8,7 +8,7 @@ import {
   type PaginatedResponse,
   type SettlementBatch,
 } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { SettlementsView } from './_components/settlements-view';
 
 type LedgerStatusFilter = 'ACCRUED' | 'SETTLED' | 'ALL';
@@ -27,8 +27,7 @@ export default async function SettlementsPage({
     ledgerStatus?: string;
   }>;
 }) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const params = await searchParams;
   const locale = await getLocale();

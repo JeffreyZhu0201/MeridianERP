@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getMessages, getTimeZone } from 'next-intl/server';
 import { PortalLocaleProvider, PortalThemeProvider } from '@meridian/ui/portal-providers';
+import { Toaster } from '@meridian/ui';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -24,8 +25,8 @@ export default async function RootLayout({
         <PortalLocaleProvider locale={locale} messages={messages} timeZone={timeZone}>
           {/* PortalThemeProvider is the provider for the theme */}
           <PortalThemeProvider storageKey="meridian-theme-admin">
-            {/* Children is the content of the layout */}
             {children}
+            <Toaster />
           </PortalThemeProvider>
         </PortalLocaleProvider>
       </body>

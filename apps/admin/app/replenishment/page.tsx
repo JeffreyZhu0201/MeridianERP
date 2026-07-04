@@ -4,7 +4,7 @@ import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { ReplenishmentStatusTabs } from './_components/replenishment-status-tabs';
 import { ReplenishmentView } from './_components/replenishment-view';
 
@@ -29,8 +29,7 @@ interface ReplenishmentPageProps {
 }
 
 export default async function ReplenishmentPage({ searchParams }: ReplenishmentPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.replenishment');
   const params = await searchParams;

@@ -17,9 +17,9 @@ import { BentoChartTile } from '@meridian/ui/client-widgets';
 
 import { RoleDashboardHints } from '@/app/_components/role-dashboard-hints';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
-import { StatusBadge } from '@/components/status-badge';
+import { OnboardingStatusBadge } from '@meridian/ui';
 import { apiFetch, ApiError, type DashboardStats } from '@/lib/api';
-import { getAdminSession, getToken } from '@/lib/auth';
+import { requireAdminSession, requireToken } from '@/lib/auth';
 
 async function loadDashboard(
   token: string,
@@ -35,11 +35,8 @@ async function loadDashboard(
 }
 
 export default async function DashboardPage() {
-  const session = await getAdminSession();
-  if (!session) return null;
-
-  const token = await getToken();
-  if (!token) return null;
+  const session = await requireAdminSession();
+  const token = await requireToken();
 
   const locale = await getLocale();
   const t = await getTranslations('admin.dashboard');
@@ -116,7 +113,7 @@ export default async function DashboardPage() {
                         <TableRow key={merchant.id}>
                           <TableCell className="font-medium">{merchant.businessName}</TableCell>
                           <TableCell>
-                            <StatusBadge status={merchant.onboardingStatus} />
+                            <OnboardingStatusBadge status={merchant.onboardingStatus} />
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {merchant.submittedAt

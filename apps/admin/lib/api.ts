@@ -154,9 +154,9 @@ export interface CommissionLedgerEntry {
   amount: string | number;
   status: string;
   createdAt: string;
-  distributor: { name: string };
+  distributor: { id: string; name: string };
   order: { id: string; total: string | number };
-  tenant: { slug: string };
+  tenant: { id: string; slug: string };
 }
 
 export interface SettlementBatch {

@@ -7,7 +7,7 @@ import { StoreTenantService } from '../common/store-tenant.service';
 import { StoreOrdersService } from './store-orders.service';
 
 @Controller('store/:slug/orders')
-@UseGuards(StoreAuthGuard)  // 需要已登录的消费者
+@UseGuards(StoreAuthGuard) // 需要已登录的消费者
 export class StoreOrdersController {
   constructor(
     private readonly ordersService: StoreOrdersService,
@@ -21,12 +21,14 @@ export class StoreOrdersController {
   }
 
   @Get()
-  async list(@Param('slug') slug: string, @CurrentUser() user: AuthenticatedUser) {
+  async list(
+    @Param('slug') slug: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     const customerId = await this.resolveCustomerId(slug, user.userId);
     return this.ordersService.listForCustomer(slug, customerId);
   }
 
-  
   @Get(':id/pickup-token')
   async getPickupToken(
     @Param('slug') slug: string,

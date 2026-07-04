@@ -6,6 +6,7 @@ import type { AdminPermission } from '@meridian/shared';
 import { AdminShell } from '@meridian/ui';
 
 import { ADMIN_ROLE_COOKIE, AUTH_COOKIE } from '@/lib/api';
+import { AdminPageTitle } from '@/components/admin-page-title';
 
 export function AdminShellWrapper({
   children,
@@ -33,6 +34,7 @@ export function AdminShellWrapper({
       role={role}
       permissions={permissions}
       onLogout={handleLogout}
+      headerStart={<AdminPageTitle />}
     >
       {children}
     </AdminShell>

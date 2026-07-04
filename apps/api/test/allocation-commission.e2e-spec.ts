@@ -76,7 +76,9 @@ describe('Allocation commission (e2e)', () => {
     });
 
     expect(ledgers).toHaveLength(2);
-    expect(ledgers.map((e) => e.merchantAllocationSequence).sort()).toEqual([1, 2]);
+    expect(ledgers.map((e) => e.merchantAllocationSequence).sort()).toEqual([
+      1, 2,
+    ]);
     expect(ledgers.every((e) => e.distributorId === promoterId)).toBe(true);
     expect(ledgers.every((e) => e.status === LedgerStatus.ACCRUED)).toBe(true);
     expect(Number(ledgers[0].amount)).toBe(10);

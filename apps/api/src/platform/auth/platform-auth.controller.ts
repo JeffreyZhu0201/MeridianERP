@@ -7,16 +7,23 @@
  * @Description: Platform auth controller
  * Platform auth controller
  * - 平台管理员登录
- * 
+ *
  * - 平台管理员注册
  * - 平台管理员登出
  * - 平台管理员刷新令牌
  * - 平台管理员验证令牌
  * - 平台管理员验证令牌
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved.
  */
 
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { Public } from '../../auth/decorators/public.decorator';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';

@@ -24,7 +24,6 @@ export class CommissionQueueService {
     private readonly queue?: Queue,
   ) {}
 
-  
   async enqueueAccrual(orderId: string): Promise<void> {
     const payload: CommissionAccrueJobPayload = { orderId };
     if (this.queue) {

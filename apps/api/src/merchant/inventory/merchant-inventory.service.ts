@@ -46,7 +46,11 @@ export class MerchantInventoryService {
     return this.warehouses.createWarehouse(user, dto);
   }
 
-  updateWarehouse(user: AuthenticatedUser, id: string, dto: UpdateWarehouseDto) {
+  updateWarehouse(
+    user: AuthenticatedUser,
+    id: string,
+    dto: UpdateWarehouseDto,
+  ) {
     return this.warehouses.updateWarehouse(user, id, dto);
   }
 

@@ -172,7 +172,11 @@ describe('PlatformUsers (e2e)', () => {
   it('grants distributor identity linked by accountId', async () => {
     const register = await request(app.getHttpServer())
       .post('/api/v1/store/auth/register')
-      .send({ email: 'promoter@test.com', password: 'password12', firstName: 'Pat' })
+      .send({
+        email: 'promoter@test.com',
+        password: 'password12',
+        firstName: 'Pat',
+      })
       .expect(201);
     const accountId = register.body.account.id;
 
@@ -187,7 +191,10 @@ describe('PlatformUsers (e2e)', () => {
   });
 
   it('assigns merchant staff role to a tenant', async () => {
-    const tenant = await prisma._seedApprovedTenant('staff-store', 'Staff Store');
+    const tenant = await prisma._seedApprovedTenant(
+      'staff-store',
+      'Staff Store',
+    );
     const register = await request(app.getHttpServer())
       .post('/api/v1/store/auth/register')
       .send({ email: 'staff-member@test.com', password: 'password12' })

@@ -18,7 +18,11 @@ async function loginPlatform(app: INestApplication<App>) {
   return res.body.accessToken as string;
 }
 
-async function loginPromoter(app: INestApplication<App>, email: string, password: string) {
+async function loginPromoter(
+  app: INestApplication<App>,
+  email: string,
+  password: string,
+) {
   const res = await request(app.getHttpServer())
     .post('/api/v1/distributor/auth/login')
     .send({ email, password });
@@ -62,7 +66,11 @@ describe('Platform withdrawals (e2e)', () => {
       },
     });
     promoterId = promoter.id;
-    promoterToken = await loginPromoter(app, 'promoter@withdraw.test', 'promoter1');
+    promoterToken = await loginPromoter(
+      app,
+      'promoter@withdraw.test',
+      'promoter1',
+    );
 
     await prisma.merchantProfile.update({
       where: { tenantId },
@@ -124,7 +132,9 @@ describe('Platform withdrawals (e2e)', () => {
 
     expect(filtered.body.meta.total).toBeGreaterThanOrEqual(1);
     expect(
-      filtered.body.data.every((row: { distributorId: string }) => row.distributorId === promoterId),
+      filtered.body.data.every(
+        (row: { distributorId: string }) => row.distributorId === promoterId,
+      ),
     ).toBe(true);
   });
 
@@ -165,5 +175,20 @@ describe('Platform withdrawals (e2e)', () => {
       .set('Authorization', `Bearer ${promoterToken}`)
       .send({ amount: 999 })
       .expect(400);
+  });
+
+  it('approves withdrawal for full settled balance', async () => {
+    const created = await request(app.getHttpServer())
+      .post('/api/v1/distributor/me/withdrawals')
+      .set('Authorization', `Bearer ${promoterToken}`)
+      .send({ amount: 10 })
+      .expect(201);
+
+    const approved = await request(app.getHttpServer())
+      .post(`/api/v1/platform/withdrawals/${created.body.id}/approve`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .expect(200);
+
+    expect(approved.body.status).toBe(WithdrawalRequestStatus.APPROVED);
   });
 });

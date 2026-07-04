@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-interface ListPaginationProps {
+import { Button } from './ui/button';
+
+export interface ListPaginationProps {
   basePath: string;
   total: number;
   page: number;
@@ -13,6 +15,9 @@ interface ListPaginationProps {
   pageParam?: string;
 }
 
+/**
+ * URL-aware list pagination — prev/next using shadcn Button styling.
+ */
 export function ListPagination({
   basePath,
   total,
@@ -39,28 +44,22 @@ export function ListPagination({
       <span>{summary}</span>
       <div className="flex gap-2">
         {page > 1 ? (
-          <Link
-            href={hrefFor(page - 1)}
-            className="inline-flex h-8 items-center rounded-full border border-border bg-background px-3 text-xs font-medium hover:bg-accent dark:border-border/40"
-          >
-            {tc('previous')}
-          </Link>
+          <Button variant="outline" size="sm" className="rounded-full" asChild>
+            <Link href={hrefFor(page - 1)}>{tc('previous')}</Link>
+          </Button>
         ) : (
-          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-border px-3 text-xs opacity-50 dark:border-border/40">
+          <Button variant="outline" size="sm" className="rounded-full" disabled>
             {tc('previous')}
-          </span>
+          </Button>
         )}
         {page < totalPages ? (
-          <Link
-            href={hrefFor(page + 1)}
-            className="inline-flex h-8 items-center rounded-full border border-border bg-background px-3 text-xs font-medium hover:bg-accent dark:border-border/40"
-          >
-            {tc('next')}
-          </Link>
+          <Button variant="outline" size="sm" className="rounded-full" asChild>
+            <Link href={hrefFor(page + 1)}>{tc('next')}</Link>
+          </Button>
         ) : (
-          <span className="inline-flex h-8 cursor-not-allowed items-center rounded-full border border-border px-3 text-xs opacity-50 dark:border-border/40">
+          <Button variant="outline" size="sm" className="rounded-full" disabled>
             {tc('next')}
-          </span>
+          </Button>
         )}
       </div>
     </div>

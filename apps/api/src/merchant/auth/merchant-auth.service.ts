@@ -54,12 +54,17 @@ export class MerchantAuthService {
 
     let account = await this.platformAccounts.findByEmail(dto.email);
     if (account) {
-      const valid = await this.platformAccounts.verifyPassword(account, dto.password);
+      const valid = await this.platformAccounts.verifyPassword(
+        account,
+        dto.password,
+      );
       if (!valid) {
         throw new ConflictException('Email already registered');
       }
       if (await this.platformAccounts.hasMerchantOwnerRole(account.id)) {
-        throw new ConflictException('Email already registered as merchant owner');
+        throw new ConflictException(
+          'Email already registered as merchant owner',
+        );
       }
     } else {
       account = await this.platformAccounts.createAccount({

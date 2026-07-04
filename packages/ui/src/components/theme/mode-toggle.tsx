@@ -20,9 +20,10 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
+import { buttonVariants } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,21 +47,35 @@ export interface ModeToggleProps {
 export function ModeToggle({ className }: ModeToggleProps) {
   const { setTheme } = useTheme();
   const t = useTranslations('common.theme');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const triggerClassName = cn(
+    buttonVariants({ variant: 'ghost', size: 'icon' }),
+    'relative',
+  );
+
+  if (!mounted) {
+    return (
+      <div className={cn(className)}>
+        <button type="button" className={triggerClassName} aria-label={t('toggle')} disabled>
+          <Sun className="h-[1.2rem] w-[1.2rem]" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className={cn(className)}>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button variant="ghost" size="icon" className="relative">
-              {/* 太阳图标 - 亮色模式下显示 */}
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              {/* 月亮图标 - 暗色模式下显示 */}
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">{t('toggle')}</span>
-            </Button>
-          }
-        />
+        <DropdownMenuTrigger className={triggerClassName}>
+          {/* 太阳图标 - 亮色模式下显示 */}
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          {/* 月亮图标 - 暗色模式下显示 */}
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">{t('toggle')}</span>
+        </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setTheme('light')}>{t('light')}</DropdownMenuItem>
           <DropdownMenuItem onClick={() => setTheme('dark')}>{t('dark')}</DropdownMenuItem>

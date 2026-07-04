@@ -11,13 +11,11 @@ import { PlatformSettingsService } from './platform-settings.service';
 export class PlatformSettingsController {
   constructor(private readonly settingsService: PlatformSettingsService) {}
 
-  
   @Get()
   getSettings() {
     return this.settingsService.getSettings();
   }
 
-  
   @Patch()
   updateSettings(@Body() dto: UpdatePlatformSettingsDto) {
     return this.settingsService.updateSettings(dto);

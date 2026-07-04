@@ -55,10 +55,7 @@ export class PlatformDistributorsController {
 
   @Post(':id/portal')
   @HttpCode(200)
-  enablePortal(
-    @Param('id') id: string,
-    @Body() dto: { password: string },
-  ) {
+  enablePortal(@Param('id') id: string, @Body() dto: { password: string }) {
     return this.service.enablePortal(id, dto.password);
   }
 
@@ -73,10 +70,7 @@ export class PlatformDistributorsController {
 
   @Post(':id/invite-code/:codeId/revoke')
   @HttpCode(200)
-  revokeInviteCode(
-    @Param('id') id: string,
-    @Param('codeId') codeId: string,
-  ) {
+  revokeInviteCode(@Param('id') id: string, @Param('codeId') codeId: string) {
     return this.service.revokeInviteCode(id, codeId);
   }
 

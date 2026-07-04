@@ -6,14 +6,9 @@ import { useTransition } from 'react';
 import { Button, Input, Select } from '@meridian/ui';
 import { LedgerStatus } from '@meridian/shared';
 
-import type { Distributor } from '@/lib/api';
 import { defaultDateRange } from '@/lib/commissions';
 
-interface CommissionsFiltersProps {
-  distributors: Distributor[];
-}
-
-export function CommissionsFilters({ distributors }: CommissionsFiltersProps) {
+export function CommissionsFilters() {
   const t = useTranslations('merchant.commissions.filters');
   const tc = useTranslations('common');
   const router = useRouter();
@@ -21,7 +16,6 @@ export function CommissionsFilters({ distributors }: CommissionsFiltersProps) {
   const [isPending, startTransition] = useTransition();
 
   const defaults = defaultDateRange();
-  const distributorId = searchParams.get('distributorId') ?? '';
   const status = searchParams.get('status') ?? '';
   const from = searchParams.get('from') ?? defaults.from;
   const to = searchParams.get('to') ?? defaults.to;
@@ -42,7 +36,6 @@ export function CommissionsFilters({ distributors }: CommissionsFiltersProps) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     applyFilters({
-      distributorId: String(form.get('distributorId') ?? ''),
       status: String(form.get('status') ?? ''),
       from: String(form.get('from') ?? ''),
       to: String(form.get('to') ?? ''),
@@ -57,24 +50,7 @@ export function CommissionsFilters({ distributors }: CommissionsFiltersProps) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3">
-      <div className="space-y-1">
-        <label htmlFor="distributorId" className="text-xs text-muted-foreground">
-          {t('distributor')}
-        </label>
-        <Select
-          id="distributorId"
-          name="distributorId"
-          defaultValue={distributorId}
-          className="min-w-[180px]"
-        >
-          <option value="">{t('allDistributors')}</option>
-          {distributors.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </Select>
-      </div>
+      <p className="w-full text-xs text-muted-foreground">{t('distributorMovedNote')}</p>
 
       <div className="space-y-1">
         <label htmlFor="status" className="text-xs text-muted-foreground">

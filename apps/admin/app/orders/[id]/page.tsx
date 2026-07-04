@@ -4,7 +4,8 @@ import type { PlatformOrderDetail } from '@meridian/shared';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
+import { OrderDetailShipActions } from './_components/order-detail-ship-actions';
 import { OrderDetailView } from './_components/order-detail-view';
 
 interface OrderDetailPageProps {
@@ -12,8 +13,7 @@ interface OrderDetailPageProps {
 }
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const { id } = await params;
   const locale = await getLocale();
@@ -27,7 +27,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
   return (
     <AdminShellWithSession>
-      <OrderDetailView order={order} locale={locale} />
+      <OrderDetailView
+        order={order}
+        locale={locale}
+        shipActions={<OrderDetailShipActions order={order} token={token} />}
+      />
     </AdminShellWithSession>
   );
 }

@@ -120,7 +120,10 @@ export class DistributorAuthService {
       data: { lastLoginAt: new Date() },
     });
     return {
-      accessToken: this.signDistributorToken(distributor.id, distributor.tenantId),
+      accessToken: this.signDistributorToken(
+        distributor.id,
+        distributor.tenantId,
+      ),
       distributor: {
         id: distributor.id,
         name: distributor.name,

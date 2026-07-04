@@ -58,7 +58,10 @@ export class StoreAuthService {
 
   async loginGlobal(dto: StoreLoginDto) {
     const account = await this.platformAccounts.findByEmail(dto.email);
-    if (!account || !(await this.platformAccounts.verifyPassword(account, dto.password))) {
+    if (
+      !account ||
+      !(await this.platformAccounts.verifyPassword(account, dto.password))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
     return {
@@ -73,7 +76,10 @@ export class StoreAuthService {
     if (!account) {
       throw new UnauthorizedException('Invalid account');
     }
-    const customer = await this.platformAccounts.ensureCustomer(account.id, tenant.id);
+    const customer = await this.platformAccounts.ensureCustomer(
+      account.id,
+      tenant.id,
+    );
     if (!customer) {
       throw new UnauthorizedException('Unable to create customer profile');
     }
@@ -92,7 +98,10 @@ export class StoreAuthService {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     let account = await this.platformAccounts.findByEmail(dto.email);
     if (account) {
-      const valid = await this.platformAccounts.verifyPassword(account, dto.password);
+      const valid = await this.platformAccounts.verifyPassword(
+        account,
+        dto.password,
+      );
       if (!valid) {
         throw new ConflictException('Email already registered');
       }
@@ -114,11 +123,15 @@ export class StoreAuthService {
       throw new ConflictException('Email already registered for this store');
     }
 
-    const customer = await this.platformAccounts.ensureCustomer(account.id, tenant.id, {
-      email: account.email,
-      firstName: dto.firstName ?? account.firstName,
-      lastName: dto.lastName ?? account.lastName,
-    });
+    const customer = await this.platformAccounts.ensureCustomer(
+      account.id,
+      tenant.id,
+      {
+        email: account.email,
+        firstName: dto.firstName ?? account.firstName,
+        lastName: dto.lastName ?? account.lastName,
+      },
+    );
     if (!customer) {
       throw new ConflictException('Unable to create customer profile');
     }
@@ -138,10 +151,16 @@ export class StoreAuthService {
   async login(slug: string, dto: StoreLoginDto) {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     const account = await this.platformAccounts.findByEmail(dto.email);
-    if (!account || !(await this.platformAccounts.verifyPassword(account, dto.password))) {
+    if (
+      !account ||
+      !(await this.platformAccounts.verifyPassword(account, dto.password))
+    ) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    const customer = await this.platformAccounts.ensureCustomer(account.id, tenant.id);
+    const customer = await this.platformAccounts.ensureCustomer(
+      account.id,
+      tenant.id,
+    );
     if (!customer) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -174,7 +193,10 @@ export class StoreAuthService {
 
     const account = await this.platformAccounts.findById(userId);
     if (account) {
-      const customer = await this.platformAccounts.ensureCustomer(account.id, tenantId);
+      const customer = await this.platformAccounts.ensureCustomer(
+        account.id,
+        tenantId,
+      );
       if (customer) {
         return customer.id;
       }

@@ -5,7 +5,7 @@ import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { LeadsTable } from './_components/leads-table';
 
 export default async function CrmLeadsPage({
@@ -13,8 +13,7 @@ export default async function CrmLeadsPage({
 }: {
   searchParams: Promise<{ stage?: string }>;
 }) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const params = await searchParams;
   const t = await getTranslations('admin.crm.leads');

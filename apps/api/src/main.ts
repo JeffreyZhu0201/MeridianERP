@@ -14,10 +14,12 @@ async function bootstrap() {
     ],
     credentials: true,
   });
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, transform: true }),
-  );
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   const port = process.env.API_PORT ?? process.env.PORT ?? 3001;
   await app.listen(port);
 }
-bootstrap();
+
+bootstrap().catch((err: unknown) => {
+  console.error('Failed to start API server', err);
+  process.exit(1);
+});

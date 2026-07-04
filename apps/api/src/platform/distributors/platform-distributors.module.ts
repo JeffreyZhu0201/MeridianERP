@@ -7,7 +7,12 @@ import { PlatformDistributorsController } from './platform-distributors.controll
 import { PlatformDistributorsService } from './platform-distributors.service';
 
 @Module({
-  imports: [AuthModule, EnvModule, PlatformAccountsModule, PlatformWithdrawalsModule],
+  imports: [
+    AuthModule,
+    EnvModule,
+    PlatformAccountsModule,
+    PlatformWithdrawalsModule,
+  ],
   controllers: [PlatformDistributorsController],
   providers: [PlatformDistributorsService],
   exports: [PlatformDistributorsService],

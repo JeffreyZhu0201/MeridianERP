@@ -5,7 +5,7 @@ import type { PlatformFundsSummary } from '@meridian/shared';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { FundsView } from './_components/funds-view';
 
 export default async function FundsPage({
@@ -13,8 +13,7 @@ export default async function FundsPage({
 }: {
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.funds');
   const locale = await getLocale();

@@ -72,6 +72,7 @@ export function ReplenishmentView({ requests, token, status }: ReplenishmentView
   }
 
   const showActions = status === 'PENDING' || !status || status === 'ALL';
+  const showStatusColumn = status !== 'PENDING' && Boolean(status) && status !== 'ALL';
 
   if (requests.length === 0) {
     return <EmptyState title={t('empty')} />;
@@ -85,8 +86,10 @@ export function ReplenishmentView({ requests, token, status }: ReplenishmentView
           <TableHeader>
             <TableRow>
               <TableHead>{t('columns.branch')}</TableHead>
+              {showStatusColumn ? <TableHead>{t('columns.status')}</TableHead> : null}
               <TableHead>{t('columns.lines')}</TableHead>
               <TableHead>{t('columns.note')}</TableHead>
+              {showStatusColumn ? <TableHead>{t('columns.rejectionReason')}</TableHead> : null}
               <TableHead>{t('columns.created')}</TableHead>
               {showActions ? (
                 <TableHead className="text-right">{t('columns.actions')}</TableHead>
@@ -99,6 +102,11 @@ export function ReplenishmentView({ requests, token, status }: ReplenishmentView
                 <TableCell className="font-medium">
                   {req.tenant.merchantProfile?.businessName ?? req.tenant.slug}
                 </TableCell>
+                {showStatusColumn ? (
+                  <TableCell>
+                    <Badge variant="secondary">{t(`requestStatus.${req.status as 'PENDING' | 'APPROVED' | 'REJECTED' | 'FULFILLED'}`)}</Badge>
+                  </TableCell>
+                ) : null}
                 <TableCell className="text-xs">
                   {req.lines.map((l) => (
                     <div key={`${req.id}-${l.masterSku.skuCode}`}>
@@ -109,6 +117,11 @@ export function ReplenishmentView({ requests, token, status }: ReplenishmentView
                 <TableCell className="max-w-[160px] truncate text-muted-foreground">
                   {req.note ?? '—'}
                 </TableCell>
+                {showStatusColumn ? (
+                  <TableCell className="max-w-[200px] text-xs text-muted-foreground">
+                    {req.rejectionReason ?? '—'}
+                  </TableCell>
+                ) : null}
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(req.createdAt).toLocaleDateString(locale)}
                 </TableCell>

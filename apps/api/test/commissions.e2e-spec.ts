@@ -261,9 +261,7 @@ describe('Commissions visibility (e2e)', () => {
     });
     expect(res.body.trend.length).toBeGreaterThan(0);
     expect(
-      res.body.trend.every(
-        (p: { orderCount: number }) => p.orderCount === 0,
-      ),
+      res.body.trend.every((p: { orderCount: number }) => p.orderCount === 0),
     ).toBe(true);
   });
 

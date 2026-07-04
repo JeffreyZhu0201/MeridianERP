@@ -1,18 +1,16 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui/server';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PlatformAdmin } from '@/lib/api';
-import { getAdminSession, getToken } from '@/lib/auth';
+import { requireAdminSession, requireToken } from '@/lib/auth';
 
 import { AdminsView } from './_components/admins-view';
 
 export default async function AdminsPage() {
-  const session = await getAdminSession();
-  if (!session) return null;
+  const session = await requireAdminSession();
 
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.admins');
 
@@ -25,9 +23,20 @@ export default async function AdminsPage() {
 
   return (
     <AdminShellWithSession session={session}>
-      <ListPageFrame title={t('title')} description={t('description')}>
-        <AdminsView admins={admins} token={token} currentAdminId={session.id} />
-      </ListPageFrame>
+      <div className="space-y-6">
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: admins.length },
+            {
+              title: t('columns.role'),
+              value: new Set(admins.map((a) => a.role)).size,
+            },
+          ]}
+        />
+        <ListPageFrame title={t('title')} description={t('description')}>
+          <AdminsView admins={admins} token={token} currentAdminId={session.id} />
+        </ListPageFrame>
+      </div>
     </AdminShellWithSession>
   );
 }

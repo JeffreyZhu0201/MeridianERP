@@ -62,8 +62,13 @@ describe('Flagship catalog (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    const row = catalog.body.find((r: { skuCode: string }) => r.skuCode === 'MUG-100');
-    expect(row).toMatchObject({ synced: true, flagshipPrice: expect.anything() });
+    const row = catalog.body.find(
+      (r: { skuCode: string }) => r.skuCode === 'MUG-100',
+    );
+    expect(row).toMatchObject({
+      synced: true,
+      flagshipPrice: expect.anything(),
+    });
   });
 
   it('POST /platform/flagship-catalog/sync syncs all active master SKUs', async () => {

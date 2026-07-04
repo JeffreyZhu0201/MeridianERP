@@ -1,7 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
-import { DetailPageFrame, FulfillmentTypeBadge, formatMoney } from '@meridian/ui/server';
-import type { StoreOrderDetail } from '@meridian/shared';
+import {
+  BentoDetailHero,
+  DetailPageFrame,
+  FulfillmentTypeBadge,
+  formatMoney,
+} from '@meridian/ui/server';
+import type { OrderStatus, StoreOrderDetail } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
@@ -22,6 +27,7 @@ export default async function OrderConfirmationPage({
   const { redirect_status: redirectStatus } = await searchParams;
   const token = await getToken();
   const t = await getTranslations('store');
+  const ts = await getTranslations('store.orderStatus');
 
   if (!token) {
     redirect(`/s/${slug}/login?from=${encodeURIComponent(`/s/${slug}/orders/${id}/confirmation`)}`);
@@ -49,17 +55,27 @@ export default async function OrderConfirmationPage({
     );
   }
 
+  const statusLabel = ts(order.status as OrderStatus);
+  const lineCount = order.lines.reduce((sum, line) => sum + line.quantity, 0);
+
   return (
     <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
       <DetailPageFrame
         title={t('confirmation.title')}
         description={t('confirmation.orderDescription', {
           id: order.id.slice(0, 8),
-          status: order.status,
+          status: statusLabel,
         })}
         backHref={`/s/${slug}/account`}
         backLabel={t('confirmation.backAccount')}
       >
+        <BentoDetailHero
+          metrics={[
+            { title: t('account.status'), value: statusLabel },
+            { title: t('account.total'), value: formatMoney(order.total, order.currency) },
+            { title: t('confirmation.lineItems'), value: lineCount },
+          ]}
+        />
         <PaymentStatusBanner redirectStatus={redirectStatus} />
         {order.fulfillmentType ? (
           <FulfillmentTypeBadge type={order.fulfillmentType} />

@@ -29,7 +29,6 @@ export class InventoryService {
     private readonly inventoryQueue: InventoryQueueService,
   ) {}
 
-  
   async getSellableQuantity(variantId: string): Promise<number> {
     const variant = await this.prisma.productVariant.findUnique({
       where: { id: variantId },
@@ -41,7 +40,6 @@ export class InventoryService {
     return variant.inventory;
   }
 
-  
   async seedVariantStockLevel(
     tenantId: string,
     variantId: string,
@@ -73,7 +71,6 @@ export class InventoryService {
     await this.syncVariantInventoryCache(variantId);
   }
 
-  
   async migrateTenantInventory(tenantId: string): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       await tx.tenantInventorySettings.upsert({
@@ -121,7 +118,6 @@ export class InventoryService {
     });
   }
 
-  
   async syncVariantInventoryCache(
     variantId: string,
     tx?: TxClient,
@@ -159,7 +155,6 @@ export class InventoryService {
     return sellable;
   }
 
-  
   async adjustStock(
     tenantId: string,
     warehouseId: string,
@@ -218,11 +213,14 @@ export class InventoryService {
       return { adjustment, sellable };
     });
 
-    await this.inventoryQueue.enqueueLowStockCheck({ tenantId, variantId, warehouseId });
+    await this.inventoryQueue.enqueueLowStockCheck({
+      tenantId,
+      variantId,
+      warehouseId,
+    });
     return this.mapAdjustment(result.adjustment);
   }
 
-  
   async applyTransferLineInTx(
     tx: TxClient,
     params: {
@@ -246,7 +244,9 @@ export class InventoryService {
     } = params;
 
     if (quantity <= 0 || !Number.isInteger(quantity)) {
-      throw new BadRequestException('Transfer quantity must be a positive integer');
+      throw new BadRequestException(
+        'Transfer quantity must be a positive integer',
+      );
     }
 
     await this.assertVariantInTenant(tx, tenantId, variantId);
@@ -300,7 +300,6 @@ export class InventoryService {
     await this.syncVariantInventoryCache(variantId, tx);
   }
 
-  
   async incrementFromReceive(
     tenantId: string,
     warehouseId: string,
@@ -309,7 +308,9 @@ export class InventoryService {
     tx?: TxClient,
   ): Promise<StockMutationResult> {
     if (quantity <= 0 || !Number.isInteger(quantity)) {
-      throw new BadRequestException('quantityReceived must be a positive integer');
+      throw new BadRequestException(
+        'quantityReceived must be a positive integer',
+      );
     }
 
     const run = async (client: TxClient) => {
@@ -331,11 +332,14 @@ export class InventoryService {
       return run(tx);
     }
     const result = await this.prisma.$transaction(run);
-    await this.inventoryQueue.enqueueLowStockCheck({ tenantId, variantId, warehouseId });
+    await this.inventoryQueue.enqueueLowStockCheck({
+      tenantId,
+      variantId,
+      warehouseId,
+    });
     return result;
   }
 
-  
   async decrementForOrder(orderId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
@@ -372,8 +376,10 @@ export class InventoryService {
     });
   }
 
-  
-  async markOrderPaidAndDecrement(orderId: string, tx: TxClient): Promise<void> {
+  async markOrderPaidAndDecrement(
+    orderId: string,
+    tx: TxClient,
+  ): Promise<void> {
     const order = await tx.order.findUnique({
       where: { id: orderId },
       include: { lines: true },
@@ -400,7 +406,6 @@ export class InventoryService {
     }
   }
 
-  
   derivePurchaseOrderStatus(
     lines: Array<{ quantityOrdered: number; quantityReceived: number }>,
     current: PurchaseOrderStatus,
@@ -421,7 +426,6 @@ export class InventoryService {
     return PurchaseOrderStatus.PARTIALLY_RECEIVED;
   }
 
-  
   async getEffectiveReorderThreshold(
     tenantId: string,
     variantId: string,
@@ -448,7 +452,6 @@ export class InventoryService {
     return this.applyQuantityDelta(tx, tenantId, warehouseId, variantId, delta);
   }
 
-  
   private async applyQuantityDelta(
     tx: TxClient,
     tenantId: string,

@@ -82,7 +82,9 @@ describe('Platform merchant store settings (e2e)', () => {
   });
 
   it('rejects store settings for non-approved merchants', async () => {
-    const pendingTenant = await prisma.tenant.create({ data: { slug: 'pending-store' } });
+    const pendingTenant = await prisma.tenant.create({
+      data: { slug: 'pending-store' },
+    });
     const pendingProfile = await prisma.merchantProfile.create({
       data: {
         tenantId: pendingTenant.id,

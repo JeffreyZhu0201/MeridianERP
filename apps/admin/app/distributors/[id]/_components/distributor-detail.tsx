@@ -57,10 +57,15 @@ export function DistributorDetailView({
   const [saving, setSaving] = useState(false);
   const [portalPassword, setPortalPassword] = useState('');
   const [name, setName] = useState(distributor.name);
+  const [email, setEmail] = useState(distributor.email ?? '');
+  const [phone, setPhone] = useState(distributor.phone ?? '');
   const [commissionRate, setCommissionRate] = useState(String(distributor.commissionRate));
   const [commissionType, setCommissionType] = useState(distributor.commissionType);
   const [isActive, setIsActive] = useState(distributor.isActive);
   const [commissionEntries, setCommissionEntries] = useState<DistributorCommissionEntry[]>([]);
+  const [commissionPage, setCommissionPage] = useState(1);
+  const [commissionTotal, setCommissionTotal] = useState(0);
+  const [commissionLimit] = useState(20);
   const [loadingCommission, setLoadingCommission] = useState(true);
   const [fundsSummary, setFundsSummary] = useState<DistributorFundsSummary | null>(null);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequestRow[]>([]);
@@ -143,14 +148,25 @@ export function DistributorDetailView({
     async function loadCommission() {
       setLoadingCommission(true);
       try {
-        const res = await apiFetch<{ items: DistributorCommissionEntry[] }>(
-          `/platform/distributors/${distributor.id}/commission-entries?limit=50`,
+        const res = await apiFetch<{
+          items: DistributorCommissionEntry[];
+          total: number;
+          page: number;
+          limit: number;
+        }>(
+          `/platform/distributors/${distributor.id}/commission-entries?page=${commissionPage}&limit=${commissionLimit}`,
           {},
           token,
         );
-        if (!cancelled) setCommissionEntries(res.items);
+        if (!cancelled) {
+          setCommissionEntries(res.items);
+          setCommissionTotal(res.total);
+        }
       } catch {
-        if (!cancelled) setCommissionEntries([]);
+        if (!cancelled) {
+          setCommissionEntries([]);
+          setCommissionTotal(0);
+        }
       } finally {
         if (!cancelled) setLoadingCommission(false);
       }
@@ -159,7 +175,7 @@ export function DistributorDetailView({
     return () => {
       cancelled = true;
     };
-  }, [distributor.id, token]);
+  }, [distributor.id, token, commissionPage, commissionLimit]);
 
   useEffect(() => {
     let cancelled = false;
@@ -249,6 +265,8 @@ export function DistributorDetailView({
           method: 'PATCH',
           body: JSON.stringify({
             name,
+            email: email || null,
+            phone: phone || null,
             commissionRate: Number(commissionRate),
             commissionType,
             isActive,
@@ -259,6 +277,8 @@ export function DistributorDetailView({
       setDistributor((d) => ({
         ...d,
         name,
+        email: email || null,
+        phone: phone || null,
         commissionRate: Number(commissionRate),
         commissionType,
         isActive,
@@ -418,6 +438,25 @@ export function DistributorDetailView({
             <div className="space-y-2">
               <Label htmlFor="dist-name">{t('columns.name')}</Label>
               <Input id="dist-name" value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="dist-email">{t('columns.email')}</Label>
+                <Input
+                  id="dist-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dist-phone">{td('phone')}</Label>
+                <Input
+                  id="dist-phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -707,8 +746,36 @@ export function DistributorDetailView({
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-4">
           <CardTitle>{td('commissionEntries')}</CardTitle>
+          {commissionTotal > commissionLimit ? (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={commissionPage <= 1 || loadingCommission}
+                onClick={() => setCommissionPage((p) => Math.max(1, p - 1))}
+              >
+                {tc('previous')}
+              </Button>
+              <span>
+                {tc('pageOf', {
+                  page: commissionPage,
+                  total: Math.max(1, Math.ceil(commissionTotal / commissionLimit)),
+                })}
+              </span>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={
+                  commissionPage >= Math.ceil(commissionTotal / commissionLimit) || loadingCommission
+                }
+                onClick={() => setCommissionPage((p) => p + 1)}
+              >
+                {tc('next')}
+              </Button>
+            </div>
+          ) : null}
         </CardHeader>
         <CardContent>
           {loadingCommission ? (

@@ -41,9 +41,9 @@ import { StoreAuthGuard } from './guards/store-auth.guard';
     PlatformAuthGuard,
     PlatformRolesGuard,
     MerchantAuthGuard,
-    StoreAuthGuard,               // 商店认证守卫
-    DistributorAuthGuard,         // 经销商认证守卫
-    OptionalStoreAuthGuard,       // 可选商店守卫
+    StoreAuthGuard, // 商店认证守卫
+    DistributorAuthGuard, // 经销商认证守卫
+    OptionalStoreAuthGuard, // 可选商店守卫
   ],
 })
 export class AuthModule {}

@@ -1,14 +1,51 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidationPipe } from '@nestjs/common';
+import { BindType, CommissionType, Prisma } from '@prisma/client';
+import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { EmailQueueService } from '../src/queue/email-queue.service';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { EnvService } from '../src/config/env.service';
 import { createMockPrisma } from './helpers/mock-prisma';
 import { EmailJobName } from '@meridian/shared';
+
+async function seedMerchantBindToken(
+  app: INestApplication<App>,
+  prisma: ReturnType<typeof createMockPrisma>,
+  tenantId: string,
+  distributorId: string,
+) {
+  const jwt = app.get(JwtService);
+  const env = app.get(EnvService);
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const token = jwt.sign(
+    {
+      distributorId,
+      tenantId,
+      bindType: BindType.MERCHANT,
+      purpose: 'bind',
+      jti: randomUUID(),
+    },
+    {
+      secret: env.getOrThrow('BIND_TOKEN_SECRET'),
+      expiresIn: '7d',
+    },
+  );
+  await prisma.distributorQrCode.create({
+    data: {
+      distributorId,
+      token,
+      bindType: BindType.MERCHANT,
+      expiresAt,
+    },
+  });
+  return token;
+}
 
 describe('EmailQueue (e2e)', () => {
   let app: INestApplication<App>;
@@ -24,13 +61,22 @@ describe('EmailQueue (e2e)', () => {
     | 'sendOrderConfirmation'
   > = {
     sendMerchantWelcome: async (email, businessName) => {
-      enqueued.push({ name: EmailJobName.MERCHANT_WELCOME, payload: { email, businessName } });
+      enqueued.push({
+        name: EmailJobName.MERCHANT_WELCOME,
+        payload: { email, businessName },
+      });
     },
     sendMerchantRejected: async (email, reason) => {
-      enqueued.push({ name: EmailJobName.MERCHANT_REJECTED, payload: { email, reason } });
+      enqueued.push({
+        name: EmailJobName.MERCHANT_REJECTED,
+        payload: { email, reason },
+      });
     },
     sendBindingCreated: async (payload) => {
-      enqueued.push({ name: EmailJobName.DISTRIBUTOR_BINDING_CREATED, payload });
+      enqueued.push({
+        name: EmailJobName.DISTRIBUTOR_BINDING_CREATED,
+        payload,
+      });
     },
     sendCommissionAccrued: async (payload) => {
       enqueued.push({ name: EmailJobName.COMMISSION_ACCRUED, payload });
@@ -57,7 +103,9 @@ describe('EmailQueue (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, transform: true }),
+    );
     await app.init();
   });
 
@@ -67,7 +115,12 @@ describe('EmailQueue (e2e)', () => {
 
   it('enqueues order confirmation after checkout simulate-payment', async () => {
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('email-store', 'Email Store', 'owner@email.test', password);
+    await prisma._seedMerchantOwner(
+      'email-store',
+      'Email Store',
+      'owner@email.test',
+      password,
+    );
     const merchantLogin = await request(app.getHttpServer())
       .post('/api/v1/merchant/auth/login')
       .send({ email: 'owner@email.test', password: 'secret12' });
@@ -94,14 +147,18 @@ describe('EmailQueue (e2e)', () => {
     const checkout = await request(app.getHttpServer())
       .post('/api/v1/store/email-store/checkout')
       .set('X-Cart-Session', sessionId)
-      .send({ guestEmail: 'guest@email.test' })
+      .send({ guestEmail: 'guest@email.test', fulfillmentType: 'PICKUP' })
       .expect(201);
 
     await request(app.getHttpServer())
-      .post(`/api/v1/store/email-store/orders/${checkout.body.order.id}/simulate-payment`)
+      .post(
+        `/api/v1/store/email-store/orders/${checkout.body.order.id}/simulate-payment`,
+      )
       .expect(200);
 
-    const confirmation = enqueued.find((j) => j.name === EmailJobName.ORDER_CONFIRMATION);
+    const confirmation = enqueued.find(
+      (j) => j.name === EmailJobName.ORDER_CONFIRMATION,
+    );
     expect(confirmation).toBeDefined();
     expect(confirmation?.payload).toMatchObject({
       email: 'guest@email.test',
@@ -139,22 +196,28 @@ describe('EmailQueue (e2e)', () => {
       .send({ email: 'bind-email@corp.test', password: 'secret12' });
     const merchantToken = login.body.accessToken as string;
 
-    const distributor = await request(app.getHttpServer())
-      .post('/api/v1/merchant/distributors')
-      .set('Authorization', `Bearer ${merchantToken}`)
-      .send({ name: 'Email Dist', commissionRate: 5 })
-      .expect(201);
-
-    const qr = await request(app.getHttpServer())
-      .post(`/api/v1/merchant/distributors/${distributor.body.id}/qr`)
-      .set('Authorization', `Bearer ${merchantToken}`)
-      .send({ bindType: 'MERCHANT' })
-      .expect(201);
+    const merchantProfile = await prisma.merchantProfile.findFirst({
+      where: { contactEmail: 'bind-email@corp.test' },
+    });
+    const distributor = await prisma.distributor.create({
+      data: {
+        tenantId: merchantProfile!.tenantId,
+        name: 'Email Dist',
+        commissionRate: new Prisma.Decimal(5),
+        commissionType: CommissionType.PERCENT,
+      },
+    });
+    const token = await seedMerchantBindToken(
+      app,
+      prisma,
+      merchantProfile!.tenantId,
+      distributor.id,
+    );
 
     await request(app.getHttpServer())
       .post('/api/v1/bindings/claim')
       .set('Authorization', `Bearer ${merchantToken}`)
-      .send({ token: qr.body.token })
+      .send({ token })
       .expect(201);
 
     const bindingJob = enqueued.find(
@@ -190,7 +253,9 @@ describe('EmailQueue (e2e)', () => {
       .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
       .expect(201);
 
-    const welcome = enqueued.find((j) => j.name === EmailJobName.MERCHANT_WELCOME);
+    const welcome = enqueued.find(
+      (j) => j.name === EmailJobName.MERCHANT_WELCOME,
+    );
     expect(welcome).toBeDefined();
     expect(welcome?.payload).toMatchObject({
       email: 'welcome@corp.test',
@@ -226,7 +291,9 @@ describe('EmailQueue (e2e)', () => {
       .send({ reason: 'Incomplete docs' })
       .expect(201);
 
-    const rejected = enqueued.find((j) => j.name === EmailJobName.MERCHANT_REJECTED);
+    const rejected = enqueued.find(
+      (j) => j.name === EmailJobName.MERCHANT_REJECTED,
+    );
     expect(rejected).toBeDefined();
     expect(rejected?.payload).toMatchObject({
       email: 'reject@corp.test',

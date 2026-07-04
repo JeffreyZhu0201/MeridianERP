@@ -11,7 +11,11 @@ import { App } from 'supertest/types';
 import { createTestApp } from './helpers/create-test-app';
 import { MockPrisma } from './helpers/mock-prisma';
 
-async function loginPromoter(app: INestApplication<App>, email: string, password: string) {
+async function loginPromoter(
+  app: INestApplication<App>,
+  email: string,
+  password: string,
+) {
   const res = await request(app.getHttpServer())
     .post('/api/v1/distributor/auth/login')
     .send({ email, password });
@@ -51,7 +55,11 @@ describe('Distributor portal (e2e)', () => {
       },
     });
     promoterId = promoter.id;
-    promoterToken = await loginPromoter(app, 'promoter@portal.test', 'portalpass1');
+    promoterToken = await loginPromoter(
+      app,
+      'promoter@portal.test',
+      'portalpass1',
+    );
 
     await prisma.merchantProfile.update({
       where: { tenantId },
@@ -102,7 +110,9 @@ describe('Distributor portal (e2e)', () => {
 
     expect(dashboard.body.distributorId).toBe(promoterId);
     expect(dashboard.body.branchCount).toBeGreaterThanOrEqual(1);
-    expect(dashboard.body.commissionSummary.entryCount).toBeGreaterThanOrEqual(1);
+    expect(dashboard.body.commissionSummary.entryCount).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(Array.isArray(dashboard.body.trend)).toBe(true);
 
     const branches = await request(app.getHttpServer())

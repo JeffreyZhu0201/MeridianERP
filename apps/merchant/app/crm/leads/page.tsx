@@ -38,7 +38,7 @@ export default async function LeadsPage() {
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <ListPageFrame title={t('title')}>
+      <div className="space-y-6">
         <BentoListHeader
           metrics={[
             { title: t('title'), value: asListTotal(leadsRes) },
@@ -46,10 +46,12 @@ export default async function LeadsPage() {
             { title: tDash('contacts'), value: asListTotal(contactsRes) },
           ]}
         />
-        <Suspense>
-          <LeadsTable leads={leads} contacts={asList(contactsRes)} token={token} />
-        </Suspense>
-      </ListPageFrame>
+        <ListPageFrame title={t('title')} description={t('description')}>
+          <Suspense>
+            <LeadsTable leads={leads} contacts={asList(contactsRes)} token={token} />
+          </Suspense>
+        </ListPageFrame>
+      </div>
     </MerchantShellWrapper>
   );
 }

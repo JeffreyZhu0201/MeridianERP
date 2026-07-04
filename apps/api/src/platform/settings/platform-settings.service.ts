@@ -13,7 +13,6 @@ export class PlatformSettingsService {
     private readonly payment: PaymentService,
   ) {}
 
-  
   private stripeKeyHint(): string | null {
     const key = this.env.get('STRIPE_SECRET_KEY');
     if (!key) return null;
@@ -21,7 +20,6 @@ export class PlatformSettingsService {
     return `${key.slice(0, 7)}…${key.slice(-4)}`;
   }
 
-  
   private webhookUrl(): string {
     const apiUrl =
       this.env.get('API_PUBLIC_URL', 'http://localhost:3001') ??
@@ -29,7 +27,6 @@ export class PlatformSettingsService {
     return `${apiUrl}/api/v1/store/checkout/webhooks/stripe`;
   }
 
-  
   private async ensureSettings() {
     return this.prisma.platformSettings.upsert({
       where: { id: SINGLETON_ID },
@@ -38,7 +35,6 @@ export class PlatformSettingsService {
     });
   }
 
-  
   async getSettings() {
     const row = await this.ensureSettings();
     return {
@@ -48,13 +44,14 @@ export class PlatformSettingsService {
       distributorPortalEnabled: row.distributorPortalEnabled,
       emailQueueEnabled: row.emailQueueEnabled,
       updatedAt: row.updatedAt.toISOString(),
-      stripeMode: this.payment.isMockMode() ? ('mock' as const) : ('live' as const),
+      stripeMode: this.payment.isMockMode()
+        ? ('mock' as const)
+        : ('live' as const),
       stripeKeyHint: this.stripeKeyHint(),
       webhookUrl: this.webhookUrl(),
     };
   }
 
-  
   async updateSettings(dto: UpdatePlatformSettingsDto) {
     const row = await this.prisma.platformSettings.upsert({
       where: { id: SINGLETON_ID },
@@ -72,7 +69,9 @@ export class PlatformSettingsService {
       distributorPortalEnabled: row.distributorPortalEnabled,
       emailQueueEnabled: row.emailQueueEnabled,
       updatedAt: row.updatedAt.toISOString(),
-      stripeMode: this.payment.isMockMode() ? ('mock' as const) : ('live' as const),
+      stripeMode: this.payment.isMockMode()
+        ? ('mock' as const)
+        : ('live' as const),
       stripeKeyHint: this.stripeKeyHint(),
       webhookUrl: this.webhookUrl(),
     };

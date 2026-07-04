@@ -4,7 +4,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AllocationOrderStatus, CommissionType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import {
+  AllocationOrderStatus,
+  CommissionType,
+  LedgerStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 import { sumAllocationLineCost } from '@meridian/shared';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -176,7 +182,9 @@ export class PlatformDistributorsService {
   async enablePortal(id: string, password: string) {
     const distributor = await this.assertPlatformDistributor(id);
     if (!distributor.email) {
-      throw new BadRequestException('Distributor email is required for portal access');
+      throw new BadRequestException(
+        'Distributor email is required for portal access',
+      );
     }
     const passwordHash = await bcrypt.hash(password, 10);
     return this.prisma.distributor.update({
@@ -263,7 +271,12 @@ export class PlatformDistributorsService {
           this.prisma.allocationOrder.findMany({
             where: {
               tenantId: m.tenantId,
-              status: { in: [AllocationOrderStatus.ISSUED, AllocationOrderStatus.CONFIRMED] },
+              status: {
+                in: [
+                  AllocationOrderStatus.ISSUED,
+                  AllocationOrderStatus.CONFIRMED,
+                ],
+              },
             },
             include: { lines: true },
           }),
@@ -441,14 +454,19 @@ export class PlatformDistributorsService {
         const orderTotal = row.order
           ? row.order.total.toString()
           : row.allocationOrder?.lines?.length
-            ? sumAllocationLineCost(row.allocationOrder.lines).toFixed(2)
+            ? sumAllocationLineCost(
+                row.allocationOrder.lines.map((l) => ({
+                  quantity: l.quantity,
+                  wholesalePrice: Number(l.wholesalePrice),
+                })),
+              ).toFixed(2)
             : '0';
         const fulfilledAt = row.order
-          ? row.order.pickupVerifiedAt?.toISOString() ??
+          ? (row.order.pickupVerifiedAt?.toISOString() ??
             row.order.shippedAt?.toISOString() ??
             (row.order.status === OrderStatus.FULFILLED
               ? row.createdAt.toISOString()
-              : null)
+              : null))
           : row.createdAt.toISOString();
         return {
           id: row.id,

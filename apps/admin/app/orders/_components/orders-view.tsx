@@ -10,6 +10,7 @@ import {
   cn,
   DeliveryShipDialog,
   formatMoney,
+  Input,
   Label,
   Select,
   Table,
@@ -29,6 +30,9 @@ interface OrdersViewProps {
   token: string;
   activeTab: 'all' | 'delivery';
   statusFilter?: string;
+  tenantIdFilter?: string;
+  guestEmailFilter?: string;
+  merchants: Array<{ tenantId: string; businessName: string }>;
 }
 
 function formatDate(iso: string, locale: string): string {
@@ -68,7 +72,15 @@ const fulfillmentVariant: Record<string, 'default' | 'secondary'> = {
 
 const ORDER_STATUSES = Object.values(OrderStatus);
 
-export function OrdersView({ orders, token, activeTab, statusFilter = '' }: OrdersViewProps) {
+export function OrdersView({
+  orders,
+  token,
+  activeTab,
+  statusFilter = '',
+  tenantIdFilter = '',
+  guestEmailFilter = '',
+  merchants,
+}: OrdersViewProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -107,6 +119,28 @@ export function OrdersView({ orders, token, activeTab, statusFilter = '' }: Orde
         params.set('status', value);
       } else {
         params.delete('status');
+      }
+      params.delete('page');
+    });
+  }
+
+  function setTenantId(value: string) {
+    updateParams((params) => {
+      if (value) {
+        params.set('tenantId', value);
+      } else {
+        params.delete('tenantId');
+      }
+      params.delete('page');
+    });
+  }
+
+  function setGuestEmail(value: string) {
+    updateParams((params) => {
+      if (value.trim()) {
+        params.set('guestEmail', value.trim());
+      } else {
+        params.delete('guestEmail');
       }
       params.delete('page');
     });
@@ -175,22 +209,60 @@ export function OrdersView({ orders, token, activeTab, statusFilter = '' }: Orde
         </div>
 
         {activeTab === 'all' ? (
-          <div className="space-y-2">
-            <Label htmlFor="order-status-filter">{t('filterStatus')}</Label>
-            <Select
-              id="order-status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-[180px]"
-            >
-              <option value="">{t('allStatuses')}</option>
-              {ORDER_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {t(`status.${status}`)}
-                </option>
-              ))}
-            </Select>
-          </div>
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="order-status-filter">{t('filterStatus')}</Label>
+              <Select
+                id="order-status-filter"
+                value={statusFilter}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-[180px]"
+              >
+                <option value="">{t('allStatuses')}</option>
+                {ORDER_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {t(`status.${status}`)}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="order-merchant-filter">{t('filterMerchant')}</Label>
+              <Select
+                id="order-merchant-filter"
+                value={tenantIdFilter}
+                onChange={(e) => setTenantId(e.target.value)}
+                className="min-w-[200px]"
+              >
+                <option value="">{t('allMerchants')}</option>
+                {merchants.map((m) => (
+                  <option key={m.tenantId} value={m.tenantId}>
+                    {m.businessName}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="order-guest-email">{t('filterGuestEmail')}</Label>
+              <Input
+                id="order-guest-email"
+                type="search"
+                defaultValue={guestEmailFilter}
+                placeholder={t('guestEmailPlaceholder')}
+                className="w-[220px]"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setGuestEmail((e.target as HTMLInputElement).value);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e.target.value !== guestEmailFilter) {
+                    setGuestEmail(e.target.value);
+                  }
+                }}
+              />
+            </div>
+          </>
         ) : null}
       </div>
 

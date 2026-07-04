@@ -11,7 +11,6 @@ import { assertLeadStageTransition } from './platform-crm-stage';
 export class PlatformCrmLeadsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   findAll(stage?: LeadStage) {
     return this.prisma.platformCrmLead.findMany({
       where: stage ? { stage } : undefined,
@@ -24,7 +23,6 @@ export class PlatformCrmLeadsService {
     });
   }
 
-  
   async findOne(id: string) {
     const lead = await this.prisma.platformCrmLead.findUnique({
       where: { id },
@@ -40,7 +38,6 @@ export class PlatformCrmLeadsService {
     return lead;
   }
 
-  
   create(dto: CreatePlatformCrmLeadDto) {
     return this.prisma.platformCrmLead.create({
       data: dto,
@@ -52,7 +49,6 @@ export class PlatformCrmLeadsService {
     });
   }
 
-  
   async update(id: string, dto: UpdatePlatformCrmLeadDto) {
     const existing = await this.findOne(id);
     if (dto.stage !== undefined) {
@@ -69,7 +65,6 @@ export class PlatformCrmLeadsService {
     });
   }
 
-  
   async remove(id: string) {
     await this.findOne(id);
     await this.prisma.platformCrmLead.delete({ where: { id } });

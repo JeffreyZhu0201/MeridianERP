@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { MerchantDetailView } from './_components/merchant-detail';
 
 interface MerchantDetailPageProps {
@@ -10,8 +10,7 @@ interface MerchantDetailPageProps {
 }
 
 export default async function MerchantDetailPage({ params }: MerchantDetailPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const { id } = await params;
 

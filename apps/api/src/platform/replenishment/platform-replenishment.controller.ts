@@ -22,20 +22,17 @@ import { PlatformReplenishmentService } from './platform-replenishment.service';
 export class PlatformReplenishmentController {
   constructor(private readonly service: PlatformReplenishmentService) {}
 
-  
   @Get()
   list(@Query('status') status?: ReplenishmentRequestStatus) {
     return this.service.list(status);
   }
 
-  
   @Post(':id/approve')
   @HttpCode(200)
   approve(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.service.approve(id, user.userId);
   }
 
-  
   @Post(':id/reject')
   @HttpCode(200)
   reject(

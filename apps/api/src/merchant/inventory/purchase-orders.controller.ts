@@ -26,13 +26,19 @@ export class MerchantPurchaseOrdersController {
   constructor(private readonly inventoryService: MerchantInventoryService) {}
 
   @Get()
-  list(@CurrentUser() user: AuthenticatedUser, @Query() query: PurchaseOrderListQueryDto) {
+  list(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: PurchaseOrderListQueryDto,
+  ) {
     return this.inventoryService.listPurchaseOrders(user.tenantId!, query);
   }
 
   @Post()
   @HttpCode(201)
-  create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreatePurchaseOrderDto) {
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreatePurchaseOrderDto,
+  ) {
     return this.inventoryService.createPurchaseOrder(user, dto);
   }
 

@@ -7,7 +7,12 @@ import { PlatformAllocationsController } from './platform-allocations.controller
 import { PlatformAllocationsService } from './platform-allocations.service';
 
 @Module({
-  imports: [AuthModule, InventoryModule, CommissionModule, FlagshipCatalogModule],
+  imports: [
+    AuthModule,
+    InventoryModule,
+    CommissionModule,
+    FlagshipCatalogModule,
+  ],
   controllers: [PlatformAllocationsController],
   providers: [PlatformAllocationsService],
   exports: [PlatformAllocationsService],

@@ -39,7 +39,7 @@ describe('StoreAuth (e2e)', () => {
     const jwt = app.get(JwtService);
     const payload = jwt.verify(res.body.accessToken, {
       secret: process.env.JWT_STORE_SECRET,
-    }) as { sub: string; aud: string; tenantId: string; roles: string[] };
+    });
 
     expect(payload.aud).toBe('store');
     expect(payload.roles).toEqual(['CUSTOMER']);
@@ -70,7 +70,9 @@ describe('StoreAuth (e2e)', () => {
   });
 
   it('rejects register on unapproved merchant', async () => {
-    const tenant = await prisma.tenant.create({ data: { slug: 'draft-store' } });
+    const tenant = await prisma.tenant.create({
+      data: { slug: 'draft-store' },
+    });
     await prisma.merchantProfile.create({
       data: {
         tenantId: tenant.id,

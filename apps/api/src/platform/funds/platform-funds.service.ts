@@ -114,7 +114,10 @@ export class PlatformFundsService {
           Number(order.total),
           order.lines.map((l) => ({
             quantity: l.quantity,
-            unitWholesalePrice: l.unitWholesalePrice,
+            unitWholesalePrice:
+              l.unitWholesalePrice != null
+                ? Number(l.unitWholesalePrice)
+                : null,
           })),
         ),
       0,
@@ -221,7 +224,10 @@ export class MerchantFundsService {
           Number(order.total),
           order.lines.map((l) => ({
             quantity: l.quantity,
-            unitWholesalePrice: l.unitWholesalePrice,
+            unitWholesalePrice:
+              l.unitWholesalePrice != null
+                ? Number(l.unitWholesalePrice)
+                : null,
           })),
         ),
       0,

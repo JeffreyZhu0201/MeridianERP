@@ -2,10 +2,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { EnvService } from '../../config/env.service';
-import { JwtPayload, AuthenticatedUser } from '../interfaces/jwt-payload.interface';
+import {
+  JwtPayload,
+  AuthenticatedUser,
+} from '../interfaces/jwt-payload.interface';
 
 @Injectable()
-export class MerchantJwtStrategy extends PassportStrategy(Strategy, 'merchant-jwt') {
+export class MerchantJwtStrategy extends PassportStrategy(
+  Strategy,
+  'merchant-jwt',
+) {
   constructor(env: EnvService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -14,7 +20,6 @@ export class MerchantJwtStrategy extends PassportStrategy(Strategy, 'merchant-jw
     });
   }
 
-  
   validate(payload: JwtPayload): AuthenticatedUser {
     if (payload.aud !== 'merchant') {
       throw new UnauthorizedException('Invalid token audience');

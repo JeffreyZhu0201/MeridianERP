@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { ListPageFrame } from '@meridian/ui/server';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 import type { MasterSkuSummary, ReplenishmentRequestSummary } from '@meridian/shared';
 
 import { MerchantShellWrapper } from '@/components/merchant-shell-wrapper';
@@ -33,15 +33,27 @@ export default async function ReplenishmentPage() {
     apiFetch<OnboardingProfile>('/merchant/onboarding', {}, token).catch(() => null),
   ]);
 
+  const requests = mapRequests(requestsRes);
+  const pendingCount = requests.filter((r) => r.status === 'PENDING').length;
+
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <ListPageFrame title={t('title')} description={t('description')}>
-        <ReplenishmentPanel
-          requests={mapRequests(requestsRes)}
-          skus={skus}
-          token={token}
+      <div className="space-y-6">
+        <BentoListHeader
+          metrics={[
+            { title: t('title'), value: requests.length },
+            { title: t('statusPending'), value: pendingCount },
+            { title: t('sku'), value: skus.length },
+          ]}
         />
-      </ListPageFrame>
+        <ListPageFrame title={t('title')} description={t('description')}>
+          <ReplenishmentPanel
+            requests={requests}
+            skus={skus}
+            token={token}
+          />
+        </ListPageFrame>
+      </div>
     </MerchantShellWrapper>
   );
 }

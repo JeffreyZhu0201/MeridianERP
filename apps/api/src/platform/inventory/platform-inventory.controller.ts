@@ -1,4 +1,11 @@
-import { Controller, Get, NotFoundException, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
 import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
@@ -10,7 +17,6 @@ import { PlatformInventoryService } from './platform-inventory.service';
 export class PlatformInventoryController {
   constructor(private readonly inventoryService: PlatformInventoryService) {}
 
-  
   @Get('tenants/:tenantId/summary')
   async summary(@Param('tenantId') tenantId: string) {
     const summary = await this.inventoryService.getTenantSummary(tenantId);
@@ -18,33 +24,33 @@ export class PlatformInventoryController {
     return summary;
   }
 
-  
   @Get('tenants/:tenantId/adjustments')
   adjustments(
     @Param('tenantId') tenantId: string,
+    @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
-    return this.inventoryService.listAdjustments(
-      tenantId,
-      limit ? parseInt(limit, 10) : 50,
+    return this.inventoryService.listAdjustments(tenantId, {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
       from,
       to,
-    );
+    });
   }
 
-  
   @Get('tenants/:tenantId/purchase-orders')
   purchaseOrders(
     @Param('tenantId') tenantId: string,
+    @Query('page') page?: string,
     @Query('status') status?: string,
     @Query('limit') limit?: string,
   ) {
-    return this.inventoryService.listPurchaseOrders(
-      tenantId,
+    return this.inventoryService.listPurchaseOrders(tenantId, {
+      page: page ? parseInt(page, 10) : undefined,
       status,
-      limit ? parseInt(limit, 10) : 50,
-    );
+      limit: limit ? parseInt(limit, 10) : undefined,
+    });
   }
 }

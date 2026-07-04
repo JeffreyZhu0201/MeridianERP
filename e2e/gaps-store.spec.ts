@@ -21,12 +21,12 @@ test.describe('Gaps store UI smoke', () => {
       test.skip(true, 'API not running');
     }
 
-    const catalog = await request.get(`${API}/api/v1/store/demo/catalog`);
+    const catalog = await request.get(`${API}/api/v1/store/demo/products`);
     if (!catalog.ok()) {
       test.skip(true, 'Demo store catalog unavailable — run prisma db seed');
     }
     const catalogBody = await catalog.json();
-    const variantId = catalogBody.products[0]?.variants[0]?.id as string | undefined;
+    const variantId = catalogBody[0]?.variants[0]?.id as string | undefined;
     if (!variantId) {
       test.skip(true, 'No demo products in catalog');
     }
@@ -47,7 +47,7 @@ test.describe('Gaps store UI smoke', () => {
 
     const checkout = await request.post(`${API}/api/v1/store/demo/checkout`, {
       headers: { Authorization: `Bearer ${token}` },
-      data: {},
+      data: { fulfillmentType: 'PICKUP' },
     });
     expect(checkout.ok()).toBeTruthy();
     const orderId = (await checkout.json()).order.id as string;

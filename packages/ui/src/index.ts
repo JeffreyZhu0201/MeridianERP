@@ -49,6 +49,8 @@ export {
   type DashboardPageFrameProps,
   AuthStatusFrame,         /** 认证状态页框架：登录/入驻引导 */
   type AuthStatusFrameProps,
+  ErpListPage,             /** ERP 列表页：指标条 + ListPageFrame */
+  type ErpListPageProps,
 } from './components/frameworks';
 
 // ============================================================
@@ -346,7 +348,7 @@ export { ScrollArea, ScrollBar } from './components/ui/scroll-area';
 export { Slider } from './components/ui/slider';
 
 /** 烤面包/通知组件 */
-export { Toaster } from './components/ui/sonner';
+export { Toaster, toast } from './components/ui/sonner';
 
 /** 开关组件 */
 export { Switch } from './components/ui/switch';
@@ -369,3 +371,31 @@ export { surfaceRing, surfaceRingLg, shellDividerB, shellDividerT } from './lib/
 
 /** 格式化工具函数 */
 export { formatMoney, formatDate, formatDateTime } from './lib/format';
+
+/** URL 分页控件 */
+export { ListPagination, type ListPaginationProps } from './components/list-pagination';
+
+/** 状态徽章 */
+export {
+  OnboardingStatusBadge,
+  StatusBadge,
+  type OnboardingStatusBadgeProps,
+} from './components/status/onboarding-status-badge';
+export { OrderStatusBadge, type OrderStatusBadgeProps } from './components/status/order-status-badge';
+
+/** 下拉菜单 */
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from './components/ui/dropdown-menu';
+
+/** 工具提示 */
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from './components/ui/tooltip';

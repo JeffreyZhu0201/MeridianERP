@@ -5,7 +5,7 @@ import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { catalogApiPath, getFulfillmentSlug } from '@/lib/fulfillment';
-import { UnifiedProductDetail } from '../_components/unified-product-detail';
+import { UnifiedProductDetail } from '../../_components/unified-product-detail';
 
 interface ShopProductPageProps {
   params: Promise<{ productSlug: string }>;

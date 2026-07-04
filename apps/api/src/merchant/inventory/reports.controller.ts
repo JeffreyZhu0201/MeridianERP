@@ -32,7 +32,10 @@ export class MerchantInventoryReportsController {
 
   @Get('export/adjustments')
   @Header('Content-Type', 'text/csv')
-  @Header('Content-Disposition', 'attachment; filename="adjustments-report.csv"')
+  @Header(
+    'Content-Disposition',
+    'attachment; filename="adjustments-report.csv"',
+  )
   exportAdjustments(
     @CurrentUser() user: AuthenticatedUser,
     @Query() query: AdjustmentListQueryDto,

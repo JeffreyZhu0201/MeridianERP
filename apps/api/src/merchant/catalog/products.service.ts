@@ -142,16 +142,23 @@ export class MerchantProductsService {
 
       if (isBranch && linkedVariants.length > 0) {
         for (const existingVariant of linkedVariants) {
-          const incoming = dto.variants.find((v) => v.sku === existingVariant.sku);
+          const incoming = dto.variants.find(
+            (v) => v.sku === existingVariant.sku,
+          );
           if (!incoming) continue;
-          await this.assertBranchPriceAllowed(existingVariant.masterSkuId!, incoming.price);
+          await this.assertBranchPriceAllowed(
+            existingVariant.masterSkuId!,
+            incoming.price,
+          );
           await this.prisma.productVariant.update({
             where: { id: existingVariant.id },
             data: { price: incoming.price },
           });
         }
       } else {
-        await this.prisma.productVariant.deleteMany({ where: { productId: id } });
+        await this.prisma.productVariant.deleteMany({
+          where: { productId: id },
+        });
         await this.prisma.productVariant.createMany({
           data: dto.variants.map((v) => ({
             productId: id,

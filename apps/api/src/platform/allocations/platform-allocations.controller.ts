@@ -23,19 +23,14 @@ import { PlatformAllocationsService } from './platform-allocations.service';
 export class PlatformAllocationsController {
   constructor(private readonly service: PlatformAllocationsService) {}
 
-  
   @Get('master-skus')
-  listMasterSkus(
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
+  listMasterSkus(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.service.listMasterSkus(
       page ? Number(page) : 1,
       limit ? Number(limit) : 50,
     );
   }
 
-  
   @Post('master-skus')
   @HttpCode(201)
   createMasterSku(
@@ -53,7 +48,6 @@ export class PlatformAllocationsController {
     return this.service.createMasterSku(dto);
   }
 
-  
   @Patch('master-skus/:id')
   updateMasterSku(
     @Param('id') id: string,
@@ -71,7 +65,6 @@ export class PlatformAllocationsController {
     return this.service.updateMasterSku(id, dto);
   }
 
-  
   @Get()
   list(
     @Query('tenantId') tenantId?: string,
@@ -80,7 +73,6 @@ export class PlatformAllocationsController {
     return this.service.listAllocations(tenantId, status);
   }
 
-  
   @Post()
   @HttpCode(201)
   create(
@@ -94,7 +86,6 @@ export class PlatformAllocationsController {
     return this.service.createAllocation(dto.tenantId, dto.lines, dto.note);
   }
 
-  
   @Post(':id/issue')
   @HttpCode(200)
   issue(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {

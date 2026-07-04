@@ -13,7 +13,11 @@ async function loginPlatform(app: INestApplication<App>) {
   return res.body.accessToken as string;
 }
 
-async function loginPromoter(app: INestApplication<App>, email: string, password: string) {
+async function loginPromoter(
+  app: INestApplication<App>,
+  email: string,
+  password: string,
+) {
   const res = await request(app.getHttpServer())
     .post('/api/v1/distributor/auth/login')
     .send({ email, password });
@@ -45,7 +49,11 @@ describe('Distributor share invite codes (e2e)', () => {
       },
     });
     promoterId = promoter.id;
-    promoterToken = await loginPromoter(app, 'promoter@share.test', 'promoter1');
+    promoterToken = await loginPromoter(
+      app,
+      'promoter@share.test',
+      'promoter1',
+    );
   });
 
   afterEach(async () => {

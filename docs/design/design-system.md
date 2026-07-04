@@ -230,7 +230,59 @@ Full-width centered card, max-w-md, large touch targets (min-h-11 buttons).
 | Status | `Badge` | Onboarding status, lead stage |
 | Navigation | `Sidebar` | Collapsible, icon mode |
 | Loading | `Skeleton` | Match table row height |
-| Toasts | `Sonner` | Success/error feedback |
+| Toasts | `Sonner` | Success/error feedback — mount `<Toaster />` in every portal root layout |
+
+### List page pattern (all portals)
+
+```
+BentoListHeader (metrics strip)
+ListPageFrame
+  ├── title + description
+  ├── filters (optional)
+  ├── emptyState (when no rows)
+  └── table / content
+  └── ListPagination (when total > limit)
+```
+
+Admin helper: `ErpListPage` from `@meridian/ui/server` (alias `AdminListPage` in admin for backward compat). Shared `ListPagination` from `@meridian/ui`.
+
+### Shared components (`@meridian/ui`)
+
+| Component | Use |
+|-----------|-----|
+| `ErpListPage` | Metric strip + list frame (admin, merchant) |
+| `ListPagination` | URL-aware prev/next with shadcn `Button` |
+| `OnboardingStatusBadge` | Merchant onboarding status |
+| `OrderStatusBadge` | Order status (pass translated `label`) |
+| `PurchaseOrderStatusBadge` | PO status |
+| `FulfillmentTypeBadge` | Pickup / delivery |
+| `DropdownMenu` | Row actions (exported from index) |
+| `Tooltip` | Column hints (exported from index) |
+
+All portals import primitives from `@meridian/ui` (client) or `@meridian/ui/server` (RSC-safe). Do not duplicate pagination or status badge maps in apps.
+
+
+### Detail page pattern
+
+```
+BentoDetailHero (key metrics + status)
+DetailPageFrame or ListPageFrame
+  └── sections with cross-links to related entities
+```
+
+Reference: admin CRM/order detail pages; merchant CRM detail (2026-07 polish).
+
+### User feedback
+
+- Mount `<Toaster />` from `@meridian/ui` in `apps/*/app/layout.tsx`.
+- Use `toast.success()` / `toast.error()` from `sonner` after mutations (confirm allocation, verify pickup, save settings).
+- Prefer toast over `alert()` or silent `router.refresh()` alone.
+
+### Status and locale
+
+- Never render raw enum strings (`PAID`, `PENDING`) in UI — translate via i18n keys (`status.${value}`, `orderStatus.${value}`).
+- Format dates with `useLocale()` or server `getLocale()`, not hardcoded `'en-US'`.
+
 | Dropdowns | `DropdownMenu` | Row actions, user menu |
 | Tabs | `Tabs` | CRM entity detail views |
 | Empty state | Custom + `Button` | Icon + message + CTA |

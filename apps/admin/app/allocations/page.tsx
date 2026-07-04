@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
 import { OnboardingStatus } from '@meridian/shared';
 
-import { ListPagination } from '@/components/list-pagination';
+import { ListPagination } from '@meridian/ui';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import {
   apiFetch,
@@ -12,7 +12,7 @@ import {
   type MerchantListItem,
   type PaginatedResponse,
 } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { AllocationsView } from './_components/allocations-view';
 
 interface AllocationsPageProps {
@@ -20,8 +20,7 @@ interface AllocationsPageProps {
 }
 
 export default async function AllocationsPage({ searchParams }: AllocationsPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.allocations');
   const params = await searchParams;
@@ -44,7 +43,7 @@ export default async function AllocationsPage({ searchParams }: AllocationsPageP
       token,
     ).catch(() => []),
     apiFetch<PaginatedResponse<MerchantListItem>>(
-      `/platform/merchants?status=${OnboardingStatus.APPROVED}&limit=100`,
+      `/platform/merchants?status=${OnboardingStatus.APPROVED}&limit=500`,
       {},
       token,
     ).catch(() => ({ data: [], meta: { total: 0, page: 1, limit: 100 } })),

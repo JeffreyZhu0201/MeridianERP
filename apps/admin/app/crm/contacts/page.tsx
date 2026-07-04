@@ -4,12 +4,11 @@ import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { ContactsTable } from './_components/contacts-table';
 
 export default async function CrmContactsPage() {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.crm.contacts');
   let contacts: PlatformCrmContact[] = [];

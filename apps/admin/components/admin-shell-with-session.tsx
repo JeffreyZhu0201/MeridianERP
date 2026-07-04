@@ -1,5 +1,5 @@
 import type { AdminSession } from '@/lib/api';
-import { getAdminSession } from '@/lib/auth';
+import { requireAdminSession } from '@/lib/auth';
 
 import { AdminShellWrapper } from './admin-shell-wrapper';
 
@@ -10,8 +10,7 @@ export async function AdminShellWithSession({
   children: React.ReactNode;
   session?: AdminSession | null;
 }) {
-  const session = sessionProp ?? (await getAdminSession());
-  if (!session) return null;
+  const session = sessionProp ?? (await requireAdminSession());
 
   return (
     <AdminShellWrapper

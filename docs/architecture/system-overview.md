@@ -1,8 +1,8 @@
 # MeridianERP System Overview
 
-**Version:** 1.0.1  
-**Last updated:** 2026-07-02  
-**Status:** Canonical architecture reference; Phase 1-5 complete  
+**Version:** 1.0.5  
+**Last updated:** 2026-07-04  
+**Status:** Canonical architecture reference; Phase 1–5 complete; admin RBAC shipped  
 **Source of truth (data model):** [`apps/api/prisma/schema.prisma`](../../apps/api/prisma/schema.prisma)
 
 MeridianERP is a **multi-tenant SaaS ERP** for factory HQ → merchant branches → B2B channel distributors → consumer storefronts. One NestJS monolith API serves four Next.js portals. Shared contracts live in `@meridian/shared`; shared UI in `@meridian/ui`.
@@ -15,6 +15,8 @@ MeridianERP is a **multi-tenant SaaS ERP** for factory HQ → merchant branches 
 | [Phase 2 E-commerce](./phase-2-ecommerce.md) | Store, orders, commission |
 | [Phase 3 Inventory](./phase-3-inventory.md) | Warehouses, POs, stock |
 | [Phase 5 Distribution & Allocation](./phase-5-distribution-and-allocation.md) | HQ ↔ branch, allocation, fulfillment split |
+| [Admin RBAC](./admin-rbac.md) | Platform admin roles and permissions |
+| [Flagship catalog & unified store](./flagship-catalog-store.md) | MasterSku sync, `/shop` catalog |
 | [Product State](../PRODUCT.md) | Current shipped product status |
 | [功能报告](../reports/功能报告.md) | Chinese business feature report |
 
@@ -203,6 +205,10 @@ sequenceDiagram
 | Distributor | `distributor` | `distributor_token` | `/distributor/*` | `JWT_DISTRIBUTOR_SECRET` |
 
 **JWT payload:** `{ sub, aud, tenantId?, roles[], iat, exp }` — 8h expiry.
+
+### Platform admin RBAC
+
+Four fixed roles (`SUPER_ADMIN`, `FINANCE`, `FULFILLMENT`, `REVIEWER`) scope admin portal navigation and API write access. Permission matrix and enforcement details: [admin-rbac.md](./admin-rbac.md). Cookie `admin_role` mirrors JWT role for middleware; stale tokens are cleared via `GET /api/auth/logout` in the admin app.
 
 ### Multi-tenancy enforcement
 
@@ -472,7 +478,7 @@ erDiagram
 | `ActivityType` | CALL, NOTE, MEETING | CrmActivity |
 | `CommissionType` | PERCENT, FIXED | Distributor, TenantSettings |
 | `BindType` | MERCHANT, CUSTOMER | DistributorQrCode, Binding |
-| `PlatformRole` | SUPER_ADMIN, PLATFORM_OPS | PlatformUser |
+| `PlatformRole` | SUPER_ADMIN, FINANCE, FULFILLMENT, REVIEWER | PlatformUser |
 | `MerchantRole` | MERCHANT_OWNER, MERCHANT_STAFF | User |
 | `OrderStatus` | PENDING_PAYMENT, PAID, FULFILLED, CANCELLED, REFUNDED | Order |
 | `LedgerStatus` | ACCRUED, SETTLED, VOID | CommissionLedger |
@@ -500,7 +506,7 @@ All fields from `schema.prisma`. PK = primary key, UK = unique, FK = foreign key
 | id | String | PK, cuid |
 | email | String | UK |
 | password | String | hashed |
-| role | PlatformRole | SUPER_ADMIN \| PLATFORM_OPS |
+| role | PlatformRole | SUPER_ADMIN \| FINANCE \| FULFILLMENT \| REVIEWER |
 | createdAt, updatedAt | DateTime | |
 
 #### PlatformSettings

@@ -27,7 +27,15 @@ import { StoreMerchantApplicationController } from './merchant-application/store
 import { StoreMerchantApplicationService } from './merchant-application/store-merchant-application.service';
 
 @Module({
-  imports: [AuthModule, PaymentModule, QueueModule, InventoryModule, FulfillmentModule, PlatformAccountsModule, FlagshipCatalogModule],
+  imports: [
+    AuthModule,
+    PaymentModule,
+    QueueModule,
+    InventoryModule,
+    FulfillmentModule,
+    PlatformAccountsModule,
+    FlagshipCatalogModule,
+  ],
   controllers: [
     StorePlatformAuthController,
     StoreAuthController,

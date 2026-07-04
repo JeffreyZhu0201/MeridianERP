@@ -5,9 +5,10 @@ import { PlatformDashboardService } from './platform-dashboard.service';
 @Controller('platform/dashboard')
 @UseGuards(PlatformAuthGuard)
 export class PlatformDashboardController {
-  constructor(private readonly platformDashboardService: PlatformDashboardService) {}
+  constructor(
+    private readonly platformDashboardService: PlatformDashboardService,
+  ) {}
 
-  
   @Get()
   getStats() {
     return this.platformDashboardService.getStats();

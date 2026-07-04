@@ -35,4 +35,17 @@ describe('PlatformAuth (e2e)', () => {
       .send({ email: 'admin@meridian.test', password: 'wrong12' })
       .expect(401);
   });
+
+  it('GET /api/v1/platform/auth/me returns 401 without token', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/auth/me')
+      .expect(401);
+  });
+
+  it('GET /api/v1/platform/auth/me returns 401 with invalid token', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/auth/me')
+      .set('Authorization', 'Bearer not-a-valid-jwt')
+      .expect(401);
+  });
 });

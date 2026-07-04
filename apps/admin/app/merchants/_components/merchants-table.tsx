@@ -17,7 +17,7 @@ import {
 } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
-import { StatusBadge } from '@/components/status-badge';
+import { OnboardingStatusBadge } from '@meridian/ui';
 import { apiFetch, type MerchantListItem, type PlatformDistributor } from '@/lib/api';
 import { ApproveDialog } from './approve-dialog';
 import { RejectDialog } from './reject-dialog';
@@ -105,7 +105,7 @@ export function MerchantsTable({ merchants, token, distributors = [] }: Merchant
                 </TableCell>
                 <TableCell>{merchant.contactEmail}</TableCell>
                 <TableCell>
-                  <StatusBadge status={merchant.onboardingStatus} />
+                  <OnboardingStatusBadge status={merchant.onboardingStatus} />
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {merchant.submittedAt

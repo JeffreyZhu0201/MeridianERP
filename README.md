@@ -1,6 +1,6 @@
 # MeridianERP
 
-**Version:** v1.0.1 (Phase 5 complete)  
+**Version:** v1.0.5 (Phase 5 + admin RBAC complete)  
 **Project:** QTWBJFXT20250904
 
 ## What This Is
@@ -47,7 +47,8 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 | `rtk pnpm typecheck` | Run TypeScript project checks |
 | `rtk pnpm lint` | Run workspace lint |
 | `rtk pnpm build` | Build all workspaces |
-| `rtk pnpm test:e2e` | Run Playwright tests |
+| `rtk pnpm test:e2e` | Run Playwright UI tests (run `rtk pnpm exec playwright install chromium` once first) |
+| `cd apps/api && rtk pnpm test:e2e` | Run API integration tests (144 cases) |
 
 Optional full stack:
 
@@ -73,6 +74,8 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 |---|---|
 | Current product state | `docs/PRODUCT.md` |
 | System architecture | `docs/architecture/system-overview.md` |
+| Admin RBAC roles | `docs/architecture/admin-rbac.md` |
+| Flagship unified store | `docs/architecture/flagship-catalog-store.md` |
 | UI design system | `docs/design/design-system.md` |
 | Agent execution workflow | `docs/execution/README.md` |
 | Git and PR workflow | `.cursor/rules/core.mdc` |

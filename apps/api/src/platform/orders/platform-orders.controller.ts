@@ -19,7 +19,6 @@ import { PlatformOrdersService } from './platform-orders.service';
 export class PlatformOrdersController {
   constructor(private readonly ordersService: PlatformOrdersService) {}
 
-  
   @Get()
   @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
   findAll(
@@ -40,14 +39,12 @@ export class PlatformOrdersController {
     );
   }
 
-  
   @Get(':id')
   @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
   }
 
-  
   @Post(':id/ship')
   @HttpCode(200)
   @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')

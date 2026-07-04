@@ -4,17 +4,14 @@ import { StoreCatalogService } from './store-catalog.service';
 
 @Controller('store/:slug/products')
 export class StoreCatalogController {
-  
   constructor(private readonly catalogService: StoreCatalogService) {}
 
-  
   @Public()
   @Get()
   listProducts(@Param('slug') slug: string) {
     return this.catalogService.listProducts(slug);
   }
 
-  
   @Public()
   @Get(':productSlug')
   getProduct(

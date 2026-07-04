@@ -1,12 +1,12 @@
 # MeridianERP Product State
 
-**Version:** 1.0.4  
-**Updated:** 2026-07-03  
-**Status:** Phase 1-5 complete; UI consistency cleanup in progress.
+**Version:** 1.0.5  
+**Updated:** 2026-07-04  
+**Status:** Phase 1–5 complete; admin RBAC and platform polish shipped.
 
 ## Status
 
-MeridianERP is a multi-tenant ERP platform for factory HQ, branch merchants, B2B distributors, and consumer storefronts. The shipped platform covers authentication, CRM, merchant onboarding, QR binding, e-commerce, inventory, distributor commissions, allocation, fulfillment, funds views, platform CRM, and AI operations diagnosis.
+MeridianERP is a multi-tenant ERP platform for factory HQ, branch merchants, B2B distributors, and consumer storefronts. The shipped platform covers authentication, CRM, merchant onboarding, QR binding, e-commerce, inventory, distributor commissions, allocation, fulfillment, funds views, platform CRM, flagship unified store, admin multi-role RBAC, and AI operations diagnosis.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -15,16 +15,19 @@ MeridianERP is a multi-tenant ERP platform for factory HQ, branch merchants, B2B
 | Phase 3 | Inventory, warehouses, purchase orders, transfers | Complete |
 | Phase 4 | Distributor portal and commission enhancements | Complete |
 | Phase 5 | Distribution, allocation, funds, platform CRM, AI diagnosis | Complete |
-| UI consistency | EmptyState, Alert, Tabs, shared surface cleanup | In progress |
+| Admin RBAC | Four platform roles with scoped nav and API guards | Complete |
+| Flagship store | Unified catalog at `/shop`, branch fulfillment selector | Complete |
+| Platform admin polish | Inventory index, CRM detail pages, order ship, filters | Complete |
+| UI consistency | EmptyState, Alert, Tabs, Bento shells, design-system alignment | Complete |
 | Settings | Platform and merchant settings, team management | Complete |
 
 ## Users And Portals
 
 | User | App | Port | Primary jobs |
 |---|---|---|---|
-| Factory HQ | `apps/admin` | 3000 | Master SKU, allocation, approvals, CRM, funds, fulfillment |
+| Factory HQ | `apps/admin` | 3000 | Master SKU, allocation, approvals, CRM, funds, fulfillment (role-scoped) |
 | Branch merchant | `apps/merchant` | 3002 | Sales, CRM, inventory, pickup verification, funds, replenishment |
-| Consumer | `apps/store` | 3003 | Browse, cart, checkout, pickup or delivery, order history |
+| Consumer | `apps/store` | 3003 | Browse unified catalog, cart, checkout, pickup or delivery, order history |
 | Sales promoter (拓店员) | `apps/distributor` | 3005 | Recruit branches via share code, view promoted stores, commissions, withdrawals |
 
 All portals share the NestJS API in `apps/api` on port 3001.
@@ -32,10 +35,11 @@ All portals share the NestJS API in `apps/api` on port 3001.
 ## Core Capabilities
 
 - Authentication uses separate JWT audiences: `admin`, `merchant`, `store`, and `distributor`.
+- **Admin RBAC:** Four roles — `SUPER_ADMIN`, `FINANCE`, `FULFILLMENT`, `REVIEWER` — with scoped navigation, middleware, and API guards. See `docs/architecture/admin-rbac.md`.
 - Tenant isolation is enforced with `tenantId` on merchant-owned data and guarded API access.
-- Admin manages merchants, distributors, MasterSku catalog, allocations, delivery queue, platform CRM, and funds.
+- Admin manages merchants, distributors, MasterSku catalog, allocations, delivery queue, platform CRM, funds, and platform admins (`/admins`).
 - Merchant manages CRM, inventory, orders, pickup verification, funds, replenishment, and settings.
-- Store supports unified flagship catalog, header branch selector, cart, Stripe checkout, account orders, pickup, and delivery (no customer–distributor binding).
+- Store supports unified flagship catalog at `/shop`, header branch selector, cart, Stripe checkout, account orders, pickup, and delivery (no customer–distributor binding).
 - Sales promoters (platform `Distributor`) recruit branches via store-portal share links, self-service invite codes/QR on `apps/distributor`, performance views, commission ledger, and withdrawals.
 - Store open-shop flow (`/open-shop?invite=`) lets registered users apply to become branch owners; HQ approves in admin.
 - HQ withdrawal approval confirms disbursement (`APPROVED` + `reviewedAt`); no third-party payout integration in P0.
@@ -55,20 +59,33 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - **Unified store:** Consumers browse flagship catalog at `/shop`; header dropdown selects fulfillment branch (inventory and branch price apply).
 - **Branch pricing:** Selling price defaults to suggested retail on allocation; merchant may tune within `maxRetailPriceDeviationPercent` (default 10%).
 - **Flagship store:** One branch marked `isFlagship`; remembered branch slug preferred in store header, else flagship default.
+- **Checkout:** Store checkout requires `fulfillmentType` (`PICKUP` or `DELIVERY`).
 - Commission balance equals settled commission minus approved withdrawals.
 - Pickup orders deduct branch inventory only when verified.
 - Delivery orders enter the HQ delivery queue and deduct MasterSku stock when shipped.
 
+## Quality And Testing
+
+| Layer | Command | Status |
+|---|---|---|
+| API e2e | `cd apps/api && rtk pnpm test:e2e` | 36 suites, 144 tests |
+| Playwright UI | `rtk pnpm exec playwright install chromium && rtk pnpm test:e2e` | 18 tests (admin, store, merchant) |
+| UX patterns | List/detail Bento frames, Toaster feedback, status i18n | See `docs/design/design-system.md` |
+| Typecheck | `rtk pnpm typecheck` | Strict monorepo build |
+| Next.js lint | `rtk pnpm --filter @meridian/admin --filter @meridian/merchant --filter @meridian/store --filter @meridian/distributor lint` | Flat ESLint config per app |
+
 ## Known Open Work
 
-- Continue UI consistency cleanup across shared states and portal surfaces.
-- Keep `docs/architecture/system-overview.md` current with shipped schema and module changes.
-- Add feature-specific PRD, architecture, and design docs before new feature implementation.
+- Keep historical phase docs aligned when schema changes (prefer updating `system-overview.md` appendix).
+- API package ESLint (`apps/api`) has legacy `@typescript-eslint/no-unsafe-*` debt — does not block runtime.
+- Add feature-specific PRD, architecture, and design docs **before** new feature implementation.
 
 ## References
 
 - Feature report: `docs/reports/功能报告.md`.
 - Architecture overview: `docs/architecture/system-overview.md`.
+- Admin RBAC: `docs/architecture/admin-rbac.md`.
+- Flagship catalog: `docs/architecture/flagship-catalog-store.md`.
 - Design system: `docs/design/design-system.md`.
 - Phase 5 PRD: `docs/prd/phase-5-distribution-and-allocation.md`.
 - Phase 5 architecture: `docs/architecture/phase-5-distribution-and-allocation.md`.

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
 import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
@@ -27,7 +35,10 @@ export class PlatformUsersController {
   }
 
   @Patch(':id')
-  updateProfile(@Param('id') id: string, @Body() dto: UpdatePlatformAccountDto) {
+  updateProfile(
+    @Param('id') id: string,
+    @Body() dto: UpdatePlatformAccountDto,
+  ) {
     return this.platformUsersService.updateProfile(id, dto);
   }
 

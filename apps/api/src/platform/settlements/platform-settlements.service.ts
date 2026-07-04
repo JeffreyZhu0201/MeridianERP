@@ -7,7 +7,6 @@ import { ExportSettlementDto } from './dto/settlement.dto';
 export class PlatformSettlementsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async findAll(page = 1, limit = 20) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
@@ -24,7 +23,6 @@ export class PlatformSettlementsService {
     return { data, meta: { total, page, limit } };
   }
 
-  
   async findLedger(status?: string, page = 1, limit = 50) {
     const skip = (page - 1) * limit;
     const where = status ? { status: status as LedgerStatus } : {};
@@ -34,9 +32,9 @@ export class PlatformSettlementsService {
         skip,
         take: limit,
         include: {
-          distributor: { select: { name: true } },
+          distributor: { select: { id: true, name: true } },
           order: { select: { id: true, total: true } },
-          tenant: { select: { slug: true } },
+          tenant: { select: { id: true, slug: true } },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -45,7 +43,6 @@ export class PlatformSettlementsService {
     return { data, meta: { total, page, limit } };
   }
 
-  
   async exportBatch(dto: ExportSettlementDto) {
     const periodEnd = dto.periodEnd ? new Date(dto.periodEnd) : new Date();
     const periodStart = dto.periodStart
@@ -77,7 +74,11 @@ export class PlatformSettlementsService {
     if (entries.length > 0) {
       await this.prisma.commissionLedger.updateMany({
         where: { id: { in: entries.map((e) => e.id) } },
-        data: { settlementBatchId: batch.id, status: LedgerStatus.SETTLED, settledAt: new Date() },
+        data: {
+          settlementBatchId: batch.id,
+          status: LedgerStatus.SETTLED,
+          settledAt: new Date(),
+        },
       });
     }
 

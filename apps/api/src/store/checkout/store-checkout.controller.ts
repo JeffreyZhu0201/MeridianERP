@@ -21,14 +21,12 @@ import { StoreCheckoutService } from './store-checkout.service';
 
 @Controller('store')
 export class StoreCheckoutController {
-  
   constructor(
     private readonly checkoutService: StoreCheckoutService,
     private readonly paymentService: PaymentService,
     private readonly storeTenant: StoreTenantService,
   ) {}
 
-  
   @Public()
   @UseGuards(OptionalStoreAuthGuard)
   @Post(':slug/checkout')
@@ -42,14 +40,17 @@ export class StoreCheckoutController {
     return this.checkoutService.checkout(slug, dto, sessionId, user);
   }
 
-  
   @Public()
   @Post('webhooks/stripe')
   @HttpCode(200)
   async stripeWebhook(
     @Req() req: RawBodyRequest<Request>,
     @Headers('stripe-signature') signature: string,
-    @Body() body: { type?: string; data?: { object?: { id: string; metadata?: { orderId?: string } } } },
+    @Body()
+    body: {
+      type?: string;
+      data?: { object?: { id: string; metadata?: { orderId?: string } } };
+    },
   ) {
     const payload = req.rawBody ?? Buffer.from(JSON.stringify(body));
     const event = await this.paymentService.constructWebhookEvent(
@@ -63,7 +64,6 @@ export class StoreCheckoutController {
     return { received: true };
   }
 
-  
   @Public()
   @Post(':slug/orders/:orderId/simulate-payment')
   @HttpCode(200)
@@ -72,6 +72,10 @@ export class StoreCheckoutController {
     @Param('orderId') orderId: string,
   ) {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
-    return this.checkoutService.confirmPaymentByOrderId(slug, orderId, tenant.id);
+    return this.checkoutService.confirmPaymentByOrderId(
+      slug,
+      orderId,
+      tenant.id,
+    );
   }
 }

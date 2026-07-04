@@ -28,7 +28,10 @@ type LedgerWithRelations = CommissionLedger & {
         lines: Array<Pick<AllocationOrderLine, 'quantity' | 'wholesalePrice'>>;
       })
     | null;
-  distributor: Pick<Distributor, 'id' | 'name' | 'commissionType' | 'commissionRate'>;
+  distributor: Pick<
+    Distributor,
+    'id' | 'name' | 'commissionType' | 'commissionRate'
+  >;
   settlementBatch: SettlementBatch | null;
   tenant?: {
     merchantProfile: { businessName: string } | null;
@@ -40,7 +43,12 @@ function resolveOrderTotal(entry: LedgerWithRelations): string {
     return entry.order.total.toString();
   }
   if (entry.allocationOrder?.lines?.length) {
-    return sumAllocationLineCost(entry.allocationOrder.lines).toFixed(2);
+    return sumAllocationLineCost(
+      entry.allocationOrder.lines.map((l) => ({
+        quantity: l.quantity,
+        wholesalePrice: Number(l.wholesalePrice),
+      })),
+    ).toFixed(2);
   }
   return '0';
 }

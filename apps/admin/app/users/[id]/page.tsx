@@ -8,7 +8,7 @@ import {
   type PaginatedResponse,
   type PlatformAccountDetail,
 } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { UserDetailView } from './_components/user-detail-view';
 
 interface UserDetailPageProps {
@@ -16,8 +16,7 @@ interface UserDetailPageProps {
 }
 
 export default async function UserDetailPage({ params }: UserDetailPageProps) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const { id } = await params;
 

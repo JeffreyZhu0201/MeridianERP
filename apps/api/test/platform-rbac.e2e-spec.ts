@@ -28,11 +28,19 @@ describe('Platform RBAC (e2e)', () => {
     const hash = await bcrypt.hash('admin123', 10);
     await prisma._seedPlatformAdmin('admin@meridian.test', hash, 'SUPER_ADMIN');
     await prisma._seedPlatformAdmin('finance@meridian.test', hash, 'FINANCE');
-    await prisma._seedPlatformAdmin('fulfillment@meridian.test', hash, 'FULFILLMENT');
+    await prisma._seedPlatformAdmin(
+      'fulfillment@meridian.test',
+      hash,
+      'FULFILLMENT',
+    );
     await prisma._seedPlatformAdmin('reviewer@meridian.test', hash, 'REVIEWER');
 
     financeToken = await loginAs(app, 'finance@meridian.test', 'admin123');
-    fulfillmentToken = await loginAs(app, 'fulfillment@meridian.test', 'admin123');
+    fulfillmentToken = await loginAs(
+      app,
+      'fulfillment@meridian.test',
+      'admin123',
+    );
     reviewerToken = await loginAs(app, 'reviewer@meridian.test', 'admin123');
   });
 
@@ -81,6 +89,30 @@ describe('Platform RBAC (e2e)', () => {
       .expect(403);
   });
 
+  it('allows fulfillment to list allocations and forbids flagship catalog', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/allocations')
+      .set('Authorization', `Bearer ${fulfillmentToken}`)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/flagship-catalog')
+      .set('Authorization', `Bearer ${fulfillmentToken}`)
+      .expect(403);
+  });
+
+  it('forbids finance from allocations and flagship catalog', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/allocations')
+      .set('Authorization', `Bearer ${financeToken}`)
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/flagship-catalog')
+      .set('Authorization', `Bearer ${financeToken}`)
+      .expect(403);
+  });
+
   it('allows reviewer to list merchants and forbids distributors', async () => {
     await request(app.getHttpServer())
       .get('/api/v1/platform/merchants')
@@ -100,5 +132,23 @@ describe('Platform RBAC (e2e)', () => {
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
     }
+  });
+
+  it('allows reviewer to list withdrawals but forbids approve and reject', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/platform/withdrawals')
+      .set('Authorization', `Bearer ${reviewerToken}`)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/platform/withdrawals/nonexistent-id/approve')
+      .set('Authorization', `Bearer ${reviewerToken}`)
+      .expect(403);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/platform/withdrawals/nonexistent-id/reject')
+      .set('Authorization', `Bearer ${reviewerToken}`)
+      .send({ reason: 'test' })
+      .expect(403);
   });
 });

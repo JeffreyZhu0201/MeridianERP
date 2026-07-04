@@ -16,7 +16,9 @@ import { PlatformAllocationsService } from '../../platform/allocations/platform-
 @Controller('merchant/allocations')
 @UseGuards(MerchantAuthGuard)
 export class MerchantAllocationsController {
-  constructor(private readonly allocationsService: PlatformAllocationsService) {}
+  constructor(
+    private readonly allocationsService: PlatformAllocationsService,
+  ) {}
 
   @Get()
   list(

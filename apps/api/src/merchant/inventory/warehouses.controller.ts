@@ -31,7 +31,10 @@ export class MerchantWarehousesController {
 
   @Post()
   @HttpCode(201)
-  create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateWarehouseDto) {
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateWarehouseDto,
+  ) {
     return this.inventoryService.createWarehouse(user, dto);
   }
 

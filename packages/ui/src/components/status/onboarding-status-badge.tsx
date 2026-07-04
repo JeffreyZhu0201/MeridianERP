@@ -2,7 +2,8 @@
 
 import { OnboardingStatus } from '@meridian/shared';
 import { useTranslations } from 'next-intl';
-import { Badge, type BadgeVariant } from '@meridian/ui';
+
+import { Badge, type BadgeVariant } from '../ui/badge';
 
 const statusVariant: Record<string, BadgeVariant> = {
   [OnboardingStatus.DRAFT]: 'secondary',
@@ -22,10 +23,22 @@ const statusLabelKeys: Record<string, OnboardingStatusKey> = {
   [OnboardingStatus.REJECTED]: 'REJECTED',
 };
 
-export function StatusBadge({ status }: { status: string }) {
-  const t = useTranslations('admin.merchants.onboardingStatus');
+export interface OnboardingStatusBadgeProps {
+  status: string;
+  /** next-intl namespace for status labels (default: admin.merchants.onboardingStatus) */
+  translationNamespace?: string;
+}
+
+export function OnboardingStatusBadge({
+  status,
+  translationNamespace = 'admin.merchants.onboardingStatus',
+}: OnboardingStatusBadgeProps) {
+  const t = useTranslations(translationNamespace);
   const labelKey = statusLabelKeys[status];
   const label = labelKey ? t(labelKey) : status;
 
   return <Badge variant={statusVariant[status] ?? 'secondary'}>{label}</Badge>;
 }
+
+/** @deprecated Use OnboardingStatusBadge */
+export const StatusBadge = OnboardingStatusBadge;

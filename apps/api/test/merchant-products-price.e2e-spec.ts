@@ -31,9 +31,13 @@ describe('Merchant branch price tuning (e2e)', () => {
       'Branch Price',
       'owner@branch.test',
       password,
+      { isFlagship: false },
     );
 
-    const flagshipTenant = await prisma._seedApprovedTenant('flagship-price', 'Flagship Price');
+    const flagshipTenant = await prisma._seedApprovedTenant(
+      'flagship-price',
+      'Flagship Price',
+    );
     await prisma.merchantProfile.update({
       where: { tenantId: flagshipTenant.id },
       data: { isFlagship: true, storePublished: true },

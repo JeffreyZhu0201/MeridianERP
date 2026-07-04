@@ -9,7 +9,6 @@ import {
 export class PlatformCrmContactsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   findAll() {
     return this.prisma.platformCrmContact.findMany({
       orderBy: { createdAt: 'desc' },
@@ -17,7 +16,6 @@ export class PlatformCrmContactsService {
     });
   }
 
-  
   async findOne(id: string) {
     const contact = await this.prisma.platformCrmContact.findUnique({
       where: { id },
@@ -29,7 +27,6 @@ export class PlatformCrmContactsService {
     return contact;
   }
 
-  
   create(dto: CreatePlatformCrmContactDto) {
     return this.prisma.platformCrmContact.create({
       data: dto,
@@ -37,7 +34,6 @@ export class PlatformCrmContactsService {
     });
   }
 
-  
   async update(id: string, dto: UpdatePlatformCrmContactDto) {
     await this.findOne(id);
     return this.prisma.platformCrmContact.update({
@@ -47,7 +43,6 @@ export class PlatformCrmContactsService {
     });
   }
 
-  
   async remove(id: string) {
     await this.findOne(id);
     await this.prisma.platformCrmLead.updateMany({

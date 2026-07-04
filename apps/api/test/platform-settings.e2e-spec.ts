@@ -23,7 +23,12 @@ describe('PlatformSettings (e2e)', () => {
     adminToken = login.body.accessToken as string;
 
     const ownerHash = await bcrypt.hash('merchant12', 10);
-    await prisma._seedMerchantOwner('plat-settings', 'Plat Store', 'm@plat.test', ownerHash);
+    await prisma._seedMerchantOwner(
+      'plat-settings',
+      'Plat Store',
+      'm@plat.test',
+      ownerHash,
+    );
     const merchantLogin = await request(app.getHttpServer())
       .post('/api/v1/merchant/auth/login')
       .send({ email: 'm@plat.test', password: 'merchant12' });

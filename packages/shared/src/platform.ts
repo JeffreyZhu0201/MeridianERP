@@ -25,6 +25,7 @@ export interface PlatformRecentMerchant {
   createdAt?: string;
   storePublished?: boolean;
   isFlagship?: boolean;
+  slug?: string;
 }
 
 export interface PlatformMerchantDetail {

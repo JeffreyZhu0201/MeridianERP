@@ -13,19 +13,17 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class PlatformWithdrawalsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private mapWithdrawalRow(
-    row: {
-      id: string;
-      distributorId: string;
-      amount: Prisma.Decimal;
-      status: WithdrawalRequestStatus;
-      note: string | null;
-      rejectionReason: string | null;
-      reviewedAt: Date | null;
-      createdAt: Date;
-      distributor: { name: string; email: string | null };
-    },
-  ) {
+  private mapWithdrawalRow(row: {
+    id: string;
+    distributorId: string;
+    amount: Prisma.Decimal;
+    status: WithdrawalRequestStatus;
+    note: string | null;
+    rejectionReason: string | null;
+    reviewedAt: Date | null;
+    createdAt: Date;
+    distributor: { name: string; email: string | null };
+  }) {
     return {
       id: row.id,
       distributorId: row.distributorId,
@@ -75,7 +73,8 @@ export class PlatformWithdrawalsService {
       throw new BadRequestException('Withdrawal is not pending');
     }
     const available = await this.getAvailableBalance(req.distributorId);
-    if (available.lessThan(req.amount)) {
+    // getAvailableBalance reserves this request in pending; add it back for approval.
+    if (available.add(req.amount).lessThan(req.amount)) {
       throw new BadRequestException('Insufficient distributor balance');
     }
     const updated = await this.prisma.withdrawalRequest.update({
@@ -91,7 +90,9 @@ export class PlatformWithdrawalsService {
   }
 
   async reject(id: string, platformUserId: string, reason: string) {
-    const req = await this.prisma.withdrawalRequest.findUnique({ where: { id } });
+    const req = await this.prisma.withdrawalRequest.findUnique({
+      where: { id },
+    });
     if (!req) throw new NotFoundException('Withdrawal not found');
     if (req.status !== WithdrawalRequestStatus.PENDING) {
       throw new BadRequestException('Withdrawal is not pending');

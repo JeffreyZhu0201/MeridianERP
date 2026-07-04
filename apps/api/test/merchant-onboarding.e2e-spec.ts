@@ -59,7 +59,7 @@ describe('MerchantOnboarding (e2e)', () => {
       .get('/api/v1/platform/merchants')
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
-    expect(list.body.items.length).toBeGreaterThan(0);
+    expect(list.body.data.length).toBeGreaterThan(0);
 
     await request(app.getHttpServer())
       .post(`/api/v1/platform/merchants/${profileId}/approve`)

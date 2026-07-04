@@ -10,7 +10,6 @@ import { decimalSumToString } from '../../merchant/commissions/commission-mapper
 export class PlatformDashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
-  
   async getStats(): Promise<PlatformDashboardStats> {
     const windowStart = dashboardWindowStart();
     const windowEnd = new Date();
@@ -87,8 +86,12 @@ export class PlatformDashboardService {
       pendingReview,
       activeDistributors,
       bindingsLast30Days,
-      commissionAccruedLast30Days: decimalSumToString(commissionAccruedAgg._sum.amount),
-      commissionSettledLast30Days: decimalSumToString(commissionSettledAgg._sum.amount),
+      commissionAccruedLast30Days: decimalSumToString(
+        commissionAccruedAgg._sum.amount,
+      ),
+      commissionSettledLast30Days: decimalSumToString(
+        commissionSettledAgg._sum.amount,
+      ),
       ordersLast30Days: orderAgg._count._all,
       orderRevenueLast30Days: decimalSumToString(orderAgg._sum.total),
       trend: buildOrderTrend(windowStart, windowEnd, trendOrders),

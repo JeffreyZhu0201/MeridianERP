@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, formatMoney } from '@meridian/ui';
 import { CommissionType, LedgerStatus, type CommissionStatementRow } from '@meridian/shared';
@@ -9,8 +9,8 @@ interface CommissionsTableProps {
   items: CommissionStatementRow[];
 }
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(new Date(iso));
+function formatDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(iso));
 }
 
 function formatRate(type: string, rate: string | number): string {
@@ -43,6 +43,7 @@ function sourceLabel(
 }
 
 export function CommissionsTable({ items }: CommissionsTableProps) {
+  const locale = useLocale();
   const t = useTranslations('merchant.commissions.table');
   const ts = useTranslations('merchant.commissions.ledgerStatus');
   const tc = useTranslations('common');
@@ -71,7 +72,7 @@ export function CommissionsTable({ items }: CommissionsTableProps) {
         <TableBody>
           {items.map((row) => (
             <TableRow key={row.id}>
-              <TableCell className="text-xs text-muted-foreground">{formatDate(row.createdAt)}</TableCell>
+              <TableCell className="text-xs text-muted-foreground">{formatDate(row.createdAt, locale)}</TableCell>
               <TableCell>
                 {row.orderId ? (
                   <Link

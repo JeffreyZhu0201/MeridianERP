@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -121,7 +122,14 @@ export function ContactsTable({
             <TableBody>
               {initial.map((contact) => (
                 <TableRow key={contact.id}>
-                  <TableCell className="font-medium">{contact.firstName}</TableCell>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/crm/contacts/${contact.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {contact.firstName}
+                    </Link>
+                  </TableCell>
                   <TableCell>{contact.lastName}</TableCell>
                   <TableCell>{contact.email ?? '—'}</TableCell>
                   <TableCell>{contact.phone ?? '—'}</TableCell>

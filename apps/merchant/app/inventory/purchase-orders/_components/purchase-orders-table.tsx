@@ -95,12 +95,9 @@ export function PurchaseOrdersTable({
             </Select>
           </div>
         </div>
-        <Link
-          href="/inventory/purchase-orders/new"
-          className="inline-flex min-h-11 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          {t('new')}
-        </Link>
+        <Button asChild className="min-h-11 rounded-full">
+          <Link href="/inventory/purchase-orders/new">{t('new')}</Link>
+        </Button>
       </div>
 
       {orders.length === 0 ? (

@@ -29,7 +29,6 @@ const CART_INCLUDE = {
 
 @Injectable()
 export class StoreCheckoutService {
-  
   constructor(
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
@@ -41,7 +40,6 @@ export class StoreCheckoutService {
     private readonly storeAuth: StoreAuthService,
   ) {}
 
-  
   async checkout(
     slug: string,
     dto: CheckoutDto,
@@ -52,7 +50,10 @@ export class StoreCheckoutService {
     let cart;
     let customerId: string | null = null;
     if (user?.userId) {
-      customerId = await this.storeAuth.resolveCustomerId(user.userId, tenant.id);
+      customerId = await this.storeAuth.resolveCustomerId(
+        user.userId,
+        tenant.id,
+      );
       cart = await this.prisma.cart.findFirst({
         where: { tenantId: tenant.id, customerId },
         include: CART_INCLUDE,
@@ -73,42 +74,70 @@ export class StoreCheckoutService {
       dto.fulfillmentType === FulfillmentType.DELIVERY &&
       !dto.deliveryAddress
     ) {
-      throw new BadRequestException('deliveryAddress is required for delivery orders');
+      throw new BadRequestException(
+        'deliveryAddress is required for delivery orders',
+      );
     }
     if (!user && !dto.guestEmail) {
-      throw new BadRequestException('guestEmail is required for guest checkout');
+      throw new BadRequestException(
+        'guestEmail is required for guest checkout',
+      );
     }
     for (const item of cart.items) {
       if (!item.variant.isActive || !item.variant.product.isPublished) {
         throw new BadRequestException('Cart contains unavailable items');
       }
       if (dto.fulfillmentType === FulfillmentType.PICKUP) {
-        const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
+        const sellable = await this.inventoryService.getSellableQuantity(
+          item.variantId,
+        );
         if (sellable < item.quantity) {
-          throw new BadRequestException(`Insufficient inventory for ${item.variant.name}`);
+          throw new BadRequestException(
+            `Insufficient inventory for ${item.variant.name}`,
+          );
+        }
+      }
+      if (dto.fulfillmentType === FulfillmentType.DELIVERY) {
+        const masterSkuId = item.variant.masterSkuId;
+        if (!masterSkuId) {
+          throw new BadRequestException(
+            `${item.variant.name} is not available for delivery`,
+          );
+        }
+        const masterSku = await this.prisma.masterSku.findUnique({
+          where: { id: masterSkuId },
+        });
+        if (!masterSku || masterSku.quantityOnHand < item.quantity) {
+          throw new BadRequestException(
+            `Insufficient inventory for ${item.variant.name}`,
+          );
         }
       }
     }
     const subtotal = cart.items.reduce(
-      (sum, item) => sum + Number(item.variant.price) * item.quantity,
-      0,
+      (sum, item) =>
+        sum.add(
+          new Prisma.Decimal(item.variant.price).mul(item.quantity),
+        ),
+      new Prisma.Decimal(0),
     );
-    const tax = 0;  // 暂不计算税费
-    const total = subtotal + tax;
+    const tax = new Prisma.Decimal(0);
+    const total = subtotal.add(tax);
     const order = await this.prisma.order.create({
       data: {
         tenantId: tenant.id,
         customerId: customerId ?? null,
-        status: OrderStatus.PENDING_PAYMENT,  // 待支付状态
+        status: OrderStatus.PENDING_PAYMENT, // 待支付状态
         fulfillmentType: dto.fulfillmentType,
         deliveryAddress:
-          dto.fulfillmentType === FulfillmentType.DELIVERY && dto.deliveryAddress
+          dto.fulfillmentType === FulfillmentType.DELIVERY &&
+          dto.deliveryAddress
             ? (dto.deliveryAddress as unknown as Prisma.InputJsonValue)
             : undefined,
         subtotal,
         tax,
         total,
-        guestEmail: user ? null : dto.guestEmail!,  // 已登录用户不需要 guestEmail
+        guestEmail: user ? null : dto.guestEmail!, // 已登录用户不需要 guestEmail
         lines: {
           create: cart.items.map((item) => ({
             variantId: item.variantId,
@@ -152,7 +181,6 @@ export class StoreCheckoutService {
     };
   }
 
-  
   async confirmPaymentByIntent(paymentIntentId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { stripePaymentIntentId: paymentIntentId },
@@ -164,7 +192,6 @@ export class StoreCheckoutService {
     await this.markOrderPaid(order.id);
   }
 
-  
   async confirmPaymentByOrderId(
     slug: string,
     orderId: string,
@@ -181,13 +208,14 @@ export class StoreCheckoutService {
       throw new BadRequestException('Order is not awaiting payment');
     }
     if (!this.paymentService.isMockMode()) {
-      throw new ForbiddenException('Simulate payment is only available in mock mode');
+      throw new ForbiddenException(
+        'Simulate payment is only available in mock mode',
+      );
     }
     await this.markOrderPaid(order.id);
     return { orderId: order.id, status: OrderStatus.PAID };
   }
 
-  
   private async markOrderPaid(orderId: string): Promise<void> {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },

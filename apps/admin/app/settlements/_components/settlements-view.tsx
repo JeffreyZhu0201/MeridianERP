@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -18,9 +19,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  ListPagination,
 } from '@meridian/ui';
-
-import { ListPagination } from '@/components/list-pagination';
 import { apiFetch, type CommissionLedgerEntry, type SettlementBatch } from '@/lib/api';
 
 type LedgerStatusFilter = 'ACCRUED' | 'SETTLED' | 'ALL';
@@ -189,7 +189,7 @@ export function SettlementsView({
                     </TableCell>
                     <TableCell>
                       <Badge variant={batch.status === 'EXPORTED' ? 'default' : 'secondary'}>
-                        {batch.status}
+                        {t(`batchStatus.${batch.status as 'DRAFT' | 'EXPORTED' | 'PAID'}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>{batch._count?.entries ?? 0}</TableCell>
@@ -259,10 +259,29 @@ export function SettlementsView({
               <TableBody>
                 {ledgerEntries.map((entry) => (
                   <TableRow key={entry.id}>
-                    <TableCell>{entry.tenant.slug}</TableCell>
-                    <TableCell>{entry.distributor.name}</TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/merchants?search=${encodeURIComponent(entry.tenant.slug)}`}
+                        className="text-primary hover:underline"
+                      >
+                        {entry.tenant.slug}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <Link
+                        href={`/distributors/${entry.distributor.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {entry.distributor.name}
+                      </Link>
+                    </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {entry.order.id.slice(0, 8)}…
+                      <Link
+                        href={`/orders/${entry.order.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {entry.order.id.slice(0, 8)}…
+                      </Link>
                     </TableCell>
                     {ledgerStatus === 'ALL' ? (
                       <TableCell>

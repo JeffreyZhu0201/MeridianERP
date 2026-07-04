@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
 import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
@@ -9,9 +17,10 @@ import { PlatformSettlementsService } from './platform-settlements.service';
 @UseGuards(PlatformAuthGuard, PlatformRolesGuard)
 @PlatformRoles('SUPER_ADMIN', 'FINANCE')
 export class PlatformSettlementsController {
-  constructor(private readonly settlementsService: PlatformSettlementsService) {}
+  constructor(
+    private readonly settlementsService: PlatformSettlementsService,
+  ) {}
 
-  
   @Get()
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     return this.settlementsService.findAll(
@@ -20,7 +29,6 @@ export class PlatformSettlementsController {
     );
   }
 
-  
   @Get('ledger')
   findLedger(
     @Query('status') status?: string,
@@ -34,7 +42,6 @@ export class PlatformSettlementsController {
     );
   }
 
-  
   @Post('export')
   @HttpCode(201)
   export(@Body() dto: ExportSettlementDto) {

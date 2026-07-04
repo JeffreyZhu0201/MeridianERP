@@ -32,7 +32,10 @@ export class CompaniesController {
 
   @Post()
   @HttpCode(201)
-  create(@CurrentUser() user: AuthenticatedUser, @Body() dto: CreateCompanyDto) {
+  create(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateCompanyDto,
+  ) {
     return this.companiesService.create(user.tenantId!, dto);
   }
 

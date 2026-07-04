@@ -3,12 +3,11 @@ import { ListPageFrame } from '@meridian/ui/server';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type PlatformDistributor } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { requireToken } from '@/lib/auth';
 import { CreateMerchantForm } from './_components/create-merchant-form';
 
 export default async function CreateMerchantPage() {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const t = await getTranslations('admin.merchants');
   let distributors: PlatformDistributor[] = [];

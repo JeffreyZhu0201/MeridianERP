@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import type { ReactNode } from 'react';
 import {
   Badge,
   BentoDetailHero,
@@ -22,6 +23,7 @@ import { OrderStatus } from '@meridian/shared';
 interface OrderDetailViewProps {
   order: PlatformOrderDetail;
   locale: string;
+  shipActions?: ReactNode;
 }
 
 function formatDate(iso: string | null | undefined, locale: string): string {
@@ -55,7 +57,7 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
   REFUNDED: 'destructive',
 };
 
-export async function OrderDetailView({ order, locale }: OrderDetailViewProps) {
+export async function OrderDetailView({ order, locale, shipActions }: OrderDetailViewProps) {
   const t = await getTranslations('admin.orders');
   const td = await getTranslations('admin.orders.detail');
   const tc = await getTranslations('common');
@@ -80,6 +82,7 @@ export async function OrderDetailView({ order, locale }: OrderDetailViewProps) {
       badges={
         <Badge variant={statusVariant[order.status] ?? 'secondary'}>{statusLabel}</Badge>
       }
+      actions={shipActions}
     >
       <BentoDetailHero
         metrics={[

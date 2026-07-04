@@ -118,6 +118,13 @@ export const store = {
     order: '订单',
     action: '操作',
   },
+  orderStatus: {
+    PENDING_PAYMENT: '待付款',
+    PAID: '已付款',
+    FULFILLED: '已完成',
+    CANCELLED: '已取消',
+    REFUNDED: '已退款',
+  },
   confirmation: {
     title: '订单已确认',
     notFound: '订单未找到',
@@ -130,6 +137,14 @@ export const store = {
     backAccount: '账户',
     orderTotal: '合计：{amount}',
     orderDescription: '订单 {id}… · {status}',
+    lineItems: '商品件数',
+    pickupTitle: '取件码',
+    pickupHint: '到店取货时向分店柜台出示此码或二维码。',
+    pickupCodeLabel: '6 位取件码',
+    pickedUpTitle: '已取货',
+    pickedUpAt: '核销时间 {date}',
+    deliveryTitle: '配送地址',
+    shippedAt: '发货时间 {date}',
   },
   product: {
     addToCart: '加入购物车',

@@ -59,7 +59,10 @@ export class MerchantPurchaseOrdersService {
     return this.mapPurchaseOrderDetail(po);
   }
 
-  async createPurchaseOrder(user: AuthenticatedUser, dto: CreatePurchaseOrderDto) {
+  async createPurchaseOrder(
+    user: AuthenticatedUser,
+    dto: CreatePurchaseOrderDto,
+  ) {
     const tenantId = user.tenantId!;
     await this.inventory.migrateTenantInventory(tenantId);
     await this.assertWarehouseActive(tenantId, dto.warehouseId);
@@ -100,12 +103,15 @@ export class MerchantPurchaseOrdersService {
     if (po.status !== PurchaseOrderStatus.DRAFT) {
       throw new BadRequestException('Only DRAFT purchase orders can be edited');
     }
-    if (dto.warehouseId) await this.assertWarehouseActive(tenantId, dto.warehouseId);
+    if (dto.warehouseId)
+      await this.assertWarehouseActive(tenantId, dto.warehouseId);
     if (dto.lines) await this.validatePoLines(tenantId, dto.lines);
 
     const updated = await this.prisma.$transaction(async (tx) => {
       if (dto.lines) {
-        await tx.purchaseOrderLine.deleteMany({ where: { purchaseOrderId: id } });
+        await tx.purchaseOrderLine.deleteMany({
+          where: { purchaseOrderId: id },
+        });
         await tx.purchaseOrderLine.createMany({
           data: dto.lines.map((l) => ({
             purchaseOrderId: id,
@@ -129,10 +135,14 @@ export class MerchantPurchaseOrdersService {
   async submitPurchaseOrder(user: AuthenticatedUser, id: string) {
     const po = await this.getPurchaseOrderEntity(user.tenantId!, id);
     if (po.status !== PurchaseOrderStatus.DRAFT) {
-      throw new BadRequestException('Only DRAFT purchase orders can be submitted');
+      throw new BadRequestException(
+        'Only DRAFT purchase orders can be submitted',
+      );
     }
     if (po.lines.length === 0) {
-      throw new BadRequestException('Purchase order must have at least one line');
+      throw new BadRequestException(
+        'Purchase order must have at least one line',
+      );
     }
     const updated = await this.prisma.purchaseOrder.update({
       where: { id },
@@ -152,7 +162,9 @@ export class MerchantPurchaseOrdersService {
     }
     const received = po.lines.reduce((s, l) => s + l.quantityReceived, 0);
     if (received > 0) {
-      throw new BadRequestException('Cannot cancel a purchase order with received quantity');
+      throw new BadRequestException(
+        'Cannot cancel a purchase order with received quantity',
+      );
     }
     const updated = await this.prisma.purchaseOrder.update({
       where: { id },
@@ -277,7 +289,9 @@ export class MerchantPurchaseOrdersService {
   }
 
   private async nextPoNumber(tenantId: string): Promise<string> {
-    const count = await this.prisma.purchaseOrder.count({ where: { tenantId } });
+    const count = await this.prisma.purchaseOrder.count({
+      where: { tenantId },
+    });
     return `PO-${String(count + 1).padStart(5, '0')}`;
   }
 
@@ -290,14 +304,18 @@ export class MerchantPurchaseOrdersService {
     }
     const variantIds = [...new Set(lines.map((l) => l.variantId))];
     if (variantIds.length !== lines.length) {
-      throw new BadRequestException('Duplicate variants in purchase order lines');
+      throw new BadRequestException(
+        'Duplicate variants in purchase order lines',
+      );
     }
     const variants = await this.prisma.productVariant.findMany({
       where: { id: { in: variantIds }, product: { tenantId } },
       select: { id: true },
     });
     if (variants.length !== variantIds.length) {
-      throw new BadRequestException('One or more variants are invalid for this tenant');
+      throw new BadRequestException(
+        'One or more variants are invalid for this tenant',
+      );
     }
   }
 

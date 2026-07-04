@@ -4,10 +4,11 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, formatMoney, ListPageFrame } from '@meridian/ui/server';
 import type { PaginatedWithdrawalList, WithdrawalRequestRow } from '@meridian/shared';
 
-import { ListPagination } from '@/components/list-pagination';
+import { ListPagination } from '@meridian/ui';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
-import { apiFetch } from '@/lib/api';
-import { getToken } from '@/lib/auth';
+import { apiFetch, type PlatformDistributor } from '@/lib/api';
+import { requireToken } from '@/lib/auth';
+import { WithdrawalsDistributorFilter } from './_components/withdrawals-distributor-filter';
 import { WithdrawalsStatusTabs } from './_components/withdrawals-status-tabs';
 import { WithdrawalsTable } from './_components/withdrawals-table';
 
@@ -18,8 +19,7 @@ export default async function WithdrawalsPage({
 }: {
   searchParams: Promise<{ status?: string; distributorId?: string; page?: string }>;
 }) {
-  const token = await getToken();
-  if (!token) return null;
+  const token = await requireToken();
 
   const params = await searchParams;
   const status = params.status ?? 'PENDING';
@@ -36,14 +36,15 @@ export default async function WithdrawalsPage({
 
   let withdrawals: WithdrawalRequestRow[] = [];
   let meta = { total: 0, page: 1, limit: 20 };
+  let distributors: PlatformDistributor[] = [];
   try {
-    const res = await apiFetch<PaginatedWithdrawalList>(
-      `/platform/withdrawals?${queryString}`,
-      {},
-      token,
-    );
-    withdrawals = res.data;
-    meta = res.meta;
+    const [withdrawalsRes, distributorsRes] = await Promise.all([
+      apiFetch<PaginatedWithdrawalList>(`/platform/withdrawals?${queryString}`, {}, token),
+      apiFetch<PlatformDistributor[]>('/platform/distributors', {}, token),
+    ]);
+    withdrawals = withdrawalsRes.data;
+    meta = withdrawalsRes.meta;
+    distributors = distributorsRes;
   } catch {
     withdrawals = [];
   }
@@ -82,6 +83,9 @@ export default async function WithdrawalsPage({
         </div>
         <Suspense fallback={null}>
           <WithdrawalsStatusTabs />
+        </Suspense>
+        <Suspense fallback={null}>
+          <WithdrawalsDistributorFilter distributors={distributors} />
         </Suspense>
         <ListPageFrame
           title={t('title')}

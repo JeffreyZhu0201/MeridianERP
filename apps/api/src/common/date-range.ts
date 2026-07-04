@@ -8,7 +8,15 @@ const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
 
 export function startOfUtcDay(date: Date): Date {
   return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0),
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      0,
+      0,
+      0,
+      0,
+    ),
   );
 }
 
@@ -42,9 +50,7 @@ function parseDateInput(value: string, boundary: 'start' | 'end'): Date {
 export function dashboardWindowStart(
   days = DEFAULT_COMMISSION_WINDOW_DAYS,
 ): Date {
-  return startOfUtcDay(
-    new Date(Date.now() - days * 24 * 60 * 60 * 1000),
-  );
+  return startOfUtcDay(new Date(Date.now() - days * 24 * 60 * 60 * 1000));
 }
 
 export function parseDateRangeQuery(
@@ -55,9 +61,7 @@ export function parseDateRangeQuery(
   const to = query.to ? parseDateInput(query.to, 'end') : todayEnd;
   const from = query.from
     ? parseDateInput(query.from, 'start')
-    : startOfUtcDay(
-        new Date(to.getTime() - defaultDays * 24 * 60 * 60 * 1000),
-      );
+    : startOfUtcDay(new Date(to.getTime() - defaultDays * 24 * 60 * 60 * 1000));
   if (from > to) {
     throw new BadRequestException('from must be before or equal to to');
   }

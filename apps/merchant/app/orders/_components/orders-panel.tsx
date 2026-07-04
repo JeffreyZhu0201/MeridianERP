@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { toast } from '@meridian/ui';
 import {
   Button,
   EmptyState,
@@ -16,7 +17,7 @@ import {
   formatMoney,
   type OrderListRow,
 } from '@meridian/ui';
-import type { FulfillmentType, MerchantOrderListItem } from '@meridian/shared';
+import type { FulfillmentType, MerchantOrderListItem, OrderStatus } from '@meridian/shared';
 import { formatPickupCodeHint } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
@@ -27,8 +28,8 @@ interface OrdersPanelProps {
   token: string;
 }
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(
+function formatDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
     new Date(iso),
   );
 }
@@ -37,19 +38,26 @@ function customerLabel(order: MerchantOrderListItem, guestLabel: string): string
   return order.customer?.email ?? order.guestEmail ?? guestLabel;
 }
 
-function toRow(order: MerchantOrderListItem, guestLabel: string, withCodeHint = false): OrderListRow {
+function toRow(
+  order: MerchantOrderListItem,
+  guestLabel: string,
+  locale: string,
+  statusLabel: (status: OrderStatus) => string,
+  withCodeHint = false,
+): OrderListRow {
   return {
     id: order.id,
     customerLabel: customerLabel(order, guestLabel),
-    status: order.status,
+    status: statusLabel(order.status),
     fulfillmentType: (order.fulfillmentType ?? 'PICKUP') as FulfillmentType,
     total: formatMoney(order.total, order.currency),
-    createdAt: formatDate(order.createdAt),
+    createdAt: formatDate(order.createdAt, locale),
     meta: withCodeHint ? formatPickupCodeHint(order.pickupCode) : undefined,
   };
 }
 
 export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) {
+  const locale = useLocale();
   const t = useTranslations('merchant.orders');
   const router = useRouter();
   const [primaryTab, setPrimaryTab] = useState('all');
@@ -57,13 +65,16 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
   const [verifyError, setVerifyError] = useState('');
   const [verifying, setVerifying] = useState(false);
 
+  const statusLabel = (status: OrderStatus) =>
+    t(`status.${status}` as 'status.PAID' | 'status.FULFILLED' | 'status.PENDING_PAYMENT' | 'status.CANCELLED' | 'status.REFUNDED');
+
   const allRows = useMemo(
-    () => orders.map((o) => toRow(o, t('guest'))),
-    [orders, t],
+    () => orders.map((o) => toRow(o, t('guest'), locale, statusLabel)),
+    [orders, t, locale],
   );
   const pendingRows = useMemo(
-    () => pickupPending.map((o) => toRow(o, t('guest'), true)),
-    [pickupPending, t],
+    () => pickupPending.map((o) => toRow(o, t('guest'), locale, statusLabel, true)),
+    [pickupPending, t, locale],
   );
 
   async function handleVerify(code: string) {
@@ -76,6 +87,7 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
         body: JSON.stringify({ code }),
       }, token);
       setVerifyTarget(null);
+      toast.success(t('verifyPickup.success'));
       router.refresh();
     } catch (err) {
       setVerifyError(err instanceof Error ? err.message : t('verifyPickup.failed'));
@@ -111,7 +123,7 @@ export function OrdersPanel({ orders, pickupPending, token }: OrdersPanelProps) 
                 href={`/orders/${row.id}`}
                 className="text-xs text-primary hover:underline"
               >
-                View
+                {t('table.view')}
               </Link>
             )}
           />

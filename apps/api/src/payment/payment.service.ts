@@ -55,7 +55,13 @@ export class PaymentService {
     };
   }
 
-  async constructWebhookEvent(payload: Buffer, signature: string): Promise<{ type: string; data: { object: { id: string; metadata?: { orderId?: string } } } }> {
+  async constructWebhookEvent(
+    payload: Buffer,
+    signature: string,
+  ): Promise<{
+    type: string;
+    data: { object: { id: string; metadata?: { orderId?: string } } };
+  }> {
     if (this.isMockMode()) {
       const body = JSON.parse(payload.toString()) as {
         type: string;

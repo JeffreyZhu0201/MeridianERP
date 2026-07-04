@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster as SonnerToaster, toast } from 'sonner';
 
 const Toaster = () => {
   return (
@@ -24,4 +24,4 @@ const Toaster = () => {
   );
 };
 
-export { Toaster };
+export { Toaster, toast };

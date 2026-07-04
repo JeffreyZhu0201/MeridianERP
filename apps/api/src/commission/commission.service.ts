@@ -67,7 +67,7 @@ export class CommissionService {
     const wholesaleTotal = sumAllocationLineCost(
       allocation.lines.map((l) => ({
         quantity: l.quantity,
-        wholesalePrice: l.wholesalePrice,
+        wholesalePrice: Number(l.wholesalePrice),
       })),
     );
     const amount = this.calculateAmount(

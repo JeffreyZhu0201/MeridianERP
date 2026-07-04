@@ -34,7 +34,10 @@ export class MerchantAdjustmentsController {
   }
 
   @Get('adjustments')
-  list(@CurrentUser() user: AuthenticatedUser, @Query() query: AdjustmentListQueryDto) {
+  list(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query() query: AdjustmentListQueryDto,
+  ) {
     return this.inventoryService.listAdjustments(user.tenantId!, query);
   }
 

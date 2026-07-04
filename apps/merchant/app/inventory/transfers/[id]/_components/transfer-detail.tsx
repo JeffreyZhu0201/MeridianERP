@@ -30,6 +30,13 @@ export function TransferDetail({ transfer: tr, token }: TransferDetailProps) {
 
   const totalQty = tr.lines.reduce((sum, l) => sum + l.quantity, 0);
 
+  function statusLabel(status: string): string {
+    if (status === 'PENDING' || status === 'TRANSFERRED' || status === 'CANCELLED') {
+      return t(`status.${status as 'PENDING' | 'TRANSFERRED' | 'CANCELLED'}`);
+    }
+    return status;
+  }
+
   return (
     <DetailPageFrame
       title={t('title')}
@@ -42,7 +49,7 @@ export function TransferDetail({ transfer: tr, token }: TransferDetailProps) {
       backLabel={t('title')}
       badges={
         <Badge variant={statusVariant[tr.status] ?? 'secondary'}>
-          {tr.status}
+          {statusLabel(tr.status)}
         </Badge>
       }
     >

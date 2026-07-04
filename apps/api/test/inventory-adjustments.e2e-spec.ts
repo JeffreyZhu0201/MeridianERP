@@ -26,7 +26,12 @@ describe('InventoryAdjustments (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner('acme-store', 'Acme Store', 'owner@acme.test', password);
+    await prisma._seedMerchantOwner(
+      'acme-store',
+      'Acme Store',
+      'owner@acme.test',
+      password,
+    );
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const product = await request(app.getHttpServer())
@@ -35,7 +40,9 @@ describe('InventoryAdjustments (e2e)', () => {
       .send({
         name: 'Widget',
         isPublished: true,
-        variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 }],
+        variants: [
+          { sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 },
+        ],
       })
       .expect(201);
 
@@ -46,7 +53,9 @@ describe('InventoryAdjustments (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    warehouseId = warehouses.body.find((w: { isDefault: boolean }) => w.isDefault).id;
+    warehouseId = warehouses.body.find(
+      (w: { isDefault: boolean }) => w.isDefault,
+    ).id;
   });
 
   afterEach(async () => {
@@ -143,7 +152,9 @@ describe('InventoryAdjustments (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    const match = alerts.body.items.find((item: { variantId: string }) => item.variantId === variantId);
+    const match = alerts.body.items.find(
+      (item: { variantId: string }) => item.variantId === variantId,
+    );
     expect(match).toBeDefined();
     expect(match.quantityOnHand).toBe(4);
     expect(match.reorderThreshold).toBe(5);
@@ -166,9 +177,11 @@ describe('InventoryAdjustments (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    expect(lowBefore.body.items.some((item: { variantId: string }) => item.variantId === variantId)).toBe(
-      true,
-    );
+    expect(
+      lowBefore.body.items.some(
+        (item: { variantId: string }) => item.variantId === variantId,
+      ),
+    ).toBe(true);
 
     await request(app.getHttpServer())
       .post('/api/v1/merchant/inventory/adjustments')
@@ -186,8 +199,10 @@ describe('InventoryAdjustments (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .expect(200);
 
-    expect(lowAfter.body.items.some((item: { variantId: string }) => item.variantId === variantId)).toBe(
-      false,
-    );
+    expect(
+      lowAfter.body.items.some(
+        (item: { variantId: string }) => item.variantId === variantId,
+      ),
+    ).toBe(false);
   });
 });

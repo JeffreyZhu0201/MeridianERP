@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { toast } from '@meridian/ui';
 import {
   Badge,
   Button,
@@ -73,7 +74,7 @@ export function TeamManagementPanel({ team, isOwner, token }: TeamManagementPane
       await apiFetch(`/merchant/team/${id}`, { method: 'DELETE' }, token);
       router.refresh();
     } catch (err) {
-      alert(err instanceof Error ? err.message : t('removeFailed'));
+      toast.error(err instanceof Error ? err.message : t('removeFailed'));
     }
   }
 

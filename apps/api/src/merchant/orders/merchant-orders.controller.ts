@@ -10,6 +10,7 @@ import {
 import { MerchantAuthGuard } from '../../auth/guards/merchant-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interface';
+import { VerifyPickupDto } from './dto/verify-pickup.dto';
 import { MerchantOrdersService } from './merchant-orders.service';
 
 @Controller('merchant/orders')
@@ -32,7 +33,7 @@ export class MerchantOrdersController {
   verifyPickup(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
-    @Body() dto: { code: string },
+    @Body() dto: VerifyPickupDto,
   ) {
     return this.ordersService.verifyPickup(
       user.tenantId!,

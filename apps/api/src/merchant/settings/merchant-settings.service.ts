@@ -95,14 +95,20 @@ export class MerchantSettingsService {
     };
   }
 
-  async updateSettings(user: AuthenticatedUser, dto: UpdateMerchantSettingsDto) {
+  async updateSettings(
+    user: AuthenticatedUser,
+    dto: UpdateMerchantSettingsDto,
+  ) {
     this.assertOwner(user);
     const tenantId = user.tenantId!;
 
     const profileData: Prisma.MerchantProfileUpdateInput = {};
-    if (dto.businessName !== undefined) profileData.businessName = dto.businessName;
-    if (dto.contactEmail !== undefined) profileData.contactEmail = dto.contactEmail;
-    if (dto.contactPhone !== undefined) profileData.contactPhone = dto.contactPhone;
+    if (dto.businessName !== undefined)
+      profileData.businessName = dto.businessName;
+    if (dto.contactEmail !== undefined)
+      profileData.contactEmail = dto.contactEmail;
+    if (dto.contactPhone !== undefined)
+      profileData.contactPhone = dto.contactPhone;
 
     const settingsData: Prisma.TenantSettingsUpdateInput = {};
     if (dto.defaultCommissionRate !== undefined) {
@@ -129,7 +135,9 @@ export class MerchantSettingsService {
         });
       }
       if (Object.keys(settingsData).length > 0) {
-        const existing = await tx.tenantSettings.findUnique({ where: { tenantId } });
+        const existing = await tx.tenantSettings.findUnique({
+          where: { tenantId },
+        });
         if (existing) {
           await tx.tenantSettings.update({
             where: { tenantId },
@@ -196,7 +204,10 @@ export class MerchantSettingsService {
 
     let account = await this.platformAccounts.findByEmail(dto.email);
     if (account) {
-      const valid = await this.platformAccounts.verifyPassword(account, dto.password);
+      const valid = await this.platformAccounts.verifyPassword(
+        account,
+        dto.password,
+      );
       if (!valid) {
         throw new ConflictException('Email already registered');
       }

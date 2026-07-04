@@ -18,7 +18,6 @@ export class PlatformAllocationsService {
     private readonly flagshipCatalog: FlagshipCatalogService,
   ) {}
 
-  
   async listMasterSkus(page = 1, limit = 50) {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
@@ -32,7 +31,6 @@ export class PlatformAllocationsService {
     return { data, meta: { total, page, limit } };
   }
 
-  
   async createMasterSku(dto: {
     skuCode: string;
     name: string;
@@ -57,7 +55,6 @@ export class PlatformAllocationsService {
     return sku;
   }
 
-  
   async updateMasterSku(
     id: string,
     dto: {
@@ -80,7 +77,6 @@ export class PlatformAllocationsService {
     return updated;
   }
 
-  
   async listAllocations(tenantId?: string, status?: AllocationOrderStatus) {
     return this.prisma.allocationOrder.findMany({
       where: {
@@ -95,12 +91,16 @@ export class PlatformAllocationsService {
     });
   }
 
-  
-  async listMerchantAllocations(tenantId: string, status?: AllocationOrderStatus) {
-    return this.listAllocations(tenantId, status ?? AllocationOrderStatus.ISSUED);
+  async listMerchantAllocations(
+    tenantId: string,
+    status?: AllocationOrderStatus,
+  ) {
+    return this.listAllocations(
+      tenantId,
+      status ?? AllocationOrderStatus.ISSUED,
+    );
   }
 
-  
   async createAllocation(
     tenantId: string,
     lines: Array<{ masterSkuId: string; quantity: number }>,
@@ -120,7 +120,9 @@ export class PlatformAllocationsService {
             const sku = skuMap.get(l.masterSkuId);
             if (!sku) throw new NotFoundException('Master SKU not found');
             if (!sku.isActive) {
-              throw new BadRequestException(`Master SKU ${sku.skuCode} is inactive`);
+              throw new BadRequestException(
+                `Master SKU ${sku.skuCode} is inactive`,
+              );
             }
             return {
               masterSkuId: l.masterSkuId,
@@ -134,7 +136,6 @@ export class PlatformAllocationsService {
     });
   }
 
-  
   async issueAllocation(id: string, platformUserId: string) {
     const order = await this.prisma.allocationOrder.findUnique({
       where: { id },
@@ -173,7 +174,6 @@ export class PlatformAllocationsService {
     });
   }
 
-  
   async confirmAllocation(id: string, userId: string, tenantId: string) {
     const order = await this.prisma.allocationOrder.findFirst({
       where: { id, tenantId },

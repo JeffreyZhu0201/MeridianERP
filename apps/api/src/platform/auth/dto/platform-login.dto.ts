@@ -5,8 +5,8 @@
  * @LastEditTime: 2026-07-01 15:17:21
  * @FilePath: /MeridianERP/apps/api/src/platform/auth/dto/platform-login.dto.ts
  * @Description: Platform login DTO
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ *
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved.
  */
 import { IsEmail, IsString, MinLength } from 'class-validator';
 

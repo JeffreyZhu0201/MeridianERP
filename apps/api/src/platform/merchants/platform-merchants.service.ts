@@ -3,7 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { MerchantProfile, MerchantRole, OnboardingStatus, OrderStatus, Prisma } from '@prisma/client';
+import {
+  MerchantProfile,
+  MerchantRole,
+  OnboardingStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 import type {
   MerchantCrmSummary,
   MerchantDistributorSummary,
@@ -27,7 +33,6 @@ export class PlatformMerchantsService {
     private readonly platformAccounts: PlatformAccountsService,
   ) {}
 
-  
   async list(query: ListMerchantsQueryDto = {}) {
     const page = query.page ?? 1;
     const limit = query.limit ?? 20;
@@ -64,6 +69,7 @@ export class PlatformMerchantsService {
         onboardingStatus: profile.onboardingStatus,
         submittedAt: profile.submittedAt?.toISOString() ?? null,
         createdAt: profile.createdAt.toISOString(),
+        slug: profile.tenant.slug,
         storePublished: profile.storePublished,
         isFlagship: profile.isFlagship,
       })),
@@ -71,30 +77,37 @@ export class PlatformMerchantsService {
     };
   }
 
-  
   async getById(id: string): Promise<PlatformMerchantDetail> {
     const profile = await this.findProfileById(id);
-    const [crmSummary, distributors, pendingRecruiter, recruitedDistributor, ownerUser] =
-      await Promise.all([
-        this.getCrmSummary(profile.tenantId),
-        this.getDistributorSummaries(profile.tenantId),
-        profile.pendingRecruitInviteCode
-          ? this.prisma.merchantRecruitInviteCode.findFirst({
-              where: { code: profile.pendingRecruitInviteCode },
-              include: { distributor: { select: { id: true, name: true } } },
-            })
-          : Promise.resolve(null),
-        profile.recruitedByDistributorId
-          ? this.prisma.distributor.findUnique({
-              where: { id: profile.recruitedByDistributorId },
-              select: { id: true, name: true },
-            })
-          : Promise.resolve(null),
-        this.prisma.user.findFirst({
-          where: { tenantId: profile.tenantId, role: MerchantRole.MERCHANT_OWNER },
-          select: { accountId: true },
-        }),
-      ]);
+    const [
+      crmSummary,
+      distributors,
+      pendingRecruiter,
+      recruitedDistributor,
+      ownerUser,
+    ] = await Promise.all([
+      this.getCrmSummary(profile.tenantId),
+      this.getDistributorSummaries(profile.tenantId),
+      profile.pendingRecruitInviteCode
+        ? this.prisma.merchantRecruitInviteCode.findFirst({
+            where: { code: profile.pendingRecruitInviteCode },
+            include: { distributor: { select: { id: true, name: true } } },
+          })
+        : Promise.resolve(null),
+      profile.recruitedByDistributorId
+        ? this.prisma.distributor.findUnique({
+            where: { id: profile.recruitedByDistributorId },
+            select: { id: true, name: true },
+          })
+        : Promise.resolve(null),
+      this.prisma.user.findFirst({
+        where: {
+          tenantId: profile.tenantId,
+          role: MerchantRole.MERCHANT_OWNER,
+        },
+        select: { accountId: true },
+      }),
+    ]);
     return this.toPlatformMerchantDetail(
       profile,
       crmSummary,
@@ -123,7 +136,9 @@ export class PlatformMerchantsService {
         },
       });
       if (!distributor) {
-        throw new BadRequestException('Invalid platform distributor for recruitment');
+        throw new BadRequestException(
+          'Invalid platform distributor for recruitment',
+        );
       }
     }
 
@@ -168,20 +183,24 @@ export class PlatformMerchantsService {
     });
 
     if (autoApprove) {
-      await this.emailQueue.sendMerchantWelcome(dto.contactEmail, dto.businessName);
+      await this.emailQueue.sendMerchantWelcome(
+        dto.contactEmail,
+        dto.businessName,
+      );
     }
 
     return profile;
   }
 
-  
   async approve(id: string, dto: { recruitedByDistributorId?: string } = {}) {
     const profile = await this.findProfileById(id);
     if (
       profile.onboardingStatus !== OnboardingStatus.SUBMITTED &&
       profile.onboardingStatus !== OnboardingStatus.UNDER_REVIEW
     ) {
-      throw new BadRequestException('Merchant cannot be approved in current status');
+      throw new BadRequestException(
+        'Merchant cannot be approved in current status',
+      );
     }
     let recruitedByDistributorId = dto.recruitedByDistributorId ?? null;
     if (!recruitedByDistributorId && profile.pendingRecruitInviteCode) {
@@ -192,7 +211,10 @@ export class PlatformMerchantsService {
         },
         include: { distributor: true },
       });
-      if (invite?.distributor.tenantId === null && invite.distributor.isActive) {
+      if (
+        invite?.distributor.tenantId === null &&
+        invite.distributor.isActive
+      ) {
         recruitedByDistributorId = invite.distributorId;
         await this.prisma.merchantRecruitInviteCode.update({
           where: { id: invite.id },
@@ -205,7 +227,9 @@ export class PlatformMerchantsService {
         where: { id: recruitedByDistributorId, tenantId: null, isActive: true },
       });
       if (!distributor) {
-        throw new BadRequestException('Invalid platform distributor for recruitment');
+        throw new BadRequestException(
+          'Invalid platform distributor for recruitment',
+        );
       }
     }
     const baseSlug = slugify(profile.businessName) || 'merchant';
@@ -233,18 +257,22 @@ export class PlatformMerchantsService {
         data: { slug },
       }),
     ]);
-    await this.emailQueue.sendMerchantWelcome(profile.contactEmail, profile.businessName);
+    await this.emailQueue.sendMerchantWelcome(
+      profile.contactEmail,
+      profile.businessName,
+    );
     return updatedProfile;
   }
 
-  
   async reject(id: string, dto: RejectMerchantDto) {
     const profile = await this.findProfileById(id);
     if (
       profile.onboardingStatus !== OnboardingStatus.SUBMITTED &&
       profile.onboardingStatus !== OnboardingStatus.UNDER_REVIEW
     ) {
-      throw new BadRequestException('Merchant cannot be rejected in current status');
+      throw new BadRequestException(
+        'Merchant cannot be rejected in current status',
+      );
     }
     const updated = await this.prisma.merchantProfile.update({
       where: { id },
@@ -254,11 +282,13 @@ export class PlatformMerchantsService {
         reviewedAt: new Date(),
       },
     });
-    await this.emailQueue.sendMerchantRejected(profile.contactEmail, dto.reason);
+    await this.emailQueue.sendMerchantRejected(
+      profile.contactEmail,
+      dto.reason,
+    );
     return updated;
   }
 
-  
   async updateRecruiter(
     id: string,
     dto: { recruitedByDistributorId: string | null; reason: string },
@@ -266,7 +296,9 @@ export class PlatformMerchantsService {
   ) {
     const profile = await this.findProfileById(id);
     if (profile.onboardingStatus !== OnboardingStatus.APPROVED) {
-      throw new BadRequestException('Only approved merchants can change recruiter');
+      throw new BadRequestException(
+        'Only approved merchants can change recruiter',
+      );
     }
     if (!dto.reason?.trim()) {
       throw new BadRequestException('Reason is required');
@@ -324,7 +356,6 @@ export class PlatformMerchantsService {
     return { contacts, companies, leads };
   }
 
-  
   private async getDistributorSummaries(
     tenantId: string,
   ): Promise<MerchantDistributorSummary[]> {
@@ -423,7 +454,9 @@ export class PlatformMerchantsService {
     }
 
     const nextStorePublished =
-      dto.storePublished !== undefined ? dto.storePublished : profile.storePublished;
+      dto.storePublished !== undefined
+        ? dto.storePublished
+        : profile.storePublished;
     let nextIsFlagship =
       dto.isFlagship !== undefined ? dto.isFlagship : profile.isFlagship;
 

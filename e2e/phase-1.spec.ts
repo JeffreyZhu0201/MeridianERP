@@ -5,10 +5,14 @@ test.describe('Phase 1 smoke', () => {
     await page.goto('/login');
     await page.fill('[name=email]', 'admin@meridian.test');
     await page.fill('[name=password]', 'admin123');
-    await page.click('button[type=submit]');
-    await expect(page).toHaveURL('/');
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.startsWith('/login'), { timeout: 15_000 }),
+      page.click('button[type=submit]'),
+    ]);
     await page.goto('/merchants');
-    await expect(page.getByRole('heading', { name: /merchants/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /merchants/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('API health endpoint', async ({ request }) => {

@@ -130,6 +130,13 @@ export const store = {
     order: 'Order',
     action: 'Action',
   },
+  orderStatus: {
+    PENDING_PAYMENT: 'Pending payment',
+    PAID: 'Paid',
+    FULFILLED: 'Fulfilled',
+    CANCELLED: 'Cancelled',
+    REFUNDED: 'Refunded',
+  },
   confirmation: {
     title: 'Order confirmed',
     notFound: 'Order not found',
@@ -144,6 +151,7 @@ export const store = {
     backAccount: 'Account',
     orderTotal: 'Total: {amount}',
     orderDescription: 'Order {id}… · {status}',
+    lineItems: 'Items',
     pickupTitle: 'Pickup code',
     pickupHint: 'Show this code or QR at the branch counter when collecting your order.',
     pickupCodeLabel: '6-digit code',

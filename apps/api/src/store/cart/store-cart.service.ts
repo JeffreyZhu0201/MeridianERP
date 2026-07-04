@@ -30,7 +30,6 @@ const CART_INCLUDE = {
 
 @Injectable()
 export class StoreCartService {
-  
   constructor(
     private readonly prisma: PrismaService,
     private readonly storeTenant: StoreTenantService,
@@ -38,7 +37,6 @@ export class StoreCartService {
     private readonly inventoryService: InventoryService,
   ) {}
 
-  
   private async resolveCart(
     tenantId: string,
     sessionId: string | undefined,
@@ -48,7 +46,10 @@ export class StoreCartService {
     sessionId: string | undefined;
   }> {
     if (user?.userId) {
-      const customerId = await this.storeAuth.resolveCustomerId(user.userId, tenantId);
+      const customerId = await this.storeAuth.resolveCustomerId(
+        user.userId,
+        tenantId,
+      );
       let cart = await this.prisma.cart.findFirst({
         where: { tenantId, customerId },
         include: CART_INCLUDE,
@@ -92,7 +93,6 @@ export class StoreCartService {
     return { cart, sessionId };
   }
 
-  
   async getCart(
     slug: string,
     sessionId: string | undefined,
@@ -107,7 +107,6 @@ export class StoreCartService {
     return this.formatCart(cart, resolvedSession);
   }
 
-  
   async addItem(
     slug: string,
     dto: AddCartItemDto,
@@ -137,7 +136,9 @@ export class StoreCartService {
       },
     });
     const requestedQty = (existing?.quantity ?? 0) + dto.quantity;
-    const sellable = await this.inventoryService.getSellableQuantity(variant.id);
+    const sellable = await this.inventoryService.getSellableQuantity(
+      variant.id,
+    );
     if (sellable < requestedQty) {
       throw new BadRequestException('Insufficient inventory');
     }
@@ -163,7 +164,6 @@ export class StoreCartService {
     return this.formatCart(updated, user ? sessionId : guestSession);
   }
 
-  
   async updateItem(
     slug: string,
     itemId: string,
@@ -183,7 +183,9 @@ export class StoreCartService {
     if (!item) {
       throw new NotFoundException('Cart item not found');
     }
-    const sellable = await this.inventoryService.getSellableQuantity(item.variantId);
+    const sellable = await this.inventoryService.getSellableQuantity(
+      item.variantId,
+    );
     if (sellable < dto.quantity) {
       throw new BadRequestException('Insufficient inventory');
     }
@@ -198,7 +200,6 @@ export class StoreCartService {
     return this.formatCart(updated, resolvedSession);
   }
 
-  
   async removeItem(
     slug: string,
     itemId: string,

@@ -89,12 +89,9 @@ export function TransfersTable({
             </Select>
           </div>
         </div>
-        <Link
-          href="/inventory/transfers/new"
-          className="inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          {t('new')}
-        </Link>
+        <Button asChild size="sm" className="rounded-full">
+          <Link href="/inventory/transfers/new">{t('new')}</Link>
+        </Button>
       </div>
 
       {transfers.length === 0 ? (
@@ -102,12 +99,9 @@ export function TransfersTable({
           title={t('emptyTitle')}
           description={t('emptyDescription')}
           action={
-            <Link
-              href="/inventory/transfers/new"
-              className="inline-flex h-9 items-center rounded-full bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              {t('new')}
-            </Link>
+            <Button asChild size="sm" className="rounded-full">
+              <Link href="/inventory/transfers/new">{t('new')}</Link>
+            </Button>
           }
         />
       ) : (

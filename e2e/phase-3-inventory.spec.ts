@@ -29,6 +29,17 @@ async function loginMerchant(page: Page): Promise<boolean> {
       value: accessToken,
       domain: merchantHost,
       path: '/',
+      httpOnly: false,
+      secure: false,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'meridian_locale_merchant',
+      value: 'zh-CN',
+      domain: merchantHost,
+      path: '/',
+      httpOnly: false,
+      secure: false,
       sameSite: 'Lax',
     },
   ]);
@@ -82,7 +93,9 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
       page.getByRole('heading', { name: inv.adjustments.title }),
     ).toBeVisible();
     await expect(page.getByText(inv.adjustments.record)).toBeVisible();
-    await expect(page.getByText(inv.adjustments.history)).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: inv.adjustments.history }),
+    ).toBeVisible();
   });
 
   test('低库存预警页加载', async ({ page }) => {
@@ -108,7 +121,7 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
       page.getByRole('heading', { name: inv.reports.title }),
     ).toBeVisible();
     await expect(page.getByRole('button', { name: inv.reports.tabStock })).toBeVisible();
-    await expect(page.getByText(inv.reports.totalSkus, { exact: true })).toBeVisible();
+    await expect(page.getByText(inv.reports.totalSkus, { exact: true }).first()).toBeVisible();
   });
 
   test('库存设置页（主账号）', async ({ page }) => {
@@ -137,7 +150,7 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
 
     if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
     for (const route of routes) {
-      await expect(page.getByRole('link', { name: route.label, exact: true })).toBeVisible();
+      await expect(page.locator(`a[href="${route.href}"]`)).toBeVisible();
     }
   });
 

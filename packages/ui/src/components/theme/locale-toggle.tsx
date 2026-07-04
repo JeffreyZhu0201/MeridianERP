@@ -20,6 +20,7 @@
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { IconLanguage } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 import {
   type AppLocale,
   localeCookieName,
@@ -28,7 +29,7 @@ import {
 import { useTranslations } from 'next-intl';
 
 import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
+import { buttonVariants } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,9 @@ export function LocaleToggle({ portal, className }: LocaleToggleProps) {
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const t = useTranslations('common.locale');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   /** 设置语言并刷新页面 */
   function setLocale(next: AppLocale) {
@@ -63,16 +67,24 @@ export function LocaleToggle({ portal, className }: LocaleToggleProps) {
     router.refresh();
   }
 
+  const triggerClassName = cn(buttonVariants({ variant: 'ghost', size: 'icon' }));
+
+  if (!mounted) {
+    return (
+      <div className={cn(className)}>
+        <button type="button" className={triggerClassName} aria-label={t('label')} disabled>
+          <IconLanguage className="size-[1.2rem]" stroke={1.5} />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={cn(className)}>
       <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button variant="ghost" size="icon" aria-label={t('label')}>
-              <IconLanguage className="size-[1.2rem]" stroke={1.5} />
-            </Button>
-          }
-        />
+        <DropdownMenuTrigger className={triggerClassName} aria-label={t('label')}>
+          <IconLanguage className="size-[1.2rem]" stroke={1.5} />
+        </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setLocale('en')} disabled={locale === 'en'}>
             {t('en')}

@@ -29,7 +29,7 @@ import {
 } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
 
-import { StatusBadge } from '@/components/status-badge';
+import { OnboardingStatusBadge } from '@meridian/ui';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
 import { ApproveDialog } from '../../_components/approve-dialog';
 import { RejectDialog } from '../../_components/reject-dialog';
@@ -152,7 +152,7 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
       title={merchant.businessName}
       backHref="/merchants"
       backLabel={t('title')}
-      badges={<StatusBadge status={merchant.onboardingStatus} />}
+      badges={<OnboardingStatusBadge status={merchant.onboardingStatus} />}
       actions={
         canReview ? (
           <div className="flex gap-2">
@@ -324,7 +324,14 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
               <TableBody>
                 {merchant.distributors.map((distributor) => (
                   <TableRow key={distributor.id}>
-                    <TableCell className="font-medium">{distributor.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/distributors/${distributor.id}`}
+                        className="text-primary hover:underline"
+                      >
+                        {distributor.name}
+                      </Link>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={distributor.isActive ? 'success' : 'secondary'}>
                         {distributor.isActive ? tc('active') : tc('inactive')}

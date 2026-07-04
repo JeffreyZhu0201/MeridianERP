@@ -26,7 +26,9 @@ export class PlatformAccountsService {
     return this.prisma.platformAccount.findUnique({ where: { id } });
   }
 
-  async createAccount(input: CreatePlatformAccountInput): Promise<PlatformAccount> {
+  async createAccount(
+    input: CreatePlatformAccountInput,
+  ): Promise<PlatformAccount> {
     const email = input.email.toLowerCase();
     const existing = await this.findByEmail(email);
     if (existing) {
@@ -44,14 +46,21 @@ export class PlatformAccountsService {
     });
   }
 
-  async verifyPassword(account: PlatformAccount, password: string): Promise<boolean> {
+  async verifyPassword(
+    account: PlatformAccount,
+    password: string,
+  ): Promise<boolean> {
     return bcrypt.compare(password, account.password);
   }
 
   async ensureCustomer(
     accountId: string,
     tenantId: string,
-    profile?: { email?: string; firstName?: string | null; lastName?: string | null },
+    profile?: {
+      email?: string;
+      firstName?: string | null;
+      lastName?: string | null;
+    },
   ) {
     const account = await this.findById(accountId);
     if (!account) {
@@ -97,8 +106,12 @@ export class PlatformAccountsService {
           where: { accountId: account.id },
           select: { role: true },
         }),
-        this.prisma.distributor.findUnique({ where: { accountId: account.id } }),
-        this.prisma.platformUser.findUnique({ where: { email: account.email } }),
+        this.prisma.distributor.findUnique({
+          where: { accountId: account.id },
+        }),
+        this.prisma.platformUser.findUnique({
+          where: { email: account.email },
+        }),
       ]);
 
     const distributor =
@@ -120,7 +133,10 @@ export class PlatformAccountsService {
     if (merchantUsers.some((u) => u.role === MerchantRole.MERCHANT_STAFF)) {
       identities.push('MERCHANT_STAFF');
     }
-    if (distributorByAccount?.isActive || (!distributorByAccount && distributor?.isActive)) {
+    if (
+      distributorByAccount?.isActive ||
+      (!distributorByAccount && distributor?.isActive)
+    ) {
       identities.push('DISTRIBUTOR');
     }
     if (platformUser) identities.push('PLATFORM_ADMIN');

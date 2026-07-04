@@ -11,7 +11,6 @@ import type { DateRangeQuery } from '@meridian/shared';
 export class PlatformFundsController {
   constructor(private readonly service: PlatformFundsService) {}
 
-  
   @Get('summary')
   getSummary(@Query() query: DateRangeQuery) {
     return this.service.getSummary(query);

@@ -1,7 +1,8 @@
-import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { Badge,
+import {
+  Badge,
   BentoListHeader,
   EmptyState,
   formatMoney,
@@ -11,8 +12,9 @@ import { Badge,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow, } from '@meridian/ui/server';
-import type { StoreOrderListItem } from '@meridian/shared';
+  TableRow,
+} from '@meridian/ui/server';
+import type { OrderStatus, StoreOrderListItem } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
@@ -27,6 +29,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
   const token = await getToken();
   const locale = await getLocale();
   const t = await getTranslations('store');
+  const ts = await getTranslations('store.orderStatus');
 
   if (!token) {
     redirect(`/s/${slug}/login?from=${encodeURIComponent(`/s/${slug}/account`)}`);
@@ -40,6 +43,10 @@ export default async function AccountPage({ params }: AccountPageProps) {
   const storeName = slug.charAt(0).toUpperCase() + slug.slice(1);
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
   const orderTotal = orders.reduce((sum, order) => sum + Number(order.total), 0);
+
+  function orderStatusLabel(status: OrderStatus): string {
+    return ts(status);
+  }
 
   return (
     <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
@@ -89,7 +96,7 @@ export default async function AccountPage({ params }: AccountPageProps) {
                         {new Date(order.createdAt).toLocaleDateString(locale)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{order.status}</Badge>
+                        <Badge variant="secondary">{orderStatusLabel(order.status)}</Badge>
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {formatMoney(order.total, locale, order.currency)}
