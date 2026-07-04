@@ -10,6 +10,7 @@ import { getTranslations } from 'next-intl/server';
 import type { LowStockAlertItem } from '@meridian/shared';
 
 import { LowStockAlertsTable } from './_components/low-stock-alerts-table';
+
 export default async function AlertsPage() {
   const token = await getToken();
   if (!token) return null;
@@ -23,9 +24,6 @@ export default async function AlertsPage() {
 
   const items = alertsRes.items;
   const t = await getTranslations('merchant.inventory.alerts');
-
-  const uniqueWarehouses = new Set(items.map((i) => i.warehouseId)).size;
-  const tWh = await getTranslations('merchant.inventory.warehouses');
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName} lowStockAlertCount={items.length}>
@@ -47,7 +45,6 @@ export default async function AlertsPage() {
           metrics={[
             { title: t('title'), value: items.length },
             { title: t('onHand'), value: items.reduce((sum, i) => sum + i.quantityOnHand, 0) },
-            { title: tWh('title'), value: uniqueWarehouses },
           ]}
         />
         <Suspense>

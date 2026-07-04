@@ -20,9 +20,45 @@ export { ShellFrame, type ShellFrameProps } from './components/shells/shell-fram
 
 /** 商户分店 Shell - 侧边栏导航 + 低库存警告徽章 */
 export { MerchantShell, type MerchantShellProps } from './components/shells/merchant-shell';
+export { ShellUserChip, type ShellUserChipProps } from './components/shells/shell-user-chip';
 
 /** 商店前端 Shell - 商店选购页面布局（购物车、账户导航） */
 export { StoreShell, type StoreShellProps } from './components/shells/store-shell';
+
+/** 商店结账 Shell - 极简头部，无主导航 */
+export {
+  StoreCheckoutShell,
+  type StoreCheckoutShellProps,
+} from './components/shells/store-checkout-shell';
+
+/** Store catalog & account UI (stich.md) */
+export {
+  StoreCatalogHeader,
+  type StoreCatalogHeaderProps,
+  type StoreCatalogMetric,
+} from './components/store/store-catalog-header';
+export { StoreFeaturedHero, type StoreFeaturedHeroProps } from './components/store/store-featured-hero';
+export {
+  StoreCatalogExplorer,
+  StoreCatalogToolbar,
+  type StoreCatalogExplorerProps,
+  type StoreCatalogNavSource,
+  type StoreCatalogToolbarProps,
+} from './components/store/store-catalog-toolbar';
+export {
+  StoreAccountSidebar,
+  type StoreAccountSidebarProps,
+  type StoreAccountSection,
+} from './components/store/store-account-sidebar';
+export {
+  StoreAccountProfileHero,
+  type StoreAccountProfileHeroProps,
+} from './components/store/store-account-profile-hero';
+export {
+  StoreAccountOrderList,
+  type StoreAccountOrderListProps,
+  type StoreAccountOrderRow,
+} from './components/store/store-account-order-list';
 
 /** 渠道经销商 Shell - 简洁顶部导航 */
 export { DistributorShell, type DistributorShellProps } from './components/shells/distributor-shell';
@@ -150,7 +186,7 @@ export { Label } from './components/ui/label';
 export { Textarea } from './components/ui/textarea';
 
 /** 卡片组件 */
-export { Card, CardHeader, CardTitle, CardContent } from './components/ui/card';
+export { Card, CardHeader, CardTitle, CardDescription, CardContent } from './components/ui/card';
 
 /** 徽章/标签组件 */
 export { Badge, type BadgeProps, type BadgeVariant } from './components/ui/badge';

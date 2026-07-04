@@ -15,32 +15,18 @@ import {
   Textarea,
 } from '@meridian/ui';
 import { StockAdjustmentReason } from '@meridian/shared';
-import type { Warehouse } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 import type { VariantOption } from '@/lib/product-variants';
 
 interface AdjustmentFormProps {
-  warehouses: Warehouse[];
   variants: VariantOption[];
   token: string;
-  defaultWarehouseId?: string;
   prefillVariantId?: string;
-  prefillWarehouseId?: string;
 }
 
-export function AdjustmentForm({
-  warehouses,
-  variants,
-  token,
-  defaultWarehouseId,
-  prefillVariantId,
-  prefillWarehouseId,
-}: AdjustmentFormProps) {
+export function AdjustmentForm({ variants, token, prefillVariantId }: AdjustmentFormProps) {
   const router = useRouter();
-  const [warehouseId, setWarehouseId] = useState(
-    prefillWarehouseId ?? defaultWarehouseId ?? warehouses[0]?.id ?? '',
-  );
   const [variantId, setVariantId] = useState(prefillVariantId ?? '');
   const [direction, setDirection] = useState<'increase' | 'decrease'>('increase');
   const [quantity, setQuantity] = useState('1');
@@ -70,16 +56,19 @@ export function AdjustmentForm({
     const quantityDelta = direction === 'increase' ? qty : -qty;
 
     try {
-      await apiFetch('/merchant/inventory/adjustments', {
-        method: 'POST',
-        body: JSON.stringify({
-          warehouseId,
-          variantId,
-          quantityDelta,
-          reason,
-          note: note || undefined,
-        }),
-      }, token);
+      await apiFetch(
+        '/merchant/inventory/adjustments',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            variantId,
+            quantityDelta,
+            reason,
+            note: note || undefined,
+          }),
+        },
+        token,
+      );
       setQuantity('1');
       setNote('');
       router.refresh();
@@ -96,23 +85,7 @@ export function AdjustmentForm({
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="adj-warehouse">{t('warehouse')}</Label>
-              <Select
-                id="adj-warehouse"
-                value={warehouseId}
-                onChange={(e) => setWarehouseId(e.target.value)}
-                required
-                className="min-h-11"
-              >
-                {warehouses.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="adj-variant-search">{t('variant')}</Label>
               <Input
                 id="adj-variant-search"
@@ -128,7 +101,7 @@ export function AdjustmentForm({
                 required
                 className="min-h-11"
               >
-                <option value="">请选择变体</option>
+                <option value="">{t('selectVariant')}</option>
                 {filteredVariants.map((v) => (
                   <option key={v.id} value={v.id}>
                     {v.productName} — {v.sku}
@@ -182,7 +155,9 @@ export function AdjustmentForm({
                 className="min-h-11"
               >
                 <option value={StockAdjustmentReason.DAMAGE}>{tReasons('DAMAGE')}</option>
-                <option value={StockAdjustmentReason.COUNT_CORRECTION}>{tReasons('COUNT_CORRECTION')}</option>
+                <option value={StockAdjustmentReason.COUNT_CORRECTION}>
+                  {tReasons('COUNT_CORRECTION')}
+                </option>
                 <option value={StockAdjustmentReason.RETURN}>{tReasons('RETURN')}</option>
                 <option value={StockAdjustmentReason.OTHER}>{tReasons('OTHER')}</option>
               </Select>
@@ -195,7 +170,7 @@ export function AdjustmentForm({
               id="adj-note"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder={reason === StockAdjustmentReason.OTHER ? '选择「其他」时请填写说明' : '选填'}
+              placeholder={reason === StockAdjustmentReason.OTHER ? t('noteRequiredOther') : t('noteOptional')}
             />
           </div>
 
@@ -205,7 +180,9 @@ export function AdjustmentForm({
             </p>
           ) : null}
 
-          <Button type="submit" className="min-h-11">{t('submit')}</Button>
+          <Button type="submit" className="min-h-11">
+            {t('submit')}
+          </Button>
         </form>
       </CardContent>
     </Card>

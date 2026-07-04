@@ -135,9 +135,8 @@ export function InventoryReportsTabs({
               <TableHeader>
                 <TableRow>
                   <TableHead>{tStock('product')}</TableHead>
-                  <TableHead>变体</TableHead>
+                  <TableHead>{tAdj('variant')}</TableHead>
                   <TableHead>{tStock('sku')}</TableHead>
-                  <TableHead>{tStock('warehouse')}</TableHead>
                   <TableHead className="text-right">{tStock('onHand')}</TableHead>
                   <TableHead className="text-right">{tStock('threshold')}</TableHead>
                 </TableRow>
@@ -148,7 +147,6 @@ export function InventoryReportsTabs({
                     <TableCell>{level.variant.productName}</TableCell>
                     <TableCell>{level.variant.name}</TableCell>
                     <TableCell className="font-mono text-xs">{level.variant.sku}</TableCell>
-                    <TableCell>{level.warehouse.name}</TableCell>
                     <TableCell className="text-right font-mono text-sm tabular-nums">
                       {level.quantityOnHand}
                     </TableCell>
@@ -192,12 +190,11 @@ export function InventoryReportsTabs({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>日期</TableHead>
+                  <TableHead>{tAdj('date')}</TableHead>
                   <TableHead>{tStock('product')}</TableHead>
-                  <TableHead>{tStock('warehouse')}</TableHead>
-                  <TableHead className="text-right">变动</TableHead>
+                  <TableHead className="text-right">{tAdj('delta')}</TableHead>
                   <TableHead>{tAdj('reason')}</TableHead>
-                  <TableHead>操作人</TableHead>
+                  <TableHead>{tAdj('actor')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -207,7 +204,6 @@ export function InventoryReportsTabs({
                       {new Date(row.createdAt).toLocaleString()}
                     </TableCell>
                     <TableCell>{row.variant.productName}</TableCell>
-                    <TableCell>{row.warehouse.name}</TableCell>
                     <TableCell
                       className={`text-right font-mono text-sm ${
                         row.quantityDelta > 0 ? 'text-emerald-600' : 'text-destructive'

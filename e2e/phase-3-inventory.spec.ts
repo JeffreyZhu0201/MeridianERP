@@ -69,22 +69,12 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
     if (!ok) return;
   });
 
-  test('仓库页：标题与默认仓库可见', async ({ page }) => {
-    if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
-
-    await expect(
-      page.getByRole('heading', { name: inv.warehouses.title }),
-    ).toBeVisible();
-    await expect(page.getByRole('cell', { name: 'Default Warehouse' })).toBeVisible({
-      timeout: 10_000,
-    });
-  });
-
   test('库存水平页加载', async ({ page }) => {
     if (!(await gotoInventoryRoute(page, '/inventory/stock'))) return;
     await expect(
       page.getByRole('heading', { name: inv.stock.title }),
     ).toBeVisible();
+    await expect(page.getByText(inv.stock.singleWarehouseNote)).toBeVisible();
   });
 
   test('库存调整页：表单与历史区', async ({ page }) => {
@@ -105,13 +95,17 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
     ).toBeVisible();
   });
 
-  test('采购订单页：列表或空状态', async ({ page }) => {
-    if (!(await gotoInventoryRoute(page, '/inventory/purchase-orders'))) return;
+  test('去进货页加载', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/procurement'))) return;
     await expect(
-      page.getByRole('heading', { name: inv.purchaseOrders.title }),
+      page.getByRole('heading', { name: inv.procurement.shopTitle }),
     ).toBeVisible();
+  });
+
+  test('采购历史页加载', async ({ page }) => {
+    if (!(await gotoInventoryRoute(page, '/inventory/procurement/history'))) return;
     await expect(
-      page.locator('a[href="/inventory/purchase-orders/new"]'),
+      page.getByRole('heading', { name: inv.procurement.historyTitle }),
     ).toBeVisible();
   });
 
@@ -134,11 +128,11 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
 
   test('侧栏库存子导航可访问全部路由', async ({ page }) => {
     const routes = [
-      { href: '/inventory/warehouses', label: inv.nav.warehouses },
       { href: '/inventory/stock', label: inv.nav.stock },
       { href: '/inventory/adjustments', label: inv.nav.adjustments },
       { href: '/inventory/alerts', label: inv.nav.alerts },
-      { href: '/inventory/purchase-orders', label: inv.nav.purchaseOrders },
+      { href: '/inventory/procurement', label: inv.nav.procurementShop },
+      { href: '/inventory/procurement/history', label: inv.nav.procurementHistory },
       { href: '/inventory/reports', label: inv.nav.reports },
       { href: '/inventory/settings', label: inv.nav.settings },
     ];
@@ -148,14 +142,17 @@ test.describe('Phase 3 商户库存（中文 UI）', () => {
       await expect(page.locator('main h1').first()).toBeVisible();
     }
 
-    if (!(await gotoInventoryRoute(page, '/inventory/warehouses'))) return;
+    if (!(await gotoInventoryRoute(page, '/inventory/stock'))) return;
     for (const route of routes) {
       await expect(page.locator(`a[href="${route.href}"]`)).toBeVisible();
     }
+    await expect(page.locator('a[href="/inventory/warehouses"]')).toHaveCount(0);
+    await expect(page.locator('a[href="/inventory/purchase-orders"]')).toHaveCount(0);
+    await expect(page.locator('a[href="/inventory/transfers"]')).toHaveCount(0);
   });
 
-  test('新建采购单页可打开', async ({ page }) => {
-    if (!(await gotoInventoryRoute(page, '/inventory/purchase-orders/new'))) return;
-    await expect(page.locator('main')).toBeVisible();
+  test('旧采购单路由重定向至采购历史', async ({ page }) => {
+    await page.goto('/inventory/purchase-orders', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/inventory\/procurement\/history/);
   });
 });

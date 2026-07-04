@@ -46,7 +46,7 @@ export default async function OrderConfirmationPage({
       <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
         <DetailPageFrame
           title={t('confirmation.notFound')}
-          backHref={`/s/${slug}/account`}
+          backHref="/shop/account"
           backLabel={t('confirmation.backAccount')}
         >
           <p className="text-sm text-muted-foreground">{t('confirmation.notFoundDescription')}</p>
@@ -66,7 +66,7 @@ export default async function OrderConfirmationPage({
           id: order.id.slice(0, 8),
           status: statusLabel,
         })}
-        backHref={`/s/${slug}/account`}
+        backHref="/shop/account"
         backLabel={t('confirmation.backAccount')}
       >
         <BentoDetailHero

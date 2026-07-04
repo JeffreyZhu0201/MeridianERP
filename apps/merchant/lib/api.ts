@@ -65,6 +65,8 @@ export interface Contact {
   company?: { name: string };
 }
 
+export type { CrmStoreCustomerListItem, MerchantSession } from '@meridian/shared';
+
 export interface Company {
   id: string;
   name: string;

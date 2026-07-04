@@ -15,6 +15,7 @@ import {
   ReceivePurchaseOrderDto,
   UpdatePurchaseOrderDto,
 } from './dto/inventory.dto';
+import { MerchantWarehousesService } from './merchant-warehouses.service';
 
 @Injectable()
 export class MerchantPurchaseOrdersService {
@@ -22,6 +23,7 @@ export class MerchantPurchaseOrdersService {
     private readonly prisma: PrismaService,
     private readonly inventory: InventoryService,
     private readonly inventoryQueue: InventoryQueueService,
+    private readonly warehouses: MerchantWarehousesService,
   ) {}
 
   async listPurchaseOrders(tenantId: string, query: PurchaseOrderListQueryDto) {
@@ -65,14 +67,16 @@ export class MerchantPurchaseOrdersService {
   ) {
     const tenantId = user.tenantId!;
     await this.inventory.migrateTenantInventory(tenantId);
-    await this.assertWarehouseActive(tenantId, dto.warehouseId);
+    const warehouseId =
+      dto.warehouseId ?? (await this.warehouses.resolveDefaultWarehouseId(tenantId));
+    await this.assertWarehouseActive(tenantId, warehouseId);
     await this.validatePoLines(tenantId, dto.lines);
 
     const poNumber = await this.nextPoNumber(tenantId);
     const po = await this.prisma.purchaseOrder.create({
       data: {
         tenantId,
-        warehouseId: dto.warehouseId,
+        warehouseId,
         supplierName: dto.supplierName,
         status:
           dto.status === 'ORDERED'

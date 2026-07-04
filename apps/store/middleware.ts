@@ -10,6 +10,10 @@ function parseStorePath(pathname: string): { slug: string; rest: string } | null
 }
 
 function isPublicStorePath(pathname: string): boolean {
+  if (pathname === '/shop/account') {
+    return false;
+  }
+
   if (
     pathname === '/' ||
     pathname === '/shop' ||

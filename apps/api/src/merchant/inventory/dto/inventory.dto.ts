@@ -8,7 +8,6 @@ import {
   ValidateNested,
   ArrayMinSize,
   IsIn,
-  MinLength,
   ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -20,36 +19,10 @@ export class UpdateInventorySettingsDto {
   defaultReorderThreshold!: number;
 }
 
-export class CreateWarehouseDto {
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
-
-  @IsOptional()
-  @IsString()
-  address?: string;
-
-  @IsOptional()
-  isDefault?: boolean;
-}
-
-export class UpdateWarehouseDto {
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  name?: string;
-
-  @IsOptional()
-  @IsString()
-  address?: string | null;
-
-  @IsOptional()
-  isActive?: boolean;
-}
-
 export class CreateStockAdjustmentDto {
+  @IsOptional()
   @IsString()
-  warehouseId!: string;
+  warehouseId?: string;
 
   @IsString()
   variantId!: string;
@@ -83,8 +56,9 @@ export class CreatePurchaseOrderLineDto {
 }
 
 export class CreatePurchaseOrderDto {
+  @IsOptional()
   @IsString()
-  warehouseId!: string;
+  warehouseId?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -192,40 +166,4 @@ export class PurchaseOrderListQueryDto extends ListQueryDto {
   @IsOptional()
   @IsString()
   warehouseId?: string;
-}
-
-export class CreateStockTransferLineDto {
-  @IsString()
-  variantId!: string;
-
-  @IsInt()
-  @Min(1)
-  quantity!: number;
-}
-
-export class CreateStockTransferDto {
-  @IsString()
-  fromWarehouseId!: string;
-
-  @IsString()
-  toWarehouseId!: string;
-
-  @IsOptional()
-  @IsString()
-  note?: string;
-
-  @ValidateNested({ each: true })
-  @Type(() => CreateStockTransferLineDto)
-  @ArrayMinSize(1)
-  lines!: CreateStockTransferLineDto[];
-}
-
-export class StockTransferListQueryDto extends ListQueryDto {
-  @IsOptional()
-  @IsString()
-  fromWarehouseId?: string;
-
-  @IsOptional()
-  @IsString()
-  toWarehouseId?: string;
 }

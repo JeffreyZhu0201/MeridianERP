@@ -38,3 +38,14 @@ export interface CreateActivityRequest {
 export interface DeleteActivityResponse {
   deleted: true;
 }
+
+/** Merchant CRM: store customer with at least one fulfilled order */
+export interface CrmStoreCustomerListItem {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  completedOrderCount: number;
+  totalSpent: string | number;
+  lastOrderAt: string;
+}

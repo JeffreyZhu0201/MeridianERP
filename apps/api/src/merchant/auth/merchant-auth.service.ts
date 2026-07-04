@@ -130,4 +130,33 @@ export class MerchantAuthService {
       accessToken: this.signMerchantToken(user.id, user.tenantId, user.role),
     };
   }
+
+  async me(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        account: { select: { firstName: true, lastName: true } },
+      },
+    });
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const firstName = user.account.firstName;
+    const lastName = user.account.lastName;
+    const parts = [firstName, lastName].filter(Boolean);
+    const displayName =
+      parts.length > 0
+        ? parts.join(' ')
+        : (user.email.split('@')[0]?.trim() || user.email);
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      firstName,
+      lastName,
+      displayName,
+    };
+  }
 }

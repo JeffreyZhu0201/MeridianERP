@@ -35,12 +35,14 @@ export interface MerchantOrderListItem {
   status: OrderStatus;
   fulfillmentType: FulfillmentType;
   pickupVerifiedAt?: string | null;
+  shippedAt?: string | null;
   currency: string;
   subtotal: string | number;
   tax: string | number;
   total: string | number;
   guestEmail: string | null;
   pickupCode?: string | null;
+  deliveryAddress?: DeliveryAddress | null;
   createdAt: string;
   updatedAt: string;
   customer: MerchantOrderCustomer | null;
@@ -102,4 +104,11 @@ export interface StoreOrderDetail extends StoreOrderListItem {
   deliveryAddress?: DeliveryAddress | null;
   shippedAt?: string | null;
   lines: MerchantOrderLine[];
+}
+
+export interface StoreCustomerProfile {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
 }

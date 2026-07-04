@@ -46,7 +46,8 @@ export class StoreCheckoutService {
     sessionId: string | undefined,
     user?: AuthenticatedUser,
   ) {
-    const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
+    const { tenant, profile } = await this.storeTenant.resolveApprovedTenant(slug);
+    const isFlagship = profile.isFlagship;
     let cart;
     let customerId: string | null = null;
     if (user?.userId) {
@@ -83,11 +84,19 @@ export class StoreCheckoutService {
         'guestEmail is required for guest checkout',
       );
     }
+    if (isFlagship && dto.fulfillmentType === FulfillmentType.PICKUP) {
+      throw new BadRequestException(
+        'Pickup is not available for flagship store orders',
+      );
+    }
     for (const item of cart.items) {
       if (!item.variant.isActive || !item.variant.product.isPublished) {
         throw new BadRequestException('Cart contains unavailable items');
       }
-      if (dto.fulfillmentType === FulfillmentType.PICKUP) {
+      if (
+        dto.fulfillmentType === FulfillmentType.PICKUP ||
+        (dto.fulfillmentType === FulfillmentType.DELIVERY && !isFlagship)
+      ) {
         const sellable = await this.inventoryService.getSellableQuantity(
           item.variantId,
         );
@@ -97,7 +106,7 @@ export class StoreCheckoutService {
           );
         }
       }
-      if (dto.fulfillmentType === FulfillmentType.DELIVERY) {
+      if (dto.fulfillmentType === FulfillmentType.DELIVERY && isFlagship) {
         const masterSkuId = item.variant.masterSkuId;
         if (!masterSkuId) {
           throw new BadRequestException(

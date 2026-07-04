@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '../../auth/interfaces/jwt-payload.interf
 import { EnvService } from '../../config/env.service';
 import { PaymentService } from '../../payment/payment.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { InventoryService } from '../../inventory/inventory.service';
 import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { UpdateMerchantSettingsDto } from './dto/update-merchant-settings.dto';
 import {
@@ -24,6 +25,7 @@ export class MerchantSettingsService {
     private readonly env: EnvService,
     private readonly payment: PaymentService,
     private readonly platformAccounts: PlatformAccountsService,
+    private readonly inventory: InventoryService,
   ) {}
 
   private assertOwner(user: AuthenticatedUser) {
@@ -72,12 +74,17 @@ export class MerchantSettingsService {
   }
 
   async getSettings(tenantId: string) {
-    const [profile, tenant, settings] = await Promise.all([
+    await this.inventory.migrateTenantInventory(tenantId);
+
+    const [profile, tenant, settings, defaultWarehouse] = await Promise.all([
       this.prisma.merchantProfile.findUniqueOrThrow({
         where: { tenantId },
       }),
       this.prisma.tenant.findUniqueOrThrow({ where: { id: tenantId } }),
       this.ensureTenantSettings(tenantId),
+      this.prisma.warehouse.findFirst({
+        where: { tenantId, isDefault: true },
+      }),
     ]);
 
     const storeUrl = `${this.storeAppUrl()}/s/${tenant.slug}`;
@@ -89,6 +96,8 @@ export class MerchantSettingsService {
         legalName: profile.legalName,
         contactEmail: profile.contactEmail,
         contactPhone: profile.contactPhone,
+        storeAddress: defaultWarehouse?.address ?? null,
+        isFlagship: profile.isFlagship,
       },
       storeUrl,
       stripeMode: this.stripeMode(),
@@ -102,6 +111,8 @@ export class MerchantSettingsService {
     this.assertOwner(user);
     const tenantId = user.tenantId!;
 
+    await this.inventory.migrateTenantInventory(tenantId);
+
     const profileData: Prisma.MerchantProfileUpdateInput = {};
     if (dto.businessName !== undefined)
       profileData.businessName = dto.businessName;
@@ -109,6 +120,7 @@ export class MerchantSettingsService {
       profileData.contactEmail = dto.contactEmail;
     if (dto.contactPhone !== undefined)
       profileData.contactPhone = dto.contactPhone;
+    if (dto.legalName !== undefined) profileData.legalName = dto.legalName;
 
     const settingsData: Prisma.TenantSettingsUpdateInput = {};
     if (dto.defaultCommissionRate !== undefined) {
@@ -133,6 +145,17 @@ export class MerchantSettingsService {
           where: { tenantId },
           data: profileData,
         });
+      }
+      if (dto.storeAddress !== undefined) {
+        const defaultWarehouse = await tx.warehouse.findFirst({
+          where: { tenantId, isDefault: true },
+        });
+        if (defaultWarehouse) {
+          await tx.warehouse.update({
+            where: { id: defaultWarehouse.id },
+            data: { address: dto.storeAddress },
+          });
+        }
       }
       if (Object.keys(settingsData).length > 0) {
         const existing = await tx.tenantSettings.findUnique({

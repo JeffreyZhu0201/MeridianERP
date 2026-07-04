@@ -65,13 +65,13 @@ export function LowStockAlertsTable({ items }: LowStockAlertsTableProps) {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Link
-                    href={`/inventory/adjustments?variantId=${item.variantId}&warehouseId=${item.warehouseId}`}
+                    href={`/inventory/adjustments?variantId=${item.variantId}`}
                     className="inline-flex min-h-9 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
                     {tAdj('record')}
                   </Link>
                   <Link
-                    href={`/inventory/purchase-orders/new?variantId=${item.variantId}`}
+                    href="/inventory/procurement"
                     className="inline-flex min-h-9 items-center rounded-full border border-border dark:border-border/40 bg-background px-3 text-xs font-medium hover:bg-accent"
                   >
                     {t('reorder')}

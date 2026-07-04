@@ -2,22 +2,14 @@ import { getTranslations } from 'next-intl/server';
 import { EmptyState, ProductCard } from '@meridian/ui/server';
 import type { UnifiedStoreProduct } from '@meridian/shared';
 
+import {
+  unifiedProductFromPrice,
+  unifiedProductInStock,
+} from '@/lib/pricing';
+
 interface UnifiedProductGridProps {
   products: UnifiedStoreProduct[];
   fulfillmentSlug: string;
-}
-
-function getDisplayPrice(product: UnifiedStoreProduct): number {
-  const prices = product.variants
-    .filter((v) => v.inStock && v.branchPrice != null)
-    .map((v) => Number(v.branchPrice));
-  if (prices.length > 0) return Math.min(...prices);
-  const flagship = product.variants.map((v) => Number(v.flagshipPrice));
-  return flagship.length > 0 ? Math.min(...flagship) : 0;
-}
-
-function isProductInStock(product: UnifiedStoreProduct): boolean {
-  return product.variants.some((v) => v.inStock);
 }
 
 export async function UnifiedProductGrid({
@@ -33,7 +25,7 @@ export async function UnifiedProductGrid({
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => {
-        const inStock = isProductInStock(product);
+        const inStock = unifiedProductInStock(product);
         return (
           <ProductCard
             key={product.id}
@@ -42,7 +34,7 @@ export async function UnifiedProductGrid({
             slug={product.slug}
             storeSlug={fulfillmentSlug}
             href={`/shop/products/${product.slug}`}
-            priceFrom={getDisplayPrice(product)}
+            priceFrom={unifiedProductFromPrice(product)}
             outOfStock={!inStock}
             outOfStockLabel={t('catalog.outOfStock')}
             addToCartLabel={t('product.addToCart')}

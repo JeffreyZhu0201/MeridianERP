@@ -1,8 +1,10 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { StoreCustomerProfile } from '@meridian/shared';
 import { JwtService } from '@nestjs/jwt';
 import { EnvService } from '../../config/env.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -203,5 +205,31 @@ export class StoreAuthService {
     }
 
     throw new UnauthorizedException('Invalid store session');
+  }
+
+  async getProfile(userId: string): Promise<StoreCustomerProfile> {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: userId },
+    });
+    if (customer) {
+      return {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+      };
+    }
+
+    const account = await this.platformAccounts.findById(userId);
+    if (account) {
+      return {
+        id: account.id,
+        email: account.email,
+        firstName: account.firstName,
+        lastName: account.lastName,
+      };
+    }
+
+    throw new NotFoundException('Profile not found');
   }
 }

@@ -1,5 +1,6 @@
-import { OnboardingStatus, PrismaClient } from '@prisma/client';
+import { OnboardingStatus, Prisma, PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { PLUGIN_CATALOG_SEED } from '../src/plugins/plugin-catalog.seed';
 
 const prisma = new PrismaClient();
 
@@ -48,7 +49,52 @@ async function seedTenantInventory(tenantId: string) {
   }
 }
 
+async function seedPluginCatalog() {
+  for (const entry of PLUGIN_CATALOG_SEED) {
+    await prisma.pluginDefinition.upsert({
+      where: { code: entry.code },
+      create: {
+        code: entry.code,
+        category: entry.category,
+        icon: entry.icon,
+        sortOrder: entry.sortOrder,
+        nameKey: entry.nameKey,
+        descriptionKey: entry.descriptionKey,
+        navRoutes: entry.navRoutes
+          ? (entry.navRoutes as unknown as Prisma.InputJsonValue)
+          : undefined,
+        isDefaultOnSignup: entry.isDefaultOnSignup,
+      },
+      update: {
+        category: entry.category,
+        icon: entry.icon,
+        sortOrder: entry.sortOrder,
+        nameKey: entry.nameKey,
+        descriptionKey: entry.descriptionKey,
+        navRoutes: entry.navRoutes
+          ? (entry.navRoutes as unknown as Prisma.InputJsonValue)
+          : undefined,
+        isDefaultOnSignup: entry.isDefaultOnSignup,
+      },
+    });
+  }
+
+  const crm = await prisma.pluginDefinition.findUnique({ where: { code: 'crm' } });
+  if (!crm) return;
+
+  const tenants = await prisma.tenant.findMany({ select: { id: true } });
+  for (const tenant of tenants) {
+    await prisma.tenantPlugin.upsert({
+      where: { tenantId_pluginId: { tenantId: tenant.id, pluginId: crm.id } },
+      create: { tenantId: tenant.id, pluginId: crm.id, status: 'INSTALLED' },
+      update: {},
+    });
+  }
+}
+
 async function main() {
+  await seedPluginCatalog();
+
   await prisma.platformSettings.upsert({
     where: { id: 'singleton' },
     update: {},

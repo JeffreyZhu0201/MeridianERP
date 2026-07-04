@@ -1,17 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { EmptyState, ProductCard } from '@meridian/ui/server';
 
+import { branchProductFromPrice } from '@/lib/pricing';
 import type { Product } from '@/lib/api';
 
 interface ProductGridProps {
   products: Product[];
   storeSlug: string;
-}
-
-function getFromPrice(variants: Product['variants']): number {
-  const active = variants.filter((v) => v.isActive);
-  if (active.length === 0) return 0;
-  return Math.min(...active.map((v) => Number(v.price)));
 }
 
 export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
@@ -30,7 +25,7 @@ export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
           name={product.name}
           slug={product.slug}
           storeSlug={storeSlug}
-          priceFrom={getFromPrice(product.variants)}
+          priceFrom={branchProductFromPrice(product.variants)}
           addToCartLabel={t('product.addToCart')}
         />
       ))}

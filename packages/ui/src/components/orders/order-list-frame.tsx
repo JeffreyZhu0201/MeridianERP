@@ -169,12 +169,12 @@ export function OrderListFrame({
         </Tabs>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Input placeholder={searchPlaceholder} className="max-w-xs" />
+      <div className="flex flex-wrap items-center gap-2">
+        <Input placeholder={searchPlaceholder} className="h-9 max-w-xs text-sm" />
         <Select
           value={statusFilter}
           onChange={(e) => onStatusFilterChange?.(e.target.value)}
-          className="w-[160px]"
+          className="h-9 w-[140px] text-sm"
         >
           <option value="all">All statuses</option>
           <option value="PAID">Paid</option>

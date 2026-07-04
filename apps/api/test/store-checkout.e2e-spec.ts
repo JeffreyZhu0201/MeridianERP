@@ -34,11 +34,8 @@ describe('StoreCheckout (e2e)', () => {
       'Acme Store',
       'owner@acme.test',
       password,
+      { isFlagship: true },
     );
-    await prisma.merchantProfile.update({
-      where: { tenantId: tenant.id },
-      data: { isFlagship: true },
-    });
     merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
     const distributor = await prisma.distributor.create({
@@ -64,6 +61,11 @@ describe('StoreCheckout (e2e)', () => {
       .expect(201);
 
     variantId = product.body.variants[0].id;
+
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant.id },
+      data: { isFlagship: false },
+    });
   });
 
   afterEach(async () => {
@@ -358,5 +360,63 @@ describe('StoreCheckout (e2e)', () => {
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({ name: 'Blocked', commissionRate: 5 })
       .expect(403);
+  });
+
+  it('rejects pickup checkout on flagship store', async () => {
+    const tenant = await prisma.tenant.findUnique({
+      where: { slug: 'acme-store' },
+    });
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant!.id },
+      data: { isFlagship: true },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/checkout')
+      .set('X-Cart-Session', sessionId)
+      .send({ guestEmail: 'guest@example.com', fulfillmentType: 'PICKUP' })
+      .expect(400);
+  });
+
+  it('branch delivery checkout validates branch inventory not master SKU', async () => {
+    const tenant = await prisma.tenant.findUnique({
+      where: { slug: 'acme-store' },
+    });
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: variantId },
+    });
+    await prisma.masterSku.update({
+      where: { id: variant!.masterSkuId! },
+      data: { quantityOnHand: 0 },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/cart/items')
+      .set('X-Cart-Session', sessionId)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    const checkout = await request(app.getHttpServer())
+      .post('/api/v1/store/acme-store/checkout')
+      .set('X-Cart-Session', sessionId)
+      .send({
+        guestEmail: 'delivery@example.com',
+        fulfillmentType: 'DELIVERY',
+        deliveryAddress: {
+          name: 'Buyer',
+          phone: '13800000000',
+          line1: '1 Test St',
+          city: 'Shanghai',
+        },
+      })
+      .expect(201);
+
+    expect(checkout.body.order.status).toBe('PENDING_PAYMENT');
   });
 });

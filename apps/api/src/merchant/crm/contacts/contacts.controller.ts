@@ -13,10 +13,13 @@ import { MerchantAuthGuard } from '../../../auth/guards/merchant-auth.guard';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.interface';
 import { CreateContactDto, UpdateContactDto } from '../dto/contact.dto';
+import { RequiresPlugin } from '../../../plugins/decorators/requires-plugin.decorator';
+import { CrmPluginGuard } from '../../../plugins/crm-plugin.guard';
 import { ContactsService } from './contacts.service';
 
+@RequiresPlugin('crm')
 @Controller('merchant/contacts')
-@UseGuards(MerchantAuthGuard)
+@UseGuards(MerchantAuthGuard, CrmPluginGuard)
 export class ContactsController {
   constructor(private readonly contactsService: ContactsService) {}
 

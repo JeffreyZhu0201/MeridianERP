@@ -1,34 +1,48 @@
-import Link from 'next/link';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import {
   EmptyState,
+  formatMoney,
   StoreCatalogHeader,
-  StoreCatalogToolbar,
   StoreFeaturedHero,
 } from '@meridian/ui/server';
+import { StoreCatalogExplorer } from '@meridian/ui';
+import type { StoreCatalogFiltersResponse, StoreCatalogSort } from '@meridian/shared';
 
 import { StoreShellWrapper } from '@/components/store-shell-wrapper';
 import { apiFetch, storePath, type Cart, type Product } from '@/lib/api';
 import { getToken } from '@/lib/auth';
+import {
+  parseCatalogSearchParams,
+  storeProductsApiPath,
+  storeProductsFiltersApiPath,
+} from '@/lib/fulfillment';
+import { branchProductFromPrice } from '@/lib/pricing';
 import { ProductGrid } from './_components/product-grid';
 
 interface StoreHomePageProps {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-function getFromPrice(variants: Product['variants']): number {
-  const active = variants.filter((v) => v.isActive);
-  if (active.length === 0) return 0;
-  return Math.min(...active.map((v) => Number(v.price)));
-}
-
-export default async function StoreHomePage({ params }: StoreHomePageProps) {
+export default async function StoreHomePage({ params, searchParams }: StoreHomePageProps) {
   const { slug } = await params;
   const token = await getToken();
+  const locale = await getLocale();
   const t = await getTranslations('store');
+  const catalogQuery = parseCatalogSearchParams(await searchParams);
 
-  const [products, cart] = await Promise.all([
-    apiFetch<Product[]>(storePath(slug, 'products')).catch(() => []),
+  const sortLabels: Record<StoreCatalogSort, string> = {
+    newest: t('catalogToolbar.sortNewest'),
+    name_asc: t('catalogToolbar.sortNameAsc'),
+    price_asc: t('catalogToolbar.sortPriceAsc'),
+    price_desc: t('catalogToolbar.sortPriceDesc'),
+  };
+
+  const [products, filters, cart] = await Promise.all([
+    apiFetch<Product[]>(storeProductsApiPath(slug, catalogQuery)).catch(() => []),
+    apiFetch<StoreCatalogFiltersResponse>(storeProductsFiltersApiPath(slug)).catch(() => ({
+      categories: [],
+    })),
     apiFetch<Cart>(storePath(slug, 'cart'), {}, token).catch(() => null),
   ]);
 
@@ -42,10 +56,10 @@ export default async function StoreHomePage({ params }: StoreHomePageProps) {
         title={t('home.shop')}
         description={t('home.browseCatalog')}
         metrics={[
-          { title: 'Catalog', value: products.length },
+          { title: t('home.catalogMetric'), value: products.length },
           {
             title: t('nav.cart'),
-            value: cartCount === 0 ? '0' : `${cartCount} items`,
+            value: cartCount === 0 ? '0' : t('home.cartItems', { count: cartCount }),
             accent: cartCount > 0,
           },
         ]}
@@ -55,22 +69,34 @@ export default async function StoreHomePage({ params }: StoreHomePageProps) {
         <StoreFeaturedHero
           title={featured.name}
           description={featured.description ?? undefined}
-          price={new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-          }).format(getFromPrice(featured.variants))}
+          price={formatMoney(branchProductFromPrice(featured.variants), locale)}
           href={`/s/${slug}/products/${featured.slug}`}
           ctaLabel={t('product.viewProduct')}
         />
       ) : null}
 
-      <StoreCatalogToolbar title={t('home.allProducts')} />
-
-      {products.length === 0 ? (
-        <EmptyState title={t('home.empty')} />
-      ) : (
-        <ProductGrid products={products} storeSlug={slug} />
-      )}
+      <StoreCatalogExplorer
+        title={t('home.allProducts')}
+        basePath={`/s/${slug}`}
+        categories={filters.categories}
+        current={catalogQuery}
+        sortLabels={sortLabels}
+        filterLabel={t('catalogToolbar.filter')}
+        sortLabel={t('catalogToolbar.sort')}
+        searchPlaceholder={t('catalogToolbar.searchPlaceholder')}
+        clearSearchLabel={t('catalogToolbar.clearSearch')}
+        searchingLabel={t('catalogToolbar.searching')}
+        allCategoriesLabel={t('catalogToolbar.allCategories')}
+        inStockOnlyLabel={t('catalogToolbar.inStockOnly')}
+      >
+        {products.length === 0 ? (
+          <EmptyState
+            title={catalogQuery.q ? t('home.emptySearch') : t('home.empty')}
+          />
+        ) : (
+          <ProductGrid products={products} storeSlug={slug} />
+        )}
+      </StoreCatalogExplorer>
     </StoreShellWrapper>
   );
 }

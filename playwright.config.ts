@@ -21,7 +21,7 @@ export default defineConfig({
   projects: [
     {
       name: 'admin',
-      testMatch: /phase-1\.spec\.ts/,
+      testMatch: /phase-1\.spec\.ts|merchant-plugins-admin\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: ADMIN_URL },
     },
     {
@@ -32,7 +32,7 @@ export default defineConfig({
     },
     {
       name: 'merchant',
-      testMatch: /phase-3-inventory\.spec\.ts|i18n-locale\.spec\.ts/,
+      testMatch: /phase-3-inventory\.spec\.ts|i18n-locale\.spec\.ts|merchant-plugins\.spec\.ts/,
       grepInvert: /@store-app/,
       use: { ...devices['Desktop Chrome'], baseURL: MERCHANT_URL },
     },

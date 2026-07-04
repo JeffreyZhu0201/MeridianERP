@@ -42,7 +42,20 @@ export {
   type StoreCatalogMetric,
 } from './components/store/store-catalog-header';
 export { StoreFeaturedHero, type StoreFeaturedHeroProps } from './components/store/store-featured-hero';
-export { StoreCatalogToolbar, type StoreCatalogToolbarProps } from './components/store/store-catalog-toolbar';
+export {
+  StoreAccountSidebar,
+  type StoreAccountSidebarProps,
+  type StoreAccountSection,
+} from './components/store/store-account-sidebar';
+export {
+  StoreAccountProfileHero,
+  type StoreAccountProfileHeroProps,
+} from './components/store/store-account-profile-hero';
+export {
+  StoreAccountOrderList,
+  type StoreAccountOrderListProps,
+  type StoreAccountOrderRow,
+} from './components/store/store-account-order-list';
 export { MetricCard, type MetricCardProps } from './components/metric-card';
 export { PageHeader, type PageHeaderProps } from './components/page-header';
 export { EmptyState, type EmptyStateProps } from './components/empty-state';

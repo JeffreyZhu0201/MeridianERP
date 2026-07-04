@@ -16,6 +16,7 @@ import { RecruitInviteModule } from './recruit-invite/recruit-invite.module';
 import { QueueModule } from './queue/queue.module';
 import { StoreModule } from './store/store.module';
 import { DistributorModule } from './distributor/distributor.module';
+import { PluginModule } from './plugins/plugin.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { DistributorModule } from './distributor/distributor.module';
     PaymentModule,
     CommissionModule,
     InventoryModule,
+    PluginModule,
     PlatformModule,
     MerchantModule,
     BindingsModule,

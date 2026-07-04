@@ -14,6 +14,7 @@ export type AdminPermission =
   | 'orders'
   | 'allocations'
   | 'replenishment'
+  | 'procurement'
   | 'withdrawals'
   | 'funds'
   | 'settlements'
@@ -31,6 +32,7 @@ export const ADMIN_ROLE_PERMISSIONS: Record<AdminPlatformRole, AdminPermission[]
     'orders',
     'allocations',
     'replenishment',
+    'procurement',
     'withdrawals',
     'funds',
     'settlements',
@@ -38,8 +40,8 @@ export const ADMIN_ROLE_PERMISSIONS: Record<AdminPlatformRole, AdminPermission[]
     'settings',
   ],
   FINANCE: ['dashboard', 'withdrawals', 'funds', 'settlements'],
-  FULFILLMENT: ['dashboard', 'orders', 'allocations', 'replenishment'],
-  REVIEWER: ['dashboard', 'merchants', 'replenishment', 'withdrawals'],
+  FULFILLMENT: ['dashboard', 'orders', 'allocations', 'replenishment', 'procurement'],
+  REVIEWER: ['dashboard', 'merchants', 'replenishment', 'procurement', 'withdrawals'],
 };
 
 export const ADMIN_ROLE_HOME_PATH: Record<AdminPlatformRole, string> = {
@@ -57,6 +59,7 @@ const PATH_PERMISSION_MAP: Array<{ prefix: string; permission: AdminPermission }
   { prefix: '/distributors', permission: 'distributors' },
   { prefix: '/orders', permission: 'orders' },
   { prefix: '/allocations', permission: 'allocations' },
+  { prefix: '/procurement', permission: 'procurement' },
   { prefix: '/replenishment', permission: 'replenishment' },
   { prefix: '/withdrawals', permission: 'withdrawals' },
   { prefix: '/funds', permission: 'funds' },

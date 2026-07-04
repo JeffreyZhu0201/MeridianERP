@@ -4,13 +4,24 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
+  StoreCatalogFiltersResponse,
+  StoreCatalogQuery,
+  StoreCatalogSort,
   UnifiedStoreCatalogResponse,
   UnifiedStoreProduct,
 } from '@meridian/shared';
+import { Prisma } from '@prisma/client';
 import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FlagshipCatalogService } from '../../platform/flagship-catalog/flagship-catalog.service';
 import { StoreTenantService } from '../common/store-tenant.service';
+
+type ProductWithRelations = Prisma.ProductGetPayload<{
+  include: {
+    category: { select: { id: true; name: true; slug: true } };
+    variants: true;
+  };
+}>;
 
 @Injectable()
 export class StoreCatalogService {
@@ -21,16 +32,175 @@ export class StoreCatalogService {
     private readonly inventoryService: InventoryService,
   ) {}
 
-  async listProducts(slug: string) {
+  private buildProductWhere(
+    tenantId: string,
+    query: StoreCatalogQuery,
+  ): Prisma.ProductWhereInput {
+    const where: Prisma.ProductWhereInput = {
+      tenantId,
+      isPublished: true,
+    };
+
+    if (query.category) {
+      where.category = { slug: query.category };
+    }
+
+    if (query.q) {
+      where.OR = [
+        { name: { contains: query.q, mode: 'insensitive' } },
+        { description: { contains: query.q, mode: 'insensitive' } },
+      ];
+    }
+
+    return where;
+  }
+
+  private minUnifiedPrice(product: UnifiedStoreProduct): number {
+    const prices = product.variants.map((v) =>
+      Number(v.branchPrice ?? v.flagshipPrice),
+    );
+    return prices.length ? Math.min(...prices) : 0;
+  }
+
+  private minStorePrice(product: ProductWithRelations): number {
+    const prices = product.variants.map((v) => Number(v.price));
+    return prices.length ? Math.min(...prices) : 0;
+  }
+
+  private sortUnifiedItems(
+    items: UnifiedStoreProduct[],
+    createdAtById: Map<string, Date>,
+    sort: StoreCatalogSort = 'newest',
+  ): UnifiedStoreProduct[] {
+    const sorted = [...items];
+    switch (sort) {
+      case 'name_asc':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'price_asc':
+        sorted.sort(
+          (a, b) => this.minUnifiedPrice(a) - this.minUnifiedPrice(b),
+        );
+        break;
+      case 'price_desc':
+        sorted.sort(
+          (a, b) => this.minUnifiedPrice(b) - this.minUnifiedPrice(a),
+        );
+        break;
+      case 'newest':
+      default:
+        sorted.sort(
+          (a, b) =>
+            (createdAtById.get(b.id)?.getTime() ?? 0) -
+            (createdAtById.get(a.id)?.getTime() ?? 0),
+        );
+        break;
+    }
+    return sorted;
+  }
+
+  private sortStoreProducts(
+    products: ProductWithRelations[],
+    sort: StoreCatalogSort = 'newest',
+  ): ProductWithRelations[] {
+    const sorted = [...products];
+    switch (sort) {
+      case 'name_asc':
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case 'price_asc':
+        sorted.sort(
+          (a, b) => this.minStorePrice(a) - this.minStorePrice(b),
+        );
+        break;
+      case 'price_desc':
+        sorted.sort(
+          (a, b) => this.minStorePrice(b) - this.minStorePrice(a),
+        );
+        break;
+      case 'newest':
+      default:
+        sorted.sort(
+          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+        );
+        break;
+    }
+    return sorted;
+  }
+
+  private filterUnifiedInStock(items: UnifiedStoreProduct[]): UnifiedStoreProduct[] {
+    return items.filter((p) => p.variants.some((v) => v.inStock));
+  }
+
+  private filterStoreInStock(products: ProductWithRelations[]): ProductWithRelations[] {
+    return products.filter((p) =>
+      p.variants.some((v) => v.isActive && v.inventory > 0),
+    );
+  }
+
+  async getStoreCatalogFilters(slug: string): Promise<StoreCatalogFiltersResponse> {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
-    return this.prisma.product.findMany({
-      where: { tenantId: tenant.id, isPublished: true },
+    return this.getFilterMetaForTenant(tenant.id);
+  }
+
+  async getUnifiedCatalogFilters(
+    fulfillmentSlug: string,
+  ): Promise<StoreCatalogFiltersResponse> {
+    if (!fulfillmentSlug) {
+      throw new BadRequestException('fulfillment query parameter is required');
+    }
+    const flagshipTenantId =
+      await this.flagshipCatalog.resolveFlagshipTenantId();
+    return this.getFilterMetaForTenant(flagshipTenantId);
+  }
+
+  private async getFilterMetaForTenant(
+    tenantId: string,
+  ): Promise<StoreCatalogFiltersResponse> {
+    const products = await this.prisma.product.findMany({
+      where: { tenantId, isPublished: true, categoryId: { not: null } },
+      select: {
+        category: { select: { slug: true, name: true } },
+      },
+    });
+
+    const counts = new Map<string, { name: string; count: number }>();
+    for (const product of products) {
+      if (!product.category) continue;
+      const existing = counts.get(product.category.slug);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(product.category.slug, {
+          name: product.category.name,
+          count: 1,
+        });
+      }
+    }
+
+    return {
+      categories: [...counts.entries()]
+        .map(([slug, { name, count }]) => ({ slug, name, count }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    };
+  }
+
+  async listProducts(slug: string, query: StoreCatalogQuery = {}) {
+    const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
+    let products = await this.prisma.product.findMany({
+      where: this.buildProductWhere(tenant.id, query),
       include: {
         category: { select: { id: true, name: true, slug: true } },
         variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    if (query.inStock) {
+      products = this.filterStoreInStock(products);
+    }
+
+    return this.sortStoreProducts(products, query.sort);
   }
 
   async getProduct(slug: string, productSlug: string) {
@@ -54,6 +224,7 @@ export class StoreCatalogService {
 
   async listUnifiedCatalog(
     fulfillmentSlug: string,
+    query: StoreCatalogQuery = {},
   ): Promise<UnifiedStoreCatalogResponse> {
     if (!fulfillmentSlug) {
       throw new BadRequestException('fulfillment query parameter is required');
@@ -72,7 +243,7 @@ export class StoreCatalogService {
     }
 
     const products = await this.prisma.product.findMany({
-      where: { tenantId: flagshipTenantId, isPublished: true },
+      where: this.buildProductWhere(flagshipTenantId, query),
       include: {
         category: { select: { id: true, name: true, slug: true } },
         variants: {
@@ -82,6 +253,8 @@ export class StoreCatalogService {
       },
       orderBy: { createdAt: 'desc' },
     });
+
+    const createdAtById = new Map(products.map((p) => [p.id, p.createdAt]));
 
     const masterSkuIds = [
       ...new Set(
@@ -109,7 +282,7 @@ export class StoreCatalogService {
       branchVariants.map((v) => [v.masterSkuId!, v]),
     );
 
-    const items: UnifiedStoreProduct[] = [];
+    let items: UnifiedStoreProduct[] = [];
     for (const product of products) {
       const variants = await Promise.all(
         product.variants.map(async (flagshipVariant) => {
@@ -152,6 +325,12 @@ export class StoreCatalogService {
         variants,
       });
     }
+
+    if (query.inStock) {
+      items = this.filterUnifiedInStock(items);
+    }
+
+    items = this.sortUnifiedItems(items, createdAtById, query.sort);
 
     return {
       fulfillmentSlug,

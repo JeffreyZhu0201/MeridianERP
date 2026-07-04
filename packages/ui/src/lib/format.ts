@@ -44,22 +44,6 @@ export function formatMoney(
     locale = 'en-US';
   }
 
-  // #region agent log
-  fetch('http://127.0.0.1:7530/ingest/82205c42-ce7f-4037-aefd-fa21e4c56b46', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '59bc7f' },
-    body: JSON.stringify({
-      sessionId: '59bc7f',
-      runId: 'post-fix',
-      hypothesisId: 'H1',
-      location: 'packages/ui/src/lib/format.ts:formatMoney',
-      message: 'formatMoney resolved args',
-      data: { currency, locale, rawSecond: currencyOrLocale, rawThird: maybeLocale ?? null },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
-
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(Number(value));
 }
 

@@ -12,6 +12,7 @@ function resolveNavKey(pathname: string): string | null {
   if (pathname.startsWith('/distributors')) return 'distributors';
   if (pathname.startsWith('/orders')) return 'orders';
   if (pathname.startsWith('/allocations')) return 'allocations';
+  if (pathname.startsWith('/procurement')) return 'procurement';
   if (pathname.startsWith('/replenishment')) return 'replenishment';
   if (pathname.startsWith('/withdrawals')) return 'withdrawals';
   if (pathname.startsWith('/funds')) return 'funds';

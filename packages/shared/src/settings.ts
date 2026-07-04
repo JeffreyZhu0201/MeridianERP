@@ -13,6 +13,8 @@ export interface MerchantProfileSettings {
   legalName?: string | null;
   contactEmail: string;
   contactPhone?: string | null;
+  storeAddress?: string | null;
+  isFlagship?: boolean;
 }
 
 export interface TenantSettingsDto {
@@ -32,8 +34,10 @@ export interface MerchantSettingsDto extends TenantSettingsDto {
 
 export interface UpdateMerchantSettingsRequest {
   businessName?: string;
+  legalName?: string | null;
   contactEmail?: string;
   contactPhone?: string;
+  storeAddress?: string | null;
   defaultCommissionRate?: number | string | null;
   defaultCommissionType?: CommissionType | null;
   notifyOnBinding?: boolean;

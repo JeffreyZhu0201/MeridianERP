@@ -40,6 +40,12 @@ export class PlatformMerchantsController {
     return this.platformMerchantsService.create(dto);
   }
 
+  @Get(':id/plugins')
+  @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
+  listPlugins(@Param('id') id: string) {
+    return this.platformMerchantsService.listPlugins(id);
+  }
+
   @Get(':id')
   @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
   getById(@Param('id') id: string) {

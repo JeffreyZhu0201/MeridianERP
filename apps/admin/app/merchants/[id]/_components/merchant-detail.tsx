@@ -28,6 +28,7 @@ import {
   Textarea,
 } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
+import type { PlatformMerchantPluginsResponse } from '@meridian/shared';
 
 import { OnboardingStatusBadge } from '@meridian/ui';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
@@ -38,9 +39,10 @@ interface MerchantDetailActionsProps {
   merchant: MerchantDetail;
   token: string;
   distributors?: PlatformDistributor[];
+  plugins?: PlatformMerchantPluginsResponse;
 }
 
-export function MerchantDetailView({ merchant, token, distributors = [] }: MerchantDetailActionsProps) {
+export function MerchantDetailView({ merchant, token, distributors = [], plugins }: MerchantDetailActionsProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.merchants');
@@ -249,6 +251,45 @@ export function MerchantDetailView({ merchant, token, distributors = [] }: Merch
           </CardContent>
         </Card>
       )}
+
+      {merchant.onboardingStatus === OnboardingStatus.APPROVED && plugins ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{td('pluginsTitle')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {plugins.plugins.map((plugin: PlatformMerchantPluginItem) => {
+                const name = td(
+                  `pluginNames.${plugin.code}` as
+                    | 'pluginNames.crm'
+                    | 'pluginNames.hrm'
+                    | 'pluginNames.im'
+                    | 'pluginNames.finance_tax'
+                    | 'pluginNames.oa'
+                    | 'pluginNames.e_signature'
+                    | 'pluginNames.customer_service',
+                );
+                return (
+                  <Badge
+                    key={plugin.code}
+                    variant={plugin.installed ? 'default' : 'outline'}
+                    title={
+                      plugin.installedAt
+                        ? td('pluginsInstalledAt', {
+                            date: new Date(plugin.installedAt).toLocaleString(locale),
+                          })
+                        : td('pluginsNotInstalled')
+                    }
+                  >
+                    {name} · {plugin.installed ? td('pluginsInstalled') : td('pluginsNotInstalled')}
+                  </Badge>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

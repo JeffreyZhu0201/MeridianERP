@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -29,6 +30,12 @@ export class StorePlatformAuthController {
   @HttpCode(201)
   login(@Body() dto: StoreLoginDto) {
     return this.authService.loginGlobal(dto);
+  }
+
+  @Get('me')
+  @UseGuards(StoreAuthGuard)
+  getMe(@CurrentUser() user: AuthenticatedUser) {
+    return this.authService.getProfile(user.userId);
   }
 }
 

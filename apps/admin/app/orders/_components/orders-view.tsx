@@ -102,8 +102,8 @@ export function OrdersView({
     updateParams((params) => {
       if (tab === 'delivery') {
         params.set('tab', 'delivery');
-        params.set('fulfillmentType', 'DELIVERY');
-        params.set('status', 'PAID');
+        params.delete('fulfillmentType');
+        params.delete('status');
       } else {
         params.delete('tab');
         params.delete('fulfillmentType');

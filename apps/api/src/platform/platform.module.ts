@@ -14,6 +14,7 @@ import { PlatformAllocationsModule } from './allocations/platform-allocations.mo
 import { FlagshipCatalogModule } from './flagship-catalog/flagship-catalog.module';
 import { PlatformWithdrawalsModule } from './withdrawals/platform-withdrawals.module';
 import { PlatformReplenishmentModule } from './replenishment/platform-replenishment.module';
+import { PlatformProcurementModule } from './procurement/platform-procurement.module';
 import { PlatformFundsModule } from './funds/platform-funds.module';
 import { PlatformCrmModule } from './crm/platform-crm.module';
 import { PlatformOrdersController } from './orders/platform-orders.controller';
@@ -36,6 +37,7 @@ import { PlatformSettlementsService } from './settlements/platform-settlements.s
     FlagshipCatalogModule,
     PlatformWithdrawalsModule,
     PlatformReplenishmentModule,
+    PlatformProcurementModule,
     PlatformFundsModule,
     PlatformCrmModule,
     FulfillmentModule,

@@ -38,6 +38,7 @@ describe('Platform orders (e2e)', () => {
       'Orders Branch',
       'owner@orders.test',
       password,
+      { isFlagship: false },
     );
     tenantId = tenant.id;
 
@@ -166,5 +167,39 @@ describe('Platform orders (e2e)', () => {
       unitWholesalePrice: '30',
       lineTotal: '50',
     });
+  });
+
+  it('rejects HQ ship for branch delivery orders', async () => {
+    await request(app.getHttpServer())
+      .post(`/api/v1/platform/orders/${orderId}/ship`)
+      .set('Authorization', `Bearer ${platformToken}`)
+      .expect(400);
+  });
+
+  it('deliveryQueue returns only flagship delivery orders awaiting ship', async () => {
+    const queue = await request(app.getHttpServer())
+      .get('/api/v1/platform/orders')
+      .query({ deliveryQueue: 'true' })
+      .set('Authorization', `Bearer ${platformToken}`)
+      .expect(200);
+
+    expect(queue.body.data.some((o: { id: string }) => o.id === orderId)).toBe(
+      false,
+    );
+
+    await prisma.merchantProfile.update({
+      where: { tenantId },
+      data: { isFlagship: true },
+    });
+
+    const queueAfter = await request(app.getHttpServer())
+      .get('/api/v1/platform/orders')
+      .query({ deliveryQueue: 'true' })
+      .set('Authorization', `Bearer ${platformToken}`)
+      .expect(200);
+
+    expect(
+      queueAfter.body.data.some((o: { id: string }) => o.id === orderId),
+    ).toBe(true);
   });
 });

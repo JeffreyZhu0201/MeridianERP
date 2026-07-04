@@ -1,44 +1,29 @@
 'use client';
 
-/**
- * MerchantShell - 商户分店门户布局组件
- *
- * 提供商户分店（Merchant Portal）的标准页面布局，包含：
- * - 可折叠侧边栏导航（CRM、目录、库存、订单、资金等）
- * - 低库存警告徽章（显示在库存菜单上）
- * - 顶部工具栏（商户名称、用户邮箱、退出按钮）
- * - 暗色模式与国际化切换
- *
- * @example
- * ```tsx
- * <MerchantShell
- *   businessName="星巴克 - 中关村店"
- *   userEmail="manager@starbucks.test"
- *   lowStockAlertCount={3}
- *   onLogout={() => signOut()}
- * >
- *   <InventoryPage />
- * </MerchantShell>
- * ```
- */
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { type ReactNode, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   IconAddressBook,
   IconBuildingWarehouse,
   IconChevronRight,
-  IconCoin,
+  IconClipboardList,
+  IconHeadset,
   IconLayoutDashboard,
+  IconMessages,
   IconPackage,
+  IconPuzzle,
   IconReceipt,
+  IconReceiptTax,
   IconSettings,
-  IconTruckDelivery,
+  IconUsers,
   IconWallet,
+  IconWritingSign,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import type { MerchantPluginCode } from '@meridian/shared';
 import { ErpShell } from '../frameworks/erp-shell';
+import { ShellUserChip } from './shell-user-chip';
 import { Badge } from '../ui/badge';
 import { cn } from '../../lib/utils';
 import {
@@ -53,53 +38,36 @@ import {
   SidebarMenuSubItem,
 } from '../ui/sidebar';
 
-/**
- * MerchantShell 属性接口
- * @param children - 页面内容
- * @param businessName - 商户/分店名称（显示在侧边栏顶部）
- * @param userEmail - 当前登录用户邮箱
- * @param onLogout - 退出登录回调函数
- * @param lowStockAlertCount - 低库存警告数量（显示在库存菜单上，红点徽章）
- */
 export interface MerchantShellProps {
   children: ReactNode;
   businessName?: string;
+  businessNameLoading?: boolean;
+  userDisplayName?: string;
   userEmail?: string;
+  userLoading?: boolean;
   onLogout?: () => void;
   lowStockAlertCount?: number;
+  installedPluginCodes?: MerchantPluginCode[];
 }
 
-/** 导航子项类型 - 支持徽章显示 */
 type NavChild = { href: string; labelKey: string; badge?: number };
-/** 导航项类型 - 一级菜单 */
 type NavItem = {
   key: string;
   href: string;
   labelKey: string;
   icon: typeof IconLayoutDashboard;
+  pluginCode?: MerchantPluginCode;
   children?: NavChild[];
 };
 
-/**
- * 商户导航配置
- * - dashboard: 首页/仪表盘
- * - crm: 客户关系管理（Contacts/Companies/Leads/Activities）
- * - catalog: 商品目录（Products/Categories）
- * - inventory: 库存管理（Warehouses/Stock/Adjustments/Transfers/Alerts/PurchaseOrders/Reports/Settings）
- * - orders: 订单管理
- * - allocations: 配额管理
- * - funds: 资金管理
- * - replenishment: 补货请求
- * - commissions: 佣金查看
- * - settings: 商户设置
- */
-const mainNav: NavItem[] = [
+const coreNav: NavItem[] = [
   { key: 'dashboard', href: '/', labelKey: 'dashboard', icon: IconLayoutDashboard },
   {
     key: 'crm',
     href: '/crm/contacts',
     labelKey: 'crm',
     icon: IconAddressBook,
+    pluginCode: 'crm',
     children: [
       { href: '/crm/contacts', labelKey: 'crmContacts' },
       { href: '/crm/companies', labelKey: 'crmCompanies' },
@@ -119,25 +87,52 @@ const mainNav: NavItem[] = [
   },
   {
     key: 'inventory',
-    href: '/inventory/warehouses',
+    href: '/inventory/stock',
     labelKey: 'inventory',
     icon: IconBuildingWarehouse,
     children: [
-      { href: '/inventory/warehouses', labelKey: 'inventoryWarehouses' },
       { href: '/inventory/stock', labelKey: 'inventoryStock' },
       { href: '/inventory/adjustments', labelKey: 'inventoryAdjustments' },
-      { href: '/inventory/transfers', labelKey: 'inventoryTransfers' },
       { href: '/inventory/alerts', labelKey: 'inventoryAlerts' },
-      { href: '/inventory/purchase-orders', labelKey: 'inventoryPurchaseOrders' },
+      { href: '/inventory/procurement', labelKey: 'inventoryProcurementShop' },
+      { href: '/inventory/procurement/history', labelKey: 'inventoryProcurementHistory' },
       { href: '/inventory/reports', labelKey: 'inventoryReports' },
       { href: '/inventory/settings', labelKey: 'inventorySettings' },
     ],
   },
   { key: 'orders', href: '/orders', labelKey: 'orders', icon: IconReceipt },
-  { key: 'allocations', href: '/allocations', labelKey: 'allocations', icon: IconPackage },
   { key: 'funds', href: '/funds', labelKey: 'funds', icon: IconWallet },
-  { key: 'replenishment', href: '/replenishment', labelKey: 'replenishment', icon: IconTruckDelivery },
-  { key: 'commissions', href: '/commissions', labelKey: 'commissions', icon: IconCoin },
+];
+
+const pluginNav: NavItem[] = [
+  { key: 'hrm', href: '/hrm', labelKey: 'hrm', icon: IconUsers, pluginCode: 'hrm' },
+  { key: 'im', href: '/im', labelKey: 'im', icon: IconMessages, pluginCode: 'im' },
+  {
+    key: 'finance-tax',
+    href: '/finance-tax',
+    labelKey: 'financeTax',
+    icon: IconReceiptTax,
+    pluginCode: 'finance_tax',
+  },
+  { key: 'oa', href: '/oa', labelKey: 'oa', icon: IconClipboardList, pluginCode: 'oa' },
+  {
+    key: 'e-signature',
+    href: '/e-signature',
+    labelKey: 'eSignature',
+    icon: IconWritingSign,
+    pluginCode: 'e_signature',
+  },
+  {
+    key: 'customer-service',
+    href: '/customer-service',
+    labelKey: 'customerService',
+    icon: IconHeadset,
+    pluginCode: 'customer_service',
+  },
+];
+
+const tailNav: NavItem[] = [
+  { key: 'plugins', href: '/plugins', labelKey: 'plugins', icon: IconPuzzle },
   { key: 'settings', href: '/settings', labelKey: 'settings', icon: IconSettings },
 ];
 
@@ -146,6 +141,10 @@ function sectionPrefix(href: string): string {
   if (href.startsWith('/catalog')) return '/catalog';
   if (href.startsWith('/inventory')) return '/inventory';
   return href;
+}
+
+function filterNav(items: NavItem[], installed: Set<string>): NavItem[] {
+  return items.filter((item) => !item.pluginCode || installed.has(item.pluginCode));
 }
 
 function MerchantNav({
@@ -234,15 +233,33 @@ function MerchantNav({
 export function MerchantShell({
   children,
   businessName,
+  businessNameLoading = false,
+  userDisplayName,
   userEmail,
+  userLoading = false,
   onLogout,
   lowStockAlertCount,
+  installedPluginCodes = [],
 }: MerchantShellProps) {
   const pathname = usePathname();
   const tc = useTranslations('common');
+  const ts = useTranslations('merchant.shell');
+  const installed = useMemo(
+    () => new Set(installedPluginCodes),
+    [installedPluginCodes],
+  );
+
+  const visibleNav = useMemo(() => {
+    const withPlugins = [
+      ...filterNav(coreNav, installed),
+      ...filterNav(pluginNav, installed),
+      ...tailNav,
+    ];
+    return withPlugins;
+  }, [installed]);
 
   const navWithBadges = useMemo(() => {
-    return mainNav.map((item) => {
+    return visibleNav.map((item) => {
       if (item.key !== 'inventory' || !item.children) return item;
       return {
         ...item,
@@ -253,7 +270,7 @@ export function MerchantShell({
         ),
       };
     });
-  }, [lowStockAlertCount]);
+  }, [visibleNav, lowStockAlertCount]);
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => ({
     crm: pathname.startsWith('/crm'),
@@ -261,9 +278,25 @@ export function MerchantShell({
     inventory: pathname.startsWith('/inventory'),
   }));
 
+  useEffect(() => {
+    setOpenSections((prev) => ({
+      ...prev,
+      crm: pathname.startsWith('/crm') || prev.crm,
+      catalog: pathname.startsWith('/catalog') || prev.catalog,
+      inventory: pathname.startsWith('/inventory') || prev.inventory,
+    }));
+  }, [pathname]);
+
   function toggleSection(key: string) {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   }
+
+  const sidebarTitle = businessName
+    ? businessName
+    : businessNameLoading
+      ? '…'
+      : ts('defaultBusinessName');
+  const sidebarInitial = businessName?.charAt(0)?.toUpperCase() ?? (businessNameLoading ? '…' : 'M');
 
   return (
     <ErpShell
@@ -271,11 +304,9 @@ export function MerchantShell({
       sidebarHeader={
         <div className="flex items-center gap-2 px-2 py-1">
           <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <span className="text-sm font-bold">M</span>
+            <span className="text-sm font-bold">{sidebarInitial}</span>
           </div>
-          <span className="truncate font-semibold tracking-tight">
-            {businessName ?? 'MeridianERP'}
-          </span>
+          <span className="truncate font-semibold tracking-tight">{sidebarTitle}</span>
         </div>
       }
       sidebar={
@@ -288,9 +319,13 @@ export function MerchantShell({
       }
       headerEnd={
         <>
-          {userEmail ? (
-            <span className="hidden text-sm text-muted-foreground sm:inline">{userEmail}</span>
-          ) : null}
+          <ShellUserChip
+            displayName={userDisplayName}
+            email={userEmail}
+            loading={userLoading}
+            href="/settings"
+            ariaLabel={ts('openSettings')}
+          />
           {onLogout ? (
             <button
               type="button"

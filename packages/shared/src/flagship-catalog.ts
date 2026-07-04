@@ -21,6 +21,25 @@ export interface UnifiedStoreProduct {
   variants: UnifiedStoreVariant[];
 }
 
+export type StoreCatalogSort = 'newest' | 'name_asc' | 'price_asc' | 'price_desc';
+
+export interface StoreCatalogQuery {
+  category?: string;
+  inStock?: boolean;
+  q?: string;
+  sort?: StoreCatalogSort;
+}
+
+export interface StoreCatalogFilterCategory {
+  slug: string;
+  name: string;
+  count: number;
+}
+
+export interface StoreCatalogFiltersResponse {
+  categories: StoreCatalogFilterCategory[];
+}
+
 export interface UnifiedStoreCatalogResponse {
   fulfillmentSlug: string;
   flagshipSlug: string;

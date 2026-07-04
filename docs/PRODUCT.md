@@ -17,6 +17,7 @@ MeridianERP is a multi-tenant ERP platform for factory HQ, branch merchants, B2B
 | Phase 5 | Distribution, allocation, funds, platform CRM, AI diagnosis | Complete |
 | Admin RBAC | Four platform roles with scoped nav and API guards | Complete |
 | Flagship store | Unified catalog at `/shop`, branch fulfillment selector | Complete |
+| Merchant plugin system | Plugin marketplace, CRM + extension modules per tenant | Complete |
 | Platform admin polish | Inventory index, CRM detail pages, order ship, filters | Complete |
 | UI consistency | EmptyState, Alert, Tabs, Bento shells, design-system alignment | Complete |
 | Settings | Platform and merchant settings, team management | Complete |
@@ -59,10 +60,11 @@ All portals share the NestJS API in `apps/api` on port 3001.
 - **Unified store:** Consumers browse flagship catalog at `/shop`; header dropdown selects fulfillment branch (inventory and branch price apply).
 - **Branch pricing:** Selling price defaults to suggested retail on allocation; merchant may tune within `maxRetailPriceDeviationPercent` (default 10%).
 - **Flagship store:** One branch marked `isFlagship`; remembered branch slug preferred in store header, else flagship default.
-- **Checkout:** Store checkout requires `fulfillmentType` (`PICKUP` or `DELIVERY`).
+- **Checkout:** Store checkout requires `fulfillmentType` (`PICKUP` or `DELIVERY`). Flagship store orders are delivery-only; branch stores support pickup and delivery.
 - Commission balance equals settled commission minus approved withdrawals.
 - Pickup orders deduct branch inventory only when verified.
-- Delivery orders enter the HQ delivery queue and deduct MasterSku stock when shipped.
+- Branch delivery orders are shipped by the merchant and deduct branch warehouse stock.
+- Flagship delivery orders enter the HQ delivery queue and deduct MasterSku stock when shipped.
 
 ## Quality And Testing
 

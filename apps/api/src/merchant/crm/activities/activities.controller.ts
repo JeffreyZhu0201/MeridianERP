@@ -12,10 +12,13 @@ import { MerchantAuthGuard } from '../../../auth/guards/merchant-auth.guard';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.interface';
 import { CreateActivityDto } from '../dto/activity.dto';
+import { RequiresPlugin } from '../../../plugins/decorators/requires-plugin.decorator';
+import { CrmPluginGuard } from '../../../plugins/crm-plugin.guard';
 import { ActivitiesService } from './activities.service';
 
+@RequiresPlugin('crm')
 @Controller('merchant/activities')
-@UseGuards(MerchantAuthGuard)
+@UseGuards(MerchantAuthGuard, CrmPluginGuard)
 export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
 

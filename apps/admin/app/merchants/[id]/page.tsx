@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
+import type { PlatformMerchantPluginsResponse } from '@meridian/shared';
 import { requireToken } from '@/lib/auth';
 import { MerchantDetailView } from './_components/merchant-detail';
 
@@ -16,10 +17,14 @@ export default async function MerchantDetailPage({ params }: MerchantDetailPageP
 
   let merchant: MerchantDetail;
   let distributors: PlatformDistributor[] = [];
+  let plugins: PlatformMerchantPluginsResponse | undefined;
   try {
-    [merchant, distributors] = await Promise.all([
+    [merchant, distributors, plugins] = await Promise.all([
       apiFetch<MerchantDetail>(`/platform/merchants/${id}`, {}, token),
       apiFetch<PlatformDistributor[]>('/platform/distributors', {}, token).catch(() => []),
+      apiFetch<PlatformMerchantPluginsResponse>(`/platform/merchants/${id}/plugins`, {}, token).catch(
+        () => undefined,
+      ),
     ]);
   } catch {
     notFound();
@@ -27,7 +32,12 @@ export default async function MerchantDetailPage({ params }: MerchantDetailPageP
 
   return (
     <AdminShellWithSession>
-      <MerchantDetailView merchant={merchant} token={token} distributors={distributors} />
+      <MerchantDetailView
+        merchant={merchant}
+        token={token}
+        distributors={distributors}
+        plugins={plugins}
+      />
     </AdminShellWithSession>
   );
 }

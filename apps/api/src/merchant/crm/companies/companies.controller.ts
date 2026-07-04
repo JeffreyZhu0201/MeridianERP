@@ -13,10 +13,13 @@ import { MerchantAuthGuard } from '../../../auth/guards/merchant-auth.guard';
 import { CurrentUser } from '../../../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../../../auth/interfaces/jwt-payload.interface';
 import { CreateCompanyDto, UpdateCompanyDto } from '../dto/company.dto';
+import { RequiresPlugin } from '../../../plugins/decorators/requires-plugin.decorator';
+import { CrmPluginGuard } from '../../../plugins/crm-plugin.guard';
 import { CompaniesService } from './companies.service';
 
+@RequiresPlugin('crm')
 @Controller('merchant/companies')
-@UseGuards(MerchantAuthGuard)
+@UseGuards(MerchantAuthGuard, CrmPluginGuard)
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 

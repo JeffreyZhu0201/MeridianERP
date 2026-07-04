@@ -53,6 +53,43 @@ export class FulfillmentService {
       orderBy: { createdAt: 'desc' },
     });
   }
+
+  async listDeliveryPending(tenantId: string) {
+    return this.prisma.order.findMany({
+      where: {
+        tenantId,
+        status: OrderStatus.PAID,
+        fulfillmentType: FulfillmentType.DELIVERY,
+        shippedAt: null,
+      },
+      include: { lines: true, customer: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  private async decrementBranchWarehouseStock(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    lines: Array<{ variantId: string | null; quantity: number }>,
+  ) {
+    const defaultWarehouse = await tx.warehouse.findFirst({
+      where: { tenantId, isDefault: true },
+    });
+    if (!defaultWarehouse) {
+      throw new ConflictException('Default warehouse not configured');
+    }
+    for (const line of lines) {
+      if (!line.variantId) continue;
+      await this.inventoryService.applyQuantityDeltaInTx(
+        tx,
+        tenantId,
+        defaultWarehouse.id,
+        line.variantId,
+        -line.quantity,
+      );
+      await this.inventoryService.syncVariantInventoryCache(line.variantId, tx);
+    }
+  }
   async verifyPickup(
     tenantId: string,
     orderId: string,
@@ -89,36 +126,74 @@ export class FulfillmentService {
           pickupVerifiedByUserId: actorUserId,
         },
       });
-      const defaultWarehouse = await tx.warehouse.findFirst({
-        where: { tenantId, isDefault: true },
-      });
-      if (!defaultWarehouse) {
-        throw new ConflictException('Default warehouse not configured');
-      }
-      for (const line of order.lines) {
-        if (!line.variantId) continue;
-        await this.inventoryService.applyQuantityDeltaInTx(
-          tx,
-          tenantId,
-          defaultWarehouse.id,
-          line.variantId,
-          -line.quantity,
-        );
-        await this.inventoryService.syncVariantInventoryCache(
-          line.variantId,
-          tx,
-        );
-      }
+      await this.decrementBranchWarehouseStock(tx, tenantId, order.lines);
     });
     return { orderId, status: OrderStatus.FULFILLED };
   }
-  async shipDelivery(orderId: string, platformUserId: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: { lines: { include: { variant: true } }, commissionEntry: true },
+
+  async shipBranchDelivery(
+    tenantId: string,
+    orderId: string,
+    merchantUserId: string,
+  ) {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, tenantId },
+      include: {
+        lines: true,
+        tenant: {
+          include: { merchantProfile: { select: { isFlagship: true } } },
+        },
+      },
     });
     if (!order) {
       throw new NotFoundException('Order not found');
+    }
+    if (order.tenant.merchantProfile?.isFlagship) {
+      throw new BadRequestException(
+        'Flagship delivery orders are fulfilled by HQ',
+      );
+    }
+    if (order.fulfillmentType !== FulfillmentType.DELIVERY) {
+      throw new BadRequestException('Order is not a delivery order');
+    }
+    if (order.status !== OrderStatus.PAID) {
+      throw new BadRequestException('Order is not awaiting shipment');
+    }
+    if (order.shippedAt) {
+      throw new ConflictException('Order already shipped');
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.FULFILLED,
+          shippedAt: new Date(),
+          shippedByMerchantUserId: merchantUserId,
+        },
+      });
+      await this.decrementBranchWarehouseStock(tx, tenantId, order.lines);
+    });
+    return { orderId, status: OrderStatus.FULFILLED };
+  }
+
+  async shipDelivery(orderId: string, platformUserId: string) {
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        lines: { include: { variant: true } },
+        commissionEntry: true,
+        tenant: {
+          include: { merchantProfile: { select: { isFlagship: true } } },
+        },
+      },
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    if (!order.tenant.merchantProfile?.isFlagship) {
+      throw new BadRequestException(
+        'Only flagship delivery orders can be shipped by HQ',
+      );
     }
     if (order.fulfillmentType !== FulfillmentType.DELIVERY) {
       throw new BadRequestException('Order is not a delivery order');

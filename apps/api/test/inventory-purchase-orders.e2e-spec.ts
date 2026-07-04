@@ -48,14 +48,13 @@ describe('InventoryPurchaseOrders (e2e)', () => {
 
     variantId = product.body.variants[0].id;
 
-    const warehouses = await request(app.getHttpServer())
-      .get('/api/v1/merchant/inventory/warehouses')
+    const levels = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/stock-levels')
       .set('Authorization', `Bearer ${merchantToken}`)
+      .query({ variantId })
       .expect(200);
 
-    warehouseId = warehouses.body.find(
-      (w: { isDefault: boolean }) => w.isDefault,
-    ).id;
+    warehouseId = levels.body.data[0].warehouseId;
   });
 
   afterEach(async () => {

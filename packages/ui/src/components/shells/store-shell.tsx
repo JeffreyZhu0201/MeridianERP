@@ -44,10 +44,13 @@ export function StoreShell({
   const t = useTranslations('store.nav');
   const tc = useTranslations('common');
 
+  const accountHref = '/shop/account';
+  const loginHref = `/login?from=${encodeURIComponent('/shop/account')}`;
+
   const navItems = [
     { href: base, label: t('shop'), exact: true },
     { href: `${base}/cart`, label: t('cart') },
-    { href: `${base}/account`, label: t('account') },
+    { href: accountHref, label: t('account') },
   ];
 
   return (
@@ -67,9 +70,11 @@ export function StoreShell({
             {branchSelect}
             <nav className="flex items-center gap-6">
               {navItems.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const active = item.href.startsWith('/shop/account')
+                  ? pathname === '/shop/account'
+                  : item.exact
+                    ? pathname === item.href
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <Link
                     key={item.href}
@@ -120,7 +125,7 @@ export function StoreShell({
             </Link>
 
             <Link
-              href={userEmail ? `${base}/account` : `${base}/login`}
+              href={userEmail ? accountHref : loginHref}
               className="store-icon-btn md:hidden"
               aria-label={t('account')}
             >

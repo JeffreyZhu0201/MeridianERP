@@ -24,6 +24,7 @@ import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
 import { RejectMerchantDto } from './dto/reject-merchant.dto';
 import { UpdateStoreSettingsDto } from './dto/update-store-settings.dto';
+import { PluginService } from '../../plugins/plugin.service';
 
 @Injectable()
 export class PlatformMerchantsService {
@@ -31,6 +32,7 @@ export class PlatformMerchantsService {
     private readonly prisma: PrismaService,
     private readonly emailQueue: EmailQueueService,
     private readonly platformAccounts: PlatformAccountsService,
+    private readonly pluginService: PluginService,
   ) {}
 
   async list(query: ListMerchantsQueryDto = {}) {
@@ -118,6 +120,10 @@ export class PlatformMerchantsService {
     );
   }
 
+  listPlugins(merchantProfileId: string) {
+    return this.pluginService.listForPlatformMerchant(merchantProfileId);
+  }
+
   async create(dto: CreatePlatformMerchantDto) {
     const account = await this.platformAccounts.findById(dto.ownerAccountId);
     if (!account) {
@@ -187,6 +193,7 @@ export class PlatformMerchantsService {
         dto.contactEmail,
         dto.businessName,
       );
+      await this.pluginService.installDefaultPlugins(tenant.id);
     }
 
     return profile;
@@ -261,6 +268,7 @@ export class PlatformMerchantsService {
       profile.contactEmail,
       profile.businessName,
     );
+    await this.pluginService.installDefaultPlugins(profile.tenantId);
     return updatedProfile;
   }
 

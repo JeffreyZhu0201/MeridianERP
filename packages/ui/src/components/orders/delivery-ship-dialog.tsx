@@ -72,6 +72,8 @@ export interface DeliveryShipDialogProps {
   onConfirm?: () => void;
   isSubmitting?: boolean;
   stockWarning?: string;
+  /** Which inventory pool decreases on ship. Defaults to master (HQ). */
+  inventoryScope?: 'master' | 'branch';
 }
 
 /**
@@ -90,6 +92,7 @@ export function DeliveryShipDialog({
   onConfirm,
   isSubmitting,
   stockWarning,
+  inventoryScope = 'master',
 }: DeliveryShipDialogProps) {
   // ESC 键关闭
   React.useEffect(() => {
@@ -102,6 +105,11 @@ export function DeliveryShipDialog({
   }, [open, onOpenChange]);
 
   if (!open) return null;
+
+  const inventoryNote =
+    inventoryScope === 'branch'
+      ? 'Branch warehouse inventory will decrease and the order will move to fulfilled. This action cannot be undone.'
+      : 'Factory inventory will decrease and the order will move to fulfilled. This action cannot be undone.';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -126,10 +134,7 @@ export function DeliveryShipDialog({
           <h2 id="delivery-ship-title" className="text-lg font-semibold">
             Mark order shipped
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Factory inventory will decrease and the order will move to fulfilled. This action
-            cannot be undone.
-          </p>
+          <p className="text-sm text-muted-foreground">{inventoryNote}</p>
         </div>
 
         {/* 订单信息和商品明细 */}

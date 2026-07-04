@@ -33,8 +33,12 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const query = new URLSearchParams();
   query.set('page', params.page ?? '1');
   query.set('limit', '20');
-  if (params.status) query.set('status', params.status);
-  if (params.fulfillmentType) query.set('fulfillmentType', params.fulfillmentType);
+  if (activeTab === 'delivery') {
+    query.set('deliveryQueue', 'true');
+  } else {
+    if (params.status) query.set('status', params.status);
+    if (params.fulfillmentType) query.set('fulfillmentType', params.fulfillmentType);
+  }
   if (params.guestEmail) query.set('guestEmail', params.guestEmail);
   if (params.tenantId) query.set('tenantId', params.tenantId);
 

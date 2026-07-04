@@ -15,6 +15,8 @@ import { CompaniesController } from './crm/companies/companies.controller';
 import { CompaniesService } from './crm/companies/companies.service';
 import { ContactsController } from './crm/contacts/contacts.controller';
 import { ContactsService } from './crm/contacts/contacts.service';
+import { StoreCustomersController } from './crm/store-customers/store-customers.controller';
+import { StoreCustomersService } from './crm/store-customers/store-customers.service';
 import { LeadsController } from './crm/leads/leads.controller';
 import { LeadsService } from './crm/leads/leads.service';
 import { ActivitiesController } from './crm/activities/activities.controller';
@@ -32,6 +34,10 @@ import { MerchantReplenishmentService } from './replenishment/merchant-replenish
 import { MerchantAllocationsController } from './allocations/merchant-allocations.controller';
 import { MerchantDashboardModule } from './dashboard/merchant-dashboard.module';
 import { MerchantSettingsModule } from './settings/merchant-settings.module';
+import { MerchantPluginsModule } from './plugins/merchant-plugins.module';
+import { MerchantProcurementModule } from './procurement/merchant-procurement.module';
+import { PluginGuard } from '../plugins/plugin.guard';
+import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
 
 @Module({
   imports: [
@@ -41,6 +47,8 @@ import { MerchantSettingsModule } from './settings/merchant-settings.module';
     CommissionsModule,
     MerchantDashboardModule,
     MerchantSettingsModule,
+    MerchantPluginsModule,
+    MerchantProcurementModule,
     FulfillmentModule,
     PlatformAllocationsModule,
     PlatformFundsModule,
@@ -50,6 +58,7 @@ import { MerchantSettingsModule } from './settings/merchant-settings.module';
     OnboardingController,
     CompaniesController,
     ContactsController,
+    StoreCustomersController,
     LeadsController,
     ActivitiesController,
     DistributorsController,
@@ -65,6 +74,7 @@ import { MerchantSettingsModule } from './settings/merchant-settings.module';
     OnboardingService,
     CompaniesService,
     ContactsService,
+    StoreCustomersService,
     LeadsService,
     ActivitiesService,
     DistributorsService,
@@ -72,6 +82,8 @@ import { MerchantSettingsModule } from './settings/merchant-settings.module';
     MerchantProductsService,
     MerchantOrdersService,
     MerchantReplenishmentService,
+    PluginGuard,
+    CrmPluginGuard,
   ],
 })
 export class MerchantModule {}

@@ -11,7 +11,6 @@ import {
   EmptyState,
   Input,
   Label,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -19,14 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from '@meridian/ui';
-import type { StockLevelWithDetails, Warehouse } from '@meridian/shared';
+import type { StockLevelWithDetails } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
 interface StockLevelsTableProps {
   initialLevels: StockLevelWithDetails[];
   initialTotal: number;
-  warehouses: Warehouse[];
   token: string;
   isOwner: boolean;
   defaultThreshold: number;
@@ -35,14 +33,12 @@ interface StockLevelsTableProps {
 export function StockLevelsTable({
   initialLevels,
   initialTotal,
-  warehouses,
   token,
   isOwner,
   defaultThreshold,
 }: StockLevelsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const warehouseId = searchParams.get('warehouseId') ?? '';
   const q = searchParams.get('q') ?? '';
   const page = Number(searchParams.get('page') ?? '1');
 
@@ -122,29 +118,12 @@ export function StockLevelsTable({
 
   const t = useTranslations('merchant.inventory.stock');
   const tCommon = useTranslations('common');
-  const tInvCommon = useTranslations('merchant.inventory.common');
 
   const totalPages = Math.max(1, Math.ceil(total / 20));
 
   return (
     <>
       <div className="flex flex-wrap gap-3">
-        <div className="space-y-2">
-          <Label htmlFor="warehouse-filter">{t('warehouse')}</Label>
-          <Select
-            id="warehouse-filter"
-            value={warehouseId}
-            onChange={(e) => updateParams({ warehouseId: e.target.value, page: '1' })}
-            className="min-h-11"
-          >
-            <option value="">{tInvCommon('allWarehouses')}</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </Select>
-        </div>
         <div className="min-w-[200px] flex-1 space-y-2">
           <Label htmlFor="stock-search">{tCommon('search')}</Label>
           <Input
@@ -166,7 +145,6 @@ export function StockLevelsTable({
               <TableRow>
                 <TableHead>{t('product')}</TableHead>
                 <TableHead>{t('sku')}</TableHead>
-                <TableHead>{t('warehouse')}</TableHead>
                 <TableHead className="text-right">{t('onHand')}</TableHead>
                 <TableHead className="text-right">{t('threshold')}</TableHead>
                 <TableHead>{tCommon('status')}</TableHead>
@@ -184,7 +162,6 @@ export function StockLevelsTable({
                     <div>{level.variant.name}</div>
                     <div className="font-mono text-xs text-muted-foreground">{level.variant.sku}</div>
                   </TableCell>
-                  <TableCell>{level.warehouse.name}</TableCell>
                   <TableCell className="text-right font-mono text-sm tabular-nums">
                     {level.quantityOnHand}
                   </TableCell>
@@ -218,9 +195,7 @@ export function StockLevelsTable({
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">
-        门店可售库存仅统计默认仓库的在库数量。
-      </p>
+      <p className="text-xs text-muted-foreground">{t('singleWarehouseNote')}</p>
 
       {total > 20 ? (
         <div className="flex items-center justify-between text-sm text-muted-foreground">

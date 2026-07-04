@@ -48,14 +48,13 @@ describe('InventoryAdjustments (e2e)', () => {
 
     variantId = product.body.variants[0].id;
 
-    const warehouses = await request(app.getHttpServer())
-      .get('/api/v1/merchant/inventory/warehouses')
+    const levels = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/stock-levels')
       .set('Authorization', `Bearer ${merchantToken}`)
+      .query({ variantId })
       .expect(200);
 
-    warehouseId = warehouses.body.find(
-      (w: { isDefault: boolean }) => w.isDefault,
-    ).id;
+    warehouseId = levels.body.data[0].warehouseId;
   });
 
   afterEach(async () => {
@@ -112,12 +111,31 @@ describe('InventoryAdjustments (e2e)', () => {
     expect(list.body.data).toHaveLength(2);
   });
 
+  it('should default to the merchant warehouse when warehouseId is omitted (US-3.3)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/merchant/inventory/adjustments')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .send({
+        variantId,
+        quantityDelta: 2,
+        reason: 'COUNT_CORRECTION',
+      })
+      .expect(201);
+
+    expect(res.body).toMatchObject({
+      warehouseId,
+      variantId,
+      quantityDelta: 2,
+      quantityBefore: 10,
+      quantityAfter: 12,
+    });
+  });
+
   it('should reject decrease adjustment when it would go below zero (US-3.3)', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/v1/merchant/inventory/adjustments')
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({
-        warehouseId,
         variantId,
         quantityDelta: -15,
         reason: 'COUNT_CORRECTION',
@@ -140,7 +158,6 @@ describe('InventoryAdjustments (e2e)', () => {
       .post('/api/v1/merchant/inventory/adjustments')
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({
-        warehouseId,
         variantId,
         quantityDelta: -6,
         reason: 'COUNT_CORRECTION',
@@ -165,7 +182,6 @@ describe('InventoryAdjustments (e2e)', () => {
       .post('/api/v1/merchant/inventory/adjustments')
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({
-        warehouseId,
         variantId,
         quantityDelta: -6,
         reason: 'COUNT_CORRECTION',
@@ -187,7 +203,6 @@ describe('InventoryAdjustments (e2e)', () => {
       .post('/api/v1/merchant/inventory/adjustments')
       .set('Authorization', `Bearer ${merchantToken}`)
       .send({
-        warehouseId,
         variantId,
         quantityDelta: 10,
         reason: 'COUNT_CORRECTION',

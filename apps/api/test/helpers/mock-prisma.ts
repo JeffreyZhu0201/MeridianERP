@@ -53,6 +53,8 @@ export function createMockPrisma() {
   const inventorySettings = new Map<Id, TenantInventorySettingsRecord>();
   const tenantSettings = new Map<Id, TenantSettingsRecord>();
   const platformSettings = new Map<Id, PlatformSettingsRecord>();
+  const pluginDefinitions = new Map<Id, PluginDefinitionRecord>();
+  const tenantPlugins = new Map<Id, TenantPluginRecord>();
   const warehouses = new Map<Id, WarehouseRecord>();
   const stockLevels = new Map<Id, StockLevelRecord>();
   const stockAdjustments = new Map<Id, StockAdjustmentRecord>();
@@ -71,6 +73,9 @@ export function createMockPrisma() {
   >();
   const withdrawalRequests = new Map<Id, WithdrawalRequestRecord>();
   const masterSkus = new Map<Id, MasterSkuRecord>();
+  const branchPurchaseOrders = new Map<Id, BranchPurchaseOrderRecord>();
+  const procurementReceivingAddresses = new Map<Id, ProcurementReceivingAddressRecord>();
+  const branchPurchaseOrderPayments = new Map<Id, BranchPurchaseOrderPaymentRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
 
@@ -332,6 +337,56 @@ export function createMockPrisma() {
     wholesalePrice: Prisma.Decimal;
   }
 
+  interface BranchPurchaseOrderLineRecord {
+    id: Id;
+    branchPurchaseOrderId: Id;
+    masterSkuId: Id;
+    quantityOrdered: number;
+    quantityReceived: number;
+    unitWholesalePrice: Prisma.Decimal;
+  }
+
+  interface BranchPurchaseOrderRecord {
+    id: Id;
+    tenantId: Id;
+    warehouseId: Id;
+    orderNumber: string;
+    status: string;
+    totalAmount: Prisma.Decimal;
+    note: string | null;
+    paidAt: Date | null;
+    allocationOrderId: Id | null;
+    receivingAddressId: Id | null;
+    receivingAddressSnapshot: Record<string, string> | null;
+    createdById: Id;
+    lines: BranchPurchaseOrderLineRecord[];
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface ProcurementReceivingAddressRecord {
+    id: Id;
+    tenantId: Id;
+    label: string;
+    contactName: string;
+    contactPhone: string;
+    address: string;
+    isDefault: boolean;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface BranchPurchaseOrderPaymentRecord {
+    id: Id;
+    branchPurchaseOrderId: Id;
+    amount: Prisma.Decimal;
+    status: string;
+    provider: string;
+    paidAt: Date | null;
+    createdAt: Date;
+  }
+
   interface AllocationOrderRecord {
     id: Id;
     tenantId: Id;
@@ -400,6 +455,33 @@ export function createMockPrisma() {
     distributorPortalEnabled: boolean;
     emailQueueEnabled: boolean;
     maxRetailPriceDeviationPercent: number;
+    updatedAt: Date;
+  }
+
+  interface PluginDefinitionRecord {
+    id: Id;
+    code: string;
+    category: string;
+    icon: string;
+    sortOrder: number;
+    nameKey: string;
+    descriptionKey: string;
+    navRoutes: unknown;
+    status: 'ACTIVE' | 'COMING_SOON' | 'DEPRECATED';
+    isDefaultOnSignup: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface TenantPluginRecord {
+    id: Id;
+    tenantId: Id;
+    pluginId: Id;
+    status: 'INSTALLED' | 'UNINSTALLED';
+    installedAt: Date;
+    uninstalledAt: Date | null;
+    installedByUserId: string | null;
+    createdAt: Date;
     updatedAt: Date;
   }
 
@@ -512,6 +594,39 @@ export function createMockPrisma() {
 
   const now = () => new Date();
 
+  const attachBranchPurchaseOrderIncludes = (
+    order: BranchPurchaseOrderRecord,
+    include?: {
+      lines?: boolean | { include?: { masterSku?: boolean } };
+      payment?: boolean;
+    },
+  ) => {
+    const result: Record<string, unknown> = { ...order };
+    if (include?.lines) {
+      const withMasterSku =
+        typeof include.lines === 'object' && include.lines.include?.masterSku;
+      result.lines = order.lines.map((line) => {
+        const lineResult: Record<string, unknown> = { ...line };
+        if (withMasterSku) {
+          const sku = masterSkus.get(line.masterSkuId);
+          lineResult.masterSku = sku ?? {
+            id: line.masterSkuId,
+            skuCode: 'SKU',
+            name: 'Item',
+          };
+        }
+        return lineResult;
+      });
+    }
+    if (include?.payment) {
+      const payment = [...branchPurchaseOrderPayments.values()].find(
+        (p) => p.branchPurchaseOrderId === order.id,
+      );
+      result.payment = payment ?? null;
+    }
+    return result;
+  };
+
   const attachVariant = (
     variant: ProductVariantRecord,
     include?: Record<string, unknown>,
@@ -553,13 +668,16 @@ export function createMockPrisma() {
         (v) => v.productId === product.id,
       );
       const variantInclude = include.variants as {
-        where?: { isActive?: boolean };
+        where?: { isActive?: boolean; masterSkuId?: { not: null } };
         orderBy?: { createdAt: string };
       };
       if (variantInclude.where?.isActive !== undefined) {
         variants = variants.filter(
           (v) => v.isActive === variantInclude.where!.isActive,
         );
+      }
+      if (variantInclude.where?.masterSkuId?.not === null) {
+        variants = variants.filter((v) => v.masterSkuId != null);
       }
       if (variantInclude.orderBy?.createdAt === 'asc') {
         variants = variants.sort(
@@ -569,6 +687,57 @@ export function createMockPrisma() {
       result.variants = variants;
     }
     return result;
+  };
+
+  const matchesProductWhere = (
+    product: ProductRecord,
+    where: Record<string, unknown>,
+  ): boolean => {
+    if (where.tenantId && product.tenantId !== where.tenantId) return false;
+    if (
+      where.isPublished !== undefined &&
+      product.isPublished !== where.isPublished
+    ) {
+      return false;
+    }
+    if (where.categoryId) {
+      const categoryIdFilter = where.categoryId as {
+        not?: null;
+      };
+      if (categoryIdFilter.not === null && product.categoryId == null) {
+        return false;
+      }
+    }
+    if (where.category) {
+      const categoryFilter = where.category as { slug?: string };
+      if (categoryFilter.slug) {
+        const cat = product.categoryId
+          ? categories.get(product.categoryId)
+          : null;
+        if (!cat || cat.slug !== categoryFilter.slug) return false;
+      }
+    }
+    if (where.OR && Array.isArray(where.OR)) {
+      const orClauses = where.OR as Array<{
+        name?: { contains: string; mode?: string };
+        description?: { contains: string; mode?: string };
+      }>;
+      const matchesOr = orClauses.some((clause) => {
+        if (clause.name?.contains) {
+          return product.name
+            .toLowerCase()
+            .includes(clause.name.contains.toLowerCase());
+        }
+        if (clause.description?.contains) {
+          return (product.description ?? '')
+            .toLowerCase()
+            .includes(clause.description.contains.toLowerCase());
+        }
+        return false;
+      });
+      if (!matchesOr) return false;
+    }
+    return true;
   };
 
   const attachCart = (cart: CartRecord, include?: Record<string, unknown>) => {
@@ -702,14 +871,34 @@ export function createMockPrisma() {
     if (include?.tenant) {
       const tenant = tenants.get(order.tenantId);
       if (typeof include.tenant === 'object' && 'select' in include.tenant) {
-        const select = include.tenant.select as Record<string, boolean>;
-        result.tenant = tenant
+        const select = include.tenant.select as Record<string, unknown>;
+        const tenantBase = tenant
           ? Object.fromEntries(
               Object.keys(select)
-                .filter((k) => select[k])
+                .filter((k) => k !== 'merchantProfile' && select[k])
                 .map((k) => [k, tenant[k as keyof TenantRecord]]),
             )
           : null;
+        if (tenant && select.merchantProfile) {
+          const profileId = profileByTenant.get(order.tenantId);
+          const profile = profileId ? merchantProfiles.get(profileId) : null;
+          const mpSelect = (
+            select.merchantProfile as { select?: Record<string, boolean> }
+          )?.select;
+          const merchantProfile =
+            profile && mpSelect
+              ? Object.fromEntries(
+                  Object.keys(mpSelect)
+                    .filter((k) => mpSelect[k])
+                    .map((k) => [k, profile[k as keyof MerchantProfileRecord]]),
+                )
+              : profile;
+          result.tenant = tenantBase
+            ? { ...tenantBase, merchantProfile: merchantProfile ?? null }
+            : null;
+        } else {
+          result.tenant = tenantBase;
+        }
       } else {
         result.tenant = tenant;
       }
@@ -918,6 +1107,23 @@ export function createMockPrisma() {
           (o as OrderRecord & { fulfillmentType?: string }).fulfillmentType ===
           where.fulfillmentType,
       );
+    }
+    if (where.shippedAt === null) {
+      items = items.filter(
+        (o) => (o as OrderRecord & { shippedAt?: Date | null }).shippedAt == null,
+      );
+    }
+    if (where.tenant && typeof where.tenant === 'object') {
+      const tenantWhere = where.tenant as {
+        merchantProfile?: { isFlagship?: boolean };
+      };
+      if (tenantWhere.merchantProfile?.isFlagship !== undefined) {
+        items = items.filter((o) => {
+          const profileId = profileByTenant.get(o.tenantId);
+          const profile = profileId ? merchantProfiles.get(profileId) : null;
+          return profile?.isFlagship === tenantWhere.merchantProfile?.isFlagship;
+        });
+      }
     }
     if (where.guestEmail) {
       const guestEmail = where.guestEmail as {
@@ -1918,6 +2124,37 @@ export function createMockPrisma() {
           account?: PlatformAccountRecord | null;
         };
       },
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: {
+          account?: boolean | { select?: { firstName?: boolean; lastName?: boolean } };
+        };
+      }) => {
+        const user = users.get(where.id) ?? null;
+        if (!user) return null;
+        let result: Record<string, unknown> = { ...user };
+        if (include?.account) {
+          const account = platformAccounts.get(user.accountId) ?? null;
+          if (
+            account &&
+            typeof include.account === 'object' &&
+            include.account.select
+          ) {
+            const picked: Record<string, unknown> = {};
+            if (include.account.select.firstName) picked.firstName = account.firstName;
+            if (include.account.select.lastName) picked.lastName = account.lastName;
+            result = { ...result, account: picked };
+          } else {
+            result = { ...result, account };
+          }
+        }
+        return result as UserRecord & {
+          account?: PlatformAccountRecord | { firstName: string | null; lastName: string | null } | null;
+        };
+      },
       findMany: async ({
         where,
         orderBy,
@@ -2777,6 +3014,78 @@ export function createMockPrisma() {
         }
         return rows.length;
       },
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+      }: {
+        where?: {
+          tenantId?: string;
+          orders?: { some?: { status?: string } };
+        };
+        include?: {
+          orders?: {
+            where?: { status?: string };
+            select?: { total?: boolean; createdAt?: boolean };
+            orderBy?: { createdAt: 'desc' | 'asc' };
+          };
+        };
+        orderBy?: { updatedAt?: 'desc' | 'asc' };
+      }) => {
+        let rows = [...customers.values()];
+        if (where?.tenantId) {
+          rows = rows.filter((c) => c.tenantId === where.tenantId);
+        }
+        if (where?.orders?.some?.status) {
+          const status = where.orders.some.status;
+          rows = rows.filter((c) =>
+            [...orders.values()].some(
+              (o) =>
+                o.customerId === c.id &&
+                o.tenantId === c.tenantId &&
+                o.status === status,
+            ),
+          );
+        }
+        if (orderBy?.updatedAt === 'desc') {
+          rows = rows.sort(
+            (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime(),
+          );
+        } else if (orderBy?.updatedAt === 'asc') {
+          rows = rows.sort(
+            (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
+          );
+        }
+        return rows.map((customer) => {
+          if (!include?.orders) return customer;
+          let customerOrders = [...orders.values()].filter(
+            (o) => o.customerId === customer.id && o.tenantId === customer.tenantId,
+          );
+          if (include.orders.where?.status) {
+            customerOrders = customerOrders.filter(
+              (o) => o.status === include.orders!.where!.status,
+            );
+          }
+          if (include.orders.orderBy?.createdAt === 'desc') {
+            customerOrders = customerOrders.sort(
+              (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+            );
+          } else if (include.orders.orderBy?.createdAt === 'asc') {
+            customerOrders = customerOrders.sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+            );
+          }
+          const select = include.orders.select;
+          const mappedOrders = customerOrders.map((o) => {
+            if (!select) return o;
+            const picked: Record<string, unknown> = {};
+            if (select.total) picked.total = o.total;
+            if (select.createdAt) picked.createdAt = o.createdAt;
+            return picked;
+          });
+          return { ...customer, orders: mappedOrders };
+        });
+      },
     },
     category: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
@@ -2848,27 +3157,31 @@ export function createMockPrisma() {
         where,
         include,
         orderBy,
+        select,
       }: {
-        where: { tenantId: string; isPublished?: boolean };
-        include?: {
-          category?: boolean;
-          variants?: {
-            where?: { isActive?: boolean };
-            orderBy?: { createdAt: string };
-          };
-        };
+        where: Record<string, unknown>;
+        include?: Record<string, unknown>;
+        select?: Record<string, unknown>;
         orderBy?: { createdAt: 'desc' | 'asc' };
       }) => {
-        let items = [...products.values()].filter(
-          (p) => p.tenantId === where.tenantId,
+        let items = [...products.values()].filter((p) =>
+          matchesProductWhere(p, where),
         );
-        if (where.isPublished !== undefined) {
-          items = items.filter((p) => p.isPublished === where.isPublished);
-        }
         if (orderBy?.createdAt === 'desc') {
           items = items.sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
           );
+        }
+        if (select) {
+          return items.map((p) => {
+            const row: Record<string, unknown> = {};
+            if (select.category) {
+              row.category = p.categoryId
+                ? categories.get(p.categoryId) ?? null
+                : null;
+            }
+            return row;
+          });
         }
         return items.map((p) => attachProduct(p, include));
       },
@@ -3346,6 +3659,179 @@ export function createMockPrisma() {
           updatedAt: now(),
         };
         platformSettings.set(record.id, record);
+        return record;
+      },
+    },
+    pluginDefinition: {
+      findUnique: async ({
+        where,
+      }: {
+        where: { code?: string; id?: string };
+      }) => {
+        if (where.code) {
+          return (
+            [...pluginDefinitions.values()].find((p) => p.code === where.code) ??
+            null
+          );
+        }
+        if (where.id) {
+          return pluginDefinitions.get(where.id) ?? null;
+        }
+        return null;
+      },
+      findMany: async ({
+        where,
+        orderBy,
+      }: {
+        where?: {
+          status?: { not?: string };
+          isDefaultOnSignup?: boolean;
+        };
+        orderBy?: { sortOrder?: 'asc' | 'desc' };
+      } = {}) => {
+        let items = [...pluginDefinitions.values()];
+        if (where?.status?.not) {
+          items = items.filter((p) => p.status !== where.status!.not);
+        }
+        if (where?.isDefaultOnSignup != null) {
+          items = items.filter(
+            (p) => p.isDefaultOnSignup === where.isDefaultOnSignup,
+          );
+        }
+        if (orderBy?.sortOrder === 'asc') {
+          items = items.sort((a, b) => a.sortOrder - b.sortOrder);
+        }
+        return items;
+      },
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { code: string };
+        create: Omit<PluginDefinitionRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        update: Partial<PluginDefinitionRecord>;
+      }) => {
+        const existing = [...pluginDefinitions.values()].find(
+          (p) => p.code === where.code,
+        );
+        if (existing) {
+          const updated: PluginDefinitionRecord = {
+            ...existing,
+            ...update,
+            updatedAt: now(),
+          };
+          pluginDefinitions.set(existing.id, updated);
+          return updated;
+        }
+        const record: PluginDefinitionRecord = {
+          id: nextId('plugin'),
+          code: create.code,
+          category: create.category,
+          icon: create.icon,
+          sortOrder: create.sortOrder ?? 0,
+          nameKey: create.nameKey,
+          descriptionKey: create.descriptionKey,
+          navRoutes: create.navRoutes ?? null,
+          status: create.status ?? 'ACTIVE',
+          isDefaultOnSignup: create.isDefaultOnSignup ?? false,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        pluginDefinitions.set(record.id, record);
+        return record;
+      },
+    },
+    tenantPlugin: {
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { tenantId_pluginId?: { tenantId: string; pluginId: string } };
+        include?: { plugin?: boolean };
+      }) => {
+        if (!where.tenantId_pluginId) return null;
+        const { tenantId, pluginId } = where.tenantId_pluginId;
+        const record = [...tenantPlugins.values()].find(
+          (row) => row.tenantId === tenantId && row.pluginId === pluginId,
+        );
+        if (!record) return null;
+        if (include?.plugin) {
+          return {
+            ...record,
+            plugin: pluginDefinitions.get(record.pluginId) ?? null,
+          };
+        }
+        return record;
+      },
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+      }: {
+        where?: {
+          tenantId?: string;
+          status?: 'INSTALLED' | 'UNINSTALLED';
+        };
+        include?: { plugin?: boolean };
+        orderBy?: { plugin?: { sortOrder?: 'asc' | 'desc' } };
+      } = {}) => {
+        let items = [...tenantPlugins.values()];
+        if (where?.tenantId) {
+          items = items.filter((row) => row.tenantId === where.tenantId);
+        }
+        if (where?.status) {
+          items = items.filter((row) => row.status === where.status);
+        }
+        if (orderBy?.plugin?.sortOrder === 'asc') {
+          items = items.sort((a, b) => {
+            const pa = pluginDefinitions.get(a.pluginId);
+            const pb = pluginDefinitions.get(b.pluginId);
+            return (pa?.sortOrder ?? 0) - (pb?.sortOrder ?? 0);
+          });
+        }
+        if (include?.plugin) {
+          return items.map((row) => ({
+            ...row,
+            plugin: pluginDefinitions.get(row.pluginId) ?? null,
+          }));
+        }
+        return items;
+      },
+      upsert: async ({
+        where,
+        create,
+        update,
+      }: {
+        where: { tenantId_pluginId: { tenantId: string; pluginId: string } };
+        create: Omit<TenantPluginRecord, 'id' | 'createdAt' | 'updatedAt'>;
+        update: Partial<TenantPluginRecord>;
+      }) => {
+        const { tenantId, pluginId } = where.tenantId_pluginId;
+        const existing = [...tenantPlugins.values()].find(
+          (row) => row.tenantId === tenantId && row.pluginId === pluginId,
+        );
+        if (existing) {
+          const updated: TenantPluginRecord = {
+            ...existing,
+            ...update,
+            updatedAt: now(),
+          };
+          tenantPlugins.set(existing.id, updated);
+          return updated;
+        }
+        const record: TenantPluginRecord = {
+          id: nextId('tenant_plugin'),
+          tenantId: create.tenantId,
+          pluginId: create.pluginId,
+          status: create.status ?? 'INSTALLED',
+          installedAt: create.installedAt ?? now(),
+          uninstalledAt: create.uninstalledAt ?? null,
+          installedByUserId: create.installedByUserId ?? null,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        tenantPlugins.set(record.id, record);
         return record;
       },
     },
@@ -4504,6 +4990,22 @@ export function createMockPrisma() {
           return { ...order, commissionEntry: entry };
         }
         if (include?.lines) {
+          const linesInclude = include.lines as Record<string, unknown>;
+          if (linesInclude.include?.masterSku) {
+            return {
+              ...order,
+              lines: order.lines.map((line) => ({
+                ...line,
+                masterSku: masterSkus.get(line.masterSkuId) ?? {
+                  id: line.masterSkuId,
+                  skuCode: 'SKU',
+                  name: 'Item',
+                  quantityOnHand: 1000,
+                  isActive: true,
+                },
+              })),
+            };
+          }
           return { ...order, lines: order.lines };
         }
         return order;
@@ -4532,10 +5034,12 @@ export function createMockPrisma() {
               ...order,
               lines: order.lines.map((line) => ({
                 ...line,
-                masterSku: {
+                masterSku: masterSkus.get(line.masterSkuId) ?? {
                   id: line.masterSkuId,
                   skuCode: 'SKU',
                   name: 'Item',
+                  quantityOnHand: 1000,
+                  isActive: true,
                 },
               })),
             };
@@ -4555,6 +5059,18 @@ export function createMockPrisma() {
           createdAt: now(),
           updatedAt: now(),
         };
+        const nestedLines = (
+          data.lines as { create?: Array<Record<string, unknown>> } | undefined
+        )?.create;
+        if (nestedLines?.length) {
+          record.lines = nestedLines.map((line) => ({
+            id: nextId('alloc_line'),
+            allocationOrderId: record.id,
+            masterSkuId: line.masterSkuId as string,
+            quantity: line.quantity as number,
+            wholesalePrice: line.wholesalePrice as Prisma.Decimal,
+          }));
+        }
         allocationOrders.set(record.id, record);
         return record;
       },
@@ -4579,6 +5095,287 @@ export function createMockPrisma() {
     allocationOrderLine: {
       findMany: async () => [],
       aggregate: async () => ({ _sum: { wholesalePrice: null } }),
+    },
+    procurementReceivingAddress: {
+      findMany: async ({
+        where,
+        orderBy,
+      }: {
+        where?: { tenantId?: string; isActive?: boolean };
+        orderBy?: Array<{ isDefault?: 'asc' | 'desc'; createdAt?: 'asc' | 'desc' }>;
+      } = {}) => {
+        let items = [...procurementReceivingAddresses.values()];
+        if (where?.tenantId) {
+          items = items.filter((a) => a.tenantId === where.tenantId);
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((a) => a.isActive === where.isActive);
+        }
+        if (orderBy?.length) {
+          items.sort((a, b) => {
+            for (const clause of orderBy) {
+              if (clause.isDefault) {
+                const cmp = Number(b.isDefault) - Number(a.isDefault);
+                if (cmp !== 0) return cmp;
+              }
+              if (clause.createdAt === 'asc') {
+                return a.createdAt.getTime() - b.createdAt.getTime();
+              }
+            }
+            return 0;
+          });
+        }
+        return items;
+      },
+      findFirst: async ({
+        where,
+        orderBy,
+      }: {
+        where?: {
+          id?: string;
+          tenantId?: string;
+          isActive?: boolean;
+          isDefault?: boolean;
+        };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+      } = {}) => {
+        let items = [...procurementReceivingAddresses.values()];
+        if (where?.id) items = items.filter((a) => a.id === where.id);
+        if (where?.tenantId) items = items.filter((a) => a.tenantId === where.tenantId);
+        if (where?.isActive !== undefined) {
+          items = items.filter((a) => a.isActive === where.isActive);
+        }
+        if (where?.isDefault !== undefined) {
+          items = items.filter((a) => a.isDefault === where.isDefault);
+        }
+        if (orderBy?.createdAt === 'asc') {
+          items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        return items[0] ?? null;
+      },
+      count: async ({ where }: { where?: { tenantId?: string; isActive?: boolean } } = {}) => {
+        let items = [...procurementReceivingAddresses.values()];
+        if (where?.tenantId) {
+          items = items.filter((a) => a.tenantId === where.tenantId);
+        }
+        if (where?.isActive !== undefined) {
+          items = items.filter((a) => a.isActive === where.isActive);
+        }
+        return items.length;
+      },
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: ProcurementReceivingAddressRecord = {
+          id: nextId('pra'),
+          tenantId: data.tenantId as string,
+          label: data.label as string,
+          contactName: data.contactName as string,
+          contactPhone: data.contactPhone as string,
+          address: data.address as string,
+          isDefault: (data.isDefault as boolean) ?? false,
+          isActive: (data.isActive as boolean) ?? true,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        procurementReceivingAddresses.set(record.id, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => {
+        const existing = procurementReceivingAddresses.get(where.id);
+        if (!existing) throw new Error('ProcurementReceivingAddress not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        procurementReceivingAddresses.set(where.id, updated);
+        return updated;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where?: { tenantId?: string };
+        data: Record<string, unknown>;
+      }) => {
+        let count = 0;
+        for (const [id, row] of procurementReceivingAddresses.entries()) {
+          if (where?.tenantId && row.tenantId !== where.tenantId) continue;
+          procurementReceivingAddresses.set(id, { ...row, ...data, updatedAt: now() });
+          count++;
+        }
+        return { count };
+      },
+      delete: async ({ where }: { where: { id: string } }) => {
+        procurementReceivingAddresses.delete(where.id);
+        return { id: where.id };
+      },
+    },
+    branchPurchaseOrder: {
+      findMany: async ({
+        where,
+        skip,
+        take,
+        orderBy,
+        include,
+      }: {
+        where?: { tenantId?: string; status?: string };
+        skip?: number;
+        take?: number;
+        orderBy?: { createdAt: 'asc' | 'desc' };
+        include?: { lines?: boolean | { include?: { masterSku?: boolean } } };
+      } = {}) => {
+        let items = [...branchPurchaseOrders.values()];
+        if (where?.tenantId) {
+          items = items.filter((o) => o.tenantId === where.tenantId);
+        }
+        if (where?.status) {
+          items = items.filter((o) => o.status === where.status);
+        }
+        if (orderBy?.createdAt === 'desc') {
+          items.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+        if (skip !== undefined) items = items.slice(skip);
+        if (take !== undefined) items = items.slice(0, take);
+        return items.map((order) => attachBranchPurchaseOrderIncludes(order, include));
+      },
+      count: async ({ where }: { where?: { tenantId?: string } } = {}) => {
+        let items = [...branchPurchaseOrders.values()];
+        if (where?.tenantId) {
+          items = items.filter((o) => o.tenantId === where.tenantId);
+        }
+        return items.length;
+      },
+      findFirst: async ({
+        where,
+        include,
+      }: {
+        where?: { id?: string; tenantId?: string };
+        include?: { lines?: boolean | { include?: { masterSku?: boolean } }; payment?: boolean };
+      } = {}) => {
+        const order = [...branchPurchaseOrders.values()].find((o) => {
+          if (where?.id && o.id !== where.id) return false;
+          if (where?.tenantId && o.tenantId !== where.tenantId) return false;
+          return true;
+        });
+        if (!order) return null;
+        return attachBranchPurchaseOrderIncludes(order, include);
+      },
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: {
+          lines?: boolean | { include?: { masterSku?: boolean } };
+          tenant?: { include?: { merchantProfile?: boolean } };
+        };
+      }) => {
+        const order = branchPurchaseOrders.get(where.id);
+        if (!order) return null;
+        const result = attachBranchPurchaseOrderIncludes(order, include) as Record<
+          string,
+          unknown
+        >;
+        if (include?.tenant) {
+          const tenant = tenants.get(order.tenantId);
+          result.tenant = tenant
+            ? {
+                ...tenant,
+                merchantProfile: merchantProfiles.get(profileByTenant.get(order.tenantId) ?? ''),
+              }
+            : null;
+        }
+        return result;
+      },
+      create: async ({
+        data,
+        include,
+      }: {
+        data: Record<string, unknown>;
+        include?: { lines?: boolean | { include?: { masterSku?: boolean } }; payment?: boolean };
+      }) => {
+        const record: BranchPurchaseOrderRecord = {
+          id: nextId('bpo'),
+          tenantId: data.tenantId as string,
+          warehouseId: data.warehouseId as string,
+          orderNumber: data.orderNumber as string,
+          status: (data.status as string) ?? 'PENDING_PAYMENT',
+          totalAmount: data.totalAmount as Prisma.Decimal,
+          note: (data.note as string | null) ?? null,
+          paidAt: (data.paidAt as Date | null) ?? null,
+          allocationOrderId: (data.allocationOrderId as string | null) ?? null,
+          receivingAddressId: (data.receivingAddressId as string | null) ?? null,
+          receivingAddressSnapshot:
+            (data.receivingAddressSnapshot as Record<string, string> | null) ?? null,
+          createdById: data.createdById as string,
+          lines: [],
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        const nestedLines = (
+          data.lines as { create?: Array<Record<string, unknown>> } | undefined
+        )?.create;
+        if (nestedLines?.length) {
+          record.lines = nestedLines.map((line) => ({
+            id: nextId('bpo_line'),
+            branchPurchaseOrderId: record.id,
+            masterSkuId: line.masterSkuId as string,
+            quantityOrdered: line.quantityOrdered as number,
+            quantityReceived: 0,
+            unitWholesalePrice: line.unitWholesalePrice as Prisma.Decimal,
+          }));
+        }
+        branchPurchaseOrders.set(record.id, record);
+        return attachBranchPurchaseOrderIncludes(record, include);
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => {
+        const existing = branchPurchaseOrders.get(where.id);
+        if (!existing) return null;
+        const updated = { ...existing, ...data, updatedAt: now() };
+        branchPurchaseOrders.set(where.id, updated);
+        return updated;
+      },
+    },
+    branchPurchaseOrderLine: {
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => {
+        for (const order of branchPurchaseOrders.values()) {
+          const line = order.lines.find((l) => l.id === where.id);
+          if (line) {
+            Object.assign(line, data);
+            return line;
+          }
+        }
+        return null;
+      },
+    },
+    branchPurchaseOrderPayment: {
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: BranchPurchaseOrderPaymentRecord = {
+          id: nextId('bpo_pay'),
+          branchPurchaseOrderId: data.branchPurchaseOrderId as string,
+          amount: data.amount as Prisma.Decimal,
+          status: data.status as string,
+          provider: (data.provider as string) ?? 'mock',
+          paidAt: (data.paidAt as Date | null) ?? null,
+          createdAt: now(),
+        };
+        branchPurchaseOrderPayments.set(record.id, record);
+        return record;
+      },
     },
     replenishmentRequest: {
       findMany: async () => [],

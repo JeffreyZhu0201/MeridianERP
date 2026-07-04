@@ -4,19 +4,18 @@ import {
   AdjustmentListQueryDto,
   CreatePurchaseOrderDto,
   CreateStockAdjustmentDto,
-  CreateWarehouseDto,
   PurchaseOrderListQueryDto,
   ReceivePurchaseOrderDto,
   StockLevelListQueryDto,
   UpdateInventorySettingsDto,
   UpdatePurchaseOrderDto,
   UpdateReorderThresholdDto,
-  UpdateWarehouseDto,
 } from './dto/inventory.dto';
 import { MerchantInventoryReportsService } from './merchant-inventory-reports.service';
 import { MerchantPurchaseOrdersService } from './merchant-purchase-orders.service';
 import { MerchantStockService } from './merchant-stock.service';
 import { MerchantWarehousesService } from './merchant-warehouses.service';
+
 @Injectable()
 export class MerchantInventoryService {
   constructor(
@@ -32,30 +31,6 @@ export class MerchantInventoryService {
 
   updateSettings(user: AuthenticatedUser, dto: UpdateInventorySettingsDto) {
     return this.warehouses.updateSettings(user, dto);
-  }
-
-  listWarehouses(tenantId: string) {
-    return this.warehouses.listWarehouses(tenantId);
-  }
-
-  getWarehouse(tenantId: string, id: string) {
-    return this.warehouses.getWarehouse(tenantId, id);
-  }
-
-  createWarehouse(user: AuthenticatedUser, dto: CreateWarehouseDto) {
-    return this.warehouses.createWarehouse(user, dto);
-  }
-
-  updateWarehouse(
-    user: AuthenticatedUser,
-    id: string,
-    dto: UpdateWarehouseDto,
-  ) {
-    return this.warehouses.updateWarehouse(user, id, dto);
-  }
-
-  setDefaultWarehouse(user: AuthenticatedUser, id: string) {
-    return this.warehouses.setDefaultWarehouse(user, id);
   }
 
   listStockLevels(tenantId: string, query: StockLevelListQueryDto) {

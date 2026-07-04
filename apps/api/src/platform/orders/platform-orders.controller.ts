@@ -28,6 +28,7 @@ export class PlatformOrdersController {
     @Query('fulfillmentType') fulfillmentType?: string,
     @Query('guestEmail') guestEmail?: string,
     @Query('tenantId') tenantId?: string,
+    @Query('deliveryQueue') deliveryQueue?: string,
   ) {
     return this.ordersService.findAll(
       page ? parseInt(page, 10) : 1,
@@ -36,6 +37,7 @@ export class PlatformOrdersController {
       fulfillmentType,
       guestEmail,
       tenantId,
+      deliveryQueue === 'true',
     );
   }
 

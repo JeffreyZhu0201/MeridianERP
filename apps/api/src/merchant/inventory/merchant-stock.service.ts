@@ -14,12 +14,14 @@ import {
   StockLevelListQueryDto,
   UpdateReorderThresholdDto,
 } from './dto/inventory.dto';
+import { MerchantWarehousesService } from './merchant-warehouses.service';
 
 @Injectable()
 export class MerchantStockService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly inventory: InventoryService,
+    private readonly warehouses: MerchantWarehousesService,
   ) {}
 
   private assertOwner(user: AuthenticatedUser) {
@@ -30,8 +32,11 @@ export class MerchantStockService {
 
   async listStockLevels(tenantId: string, query: StockLevelListQueryDto) {
     const { skip, take, page, limit } = getPagination(query);
-    const where: Prisma.StockLevelWhereInput = { tenantId };
-    if (query.warehouseId) where.warehouseId = query.warehouseId;
+    const defaultWarehouseId = await this.warehouses.resolveDefaultWarehouseId(tenantId);
+    const where: Prisma.StockLevelWhereInput = {
+      tenantId,
+      warehouseId: defaultWarehouseId,
+    };
     if (query.variantId) where.variantId = query.variantId;
     if (query.q) {
       where.variant = {
@@ -151,21 +156,42 @@ export class MerchantStockService {
   }
 
   createAdjustment(user: AuthenticatedUser, dto: CreateStockAdjustmentDto) {
-    return this.inventory.adjustStock(
-      user.tenantId!,
-      dto.warehouseId,
-      dto.variantId,
-      dto.quantityDelta,
-      dto.reason,
-      dto.note,
-      user.userId,
+    const tenantId = user.tenantId!;
+    return this.resolveAdjustmentWarehouseId(tenantId, dto.warehouseId).then(
+      (warehouseId) =>
+        this.inventory.adjustStock(
+          tenantId,
+          warehouseId,
+          dto.variantId,
+          dto.quantityDelta,
+          dto.reason,
+          dto.note,
+          user.userId,
+        ),
     );
+  }
+
+  private async resolveAdjustmentWarehouseId(
+    tenantId: string,
+    warehouseId?: string,
+  ): Promise<string> {
+    if (warehouseId) {
+      const warehouse = await this.prisma.warehouse.findFirst({
+        where: { id: warehouseId, tenantId },
+      });
+      if (!warehouse) throw new NotFoundException('Warehouse not found');
+      return warehouse.id;
+    }
+    return this.warehouses.resolveDefaultWarehouseId(tenantId);
   }
 
   async listAdjustments(tenantId: string, query: AdjustmentListQueryDto) {
     const { skip, take, page, limit } = getPagination(query);
-    const where: Prisma.StockAdjustmentWhereInput = { tenantId };
-    if (query.warehouseId) where.warehouseId = query.warehouseId;
+    const defaultWarehouseId = await this.warehouses.resolveDefaultWarehouseId(tenantId);
+    const where: Prisma.StockAdjustmentWhereInput = {
+      tenantId,
+      warehouseId: defaultWarehouseId,
+    };
     if (query.variantId) where.variantId = query.variantId;
     if (query.reason) where.reason = query.reason;
     if (query.from || query.to) {

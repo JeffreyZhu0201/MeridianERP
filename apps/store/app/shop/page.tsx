@@ -1,30 +1,39 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import {
   EmptyState,
+  formatMoney,
   StoreCatalogHeader,
-  StoreCatalogToolbar,
   StoreFeaturedHero,
 } from '@meridian/ui/server';
-import type { UnifiedStoreCatalogResponse } from '@meridian/shared';
+import { StoreCatalogExplorer } from '@meridian/ui';
+import type {
+  StoreCatalogFiltersResponse,
+  StoreCatalogSort,
+  UnifiedStoreCatalogResponse,
+} from '@meridian/shared';
 
 import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { catalogApiPath, getFulfillmentSlug } from '@/lib/fulfillment';
+import {
+  catalogApiPath,
+  catalogFiltersApiPath,
+  getFulfillmentSlug,
+  parseCatalogSearchParams,
+} from '@/lib/fulfillment';
+import { unifiedProductFromPrice } from '@/lib/pricing';
 import { UnifiedProductGrid } from './_components/unified-product-grid';
 
-function getFeaturedPrice(product: UnifiedStoreCatalogResponse['items'][0]): string {
-  const prices = product.variants
-    .filter((v) => v.inStock)
-    .map((v) => Number(v.branchPrice ?? v.flagshipPrice));
-  const min = prices.length ? Math.min(...prices) : 0;
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(min);
+interface ShopPageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: ShopPageProps) {
   const fulfillmentSlug = await getFulfillmentSlug();
   const token = await getToken();
+  const locale = await getLocale();
   const t = await getTranslations('store');
+  const catalogQuery = parseCatalogSearchParams(await searchParams);
 
   if (!fulfillmentSlug) {
     return (
@@ -34,11 +43,23 @@ export default async function ShopPage() {
     );
   }
 
-  const [catalog, cart] = await Promise.all([
-    apiFetch<UnifiedStoreCatalogResponse>(catalogApiPath(fulfillmentSlug)).catch(() => ({
+  const sortLabels: Record<StoreCatalogSort, string> = {
+    newest: t('catalogToolbar.sortNewest'),
+    name_asc: t('catalogToolbar.sortNameAsc'),
+    price_asc: t('catalogToolbar.sortPriceAsc'),
+    price_desc: t('catalogToolbar.sortPriceDesc'),
+  };
+
+  const [catalog, filters, cart] = await Promise.all([
+    apiFetch<UnifiedStoreCatalogResponse>(
+      catalogApiPath(fulfillmentSlug, undefined, catalogQuery),
+    ).catch(() => ({
       fulfillmentSlug,
       flagshipSlug: fulfillmentSlug,
       items: [],
+    })),
+    apiFetch<StoreCatalogFiltersResponse>(catalogFiltersApiPath(fulfillmentSlug)).catch(() => ({
+      categories: [],
     })),
     apiFetch<Cart>(storePath(fulfillmentSlug, 'cart'), {}, token).catch(() => null),
   ]);
@@ -58,10 +79,10 @@ export default async function ShopPage() {
         title={t('home.shop')}
         description={t('home.browseCatalog')}
         metrics={[
-          { title: 'Catalog', value: products.length },
+          { title: t('home.catalogMetric'), value: products.length },
           {
             title: t('nav.cart'),
-            value: cartCount === 0 ? '0' : `${cartCount} items`,
+            value: cartCount === 0 ? '0' : t('home.cartItems', { count: cartCount }),
             accent: cartCount > 0,
           },
         ]}
@@ -72,19 +93,34 @@ export default async function ShopPage() {
           badge={t('home.flagshipBadge')}
           title={featured.name}
           description={featured.description ?? undefined}
-          price={getFeaturedPrice(featured)}
+          price={formatMoney(unifiedProductFromPrice(featured), locale)}
           href={`/shop/products/${featured.slug}`}
           ctaLabel={t('product.viewProduct')}
         />
       ) : null}
 
-      <StoreCatalogToolbar title={t('home.allProducts')} />
-
-      {products.length === 0 ? (
-        <EmptyState title={t('home.empty')} />
-      ) : (
-        <UnifiedProductGrid products={products} fulfillmentSlug={fulfillmentSlug} />
-      )}
+      <StoreCatalogExplorer
+        title={t('home.allProducts')}
+        basePath="/shop"
+        categories={filters.categories}
+        current={catalogQuery}
+        sortLabels={sortLabels}
+        filterLabel={t('catalogToolbar.filter')}
+        sortLabel={t('catalogToolbar.sort')}
+        searchPlaceholder={t('catalogToolbar.searchPlaceholder')}
+        clearSearchLabel={t('catalogToolbar.clearSearch')}
+        searchingLabel={t('catalogToolbar.searching')}
+        allCategoriesLabel={t('catalogToolbar.allCategories')}
+        inStockOnlyLabel={t('catalogToolbar.inStockOnly')}
+      >
+        {products.length === 0 ? (
+          <EmptyState
+            title={catalogQuery.q ? t('home.emptySearch') : t('home.empty')}
+          />
+        ) : (
+          <UnifiedProductGrid products={products} fulfillmentSlug={fulfillmentSlug} />
+        )}
+      </StoreCatalogExplorer>
     </ShopShellWrapper>
   );
 }

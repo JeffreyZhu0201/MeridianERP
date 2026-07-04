@@ -28,6 +28,11 @@ export class MerchantOrdersController {
     return this.ordersService.listPickupPending(user.tenantId!);
   }
 
+  @Get('delivery-pending')
+  listDeliveryPending(@CurrentUser() user: AuthenticatedUser) {
+    return this.ordersService.listDeliveryPending(user.tenantId!);
+  }
+
   @Post(':id/verify-pickup')
   @HttpCode(200)
   verifyPickup(
@@ -41,6 +46,15 @@ export class MerchantOrdersController {
       dto.code,
       user.userId,
     );
+  }
+
+  @Post(':id/ship')
+  @HttpCode(200)
+  shipDelivery(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id') id: string,
+  ) {
+    return this.ordersService.shipDelivery(user.tenantId!, id, user.userId);
   }
 
   @Get(':id')

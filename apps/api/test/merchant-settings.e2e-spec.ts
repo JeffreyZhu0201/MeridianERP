@@ -81,6 +81,28 @@ describe('MerchantSettings (e2e)', () => {
     expect(res.body.notifyOnBinding).toBe(false);
   });
 
+  it('owner can PATCH legalName and storeAddress', async () => {
+    const res = await request(app.getHttpServer())
+      .patch('/api/v1/merchant/settings')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({
+        legalName: 'Settings Store LLC',
+        storeAddress: '123 Main Street, Shanghai',
+      })
+      .expect(200);
+
+    expect(res.body.profile.legalName).toBe('Settings Store LLC');
+    expect(res.body.profile.storeAddress).toBe('123 Main Street, Shanghai');
+
+    const getRes = await request(app.getHttpServer())
+      .get('/api/v1/merchant/settings')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .expect(200);
+
+    expect(getRes.body.profile.legalName).toBe('Settings Store LLC');
+    expect(getRes.body.profile.storeAddress).toBe('123 Main Street, Shanghai');
+  });
+
   it('staff cannot PATCH settings', async () => {
     await request(app.getHttpServer())
       .patch('/api/v1/merchant/settings')

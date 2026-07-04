@@ -29,6 +29,7 @@ export class PlatformOrdersService {
     fulfillmentType?: string,
     guestEmail?: string,
     tenantId?: string,
+    deliveryQueue?: boolean,
   ) {
     const skip = (page - 1) * limit;
     const where: Prisma.OrderWhereInput = {};
@@ -40,6 +41,12 @@ export class PlatformOrdersService {
     if (tenantId) where.tenantId = tenantId;
     if (guestEmail?.trim()) {
       where.guestEmail = { contains: guestEmail.trim(), mode: 'insensitive' };
+    }
+    if (deliveryQueue) {
+      where.fulfillmentType = 'DELIVERY';
+      where.status = 'PAID';
+      where.shippedAt = null;
+      where.tenant = { merchantProfile: { isFlagship: true } };
     }
 
     const [data, total] = await Promise.all([

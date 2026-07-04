@@ -17,29 +17,25 @@ import {
   TableRow,
 } from '@meridian/ui';
 import { StockAdjustmentReason } from '@meridian/shared';
-import type { StockAdjustmentWithDetails, Warehouse } from '@meridian/shared';
+import type { StockAdjustmentWithDetails } from '@meridian/shared';
 
 interface AdjustmentsHistoryTableProps {
   adjustments: StockAdjustmentWithDetails[];
   total: number;
   page: number;
-  warehouses: Warehouse[];
 }
 
 export function AdjustmentsHistoryTable({
   adjustments,
   total,
   page,
-  warehouses,
 }: AdjustmentsHistoryTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const t = useTranslations('merchant.inventory.adjustments');
   const tStock = useTranslations('merchant.inventory.stock');
   const tCommon = useTranslations('common');
-  const tInvCommon = useTranslations('merchant.inventory.common');
   const tReasons = useTranslations('merchant.inventory.adjustmentReason');
-  const warehouseId = searchParams.get('warehouseId') ?? '';
   const reason = searchParams.get('reason') ?? '';
   const from = searchParams.get('from') ?? '';
   const to = searchParams.get('to') ?? '';
@@ -79,22 +75,6 @@ export function AdjustmentsHistoryTable({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="hist-warehouse">{t('warehouse')}</Label>
-          <Select
-            id="hist-warehouse"
-            value={warehouseId}
-            onChange={(e) => updateFilter('warehouseId', e.target.value)}
-            className="min-h-11"
-          >
-            <option value="">{tInvCommon('allWarehouses')}</option>
-            {warehouses.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="hist-reason">{t('filterReason')}</Label>
           <Select
             id="hist-reason"
@@ -102,7 +82,7 @@ export function AdjustmentsHistoryTable({
             onChange={(e) => updateFilter('reason', e.target.value)}
             className="min-h-11"
           >
-            <option value="">全部</option>
+            <option value="">{t('allReasons')}</option>
             {Object.values(StockAdjustmentReason).map((r) => (
               <option key={r} value={r}>
                 {tReasons(r)}
@@ -119,13 +99,12 @@ export function AdjustmentsHistoryTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>日期</TableHead>
+                <TableHead>{t('date')}</TableHead>
                 <TableHead>{tStock('product')}</TableHead>
-                <TableHead>{t('warehouse')}</TableHead>
-                <TableHead className="text-right">变动</TableHead>
-                <TableHead className="text-right">调整前 → 后</TableHead>
+                <TableHead className="text-right">{t('delta')}</TableHead>
+                <TableHead className="text-right">{t('beforeAfter')}</TableHead>
                 <TableHead>{t('reason')}</TableHead>
-                <TableHead>操作人</TableHead>
+                <TableHead>{t('actor')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +117,6 @@ export function AdjustmentsHistoryTable({
                     <div>{adj.variant.productName}</div>
                     <div className="font-mono text-xs text-muted-foreground">{adj.variant.sku}</div>
                   </TableCell>
-                  <TableCell>{adj.warehouse.name}</TableCell>
                   <TableCell
                     className={`text-right font-mono text-sm tabular-nums ${
                       adj.quantityDelta > 0 ? 'text-emerald-600' : 'text-destructive'

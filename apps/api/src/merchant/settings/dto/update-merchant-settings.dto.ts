@@ -24,6 +24,14 @@ export class UpdateMerchantSettingsDto {
   contactPhone?: string;
 
   @IsOptional()
+  @IsString()
+  legalName?: string | null;
+
+  @IsOptional()
+  @IsString()
+  storeAddress?: string | null;
+
+  @IsOptional()
   @IsNumber()
   defaultCommissionRate?: number | null;
 
