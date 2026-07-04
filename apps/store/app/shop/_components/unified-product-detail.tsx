@@ -53,26 +53,31 @@ export function UnifiedProductDetail({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
-      <div className="aspect-square rounded-xl bg-muted" />
+    <div className="grid gap-8 lg:grid-cols-12">
+      <div className="lg:col-span-7">
+        <div className="store-bento-card relative aspect-square overflow-hidden bg-muted/50">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-muted to-accent/30" />
+        </div>
+      </div>
 
-      <div className="space-y-6">
+      <div className="flex flex-col gap-6 lg:col-span-5 lg:sticky lg:top-28 lg:self-start">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{product.name}</h1>
+          <h1 className="store-headline-xl text-foreground">{product.name}</h1>
           {product.description ? (
-            <p className="mt-2 text-muted-foreground">{product.description}</p>
+            <p className="store-body-md mt-3 text-muted-foreground">{product.description}</p>
           ) : null}
         </div>
 
         {variants.length > 1 ? (
           <div className="space-y-2">
-            <label htmlFor="variant" className="text-sm font-medium">
+            <label htmlFor="variant" className="store-label text-foreground">
               {t('product.variant')}
             </label>
             <Select
               id="variant"
               value={variantId}
               onChange={(e) => setVariantId(e.target.value)}
+              className="min-h-11 rounded-lg"
             >
               {variants.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -84,33 +89,35 @@ export function UnifiedProductDetail({
           </div>
         ) : null}
 
-        {selected ? (
-          <div className="space-y-1">
-            <p className="text-2xl font-semibold">{formatMoney(displayPrice)}</p>
-            <p className="text-sm text-muted-foreground">
-              {outOfStock
+        <div className="store-bento-card space-y-4 p-5">
+          {selected ? (
+            <>
+              <p className="store-price text-2xl">{formatMoney(displayPrice)}</p>
+              <p className="text-sm text-muted-foreground">
+                {outOfStock
+                  ? t('product.outOfStock')
+                  : selected.inventory <= 5
+                    ? t('product.lowStock', { count: selected.inventory })
+                    : t('product.inStock')}
+              </p>
+            </>
+          ) : null}
+
+          <Button
+            className="min-h-11 w-full rounded-full"
+            size="lg"
+            disabled={outOfStock || adding}
+            onClick={handleAddToCart}
+          >
+            {adding
+              ? t('product.adding')
+              : outOfStock
                 ? t('product.outOfStock')
-                : selected.inventory <= 5
-                  ? t('product.lowStock', { count: selected.inventory })
-                  : t('product.inStock')}
-            </p>
-          </div>
-        ) : null}
+                : t('product.addToCart')}
+          </Button>
 
-        <Button
-          className="min-h-11 w-full sm:w-auto"
-          size="lg"
-          disabled={outOfStock || adding}
-          onClick={handleAddToCart}
-        >
-          {adding
-            ? t('product.adding')
-            : outOfStock
-              ? t('product.outOfStock')
-              : t('product.addToCart')}
-        </Button>
-
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        </div>
       </div>
     </div>
   );

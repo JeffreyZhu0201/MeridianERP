@@ -36,6 +36,13 @@ export {
 
 export { AuthLayout, type AuthLayoutProps } from './components/auth-layout';
 export { ProductCard, type ProductCardProps } from './components/product-card';
+export {
+  StoreCatalogHeader,
+  type StoreCatalogHeaderProps,
+  type StoreCatalogMetric,
+} from './components/store/store-catalog-header';
+export { StoreFeaturedHero, type StoreFeaturedHeroProps } from './components/store/store-featured-hero';
+export { StoreCatalogToolbar, type StoreCatalogToolbarProps } from './components/store/store-catalog-toolbar';
 export { MetricCard, type MetricCardProps } from './components/metric-card';
 export { PageHeader, type PageHeaderProps } from './components/page-header';
 export { EmptyState, type EmptyStateProps } from './components/empty-state';

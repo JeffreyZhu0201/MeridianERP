@@ -3,44 +3,21 @@
 /**
  * StoreShell - 商店前端消费者门户布局组件
  *
- * 提供消费者商店（Store Front）的标准页面布局，包含：
- * - 顶部固定导航栏（商店名、购物车、用户账户）
- * - 购物车数量徽章（显示在购物车图标上）
- * - 底部页脚（Powered by MeridianERP）
- * - 暗色模式与国际化切换
- *
- * @example
- * ```tsx
- * <StoreShell
- *   storeSlug="starbucks-zhongguancun"
- *   storeName="星巴克 - 中关村店"
- *   cartCount={3}
- *   userEmail="customer@example.com"
- * >
- *   <ProductCatalog />
- * </StoreShell>
- * ```
+ * Layout aligned with docs/design/stich.md:
+ * - h-20 sticky header, max-w-7xl, underline active nav
+ * - Icon action row, tertiary cart indicator
+ * - Three-column footer
  */
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { type ReactNode } from 'react';
-import { IconShoppingCart, IconUser } from '@tabler/icons-react';
+import { IconLayoutGrid, IconShoppingCart, IconUser } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { LocaleToggle } from '../theme/locale-toggle';
 import { ModeToggle } from '../theme/mode-toggle';
-import { shellDividerB, shellDividerT } from '../../lib/surfaces';
 import { cn } from '../../lib/utils';
 
-/**
- * StoreShell 属性接口
- * @param children - 页面内容（商品目录、购物车、账户页面等）
- * @param storeSlug - 商店 URL slug（用于生成商店内链接）
- * @param storeName - 商店显示名称
- * @param cartCount - 购物车商品数量（显示徽章，超过 9 显示 9+）
- * @param userEmail - 当前登录用户邮箱（未登录则显示登录链接）
- * @param onLogout - 退出登录回调函数
- */
 export interface StoreShellProps {
   children: ReactNode;
   storeSlug: string;
@@ -48,9 +25,7 @@ export interface StoreShellProps {
   cartCount?: number;
   userEmail?: string;
   onLogout?: () => void;
-  /** Base path for nav links; defaults to `/s/{storeSlug}` */
   basePath?: string;
-  /** Optional branch picker shown in the header */
   branchSelect?: ReactNode;
 }
 
@@ -76,72 +51,69 @@ export function StoreShell({
   ];
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className={cn('sticky top-0 z-10 bg-background', shellDividerB)}>
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
+    <div className="flex min-h-dvh flex-col bg-background">
+      <header className="sticky top-0 z-50 border-b border-border bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 md:px-12">
           <Link
             href={base}
-            className="text-lg font-semibold tracking-tight hover:text-primary"
+            className="store-headline-lg flex items-center gap-2 text-primary hover:opacity-90"
           >
-            {storeName ?? storeSlug}
+            <IconLayoutGrid className="size-6 shrink-0" stroke={1.75} />
+            <span className="hidden sm:inline">{storeName ?? 'Meridian Store'}</span>
+            <span className="sm:hidden">{storeName?.slice(0, 12) ?? 'Store'}</span>
           </Link>
 
-          <nav className="hidden items-center gap-1 sm:flex">
-            {navItems.map((item) => {
-              const active = item.exact
-                ? pathname === item.href
-                : pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                    active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <div className="flex items-center gap-2">
+          <div className="hidden items-center gap-6 md:flex">
             {branchSelect}
+            <nav className="flex items-center gap-6">
+              {navItems.map((item) => {
+                const active = item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={active ? 'store-nav-link-active' : 'store-nav-link'}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-1">
+            {branchSelect ? <div className="md:hidden">{branchSelect}</div> : null}
             <LocaleToggle portal="store" />
             <ModeToggle />
             {userEmail ? (
-              <div className="hidden items-center gap-2 text-sm sm:flex">
+              <div className="hidden items-center gap-2 pl-2 text-sm lg:flex">
                 <span className="max-w-[140px] truncate text-muted-foreground">{userEmail}</span>
                 {onLogout ? (
                   <button
                     type="button"
                     onClick={onLogout}
-                    className="rounded-full px-3 py-1 hover:bg-muted"
+                    className="rounded-full px-3 py-1.5 text-sm hover:bg-muted"
                   >
                     {tc('signOut')}
                   </button>
                 ) : null}
               </div>
             ) : (
-              <Link
-                href={`${base}/login`}
-                className="hidden rounded-full px-3 py-1 text-sm text-muted-foreground hover:bg-muted sm:inline"
-              >
-                {tc('signIn')}
+              <Link href={`${base}/login`} className="store-icon-btn hidden md:flex" aria-label={tc('signIn')}>
+                <IconUser className="size-5" stroke={1.5} />
               </Link>
             )}
 
             <Link
               href={`${base}/cart`}
-              className="relative flex size-11 items-center justify-center rounded-full hover:bg-muted"
+              className="store-icon-btn"
               aria-label={`${t('cart')}${cartCount > 0 ? `, ${cartCount}` : ''}`}
             >
               <IconShoppingCart className="size-5" stroke={1.5} />
               {cartCount > 0 ? (
-                <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                <span className="absolute right-1.5 top-1.5 flex size-4 items-center justify-center rounded-full bg-[hsl(var(--store-tertiary))] text-[10px] font-bold text-white">
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               ) : null}
@@ -149,7 +121,7 @@ export function StoreShell({
 
             <Link
               href={userEmail ? `${base}/account` : `${base}/login`}
-              className="flex size-11 items-center justify-center rounded-full hover:bg-muted sm:hidden"
+              className="store-icon-btn md:hidden"
               aria-label={t('account')}
             >
               <IconUser className="size-5" stroke={1.5} />
@@ -158,11 +130,20 @@ export function StoreShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 md:px-12 md:py-12">{children}</main>
 
-      <footer className={cn(shellDividerT, 'py-6')}>
-        <div className="mx-auto max-w-6xl px-4 text-center text-xs text-muted-foreground">
-          {tc('poweredBy')}
+      <footer className="border-t border-border bg-muted/40">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm md:flex-row md:px-12">
+          <div className="store-headline-lg flex items-center gap-2 text-foreground">
+            <IconLayoutGrid className="size-5 text-primary" stroke={1.75} />
+            Meridian Store
+          </div>
+          <div className="store-label flex gap-6 text-muted-foreground">
+            <span>Privacy</span>
+            <span>Terms</span>
+            <span>Legal</span>
+          </div>
+          <p className="text-xs text-muted-foreground">{tc('poweredBy')}</p>
         </div>
       </footer>
     </div>

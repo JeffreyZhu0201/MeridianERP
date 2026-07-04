@@ -1,5 +1,10 @@
 import { getTranslations } from 'next-intl/server';
-import { BentoDashboardFrame, BentoMetricTile, BentoTile, EmptyState } from '@meridian/ui/server';
+import {
+  EmptyState,
+  StoreCatalogHeader,
+  StoreCatalogToolbar,
+  StoreFeaturedHero,
+} from '@meridian/ui/server';
 import type { UnifiedStoreCatalogResponse } from '@meridian/shared';
 
 import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
@@ -7,6 +12,14 @@ import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { catalogApiPath, getFulfillmentSlug } from '@/lib/fulfillment';
 import { UnifiedProductGrid } from './_components/unified-product-grid';
+
+function getFeaturedPrice(product: UnifiedStoreCatalogResponse['items'][0]): string {
+  const prices = product.variants
+    .filter((v) => v.inStock)
+    .map((v) => Number(v.branchPrice ?? v.flagshipPrice));
+  const min = prices.length ? Math.min(...prices) : 0;
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(min);
+}
 
 export default async function ShopPage() {
   const fulfillmentSlug = await getFulfillmentSlug();
@@ -41,41 +54,37 @@ export default async function ShopPage() {
       storeName={storeName}
       cartCount={cartCount}
     >
-      <BentoDashboardFrame title={t('home.shop')} description={t('home.browseCatalog')}>
-        <BentoTile colSpan={2} rowSpan={2}>
-          <div className="flex h-full flex-col justify-between gap-4 p-6">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">{storeName}</p>
-              <h2 className="text-2xl font-semibold tracking-tight">{t('home.browseCatalog')}</h2>
-              <p className="text-sm text-muted-foreground">
-                {products.length} {products.length === 1 ? 'product' : 'products'}
-              </p>
-            </div>
-            {featured ? (
-              <div className="rounded-lg ring-1 ring-border bg-muted/30 p-4">
-                <p className="text-xs text-muted-foreground">Featured</p>
-                <a
-                  href={`/shop/products/${featured.slug}`}
-                  className="mt-1 block text-lg font-medium hover:text-primary"
-                >
-                  {featured.name}
-                </a>
-              </div>
-            ) : null}
-          </div>
-        </BentoTile>
-        <BentoMetricTile title={t('nav.cart')} value={cartCount} />
-        <BentoMetricTile title="Catalog" value={products.length} />
-        <BentoTile colSpan={4}>
-          <div className="p-4 md:p-6">
-            {products.length === 0 ? (
-              <EmptyState title={t('home.empty')} />
-            ) : (
-              <UnifiedProductGrid products={products} fulfillmentSlug={fulfillmentSlug} />
-            )}
-          </div>
-        </BentoTile>
-      </BentoDashboardFrame>
+      <StoreCatalogHeader
+        title={t('home.shop')}
+        description={t('home.browseCatalog')}
+        metrics={[
+          { title: 'Catalog', value: products.length },
+          {
+            title: t('nav.cart'),
+            value: cartCount === 0 ? '0' : `${cartCount} items`,
+            accent: cartCount > 0,
+          },
+        ]}
+      />
+
+      {featured ? (
+        <StoreFeaturedHero
+          badge={t('home.flagshipBadge')}
+          title={featured.name}
+          description={featured.description ?? undefined}
+          price={getFeaturedPrice(featured)}
+          href={`/shop/products/${featured.slug}`}
+          ctaLabel={t('product.viewProduct')}
+        />
+      ) : null}
+
+      <StoreCatalogToolbar title={t('home.allProducts')} />
+
+      {products.length === 0 ? (
+        <EmptyState title={t('home.empty')} />
+      ) : (
+        <UnifiedProductGrid products={products} fulfillmentSlug={fulfillmentSlug} />
+      )}
     </ShopShellWrapper>
   );
 }

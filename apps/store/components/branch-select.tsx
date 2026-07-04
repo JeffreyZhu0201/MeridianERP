@@ -50,7 +50,7 @@ export function BranchSelect({ currentSlug }: BranchSelectProps) {
         id="branch-select"
         value={value}
         onChange={(e) => handleChange(e.target.value)}
-        className="h-9 min-w-[10rem] text-sm"
+        className="h-9 min-w-[10rem] rounded-full border-border bg-muted/60 text-sm font-medium text-primary"
         aria-label={t('branchSelect')}
       >
         <option value="" disabled>

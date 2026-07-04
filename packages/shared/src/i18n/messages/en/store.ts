@@ -17,6 +17,7 @@ export const store = {
     pickerLoadError: 'Could not load stores',
     flagshipBadge: 'Flagship',
     openShop: 'Open a shop',
+    allProducts: 'All Products',
   },
   openShop: {
     subtitle: '申请开店',
@@ -162,6 +163,7 @@ export const store = {
   },
   product: {
     addToCart: 'Add to cart',
+    viewProduct: 'View product',
     outOfStock: 'Out of stock',
     notFound: 'Product not found',
     notFoundDescription: 'This product may have been removed or the link is incorrect.',

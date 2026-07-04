@@ -1,36 +1,12 @@
 /**
  * ProductCard - 商品卡片组件
  *
- * 用于商店前端展示商品：
- * - 商品图片（带 hover 缩放效果）
- * - 商品名称（hover 时高亮）
- * - 价格（"From xxx" 格式）
- * - 点击跳转到商品详情页
- *
- * @example
- * ```tsx
- * <ProductCard
- *   name="拿铁"
- *   slug="latte"
- *   storeSlug="starbucks-zhongguancun"
- *   priceFrom={28}
- *   imageUrl="https://example.com/latte.jpg"
- * />
- * ```
+ * variant="store" follows docs/design/stich.md consumer catalog cards.
  */
 
 import Link from 'next/link';
 import { cn } from '../lib/utils';
 
-/**
- * ProductCard 属性接口
- * @param name - 商品名称
- * @param slug - 商品 URL slug
- * @param storeSlug - 商店 URL slug
- * @param priceFrom - 起售价格
- * @param imageUrl - 商品图片 URL（可选，无图片时显示占位符）
- * @param className - 自定义样式类名
- */
 export interface ProductCardProps {
   name: string;
   slug: string;
@@ -38,25 +14,20 @@ export interface ProductCardProps {
   priceFrom: string | number;
   imageUrl?: string;
   className?: string;
-  /** Override product link base (default `/s/{storeSlug}/products/{slug}`) */
   href?: string;
   outOfStock?: boolean;
   outOfStockLabel?: string;
+  /** ERP default link card; store = stich bento card with CTA styling */
+  variant?: 'default' | 'store';
+  flagshipBadge?: string;
+  addToCartLabel?: string;
 }
 
-/** 格式化价格显示（USD 格式） */
 function formatPrice(price: string | number): string {
   const num = typeof price === 'string' ? parseFloat(price) : price;
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
 }
 
-/**
- * 商品卡片组件
- * - 1:1 方形图片区域
- * - 图片 hover 时轻微放大
- * - 商品名称 hover 时高亮
- * - 链接到 /s/{storeSlug}/products/{slug}
- */
 export function ProductCard({
   name,
   slug,
@@ -67,8 +38,82 @@ export function ProductCard({
   href,
   outOfStock,
   outOfStockLabel = 'Out of stock',
+  variant = 'default',
+  flagshipBadge,
+  addToCartLabel = 'Add to Cart',
 }: ProductCardProps) {
   const linkHref = href ?? `/s/${storeSlug}/products/${slug}`;
+
+  if (variant === 'store') {
+    return (
+      <article
+        className={cn(
+          'store-bento-card group flex flex-col overflow-hidden bg-card',
+          outOfStock && 'opacity-70',
+          className,
+        )}
+      >
+        <Link href={linkHref} className="relative block h-48 bg-muted/60 p-3">
+          {flagshipBadge ? (
+            <span className="absolute left-3 top-3 z-10 rounded bg-secondary/15 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-secondary">
+              {flagshipBadge}
+            </span>
+          ) : null}
+          {outOfStock ? (
+            <span className="absolute inset-0 z-10 flex items-center justify-center bg-white/40 dark:bg-black/30">
+              <span className="rounded-full bg-destructive px-3 py-1 text-sm font-medium text-destructive-foreground">
+                {outOfStockLabel}
+              </span>
+            </span>
+          ) : null}
+          {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={imageUrl}
+              alt={name}
+              className={cn(
+                'mx-auto h-full w-full object-contain object-center mix-blend-multiply transition-transform duration-300',
+                !outOfStock && 'group-hover:scale-105',
+                outOfStock && 'grayscale',
+              )}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+              No image
+            </div>
+          )}
+        </Link>
+        <div className="flex flex-1 flex-col p-4">
+          <Link href={linkHref}>
+            <h3 className="store-body-md line-clamp-2 font-medium leading-snug text-foreground group-hover:text-primary">
+              {name}
+            </h3>
+          </Link>
+          <span
+            className={cn(
+              'store-price mt-auto pt-2',
+              outOfStock && 'text-muted-foreground',
+            )}
+          >
+            {formatPrice(priceFrom)}
+          </span>
+          <Link
+            href={linkHref}
+            className={cn(
+              'store-label mt-3 block w-full rounded-full border py-2 text-center transition-colors',
+              outOfStock
+                ? 'cursor-not-allowed border-border bg-muted text-muted-foreground'
+                : 'border-primary text-primary hover:bg-primary hover:text-primary-foreground',
+            )}
+            aria-disabled={outOfStock}
+            tabIndex={outOfStock ? -1 : undefined}
+          >
+            {outOfStock ? outOfStockLabel : addToCartLabel}
+          </Link>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <Link
@@ -79,7 +124,6 @@ export function ProductCard({
         className,
       )}
     >
-      {/* 商品图片 */}
       <div className="aspect-square bg-muted">
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -94,8 +138,6 @@ export function ProductCard({
           </div>
         )}
       </div>
-
-      {/* 商品信息 */}
       <div className="flex flex-1 flex-col gap-1 p-4">
         <h3 className="text-sm font-medium leading-snug group-hover:text-primary">{name}</h3>
         {outOfStock ? (

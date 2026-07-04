@@ -31,12 +31,13 @@ export async function UnifiedProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => {
         const inStock = isProductInStock(product);
         return (
           <ProductCard
             key={product.id}
+            variant="store"
             name={product.name}
             slug={product.slug}
             storeSlug={fulfillmentSlug}
@@ -44,6 +45,7 @@ export async function UnifiedProductGrid({
             priceFrom={getDisplayPrice(product)}
             outOfStock={!inStock}
             outOfStockLabel={t('catalog.outOfStock')}
+            addToCartLabel={t('product.addToCart')}
           />
         );
       })}

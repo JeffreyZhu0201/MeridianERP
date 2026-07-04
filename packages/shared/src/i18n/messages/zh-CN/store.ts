@@ -17,6 +17,7 @@ export const store = {
     pickerLoadError: '无法加载店铺列表',
     flagshipBadge: '总店',
     openShop: '我要开店',
+    allProducts: '全部商品',
   },
   openShop: {
     subtitle: '申请开店',
@@ -148,6 +149,7 @@ export const store = {
   },
   product: {
     addToCart: '加入购物车',
+    viewProduct: '查看商品',
     outOfStock: '缺货',
     notFound: '商品未找到',
     notFoundDescription: '该商品可能已下架或链接不正确。',

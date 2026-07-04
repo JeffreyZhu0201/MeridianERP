@@ -22,14 +22,16 @@ export async function ProductGrid({ products, storeSlug }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product) => (
         <ProductCard
           key={product.id}
+          variant="store"
           name={product.name}
           slug={product.slug}
           storeSlug={storeSlug}
           priceFrom={getFromPrice(product.variants)}
+          addToCartLabel={t('product.addToCart')}
         />
       ))}
     </div>
