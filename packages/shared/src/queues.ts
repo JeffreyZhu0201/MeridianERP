@@ -1,4 +1,5 @@
 export const EMAIL_QUEUE = 'email' as const;
+export const ORDER_QUEUE = 'orders' as const;
 
 export const EmailJobName = {
   MERCHANT_WELCOME: 'merchant.welcome',
@@ -31,6 +32,12 @@ export interface OrderConfirmationEmailPayload {
   orderId: string;
   email: string;
 }
+
+export const OrderJobName = {
+  EXPIRE_PENDING: 'orders.expire-pending',
+  EXPIRE_ISSUED_ALLOCATIONS: 'orders.expire-issued-allocations',
+  SETTLEMENT_REMINDER: 'orders.settlement-reminder',
+} as const;
 
 export const DEFAULT_QUEUE_ATTEMPTS = 3;
 

@@ -9,6 +9,7 @@ function isPublicStorePath(pathname: string): boolean {
 
   return (
     pathname === '/' ||
+    pathname === '/embed-preview' ||
     pathname === '/shop' ||
     pathname.startsWith('/shop/') ||
     pathname === '/login' ||
@@ -43,6 +44,14 @@ export function middleware(request: NextRequest) {
       return NextResponse.next();
     }
     return NextResponse.redirect(new URL('/shop', request.url));
+  }
+
+  if (pathname === '/embed-preview') {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-embed-preview', '1');
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   return NextResponse.next();

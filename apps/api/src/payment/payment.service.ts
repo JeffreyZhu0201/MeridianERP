@@ -78,4 +78,17 @@ export class PaymentService {
       data: { object: { id: string; metadata?: { orderId?: string } } };
     };
   }
+
+  async refundPaymentIntent(paymentIntentId: string): Promise<{ id: string }> {
+    if (this.isMockMode()) {
+      return { id: `re_mock_${paymentIntentId}` };
+    }
+
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(this.env.getOrThrow('STRIPE_SECRET_KEY'));
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+    });
+    return { id: refund.id };
+  }
 }

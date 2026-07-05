@@ -57,6 +57,18 @@ export class MerchantOrdersController {
     return this.ordersService.shipDelivery(user.tenantId!, id, user.userId);
   }
 
+  @Post(':id/cancel')
+  @HttpCode(200)
+  cancel(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.ordersService.cancelPending(user.tenantId!, id);
+  }
+
+  @Post(':id/refund')
+  @HttpCode(200)
+  refund(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
+    return this.ordersService.refundPaid(user.tenantId!, id);
+  }
+
   @Get(':id')
   findOne(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.ordersService.findOne(user.tenantId!, id);

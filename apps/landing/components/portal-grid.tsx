@@ -18,15 +18,21 @@ function PortalCard({
         featured ? 'md:col-span-2 md:row-span-2' : ''
       }`}
     >
-      <div className={`relative ${featured ? 'h-28 md:h-48' : 'h-28'}`}>
+      <div
+        className={
+          featured
+            ? 'relative min-h-[180px] w-full flex-1 md:aspect-video md:min-h-[300px]'
+            : 'relative aspect-video w-full min-h-[130px]'
+        }
+      >
         <PortalUiPreview
           src={embedSrc}
           width={1280}
           height={720}
           title={`${portal.title} 界面预览`}
-          className="absolute inset-0"
+          className="absolute inset-0 size-full"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/50 to-transparent px-4 pb-3 pt-8">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between bg-gradient-to-t from-black/50 to-transparent px-4 pb-3 pt-8">
           <span className="font-mono text-[0.625rem] uppercase tracking-widest text-white/80">
             {portal.titleEn}
           </span>
@@ -36,20 +42,24 @@ function PortalCard({
         </div>
       </div>
 
-      <div className={`relative flex flex-1 flex-col p-5 ${featured ? 'md:p-8' : ''}`}>
+      <div
+        className={`relative z-[2] flex flex-col ${featured ? 'p-5 md:p-6' : 'p-4 md:p-5'}`}
+      >
         <h3
           className={`font-display font-semibold tracking-[-0.02em] text-ink ${
-            featured ? 'text-2xl md:text-3xl' : 'text-lg'
+            featured ? 'text-xl md:text-2xl' : 'text-lg'
           }`}
         >
           {portal.title}
         </h3>
         <p
-          className={`mt-2 flex-1 text-mist ${featured ? 'max-w-md text-base leading-relaxed' : 'text-sm leading-relaxed'}`}
+          className={`mt-1.5 flex-1 text-mist ${
+            featured ? 'max-w-md text-sm leading-relaxed md:text-base' : 'text-sm leading-relaxed'
+          }`}
         >
           {portal.description}
         </p>
-        <span className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-ink">
+        <span className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-ink">
           打开门户
           <span className="transition-transform group-hover:translate-x-1" aria-hidden>
             →

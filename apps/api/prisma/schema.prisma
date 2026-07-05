@@ -245,6 +245,7 @@ model MerchantProfile {
   recruitedAt              DateTime? // 招募时间
   pendingRecruitInviteCode String? // 待生效的招募邀请码
   storePublished           Boolean              @default(false) // 店铺是否已发布
+  operationalFrozen        Boolean              @default(false) // 运营冻结（暂停接单）
   isFlagship               Boolean              @default(false) // 是否为总店（旗舰店）
   recruiterChangeLogs      RecruiterChangeLog[] // 招募人变更日志
   createdAt                DateTime             @default(now()) // 创建时间
@@ -559,6 +560,7 @@ model Order {
   pickupVerifiedByUserId    String? // 核销人 ID
   deliveryAddress           Json? // 配送地址
   shippedAt                 DateTime? // 发货时间
+  deliveredAt               DateTime? // 签收时间
   shippedByPlatformUserId   String? // 平台发货操作人 ID
   shippedByMerchantUserId   String? // 分店配送发货操作人 ID
   lines                     OrderLine[] // 订单行
@@ -659,6 +661,7 @@ model TenantSettings {
   defaultCommissionRate Decimal?        @db.Decimal(10, 4) // 默认佣金比例
   defaultCommissionType CommissionType? // 默认佣金类型
   notifyOnCommission    Boolean         @default(true) // 佣金到账通知
+  deliveryFlatFee       Decimal         @default(0) @db.Decimal(12, 2) // 配送固定运费
   createdAt             DateTime        @default(now()) // 创建时间
   updatedAt             DateTime        @updatedAt // 更新时间
 }

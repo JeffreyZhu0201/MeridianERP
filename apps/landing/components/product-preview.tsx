@@ -27,8 +27,8 @@ export function ProductPreview() {
         </div>
       </div>
 
-      <div className="flex min-h-[280px] flex-col md:min-h-[380px] md:flex-row">
-        <aside className="flex gap-1 overflow-x-auto border-b border-neutral-100 bg-white p-2 md:w-44 md:flex-col md:gap-0.5 md:border-b-0 md:border-r md:p-3">
+      <div className="flex min-h-[280px] flex-col md:min-h-[380px] md:flex-row md:items-stretch">
+        <aside className="flex gap-1 overflow-x-auto border-b border-neutral-100 bg-white p-2 md:w-44 md:shrink-0 md:flex-col md:gap-0.5 md:border-b-0 md:border-r md:p-3">
           {portals.map((p) => (
             <button
               key={p.id}
@@ -45,14 +45,14 @@ export function ProductPreview() {
           ))}
         </aside>
 
-        <div className="relative min-h-[240px] flex-1 md:min-h-0">
+        <div className="relative min-h-[240px] w-full flex-1 md:aspect-video md:min-h-[280px]">
           <PortalUiPreview
             key={embedSrc}
             src={embedSrc}
             width={1280}
             height={720}
             title={`${portal.title} 界面预览`}
-            className="absolute inset-0"
+            className="absolute inset-0 size-full"
           />
         </div>
       </div>

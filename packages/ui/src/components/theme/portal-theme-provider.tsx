@@ -27,17 +27,21 @@ import { ThemeProvider } from './theme-provider';
 
 export function PortalThemeProvider({
   storageKey,
+  forcedTheme,
   children,
 }: {
   /** 主题偏好存储的 localStorage key */
   storageKey: string;
+  /** 锁定主题（如 embed 预览），忽略用户偏好与系统设置 */
+  forcedTheme?: 'light' | 'dark';
   children: React.ReactNode;
 }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme={forcedTheme ?? 'system'}
+      forcedTheme={forcedTheme}
+      enableSystem={!forcedTheme}
       disableTransitionOnChange
       storageKey={storageKey}
     >

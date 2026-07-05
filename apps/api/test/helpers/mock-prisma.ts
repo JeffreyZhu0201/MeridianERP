@@ -128,6 +128,7 @@ export function createMockPrisma() {
     recruitedAt: Date | null;
     pendingRecruitInviteCode: string | null;
     storePublished: boolean;
+    operationalFrozen: boolean;
     isFlagship: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -448,6 +449,7 @@ export function createMockPrisma() {
     defaultCommissionType: CommissionType | null;
     notifyOnBinding: boolean;
     notifyOnCommission: boolean;
+    deliveryFlatFee: Prisma.Decimal;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -1103,7 +1105,18 @@ export function createMockPrisma() {
       }
     }
     if (where.customerId) {
-      items = items.filter((o) => o.customerId === where.customerId);
+      if (
+        typeof where.customerId === 'object' &&
+        where.customerId !== null &&
+        'in' in (where.customerId as { in?: string[] })
+      ) {
+        const ids = (where.customerId as { in: string[] }).in;
+        items = items.filter(
+          (o) => o.customerId != null && ids.includes(o.customerId),
+        );
+      } else {
+        items = items.filter((o) => o.customerId === where.customerId);
+      }
     }
     if (where.fulfillmentType) {
       items = items.filter(
@@ -1900,6 +1913,7 @@ export function createMockPrisma() {
           recruitedAt: data.recruitedAt ?? null,
           pendingRecruitInviteCode: data.pendingRecruitInviteCode ?? null,
           storePublished: data.storePublished ?? false,
+          operationalFrozen: data.operationalFrozen ?? false,
           isFlagship: data.isFlagship ?? false,
           createdAt: now(),
           updatedAt: now(),
@@ -3011,6 +3025,27 @@ export function createMockPrisma() {
         customers.set(record.id, record);
         return record;
       },
+      findMany: async ({
+        where,
+        select,
+      }: {
+        where?: { accountId?: string };
+        select?: { id?: boolean; tenantId?: boolean };
+      }) => {
+        let items = [...customers.values()];
+        if (where?.accountId) {
+          items = items.filter((c) => c.accountId === where.accountId);
+        }
+        if (select) {
+          return items.map((c) => {
+            const row: Record<string, unknown> = {};
+            if (select.id) row.id = c.id;
+            if (select.tenantId) row.tenantId = c.tenantId;
+            return row;
+          });
+        }
+        return items;
+      },
       count: async ({ where }: { where?: { accountId?: string } }) => {
         let rows = [...customers.values()];
         if (where?.accountId) {
@@ -3576,6 +3611,7 @@ export function createMockPrisma() {
           defaultCommissionType: data.defaultCommissionType ?? null,
           notifyOnBinding: data.notifyOnBinding ?? true,
           notifyOnCommission: data.notifyOnCommission ?? true,
+          deliveryFlatFee: data.deliveryFlatFee ?? new Prisma.Decimal(0),
         };
         tenantSettings.set(record.tenantId, record);
         return record;
@@ -3616,6 +3652,7 @@ export function createMockPrisma() {
           defaultCommissionType: create.defaultCommissionType ?? null,
           notifyOnBinding: create.notifyOnBinding ?? true,
           notifyOnCommission: create.notifyOnCommission ?? true,
+          deliveryFlatFee: create.deliveryFlatFee ?? new Prisma.Decimal(0),
         };
         tenantSettings.set(record.tenantId, record);
         return record;
@@ -4536,6 +4573,17 @@ export function createMockPrisma() {
         if (!order) return null;
         return attachOrder(order, include);
       },
+      findUniqueOrThrow: async ({
+        where,
+        include,
+      }: {
+        where: { id?: string; stripePaymentIntentId?: string };
+        include?: Record<string, unknown>;
+      }) => {
+        const order = await mock.order.findUnique({ where, include });
+        if (!order) throw new Error('Order not found');
+        return order;
+      },
       create: async ({
         data,
         include,
@@ -4649,6 +4697,33 @@ export function createMockPrisma() {
         return result;
       },
     },
+    orderLine: {
+      aggregate: async ({
+        where,
+        _sum,
+      }: {
+        where?: {
+          variantId?: string;
+          order?: { status?: OrderStatus };
+        };
+        _sum?: { quantity?: boolean };
+      }) => {
+        let lines = [...orderLines.values()];
+        if (where?.variantId) {
+          lines = lines.filter((l) => l.variantId === where.variantId);
+        }
+        if (where?.order?.status) {
+          lines = lines.filter((l) => {
+            const order = orders.get(l.orderId);
+            return order?.status === where.order?.status;
+          });
+        }
+        const quantity = lines.reduce((sum, l) => sum + l.quantity, 0);
+        return {
+          _sum: _sum?.quantity ? { quantity } : undefined,
+        };
+      },
+    },
     commissionLedger: {
       findMany: async ({
         where,
@@ -4723,6 +4798,36 @@ export function createMockPrisma() {
         };
         commissionLedgers.set(record.id, record);
         return record;
+      },
+      findUnique: async ({
+        where,
+      }: {
+        where: { id?: string; orderId?: string };
+      }) => {
+        if (where.id) {
+          return commissionLedgers.get(where.id) ?? null;
+        }
+        if (where.orderId) {
+          return (
+            [...commissionLedgers.values()].find(
+              (e) => e.orderId === where.orderId,
+            ) ?? null
+          );
+        }
+        return null;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Partial<CommissionLedgerRecord>;
+      }) => {
+        const existing = commissionLedgers.get(where.id);
+        if (!existing) throw new Error('CommissionLedger not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        commissionLedgers.set(where.id, updated);
+        return updated;
       },
       updateMany: async ({
         where,

@@ -101,7 +101,13 @@ export interface StoreOrderDetail extends StoreOrderListItem {
   pickupVerifiedAt?: string | null;
   deliveryAddress?: DeliveryAddress | null;
   shippedAt?: string | null;
+  deliveredAt?: string | null;
   lines: MerchantOrderLine[];
+}
+
+export interface CrossStoreOrderListItem extends StoreOrderListItem {
+  storeSlug: string;
+  storeName: string;
 }
 
 export interface StoreCustomerProfile {

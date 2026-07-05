@@ -37,7 +37,15 @@ export class InventoryService {
     if (!variant) {
       throw new NotFoundException('Variant not found');
     }
-    return variant.inventory;
+    const pendingReserved = await this.prisma.orderLine.aggregate({
+      where: {
+        variantId,
+        order: { status: OrderStatus.PENDING_PAYMENT },
+      },
+      _sum: { quantity: true },
+    });
+    const reserved = pendingReserved._sum.quantity ?? 0;
+    return Math.max(0, variant.inventory - reserved);
   }
 
   async seedVariantStockLevel(

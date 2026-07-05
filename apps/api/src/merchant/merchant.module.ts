@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';
+import { OrderLifecycleModule } from '../orders/order-lifecycle.module';
 import { PlatformAllocationsModule } from '../platform/allocations/platform-allocations.module';
 import { PlatformFundsModule } from '../platform/funds/platform-funds.module';
 import { MerchantAuthController } from './auth/merchant-auth.controller';
@@ -46,6 +47,7 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     MerchantPluginsModule,
     MerchantProcurementModule,
     FulfillmentModule,
+    OrderLifecycleModule,
     PlatformAllocationsModule,
     PlatformFundsModule,
   ],

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
+import { OrderLifecycleService } from '../../orders/order-lifecycle.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -8,6 +9,7 @@ export class PlatformOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly fulfillmentService: FulfillmentService,
+    private readonly orderLifecycle: OrderLifecycleService,
   ) {}
 
   async findAll(
@@ -78,6 +80,14 @@ export class PlatformOrdersService {
 
   async ship(orderId: string, platformUserId: string) {
     return this.fulfillmentService.shipDelivery(orderId, platformUserId);
+  }
+
+  cancel(orderId: string) {
+    return this.orderLifecycle.cancelPendingPayment({ orderId });
+  }
+
+  refund(orderId: string, allowFulfilled = false) {
+    return this.orderLifecycle.refundPaidOrder({ orderId, allowFulfilled });
   }
 
   async findOne(orderId: string) {

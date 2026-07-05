@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { CommissionSource, LedgerStatus } from '@prisma/client';
-import { Prisma } from '@prisma/client';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CommissionSource, LedgerStatus, Prisma } from '@prisma/client';
 import { sumAllocationLineCost } from '@meridian/shared';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmailQueueService } from '../queue/email-queue.service';
@@ -88,6 +87,23 @@ export class CommissionService {
         amount: amount.toString(),
       });
     }
+  }
+
+  async voidOnRefund(orderId: string, tx?: Prisma.TransactionClient) {
+    const client = tx ?? this.prisma;
+    const ledger = await client.commissionLedger.findUnique({ where: { orderId } });
+    if (!ledger || ledger.status === LedgerStatus.VOID) {
+      return;
+    }
+    if (ledger.status === LedgerStatus.SETTLED) {
+      throw new BadRequestException(
+        'Cannot refund order with settled commission; contact finance',
+      );
+    }
+    await client.commissionLedger.update({
+      where: { id: ledger.id },
+      data: { status: LedgerStatus.VOID },
+    });
   }
 
   calculateAmount(

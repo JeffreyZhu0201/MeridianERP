@@ -53,4 +53,21 @@ export class PlatformOrdersController {
   ship(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string) {
     return this.ordersService.ship(id, user.userId);
   }
+
+  @Post(':id/cancel')
+  @HttpCode(200)
+  @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
+  cancel(@Param('id') id: string) {
+    return this.ordersService.cancel(id);
+  }
+
+  @Post(':id/refund')
+  @HttpCode(200)
+  @PlatformRoles('SUPER_ADMIN', 'FINANCE')
+  refund(
+    @Param('id') id: string,
+    @Query('allowFulfilled') allowFulfilled?: string,
+  ) {
+    return this.ordersService.refund(id, allowFulfilled === 'true');
+  }
 }

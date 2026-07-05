@@ -48,7 +48,7 @@ export function PortalUiPreview({
         src={src}
         title={title}
         tabIndex={-1}
-        loading="lazy"
+        loading="eager"
         className="pointer-events-none absolute left-0 top-0 border-0"
         style={{
           width,

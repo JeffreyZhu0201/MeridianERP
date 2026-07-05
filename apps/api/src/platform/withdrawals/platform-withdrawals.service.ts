@@ -64,29 +64,61 @@ export class PlatformWithdrawalsService {
   }
 
   async approve(id: string, platformUserId: string) {
-    const req = await this.prisma.withdrawalRequest.findUnique({
-      where: { id },
-      include: { distributor: true },
+    return this.prisma.$transaction(async (tx) => {
+      const req = await tx.withdrawalRequest.findUnique({
+        where: { id },
+        include: { distributor: true },
+      });
+      if (!req) throw new NotFoundException('Withdrawal not found');
+      if (req.status !== WithdrawalRequestStatus.PENDING) {
+        throw new BadRequestException('Withdrawal is not pending');
+      }
+
+      const [settledAgg, approvedAgg, pendingAgg] = await Promise.all([
+        tx.commissionLedger.aggregate({
+          where: {
+            distributorId: req.distributorId,
+            status: LedgerStatus.SETTLED,
+          },
+          _sum: { amount: true },
+        }),
+        tx.withdrawalRequest.aggregate({
+          where: {
+            distributorId: req.distributorId,
+            status: WithdrawalRequestStatus.APPROVED,
+          },
+          _sum: { amount: true },
+        }),
+        tx.withdrawalRequest.aggregate({
+          where: {
+            distributorId: req.distributorId,
+            status: WithdrawalRequestStatus.PENDING,
+          },
+          _sum: { amount: true },
+        }),
+      ]);
+      const settled = new Prisma.Decimal(settledAgg._sum.amount ?? 0);
+      const withdrawn = new Prisma.Decimal(approvedAgg._sum.amount ?? 0);
+      const pending = new Prisma.Decimal(pendingAgg._sum.amount ?? 0);
+      const available = settled.minus(withdrawn).minus(pending);
+      if (available.add(req.amount).lessThan(req.amount)) {
+        throw new BadRequestException('Insufficient distributor balance');
+      }
+
+      const updated = await tx.withdrawalRequest.update({
+        where: { id, status: WithdrawalRequestStatus.PENDING },
+        data: {
+          status: WithdrawalRequestStatus.APPROVED,
+          reviewedAt: new Date(),
+          reviewedByPlatformUserId: platformUserId,
+        },
+        include: { distributor: { select: { name: true, email: true } } },
+      });
+      if (!updated) {
+        throw new ConflictException('Withdrawal was already processed');
+      }
+      return this.mapWithdrawalRow(updated);
     });
-    if (!req) throw new NotFoundException('Withdrawal not found');
-    if (req.status !== WithdrawalRequestStatus.PENDING) {
-      throw new BadRequestException('Withdrawal is not pending');
-    }
-    const available = await this.getAvailableBalance(req.distributorId);
-    // getAvailableBalance reserves this request in pending; add it back for approval.
-    if (available.add(req.amount).lessThan(req.amount)) {
-      throw new BadRequestException('Insufficient distributor balance');
-    }
-    const updated = await this.prisma.withdrawalRequest.update({
-      where: { id },
-      data: {
-        status: WithdrawalRequestStatus.APPROVED,
-        reviewedAt: new Date(),
-        reviewedByPlatformUserId: platformUserId,
-      },
-      include: { distributor: { select: { name: true, email: true } } },
-    });
-    return this.mapWithdrawalRow(updated);
   }
 
   async reject(id: string, platformUserId: string, reason: string) {

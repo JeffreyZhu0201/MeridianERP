@@ -21,6 +21,9 @@ export class StoreTenantService {
     if (!profile || profile.onboardingStatus !== OnboardingStatus.APPROVED) {
       throw new ForbiddenException('Store is not available');
     }
+    if (profile.operationalFrozen) {
+      throw new ForbiddenException('Store is temporarily unavailable');
+    }
 
     return { tenant, profile };
   }

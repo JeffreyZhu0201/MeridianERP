@@ -97,4 +97,18 @@ export class PlatformMerchantsController {
   ) {
     return this.platformMerchantsService.updateStoreSettings(id, dto);
   }
+
+  @Post(':id/freeze')
+  @HttpCode(200)
+  @PlatformRoles('SUPER_ADMIN')
+  freeze(@Param('id') id: string) {
+    return this.platformMerchantsService.freeze(id);
+  }
+
+  @Post(':id/unfreeze')
+  @HttpCode(200)
+  @PlatformRoles('SUPER_ADMIN')
+  unfreeze(@Param('id') id: string) {
+    return this.platformMerchantsService.unfreeze(id);
+  }
 }

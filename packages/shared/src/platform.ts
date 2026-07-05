@@ -46,6 +46,7 @@ export interface PlatformMerchantDetail {
   recruitedByDistributorId?: string | null;
   recruitedByDistributorName?: string | null;
   storePublished: boolean;
+  operationalFrozen?: boolean;
   isFlagship: boolean;
   crmSummary: MerchantCrmSummary;
 }

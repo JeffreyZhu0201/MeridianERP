@@ -1,0 +1,886 @@
+"filename", "language", "JSON", "TypeScript", "JSON with Comments", "Markdown", "JavaScript", "TypeScript JSX", "YAML", "CSS", "Docker", "MS SQL", "Prisma", "comment", "blank", "total"
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/architect.md", "Markdown", 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 13, 47
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/devops-engineer.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 14, 53
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/nestjs-backend.md", "Markdown", 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 12, 44
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/nextjs-frontend.md", "Markdown", 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 15, 56
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/product-manager.md", "Markdown", 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 11, 37
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/test-engineer.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 14, 53
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/agents/ui-designer.md", "Markdown", 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 13, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/backend.mdc", "Markdown", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 8, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/core.mdc", "Markdown", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 10, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/devops.mdc", "Markdown", 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/finesse-skill.mdc", "Markdown", 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 48, 175
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/frontend.mdc", "Markdown", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 3, 18
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/planning-docs.mdc", "Markdown", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 12, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/quality.mdc", "Markdown", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 5, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.cursor/rules/ui.mdc", "Markdown", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 10, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/.github/workflows/ci.yml", "YAML", 0, 0, 0, 0, 0, 0, 38, 0, 0, 0, 0, 0, 10, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/CLAUDE.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 13, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/README.md", "Markdown", 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 39, 117
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 1, 5, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/_components/role-dashboard-hints.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 6, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/admins/_components/admins-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 231, 0, 0, 0, 0, 0, 0, 14, 245
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/admins/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 35, 0, 0, 0, 0, 0, 0, 8, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/allocation-orders-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 166, 0, 0, 0, 0, 0, 0, 8, 174
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/allocations-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 334, 0, 0, 0, 0, 0, 0, 25, 359
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/create-allocation-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 117, 0, 0, 0, 0, 0, 0, 7, 124
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/create-sku-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 128, 0, 0, 0, 0, 0, 0, 5, 133
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/edit-sku-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 139, 0, 0, 0, 0, 0, 0, 6, 145
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/_components/master-sku-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 5, 108
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/allocations/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 78, 0, 0, 0, 0, 0, 0, 8, 86
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/api/auth/logout/route.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/distributors/[id]/_components/distributor-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 800, 0, 0, 0, 0, 0, 0, 30, 830
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/distributors/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 9, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/distributors/_components/create-distributor-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 11, 202
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/distributors/_components/distributors-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 8, 90
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/distributors/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 5, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/embed-preview/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 0, 7, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/_components/funds-overview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 236, 0, 0, 0, 0, 0, 0, 17, 253
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/commissions/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 131, 0, 0, 0, 0, 0, 0, 7, 138
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/expected-profit/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 0, 7, 120
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/inventory-cost/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 7, 114
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/net-profit/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 109, 0, 0, 0, 0, 0, 0, 9, 118
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 5, 55
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/funds/procurement/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 131, 0, 0, 0, 0, 0, 0, 7, 138
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 10, 2, 16
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/inventory/master-catalog/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 111, 0, 0, 0, 0, 0, 0, 13, 124
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/inventory/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 0, 6, 101
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/inventory/tenants/[tenantId]/_components/tenant-inventory-summary.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 287, 0, 0, 0, 0, 0, 0, 16, 303
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/inventory/tenants/[tenantId]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 12, 139
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 2, 4, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/login/_components/login-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 0, 0, 9, 99
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/login/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 5, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/[id]/_components/merchant-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 491, 0, 0, 0, 0, 0, 0, 21, 512
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 7, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/_components/approve-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 9, 84
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/_components/merchants-filters.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 0, 5, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/_components/merchants-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 158, 0, 0, 0, 0, 0, 0, 10, 168
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/_components/reject-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 6, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/new/_components/create-merchant-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 198, 0, 0, 0, 0, 0, 0, 10, 208
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/new/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 5, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/merchants/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 11, 121
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/orders/[id]/_components/order-detail-ship-actions.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 10, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/orders/[id]/_components/order-detail-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 213, 0, 0, 0, 0, 0, 0, 14, 227
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/orders/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 7, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/orders/_components/orders-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 355, 0, 0, 0, 0, 0, 0, 23, 378
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/orders/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 11, 118
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 137, 0, 0, 0, 0, 0, 0, 6, 143
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/procurement/_components/procurement-status-tabs.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 6, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/procurement/_components/procurement-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 144, 0, 0, 0, 0, 0, 0, 9, 153
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/procurement/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 11, 103
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/replenishment/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/settings/_components/platform-settings-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 146, 0, 0, 0, 0, 0, 0, 10, 156
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/settings/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 9, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/settlements/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 2, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/users/[id]/_components/user-detail-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 506, 0, 0, 0, 0, 0, 0, 37, 543
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/users/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 7, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/users/_components/users-filters.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 7, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/users/_components/users-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/users/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 8, 80
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/settlements-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 313, 0, 0, 0, 0, 0, 0, 21, 334
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-distributor-filter.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 7, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-status-tabs.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 7, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 197, 0, 0, 0, 0, 0, 0, 13, 210
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-toolbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 7, 56
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-workflow-hint.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 6, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/_components/withdrawals-workflow-nav.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 6, 63
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/app/withdrawals/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0, 0, 23, 273
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/components/admin-back-link.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 3, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/components/admin-list-page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 3
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/components/admin-page-title.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 7, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/components/admin-shell-with-session.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 4, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/components/admin-shell-wrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 7, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/i18n/request.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/lib/api.ts", "TypeScript", 0, 151, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 21, 173
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/lib/auth.ts", "TypeScript", 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 47
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/middleware.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/next-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 7
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/next.config.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/package.json", "JSON", 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/tailwind.config.ts", "TypeScript", 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 72
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/admin/tsconfig.json", "JSON with Comments", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/.prettierrc", "JSON", 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 0, 1, 5, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/README.md", "Markdown", 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 2, 29, 99
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 1, 2, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/nest-cli.json", "JSON", 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/package.json", "JSON", 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 102
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20250624120000_init/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 153, 0, 49, 60, 262
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20250624180000_phase2_ecommerce/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 162, 0, 16, 34, 212
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20250624200000_phase3_inventory/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 155, 0, 50, 60, 265
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20250625120000_distributor_qr_revoked_at/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20250625140000_commission_performance_indexes/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260625044035_gaps_epic_settings_transfers_distributor/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 52, 0, 21, 22, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260625120000_phase5_hq_branch_channel/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 2, 8, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260701065425_init/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 161, 0, 46, 58, 265
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260703120000_unified_platform_account/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 93, 0, 15, 19, 127
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260703140000_sales_promoter/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 1, 6, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260703180000_channel_funds_model/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 7, 9, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260703200000_flagship_catalog_store/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 2, 4, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704020000_platform_roles_rbac/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 1, 4, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704080507_branch_purchase_orders/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 24, 27, 106
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704100000_merchant_plugin_system/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 0, 9, 11, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704120000_procurement_receiving_addresses/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 6, 7, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704140000_order_shipped_by_merchant/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 3
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704160000_remove_branch_distributor_binding/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 12, 12, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260704161000_remove_crm_lead_distributor/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/migrations/20260705120000_business_flow_p2_p3/migration.sql", "MS SQL", 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 3, 9
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/schema.prisma", "Prisma", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 888, 127, 132, 1147
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/prisma/seed.ts", "TypeScript", 0, 204, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 222
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/app.controller.spec.ts", "TypeScript", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/app.controller.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/app.module.ts", "TypeScript", 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/app.service.ts", "TypeScript", 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/auth.module.ts", "TypeScript", 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/decorators/current-user.decorator.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2, 22
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/decorators/platform-roles.decorator.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/decorators/public.decorator.ts", "TypeScript", 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/distributor-auth.guard.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/merchant-auth.guard.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/merchant-owner.guard.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/optional-store-auth.guard.ts", "TypeScript", 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/platform-auth.guard.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 3, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/platform-roles.guard.ts", "TypeScript", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/guards/store-auth.guard.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/interfaces/jwt-payload.interface.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/strategies/customer-jwt.strategy.ts", "TypeScript", 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/strategies/distributor-jwt.strategy.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 39
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/strategies/merchant-jwt.strategy.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 39
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/auth/strategies/platform-jwt.strategy.ts", "TypeScript", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/commission/commission.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/commission/commission.service.ts", "TypeScript", 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 121
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/dashboard-trend.ts", "TypeScript", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/date-range.ts", "TypeScript", 0, 78, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 87
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/decorators/tenant-id.decorator.ts", "TypeScript", 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 9
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/interceptors/tenant.interceptor.ts", "TypeScript", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/list-response.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/pagination.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/common/utils/slug.util.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/config/env.module.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/config/env.service.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/auth/distributor-auth.controller.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/auth/distributor-auth.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/auth/distributor-auth.service.ts", "TypeScript", 0, 127, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 137
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/auth/dto/distributor-login.dto.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 15
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/distributor-me.controller.ts", "TypeScript", 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/distributor-me.service.ts", "TypeScript", 0, 268, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 283
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/distributor.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/dto/create-invite-code.dto.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/distributor/dto/create-withdrawal.dto.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/fulfillment/fulfillment.module.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/fulfillment/fulfillment.service.ts", "TypeScript", 0, 305, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 316
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/inventory/inventory.constants.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/inventory/inventory.module.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/inventory/inventory.service.ts", "TypeScript", 0, 528, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 46, 574
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/main.ts", "TypeScript", 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/allocations/merchant-allocations.controller.ts", "TypeScript", 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 44
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/auth/dto/merchant-auth.dto.ts", "TypeScript", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/auth/merchant-auth.controller.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/auth/merchant-auth.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/auth/merchant-auth.service.ts", "TypeScript", 0, 147, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 163
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/catalog/categories.controller.ts", "TypeScript", 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 56
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/catalog/categories.service.ts", "TypeScript", 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 90
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/catalog/dto/catalog.dto.ts", "TypeScript", 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 102
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/catalog/products.controller.ts", "TypeScript", 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 56
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/catalog/products.service.ts", "TypeScript", 0, 196, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 209
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/commission-mappers.ts", "TypeScript", 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 94
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/commissions.controller.ts", "TypeScript", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/commissions.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/commissions.service.ts", "TypeScript", 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 107
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/dto/commission-list-query.dto.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/commissions/dto/commission-summary-query.dto.ts", "TypeScript", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/activities/activities.controller.ts", "TypeScript", 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/activities/activities.service.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/companies/companies.controller.ts", "TypeScript", 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/companies/companies.service.ts", "TypeScript", 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/contacts/contacts.controller.ts", "TypeScript", 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/contacts/contacts.service.ts", "TypeScript", 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/dto/activity.dto.ts", "TypeScript", 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/dto/company.dto.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/dto/contact.dto.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/dto/lead.dto.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 22
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/leads/leads.controller.ts", "TypeScript", 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 56
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/leads/leads.service.ts", "TypeScript", 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 55
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/store-customers/store-customers.controller.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/crm/store-customers/store-customers.service.ts", "TypeScript", 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/dashboard/merchant-dashboard.controller.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/dashboard/merchant-dashboard.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/dashboard/merchant-dashboard.service.ts", "TypeScript", 0, 174, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 188
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/funds/merchant-funds.controller.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/adjustments.controller.ts", "TypeScript", 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/dto/inventory.dto.ts", "TypeScript", 0, 137, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 170
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-inventory-report-csv.ts", "TypeScript", 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-inventory-reports.service.ts", "TypeScript", 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-inventory.module.ts", "TypeScript", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-inventory.service.ts", "TypeScript", 0, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 116
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-purchase-orders.service.ts", "TypeScript", 0, 429, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 455
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-stock.service.ts", "TypeScript", 0, 277, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 299
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/merchant-warehouses.service.ts", "TypeScript", 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/purchase-orders.controller.ts", "TypeScript", 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 81
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/reports.controller.ts", "TypeScript", 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/settings.controller.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/inventory/stock-levels.controller.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/merchant.module.ts", "TypeScript", 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 84
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/onboarding/dto/update-onboarding.dto.ts", "TypeScript", 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/onboarding/onboarding.controller.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/onboarding/onboarding.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/onboarding/onboarding.service.ts", "TypeScript", 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/orders/dto/verify-pickup.dto.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/orders/merchant-orders.controller.ts", "TypeScript", 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 77
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/orders/merchant-orders.service.ts", "TypeScript", 0, 176, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 188
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/plugins/merchant-plugins.controller.ts", "TypeScript", 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/plugins/merchant-plugins.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/procurement/dto/procurement.dto.ts", "TypeScript", 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 65
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/procurement/merchant-procurement.controller.ts", "TypeScript", 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/procurement/merchant-procurement.module.ts", "TypeScript", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/procurement/merchant-procurement.service.ts", "TypeScript", 0, 286, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 311
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/dto/procurement-address.dto.ts", "TypeScript", 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/dto/team-member.dto.ts", "TypeScript", 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/dto/update-merchant-settings.dto.ts", "TypeScript", 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-procurement-addresses.controller.ts", "TypeScript", 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 64
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-procurement-addresses.service.ts", "TypeScript", 0, 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 239
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-settings.controller.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-settings.module.ts", "TypeScript", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-settings.service.ts", "TypeScript", 0, 290, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 322
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/merchant/settings/merchant-team.controller.ts", "TypeScript", 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/orders/allocation-expiry.service.ts", "TypeScript", 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/orders/order-lifecycle.module.ts", "TypeScript", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/orders/order-lifecycle.service.ts", "TypeScript", 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 22, 207
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/orders/settlement-reminder.service.ts", "TypeScript", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/payment/payment.module.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/payment/payment.service.ts", "TypeScript", 0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/accounts/platform-accounts.module.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/accounts/platform-accounts.service.ts", "TypeScript", 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 157
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/admins/dto/create-platform-admin.dto.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 22
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/admins/dto/update-platform-admin.dto.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/admins/platform-admins.controller.ts", "TypeScript", 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 53
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/admins/platform-admins.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/admins/platform-admins.service.ts", "TypeScript", 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 114
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/allocations/platform-allocations.controller.ts", "TypeScript", 0, 87, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/allocations/platform-allocations.module.ts", "TypeScript", 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/allocations/platform-allocations.service.ts", "TypeScript", 0, 228, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 241
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/auth/dto/platform-login.dto.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 2, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/auth/platform-auth.controller.ts", "TypeScript", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 5, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/auth/platform-auth.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/auth/platform-auth.service.ts", "TypeScript", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 5, 81
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/dashboard/platform-dashboard.controller.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/dashboard/platform-dashboard.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/dashboard/platform-dashboard.service.ts", "TypeScript", 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 104
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/distributors/dto/create-platform-distributor.dto.ts", "TypeScript", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/distributors/platform-distributors.controller.ts", "TypeScript", 0, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 112
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/distributors/platform-distributors.module.ts", "TypeScript", 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/distributors/platform-distributors.service.ts", "TypeScript", 0, 470, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 503
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/flagship-catalog/flagship-catalog.controller.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/flagship-catalog/flagship-catalog.module.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/flagship-catalog/flagship-catalog.service.ts", "TypeScript", 0, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 133
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/funds/platform-funds.controller.ts", "TypeScript", 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 77
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/funds/platform-funds.module.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 16
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/funds/platform-funds.service.ts", "TypeScript", 0, 607, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 643
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/inventory/platform-inventory.controller.ts", "TypeScript", 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/inventory/platform-inventory.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/inventory/platform-inventory.service.ts", "TypeScript", 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 166
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/dto/create-platform-merchant.dto.ts", "TypeScript", 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/dto/list-merchants-query.dto.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/dto/reject-merchant.dto.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/dto/update-store-settings.dto.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/platform-merchants.controller.ts", "TypeScript", 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 115
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/platform-merchants.module.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/merchants/platform-merchants.service.ts", "TypeScript", 0, 553, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 590
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/orders/platform-orders.controller.ts", "TypeScript", 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 74
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/orders/platform-orders.service.ts", "TypeScript", 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 159
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/platform.module.ts", "TypeScript", 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/procurement/platform-procurement.controller.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/procurement/platform-procurement.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/procurement/platform-procurement.service.ts", "TypeScript", 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 120
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settings/dto/update-platform-settings.dto.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settings/platform-settings.controller.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settings/platform-settings.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settings/platform-settings.service.ts", "TypeScript", 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 80
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settlements/dto/settlement.dto.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settlements/platform-settlements.controller.ts", "TypeScript", 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/settlements/platform-settlements.service.ts", "TypeScript", 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 99
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/dto/list-platform-users-query.dto.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/dto/update-platform-account-identities.dto.ts", "TypeScript", 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/dto/update-platform-account.dto.ts", "TypeScript", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/platform-users.controller.ts", "TypeScript", 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/platform-users.module.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/users/platform-users.service.ts", "TypeScript", 0, 396, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 429
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/withdrawals/dto/reject-withdrawal.dto.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/withdrawals/platform-withdrawals.controller.ts", "TypeScript", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 64
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/withdrawals/platform-withdrawals.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/platform/withdrawals/platform-withdrawals.service.ts", "TypeScript", 0, 171, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 183
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/crm-plugin.guard.ts", "TypeScript", 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/decorators/requires-plugin.decorator.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/plugin-catalog.seed.ts", "TypeScript", 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 103
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/plugin.guard.ts", "TypeScript", 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 44
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/plugin.module.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/plugins/plugin.service.ts", "TypeScript", 0, 272, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 298
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/prisma/prisma.module.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/prisma/prisma.service.ts", "TypeScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/console-mail.transport.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/email-queue.service.ts", "TypeScript", 0, 53, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/email.processor.ts", "TypeScript", 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 100
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/inventory-queue.service.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/order-queue.service.ts", "TypeScript", 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/order.processor.ts", "TypeScript", 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/queue/queue.module.ts", "TypeScript", 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/recruit-invite/recruit-invite-codes.service.ts", "TypeScript", 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 105
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/recruit-invite/recruit-invite.module.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/recruit-invite/recruit-invite.service.ts", "TypeScript", 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/auth/dto/store-auth.dto.ts", "TypeScript", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 4, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/auth/store-auth.controller.ts", "TypeScript", 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 106, 9, 176
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/auth/store-auth.service.ts", "TypeScript", 0, 217, 0, 0, 0, 0, 0, 0, 0, 0, 0, 60, 19, 296
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/cart/dto/cart.dto.ts", "TypeScript", 0, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/cart/store-cart.controller.ts", "TypeScript", 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/cart/store-cart.service.ts", "TypeScript", 0, 236, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 250
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/catalog/store-catalog.controller.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/catalog/store-catalog.service.ts", "TypeScript", 0, 318, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 354
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/catalog/store-unified-catalog.controller.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/checkout/store-checkout.controller.ts", "TypeScript", 0, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 82
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/checkout/store-checkout.service.ts", "TypeScript", 0, 262, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 271
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/common/store-tenant.service.ts", "TypeScript", 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/merchant-application/dto/store-merchant-application.dto.ts", "TypeScript", 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/merchant-application/store-merchant-application.controller.ts", "TypeScript", 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/merchant-application/store-merchant-application.service.ts", "TypeScript", 0, 119, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 133
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/orders/store-orders.controller.ts", "TypeScript", 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 92
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/orders/store-orders.service.ts", "TypeScript", 0, 184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 194
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/store.module.ts", "TypeScript", 0, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 69
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/stores/store-stores.controller.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 15
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/src/store/stores/store-stores.service.ts", "TypeScript", 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/allocation-commission.e2e-spec.ts", "TypeScript", 0, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 88
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/app.e2e-spec.ts", "TypeScript", 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/branch-procurement.e2e-spec.ts", "TypeScript", 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 132
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/commissions.e2e-spec.ts", "TypeScript", 0, 236, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 31, 267
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/crm-store-customers.e2e-spec.ts", "TypeScript", 0, 182, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 212
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/crm.e2e-spec.ts", "TypeScript", 0, 118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 138
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/distributor-portal.e2e-spec.ts", "TypeScript", 0, 123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 140
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/distributor-share.e2e-spec.ts", "TypeScript", 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 108
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/email-queue.e2e-spec.ts", "TypeScript", 0, 184, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 204
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/flagship-catalog.e2e-spec.ts", "TypeScript", 0, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 83
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/gaps-wave1.e2e-spec.ts", "TypeScript", 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 114
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/helpers/create-test-app.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/helpers/mock-prisma.ts", "TypeScript", 0, 5992, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 85, 6077
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/inventory-adjustments.e2e-spec.ts", "TypeScript", 0, 194, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 224
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/inventory-purchase-orders.e2e-spec.ts", "TypeScript", 0, 175, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 204
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/inventory-reports.e2e-spec.ts", "TypeScript", 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 126
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/jest-e2e.json", "JSON", 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-auth.e2e-spec.ts", "TypeScript", 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-onboarding.e2e-spec.ts", "TypeScript", 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 105
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-orders-delivery.e2e-spec.ts", "TypeScript", 0, 126, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 150
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-plugins.e2e-spec.ts", "TypeScript", 0, 123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 152
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-products-price.e2e-spec.ts", "TypeScript", 0, 125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 138
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/merchant-settings.e2e-spec.ts", "TypeScript", 0, 129, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 151
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/phase-5-platform.e2e-spec.ts", "TypeScript", 0, 113, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 129
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-admins.e2e-spec.ts", "TypeScript", 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 122
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-auth.e2e-spec.ts", "TypeScript", 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-dashboard.e2e-spec.ts", "TypeScript", 0, 253, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 277
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-distributors.e2e-spec.ts", "TypeScript", 0, 172, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 24, 196
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-merchant-store-settings.e2e-spec.ts", "TypeScript", 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 104
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-orders.e2e-spec.ts", "TypeScript", 0, 152, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 174
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-rbac.e2e-spec.ts", "TypeScript", 0, 133, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 155
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-settings.e2e-spec.ts", "TypeScript", 0, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 77
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-users.e2e-spec.ts", "TypeScript", 0, 191, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 221
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/platform-withdrawals.e2e-spec.ts", "TypeScript", 0, 169, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 195
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/setup-e2e.ts", "TypeScript", 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/setup.ts", "TypeScript", 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-auth.e2e-spec.ts", "TypeScript", 0, 120, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 143
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-catalog-filters.e2e-spec.ts", "TypeScript", 0, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 108
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-catalog-unified.e2e-spec.ts", "TypeScript", 0, 140, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 163
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-catalog.e2e-spec.ts", "TypeScript", 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 122
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-checkout.e2e-spec.ts", "TypeScript", 0, 223, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 265
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-open-shop.e2e-spec.ts", "TypeScript", 0, 125, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 145
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-order-lifecycle.e2e-spec.ts", "TypeScript", 0, 251, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 295
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-orders.e2e-spec.ts", "TypeScript", 0, 122, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 143
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/test/store-stores.e2e-spec.ts", "TypeScript", 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/tsconfig.build.json", "JSON", 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/api/tsconfig.json", "JSON with Comments", 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/branches/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 6, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/commissions/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 158, 0, 0, 0, 0, 0, 0, 12, 170
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/embed-preview/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 6, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 6, 39
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/login/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 102, 0, 0, 0, 0, 0, 0, 10, 112
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/logout/route.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 11
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 6, 87
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/share/_components/share-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 158, 0, 0, 0, 0, 0, 0, 11, 169
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/share/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 5, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/withdrawals/_components/withdrawals-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 11, 166
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/app/withdrawals/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 6, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/components/distributor-shell-wrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 8, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/i18n/request.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/lib/api.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 9, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/lib/auth.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/middleware.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/next-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 7
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/next.config.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/package.json", "JSON", 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/tailwind.config.ts", "TypeScript", 0, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/distributor/tsconfig.json", "JSON with Comments", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/app/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 13, 85
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 7, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/app/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 2, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/capabilities-section.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 3, 65
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/cta-section.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 1, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/grain-overlay.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 1, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/hero-section.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 3, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/marquee-strip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 3, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/portal-grid.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 102, 0, 0, 0, 0, 0, 0, 10, 112
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/portal-ui-preview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 2, 8, 63
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/product-preview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 69, 0, 0, 0, 0, 0, 0, 10, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/site-footer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 5, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/site-nav.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 8, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/components/stack-section.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 4, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 4, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/lib/portal-embed.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/lib/portals.ts", "TypeScript", 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 60
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/next-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 7
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/next.config.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/package.json", "JSON", 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/tailwind.config.ts", "TypeScript", 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/landing/tsconfig.json", "JSON with Comments", 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 1, 5, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/_components/plugin-stub-page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 8, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/allocations/_components/allocations-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 118, 0, 0, 0, 0, 0, 0, 10, 128
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/allocations/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/catalog/categories/_components/categories-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 155, 0, 0, 0, 0, 0, 0, 13, 168
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/catalog/categories/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 6, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/catalog/products/_components/products-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 335, 0, 0, 0, 0, 0, 0, 15, 350
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/catalog/products/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 6, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/commissions/_components/commissions-filters.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 76, 0, 0, 0, 0, 0, 0, 13, 89
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/commissions/_components/commissions-summary-cards.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 5, 23
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/commissions/_components/commissions-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 107, 0, 0, 0, 0, 0, 0, 11, 118
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/commissions/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/activities/_components/activities-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 203, 0, 0, 0, 0, 0, 0, 14, 217
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/activities/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 40, 0, 0, 0, 0, 0, 0, 6, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/companies/[id]/_components/company-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 163, 0, 0, 0, 0, 0, 0, 12, 175
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/companies/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 8, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/companies/_components/companies-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 150, 0, 0, 0, 0, 0, 0, 12, 162
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/companies/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 6, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/[id]/_components/contact-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 171, 0, 0, 0, 0, 0, 0, 11, 182
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 8, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/_components/contacts-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 8, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/_components/contacts-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 182, 0, 0, 0, 0, 0, 0, 12, 194
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/_components/store-customers-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 0, 0, 8, 69
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/contacts/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 6, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 3, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/leads/[id]/_components/lead-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 105, 0, 0, 0, 0, 0, 0, 11, 116
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/leads/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 8, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/leads/_components/leads-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 209, 0, 0, 0, 0, 0, 0, 14, 223
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/crm/leads/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 7, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/customer-service/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/e-signature/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/embed-preview/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 6, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/finance-tax/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/funds/_components/merchant-funds-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 11, 107
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/funds/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 6, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/hrm/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/im/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/adjustments/_components/adjustment-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 177, 0, 0, 0, 0, 0, 0, 14, 191
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/adjustments/_components/adjustments-history-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 168, 0, 0, 0, 0, 0, 0, 9, 177
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/adjustments/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 10, 78
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/alerts/_components/low-stock-alerts-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 5, 88
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/alerts/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 8, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 10, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/_components/procurement-history-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 7, 89
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/_components/procurement-order-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 174, 0, 0, 0, 0, 0, 0, 15, 189
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/_components/procurement-shop.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 266, 0, 0, 0, 0, 0, 0, 16, 282
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/history/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 8, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/procurement/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 8, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/purchase-orders/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/purchase-orders/new/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/purchase-orders/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/reports/_components/inventory-reports-tabs.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 217, 0, 0, 0, 0, 0, 0, 13, 230
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/reports/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 9, 92
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/settings/_components/inventory-settings-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 96, 0, 0, 0, 0, 0, 0, 8, 104
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/settings/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 5, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/stock/_components/stock-levels-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 246, 0, 0, 0, 0, 0, 0, 20, 266
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/stock/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 11, 75
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/transfers/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/transfers/new/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/transfers/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/warehouses/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/inventory/warehouses/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 4, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/login/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 10, 102
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/oa/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/onboarding/pending/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 3, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/orders/[id]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 0, 9, 112
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/orders/_components/orders-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 276, 0, 0, 0, 0, 0, 0, 19, 295
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/orders/_components/orders-table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 8, 71
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/orders/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 0, 0, 11, 72
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 147, 0, 0, 0, 0, 0, 0, 6, 153
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/plugins/_components/plugin-marketplace.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 0, 11, 154
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/plugins/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 6, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/register/_components/register-wizard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 211, 0, 0, 0, 0, 0, 0, 17, 228
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/register/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 3, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/replenishment/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/commission-defaults-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 98, 0, 0, 0, 0, 0, 0, 8, 106
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/merchant-owner-profile-hero.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 6, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/merchant-profile-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 126, 0, 0, 0, 0, 0, 0, 8, 134
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/notification-settings-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 73, 0, 0, 0, 0, 0, 0, 8, 81
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/payment-settings-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 5, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/procurement-addresses-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 270, 0, 0, 0, 0, 0, 0, 16, 286
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/save-status.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 4, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/settings-panels.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 5, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/_components/team-management-panel.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 172, 0, 0, 0, 0, 0, 0, 10, 182
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/app/settings/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 7, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/components/merchant-shell-wrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 113, 0, 0, 0, 0, 0, 0, 14, 127
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/i18n/request.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/api.ts", "TypeScript", 0, 103, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 123
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/auth.ts", "TypeScript", 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/commissions.ts", "TypeScript", 0, 76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 86
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/inventory.ts", "TypeScript", 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 55
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/plugins.ts", "TypeScript", 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/lib/product-variants.ts", "TypeScript", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 31
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/middleware.ts", "TypeScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/next-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 7
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/next.config.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/package.json", "JSON", 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/tailwind.config.ts", "TypeScript", 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 72
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/merchant/tsconfig.json", "JSON with Comments", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/Dockerfile", "Docker", 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 0, 1, 5, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/embed-preview/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 62, 0, 0, 0, 0, 0, 0, 8, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 92, 0, 0, 0, 1, 16, 109
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 5, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/login/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 11, 111
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/open-shop/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 260, 0, 0, 0, 0, 0, 0, 20, 280
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/open-shop/pending/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 3, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/register/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 130, 0, 0, 0, 0, 0, 0, 11, 141
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/cart-view.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 140, 0, 0, 0, 0, 0, 0, 10, 150
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/checkout/checkout-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 286, 0, 0, 0, 0, 0, 0, 17, 303
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/checkout/checkout-payment-step.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 9, 73
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/checkout/stripe-payment-form.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 73, 0, 0, 0, 0, 0, 0, 15, 88
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/unified-product-detail.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 112, 0, 0, 0, 0, 0, 0, 13, 125
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/_components/unified-product-grid.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 6, 47
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/account/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 200, 0, 0, 0, 0, 0, 0, 17, 217
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/cart/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 7, 64
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/checkout/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 6, 47
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/orders/[id]/confirmation/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 118, 0, 0, 0, 0, 0, 0, 11, 129
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/orders/_components/fulfillment-summary.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 8, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/orders/_components/payment-status-banner.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 8, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/orders/_components/pickup-fulfillment-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 98, 0, 0, 0, 0, 0, 0, 18, 116
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 116, 0, 0, 0, 0, 0, 0, 11, 127
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/app/shop/products/[productSlug]/page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 9, 40
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/components/branch-select.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 11, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/components/shop-shell-wrapper.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 9, 92
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/eslint.config.mjs", "JavaScript", 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/i18n/request.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/api.ts", "TypeScript", 0, 106, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 128
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/auth.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 9
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/cart-session.client.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/cart-session.server.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/cart-session.shared.ts", "TypeScript", 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/fulfillment.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/lib/pricing.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/middleware.ts", "TypeScript", 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 55
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/next-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 2, 7
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/next.config.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 12
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/package.json", "JSON", 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 37
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/postcss.config.mjs", "JavaScript", 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 1, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/tailwind.config.ts", "TypeScript", 0, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 72
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/apps/store/tsconfig.json", "JSON with Comments", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docker/docker-compose.yml", "YAML", 0, 0, 0, 0, 0, 0, 95, 0, 0, 0, 0, 0, 7, 102
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/PRODUCT.md", "Markdown", 0, 0, 0, 115, 0, 0, 0, 0, 0, 0, 0, 0, 28, 143
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/admin-rbac.md", "Markdown", 0, 0, 0, 79, 0, 0, 0, 0, 0, 0, 0, 0, 30, 109
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/bento-ui-redesign.md", "Markdown", 0, 0, 0, 436, 0, 0, 0, 0, 0, 0, 0, 0, 147, 583
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/channel-funds-model.md", "Markdown", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 13, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/distributor-portal.md", "Markdown", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 11, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/flagship-catalog-store.md", "Markdown", 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 18, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/merchant-plugin-system.md", "Markdown", 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 24, 92
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-1-foundation.md", "Markdown", 0, 0, 0, 296, 0, 0, 0, 0, 0, 0, 0, 0, 65, 361
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-2-ecommerce.md", "Markdown", 0, 0, 0, 120, 0, 0, 0, 0, 0, 0, 0, 0, 37, 157
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-3-inventory.md", "Markdown", 0, 0, 0, 448, 0, 0, 0, 0, 0, 0, 0, 0, 115, 563
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-3-stock-transfers.md", "Markdown", 0, 0, 0, 31, 0, 0, 0, 0, 0, 0, 0, 0, 11, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-4-distributor-enhancements.md", "Markdown", 0, 0, 0, 577, 0, 0, 0, 0, 0, 0, 0, 0, 223, 800
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-4-distributor-slice3.md", "Markdown", 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 108, 428
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-4-distributor-slice4.md", "Markdown", 0, 0, 0, 217, 0, 0, 0, 0, 0, 0, 0, 0, 91, 308
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/phase-5-distribution-and-allocation.md", "Markdown", 0, 0, 0, 691, 0, 0, 0, 0, 0, 0, 0, 0, 212, 903
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/platform-settings.md", "Markdown", 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 10, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/platform-shadcn-blocks-framework.md", "Markdown", 0, 0, 0, 438, 0, 0, 0, 0, 0, 0, 0, 0, 139, 577
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/platform-ui-blocks-and-gaps.md", "Markdown", 0, 0, 0, 361, 0, 0, 0, 0, 0, 0, 0, 0, 152, 513
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/sales-promoter.md", "Markdown", 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 26, 96
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/system-overview.md", "Markdown", 0, 0, 0, 863, 0, 0, 0, 0, 0, 0, 0, 0, 205, 1068
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/architecture/unified-user-identity.md", "Markdown", 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 32, 126
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/bento-ui-redesign.md", "Markdown", 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 17, 53
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/channel-funds-model.md", "Markdown", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 12, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/dark-mode-borders.md", "Markdown", 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 15, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/design-system.md", "Markdown", 0, 0, 0, 267, 0, 0, 0, 0, 0, 0, 0, 0, 85, 352
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/flagship-catalog-store.md", "Markdown", 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 10, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/merchant-plugin-system.md", "Markdown", 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 0, 0, 23, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/phase-1-admin.md", "Markdown", 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 23, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/phase-1-merchant.md", "Markdown", 0, 0, 0, 85, 0, 0, 0, 0, 0, 0, 0, 0, 35, 120
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/phase-2-store.md", "Markdown", 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 16, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/phase-3-inventory.md", "Markdown", 0, 0, 0, 456, 0, 0, 0, 0, 0, 0, 0, 0, 123, 579
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/phase-5-hq-branch-channel.md", "Markdown", 0, 0, 0, 333, 0, 0, 0, 0, 0, 0, 0, 0, 131, 464
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/platform-settings.md", "Markdown", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 7, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/platform-shadcn-blocks-framework.md", "Markdown", 0, 0, 0, 434, 0, 0, 0, 0, 0, 0, 0, 0, 129, 563
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/platform-ui-blocks-and-gaps.md", "Markdown", 0, 0, 0, 415, 0, 0, 0, 0, 0, 0, 0, 0, 112, 527
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/sales-promoter.md", "Markdown", 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 39, 107
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/stich.md", "Markdown", 0, 0, 0, 1886, 0, 0, 0, 0, 0, 0, 0, 12, 17, 1915
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/store.md", "Markdown", 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 17, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/design/unified-user-identity.md", "Markdown", 0, 0, 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 24, 80
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/execution/README.md", "Markdown", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 22, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/README.md", "Markdown", 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 16, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/admin-nav-consolidation-implementation.md", "Markdown", 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 0, 0, 23, 74
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/admin-rbac-maturity.md", "Markdown", 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 14, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/bento-ui-redesign-implementation.md", "Markdown", 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/bento-ui-redesign-test.md", "Markdown", 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 13, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/frontend-ux-polish.md", "Markdown", 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 15, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-0-discovery.md", "Markdown", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 11, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-1-test.md", "Markdown", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 11, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-2-test.md", "Markdown", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 11, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-3-test.md", "Markdown", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 0, 11, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-4-test.md", "Markdown", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 11, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-5-test.md", "Markdown", 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 11, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/gaps-wave-6-distributor-portal-test.md", "Markdown", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 11, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-1.md", "Markdown", 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 12, 41
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-2.md", "Markdown", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 8, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-3.md", "Markdown", 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 8, 20
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-4.md", "Markdown", 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 9, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-5.md", "Markdown", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 10, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-6.md", "Markdown", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 8, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-iteration-7.md", "Markdown", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 8, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-test-engineer.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 13, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/loop-test-report.md", "Markdown", 0, 0, 0, 161, 0, 0, 0, 0, 0, 0, 0, 0, 43, 204
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-architecture.md", "Markdown", 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 8, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-backend.md", "Markdown", 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 8, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-design.md", "Markdown", 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 8, 18
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-discovery.md", "Markdown", 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 10, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-frontend.md", "Markdown", 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 8, 30
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/merchant-plugin-system-verification.md", "Markdown", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 10, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-architecture.md", "Markdown", 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 22, 71
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-design.md", "Markdown", 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 25, 89
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-discovery.md", "Markdown", 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 12, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-github.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 12, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-implementation.md", "Markdown", 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 13, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-shipping.md", "Markdown", 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 19, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-3-inventory-verification.md", "Markdown", 0, 0, 0, 52, 0, 0, 0, 0, 0, 0, 0, 0, 18, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-architecture.md", "Markdown", 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 0, 0, 25, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-discovery.md", "Markdown", 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 18, 60
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice1-backend.md", "Markdown", 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 16, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice1-frontend.md", "Markdown", 0, 0, 0, 57, 0, 0, 0, 0, 0, 0, 0, 0, 19, 76
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice1-test.md", "Markdown", 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 24, 82
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice2-architecture.md", "Markdown", 0, 0, 0, 71, 0, 0, 0, 0, 0, 0, 0, 0, 25, 96
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice2-backend.md", "Markdown", 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 18, 65
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice2-frontend.md", "Markdown", 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 16, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice2-test.md", "Markdown", 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 16, 55
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice3-architecture.md", "Markdown", 0, 0, 0, 94, 0, 0, 0, 0, 0, 0, 0, 0, 30, 124
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice3-backend.md", "Markdown", 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 21, 85
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice3-frontend.md", "Markdown", 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 21, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice3-test.md", "Markdown", 0, 0, 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 19, 77
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice4-architecture.md", "Markdown", 0, 0, 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 28, 114
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice4-backend.md", "Markdown", 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 20, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice4-frontend.md", "Markdown", 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 0, 0, 22, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-4-distributor-slice4-test.md", "Markdown", 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 0, 18, 73
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-5-architecture.md", "Markdown", 0, 0, 0, 48, 0, 0, 0, 0, 0, 0, 0, 0, 13, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-5-design.md", "Markdown", 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 12, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-5-discovery.md", "Markdown", 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 13, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-5-prd.md", "Markdown", 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 14, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/phase-5-verification.md", "Markdown", 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 2, 8
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-shadcn-blocks-framework-architecture.md", "Markdown", 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 12, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-shadcn-blocks-framework-design.md", "Markdown", 0, 0, 0, 86, 0, 0, 0, 0, 0, 0, 0, 0, 31, 117
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-shadcn-blocks-framework-discovery.md", "Markdown", 0, 0, 0, 54, 0, 0, 0, 0, 0, 0, 0, 0, 12, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-shadcn-blocks-framework-implementation.md", "Markdown", 0, 0, 0, 102, 0, 0, 0, 0, 0, 0, 0, 0, 40, 142
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-ui-blocks-and-gaps-architecture.md", "Markdown", 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 14, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-ui-blocks-and-gaps-design.md", "Markdown", 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 25, 89
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-ui-blocks-and-gaps-discovery.md", "Markdown", 0, 0, 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 13, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/platform-ui-blocks-and-gaps-implementation.md", "Markdown", 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 11, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/remove-branch-distributors-implementation.md", "Markdown", 0, 0, 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 13, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/handoffs/shadcn-component-unification.md", "Markdown", 0, 0, 0, 32, 0, 0, 0, 0, 0, 0, 0, 0, 16, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/bento-ui-redesign.md", "Markdown", 0, 0, 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 26, 115
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/channel-funds-model.md", "Markdown", 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 11, 38
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/distributor-portal.md", "Markdown", 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 10, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/flagship-catalog-store.md", "Markdown", 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 24, 50
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/merchant-plugin-system.md", "Markdown", 0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 0, 0, 41, 116
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/phase-1-foundation.md", "Markdown", 0, 0, 0, 82, 0, 0, 0, 0, 0, 0, 0, 0, 22, 104
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/phase-2-ecommerce.md", "Markdown", 0, 0, 0, 90, 0, 0, 0, 0, 0, 0, 0, 0, 28, 118
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/phase-3-inventory.md", "Markdown", 0, 0, 0, 110, 0, 0, 0, 0, 0, 0, 0, 0, 25, 135
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/phase-4-distributor-enhancements.md", "Markdown", 0, 0, 0, 92, 0, 0, 0, 0, 0, 0, 0, 0, 32, 124
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/phase-5-distribution-and-allocation.md", "Markdown", 0, 0, 0, 238, 0, 0, 0, 0, 0, 0, 0, 0, 71, 309
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/platform-settings.md", "Markdown", 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 10, 34
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/platform-shadcn-blocks-framework.md", "Markdown", 0, 0, 0, 201, 0, 0, 0, 0, 0, 0, 0, 0, 54, 255
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/platform-ui-blocks-and-gaps.md", "Markdown", 0, 0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 34, 133
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/sales-promoter.md", "Markdown", 0, 0, 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 12, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/prd/unified-user-identity.md", "Markdown", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 16, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/reports/功能报告.md", "Markdown", 0, 0, 0, 211, 0, 0, 0, 0, 0, 0, 0, 0, 57, 268
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/reports/周报_MeridianERP_Week1.md", "Markdown", 0, 0, 0, 45, 0, 0, 0, 0, 0, 0, 0, 0, 29, 74
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/reports/立项报告_MeridianERP_v1.0.md", "Markdown", 0, 0, 0, 191, 0, 0, 0, 0, 0, 0, 0, 0, 57, 248
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/superpowers/plans/2026-07-05-p0-order-lifecycle.md", "Markdown", 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 11, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/superpowers/specs/2026-06-30-ai-diagnosis-agent-design.md", "Markdown", 0, 0, 0, 257, 0, 0, 0, 0, 0, 0, 0, 0, 75, 332
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/docs/superpowers/specs/2026-07-02-enterprise-ops-design.md", "Markdown", 0, 0, 0, 432, 0, 0, 0, 0, 0, 0, 0, 0, 113, 545
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/gaps-store.spec.ts", "TypeScript", 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 78
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/i18n-locale.spec.ts", "TypeScript", 0, 58, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/merchant-plugins-admin.spec.ts", "TypeScript", 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 21
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/merchant-plugins.spec.ts", "TypeScript", 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/phase-1.spec.ts", "TypeScript", 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/phase-2-store.spec.ts", "TypeScript", 0, 109, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 127
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/e2e/phase-3-inventory.spec.ts", "TypeScript", 0, 135, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 22, 159
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/package.json", "JSON", 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 37
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/package.json", "JSON", 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/admin-rbac.ts", "TypeScript", 0, 81, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 90
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/branch-procurement.ts", "TypeScript", 0, 104, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 119
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/crm.ts", "TypeScript", 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 5, 52
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/distributor-portal.ts", "TypeScript", 0, 34, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/distributors.ts", "TypeScript", 0, 89, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 12, 106
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/ecommerce.ts", "TypeScript", 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 13, 119
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/enums.ts", "TypeScript", 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 80
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/flagship-catalog.ts", "TypeScript", 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 65
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/frontend-api.ts", "TypeScript", 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/fund-formulas.ts", "TypeScript", 0, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 9, 94
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/config.ts", "TypeScript", 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 5, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/index.ts", "TypeScript", 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/load-messages.ts", "TypeScript", 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 4, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/admin.ts", "TypeScript", 0, 872, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 873
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/common.ts", "TypeScript", 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/distributor.ts", "TypeScript", 0, 121, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 122
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/index.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/merchant.ts", "TypeScript", 0, 891, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 892
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/en/store.ts", "TypeScript", 0, 223, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 224
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/admin.ts", "TypeScript", 0, 866, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 867
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/common.ts", "TypeScript", 0, 56, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/distributor.ts", "TypeScript", 0, 118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 119
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/index.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/merchant.ts", "TypeScript", 0, 875, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 876
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/i18n/messages/zh-CN/store.ts", "TypeScript", 0, 220, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 221
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/index.ts", "TypeScript", 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/inventory.ts", "TypeScript", 0, 270, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 38, 308
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/merchant-dashboard.ts", "TypeScript", 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 4, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/merchant-session.ts", "TypeScript", 0, 30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/order-list.ts", "TypeScript", 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 29
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/phase-5-allocation.ts", "TypeScript", 0, 39, 0, 0, 0, 0, 0, 0, 0, 0, 0, 13, 5, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/phase-5-distribution.ts", "TypeScript", 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 22, 173
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/phase-5-fulfillment.ts", "TypeScript", 0, 88, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 8, 107
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/phase-5-funds.ts", "TypeScript", 0, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 9, 111
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/platform.ts", "TypeScript", 0, 118, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 16, 141
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/plugins.ts", "TypeScript", 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 83
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/procurement-addresses.ts", "TypeScript", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 37
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/queues.ts", "TypeScript", 0, 35, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/settings.ts", "TypeScript", 0, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 10, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/store-catalog-query.ts", "TypeScript", 0, 68, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 80
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/src/store.ts", "TypeScript", 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/shared/tsconfig.json", "JSON with Comments", 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/package.json", "JSON", 70, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 71
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/client-widgets.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 3, 10
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/auth-layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 35, 9, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/bento-chart-tile.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 103, 0, 0, 0, 0, 0, 51, 9, 163
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/bento-dashboard-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 30, 0, 0, 0, 0, 0, 37, 4, 71
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/bento-grid.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 33, 5, 63
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/bento-metric-tile.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 0, 77, 8, 146
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/bento-tile.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 35, 6, 82
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/bento/index.ts", "TypeScript", 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 6, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/cart-drawer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 87, 0, 0, 0, 0, 0, 53, 7, 147
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/empty-state.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 31, 0, 0, 0, 0, 0, 38, 5, 74
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/auth-status-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 32, 6, 65
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/bind-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 36, 7, 85
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/dashboard-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 36, 5, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/detail-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 63, 0, 0, 0, 0, 0, 41, 7, 111
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/erp-list-page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 3, 4, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/erp-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 59, 0, 0, 0, 0, 0, 50, 8, 117
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/form-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 37, 5, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/index.ts", "TypeScript", 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 10, 46
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/list-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 41, 7, 90
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/frameworks/settings-page-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 31, 5, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/inventory/purchase-order-status-badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 27, 5, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/inventory/stock-adjustment-reason-badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 20, 4, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/list-pagination.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 57, 0, 0, 0, 0, 0, 3, 8, 68
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/metric-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 28, 4, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/orders/delivery-ship-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 123, 0, 0, 0, 0, 0, 63, 15, 201
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/orders/fulfillment-type-badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 25, 8, 57
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/orders/index.ts", "TypeScript", 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 6, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/orders/order-list-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 191, 0, 0, 0, 0, 0, 51, 15, 257
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/orders/pickup-verify-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 279, 0, 0, 0, 0, 0, 62, 25, 366
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/page-header.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 33, 5, 64
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/product-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 137, 0, 0, 0, 0, 0, 8, 7, 152
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/admin-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 264, 0, 0, 0, 0, 0, 35, 21, 320
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/distributor-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 106, 0, 0, 0, 0, 0, 8, 12, 126
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/merchant-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 324, 0, 0, 0, 0, 0, 0, 21, 345
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/shell-frame.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 31, 9, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/shell-user-chip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 11, 83
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/store-checkout-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 3, 4, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/shells/store-shell.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 143, 0, 0, 0, 0, 0, 8, 14, 165
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/status/onboarding-status-badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 33, 0, 0, 0, 0, 0, 2, 10, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/status/order-status-badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 1, 5, 27
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-account-order-list.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 3, 5, 61
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-account-profile-hero.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 58, 0, 0, 0, 0, 0, 3, 5, 66
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-account-sidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 110, 0, 0, 0, 0, 0, 3, 8, 121
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-catalog-header.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 3, 4, 60
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-catalog-toolbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 299, 0, 0, 0, 0, 0, 6, 24, 329
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/store/store-featured-hero.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 3, 3, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/auth-toolbar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 19, 5, 36
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/index.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 7, 35
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/locale-toggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 61, 0, 0, 0, 0, 0, 28, 11, 100
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/mode-toggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 27, 10, 88
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/portal-locale-provider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 26, 5, 47
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/portal-theme-provider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 23, 4, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/theme/theme-provider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 16, 4, 29
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/accordion.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 51, 0, 0, 0, 0, 0, 0, 7, 58
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/alert-dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 127, 0, 0, 0, 0, 0, 0, 14, 141
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/alert.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 53, 0, 0, 0, 0, 0, 0, 6, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/avatar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 5, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/badge.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 4, 29
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/breadcrumb.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 9, 79
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 4, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/calendar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 152, 0, 0, 0, 0, 0, 0, 16, 168
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 6, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/chart.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 4, 25
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/checkbox.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 44, 0, 0, 0, 0, 0, 1, 4, 49
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/collapsible.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 6, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/combobox.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 4, 5, 59
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/command.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 94, 0, 0, 0, 0, 0, 4, 9, 107
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/context-menu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 181, 0, 0, 0, 0, 0, 0, 18, 199
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/dialog-close-button.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 2, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/dialog.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 7, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/dropdown-menu.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 81, 0, 0, 0, 0, 0, 0, 9, 90
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/hover-card.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 6, 29
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/input-group.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 4, 32
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/input-otp.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 75, 0, 0, 0, 0, 0, 0, 9, 84
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/input.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 2, 18
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/label.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 2, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/menubar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 83, 0, 0, 0, 0, 0, 0, 8, 91
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/pagination.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 122, 0, 0, 0, 0, 0, 0, 9, 131
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/popover.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 7, 33
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/progress.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 4, 24
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/radio-group.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 5, 42
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/resizable.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 9, 6, 70
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/scroll-area.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 5, 48
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/select.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 17, 0, 0, 0, 0, 0, 0, 2, 19
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/separator.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 5, 26
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/sheet.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 44, 0, 0, 0, 0, 0, 0, 7, 51
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/sidebar-sheet.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 74, 0, 0, 0, 0, 0, 0, 9, 83
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/sidebar.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 516, 0, 0, 0, 0, 0, 0, 45, 561
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/skeleton.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 3, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/slider.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 4, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/sonner.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 24, 0, 0, 0, 0, 0, 0, 4, 28
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/switch.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 34, 0, 0, 0, 0, 0, 1, 4, 39
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/table.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 7, 62
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/tabs.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 68, 0, 0, 0, 0, 0, 0, 9, 77
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/textarea.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 2, 17
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/toggle-group.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 80, 0, 0, 0, 0, 0, 0, 9, 89
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/toggle.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 39, 0, 0, 0, 0, 0, 0, 4, 43
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/components/ui/tooltip.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 46, 0, 0, 0, 0, 0, 0, 8, 54
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/hooks/use-mobile.ts", "TypeScript", 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 6, 45
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/index.ts", "TypeScript", 0, 252, 0, 0, 0, 0, 0, 0, 0, 0, 0, 107, 79, 438
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/lib/format.ts", "TypeScript", 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 9, 67
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/lib/surfaces.ts", "TypeScript", 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 3, 29
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/lib/utils.ts", "TypeScript", 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 2, 22
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/portal-providers.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 2, 5
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/src/server.ts", "TypeScript", 0, 96, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 103
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/styles/globals.css", "CSS", 0, 0, 0, 0, 0, 0, 0, 88, 0, 0, 0, 0, 7, 95
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/packages/ui/tsconfig.json", "JSON with Comments", 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/playwright.config.ts", "TypeScript", 0, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 69
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/pnpm-lock.yaml", "YAML", 0, 0, 0, 0, 0, 0, 10032, 0, 0, 0, 0, 0, 2369, 12401
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/pnpm-workspace.yaml", "YAML", 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 4
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/tsconfig.base.json", "JSON", 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 13
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/tsconfig.json", "JSON with Comments", 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 14
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/turbo.json", "JSON", 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 18
+"/Users/zhuzy2024/Documents/Workspace/MeridianERP/workspaces/MeridianERP.code-workspace", "JSON with Comments", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 25
+"Total", "-", 452, 34774, 208, 15546, 106, 25706, 10168, 264, 130, 972, 888, 2380, 13330, 104924

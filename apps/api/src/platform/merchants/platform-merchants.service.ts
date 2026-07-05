@@ -516,6 +516,7 @@ export class PlatformMerchantsService {
       recruitedByDistributorId: profile.recruitedByDistributorId,
       recruitedByDistributorName: recruitedDistributor?.name ?? null,
       storePublished: profile.storePublished,
+      operationalFrozen: profile.operationalFrozen,
       isFlagship: profile.isFlagship,
       crmSummary,
     };
@@ -562,6 +563,27 @@ export class PlatformMerchantsService {
       });
     });
 
+    return this.getById(id);
+  }
+
+  async freeze(id: string) {
+    const profile = await this.findProfileById(id);
+    if (profile.onboardingStatus !== OnboardingStatus.APPROVED) {
+      throw new BadRequestException('Only approved merchants can be frozen');
+    }
+    await this.prisma.merchantProfile.update({
+      where: { id: profile.id },
+      data: { operationalFrozen: true },
+    });
+    return this.getById(id);
+  }
+
+  async unfreeze(id: string) {
+    const profile = await this.findProfileById(id);
+    await this.prisma.merchantProfile.update({
+      where: { id: profile.id },
+      data: { operationalFrozen: false },
+    });
     return this.getById(id);
   }
 }

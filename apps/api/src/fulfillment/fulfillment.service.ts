@@ -250,6 +250,57 @@ export class FulfillmentService {
     });
     return { orderId, status: OrderStatus.FULFILLED };
   }
+
+  async restoreBranchStock(
+    tx: Prisma.TransactionClient,
+    tenantId: string,
+    lines: Array<{ variantId: string | null; quantity: number }>,
+  ) {
+    const defaultWarehouse = await tx.warehouse.findFirst({
+      where: { tenantId, isDefault: true },
+    });
+    if (!defaultWarehouse) {
+      throw new ConflictException('Default warehouse not configured');
+    }
+    for (const line of lines) {
+      if (!line.variantId) continue;
+      await this.inventoryService.applyQuantityDeltaInTx(
+        tx,
+        tenantId,
+        defaultWarehouse.id,
+        line.variantId,
+        line.quantity,
+      );
+      await this.inventoryService.syncVariantInventoryCache(line.variantId, tx);
+    }
+  }
+
+  async restoreMasterSkuStock(
+    tx: Prisma.TransactionClient,
+    order: {
+      id: string;
+      lines: Array<{ quantity: number; variantId: string | null }>;
+    },
+  ) {
+    for (const line of order.lines) {
+      if (!line.variantId) continue;
+      const variant = await tx.productVariant.findUnique({
+        where: { id: line.variantId },
+        select: { masterSkuId: true },
+      });
+      const masterSkuId = variant?.masterSkuId;
+      if (!masterSkuId) continue;
+      await tx.masterSku.update({
+        where: { id: masterSkuId },
+        data: {
+          quantityOnHand: { increment: line.quantity },
+          cumulativeShippedQty: { decrement: line.quantity },
+        },
+      });
+    }
+    await tx.deliveryAllocationLedger.deleteMany({ where: { orderId: order.id } });
+  }
+
   buildPickupQrPayload(orderId: string, pickupCode: string): string {
     const payload: Record<string, string> = { orderId, code: pickupCode };
     const secret = process.env.PICKUP_QR_SECRET;

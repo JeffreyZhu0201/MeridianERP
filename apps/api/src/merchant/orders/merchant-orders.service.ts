@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import type { DeliveryAddress } from '@meridian/shared';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
+import { OrderLifecycleService } from '../../orders/order-lifecycle.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 function mapOrder(order: {
@@ -71,6 +72,7 @@ export class MerchantOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly fulfillmentService: FulfillmentService,
+    private readonly orderLifecycle: OrderLifecycleService,
   ) {}
 
   private async assertNotFlagship(tenantId: string) {
@@ -139,6 +141,14 @@ export class MerchantOrdersService {
       orderId,
       userId,
     );
+  }
+
+  cancelPending(tenantId: string, orderId: string) {
+    return this.orderLifecycle.cancelPendingPayment({ orderId, tenantId });
+  }
+
+  refundPaid(tenantId: string, orderId: string) {
+    return this.orderLifecycle.refundPaidOrder({ orderId, tenantId });
   }
 
   async findOne(tenantId: string, id: string) {

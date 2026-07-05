@@ -130,8 +130,15 @@ export class StoreCheckoutService {
         ),
       new Prisma.Decimal(0),
     );
+    const settings = await this.prisma.tenantSettings.findUnique({
+      where: { tenantId: tenant.id },
+    });
+    const deliveryFee =
+      dto.fulfillmentType === FulfillmentType.DELIVERY
+        ? new Prisma.Decimal(settings?.deliveryFlatFee ?? 0)
+        : new Prisma.Decimal(0);
     const tax = new Prisma.Decimal(0);
-    const total = subtotal.add(tax);
+    const total = subtotal.add(tax).add(deliveryFee);
     const order = await this.prisma.order.create({
       data: {
         tenantId: tenant.id,

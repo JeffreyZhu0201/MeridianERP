@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { FulfillmentModule } from '../fulfillment/fulfillment.module';
 import { InventoryModule } from '../inventory/inventory.module';
+import { OrderLifecycleModule } from '../orders/order-lifecycle.module';
 import { PaymentModule } from '../payment/payment.module';
 import { QueueModule } from '../queue/queue.module';
 import { PlatformAccountsModule } from '../platform/accounts/platform-accounts.module';
@@ -18,7 +19,10 @@ import { StoreCartController } from './cart/store-cart.controller';
 import { StoreCartService } from './cart/store-cart.service';
 import { StoreCheckoutController } from './checkout/store-checkout.controller';
 import { StoreCheckoutService } from './checkout/store-checkout.service';
-import { StoreOrdersController } from './orders/store-orders.controller';
+import {
+  StoreAccountOrdersController,
+  StoreOrdersController,
+} from './orders/store-orders.controller';
 import { StoreOrdersService } from './orders/store-orders.service';
 import { StoreStoresController } from './stores/store-stores.controller';
 import { StoreStoresService } from './stores/store-stores.service';
@@ -33,6 +37,7 @@ import { StoreMerchantApplicationService } from './merchant-application/store-me
     QueueModule,
     InventoryModule,
     FulfillmentModule,
+    OrderLifecycleModule,
     PlatformAccountsModule,
     FlagshipCatalogModule,
   ],
@@ -43,6 +48,7 @@ import { StoreMerchantApplicationService } from './merchant-application/store-me
     StoreCatalogController,
     StoreCartController,
     StoreCheckoutController,
+    StoreAccountOrdersController,
     StoreOrdersController,
     StoreStoresController,
     StoreMerchantApplicationController,
