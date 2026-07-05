@@ -2,18 +2,52 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
+  Badge,
   EmptyState,
   formatMoney,
   StoreAccountOrderList,
   StoreAccountProfileHero,
   StoreAccountSidebar,
 } from '@meridian/ui/server';
-import type { OrderStatus, StoreCustomerProfile, StoreOrderListItem } from '@meridian/shared';
+import type {
+  OrderStatus,
+  StoreCustomerProfile,
+  StoreMerchantApplicationStatus,
+  StoreOrderListItem,
+} from '@meridian/shared';
 
 import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { getFulfillmentSlug } from '@/lib/fulfillment';
+
+const MERCHANT_PORTAL_URL =
+  process.env.NEXT_PUBLIC_MERCHANT_URL ??
+  process.env.MERCHANT_APP_URL ??
+  'http://localhost:3002';
+
+function applicationStatusVariant(
+  status: string,
+): 'default' | 'secondary' | 'destructive' | 'warning' | 'success' {
+  switch (status) {
+    case 'APPROVED':
+      return 'success';
+    case 'REJECTED':
+      return 'destructive';
+    case 'SUBMITTED':
+    case 'UNDER_REVIEW':
+      return 'warning';
+    default:
+      return 'secondary';
+  }
+}
+
+function shouldShowBecomeMerchant(application: StoreMerchantApplicationStatus | null): boolean {
+  if (!application) return true;
+  if (application.onboardingStatus === 'APPROVED') return false;
+  if (application.onboardingStatus === 'REJECTED') return true;
+  return false;
+}
 
 export default async function ShopAccountPage() {
   const token = await getToken();
@@ -37,20 +71,35 @@ export default async function ShopAccountPage() {
     );
   }
 
-  const [profile, orders, cart] = await Promise.all([
+  const [profile, orders, cart, application] = await Promise.all([
     apiFetch<StoreCustomerProfile>('/store/auth/me', {}, token).catch(() => null),
     apiFetch<StoreOrderListItem[]>(storePath(fulfillmentSlug, 'orders'), {}, token).catch(
       () => [],
     ),
     apiFetch<Cart>(storePath(fulfillmentSlug, 'cart'), {}, token).catch(() => null),
+    apiFetch<StoreMerchantApplicationStatus | null>('/store/merchant-applications/me', {}, token).catch(
+      () => null,
+    ),
   ]);
 
   const storeName = fulfillmentSlug.charAt(0).toUpperCase() + fulfillmentSlug.slice(1);
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
   const orderTotal = orders.reduce((sum, order) => sum + Number(order.total), 0);
+  const showBecomeMerchant = shouldShowBecomeMerchant(application);
 
   function orderStatusLabel(status: OrderStatus): string {
     return ts(status);
+  }
+
+  function applicationStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      SUBMITTED: t('account.applicationStatus.SUBMITTED'),
+      UNDER_REVIEW: t('account.applicationStatus.UNDER_REVIEW'),
+      APPROVED: t('account.applicationStatus.APPROVED'),
+      REJECTED: t('account.applicationStatus.REJECTED'),
+      DRAFT: t('account.applicationStatus.DRAFT'),
+    };
+    return labels[status] ?? status;
   }
 
   return (
@@ -59,15 +108,18 @@ export default async function ShopAccountPage() {
       storeName={storeName}
       cartCount={cartCount}
       userEmail={profile?.email}
+      showBecomeMerchant={showBecomeMerchant}
     >
       <div className="flex flex-col gap-8 md:flex-row">
         <StoreAccountSidebar
           navLabel={t('account.title')}
+          showBecomeMerchant={showBecomeMerchant}
           labels={{
             orders: t('account.sidebar.orders'),
             addresses: t('account.sidebar.addresses'),
             settings: t('account.sidebar.settings'),
             comingSoon: t('account.sidebar.comingSoon'),
+            becomeMerchant: t('account.sidebar.becomeMerchant'),
           }}
         />
 
@@ -78,6 +130,43 @@ export default async function ShopAccountPage() {
               lastName={profile.lastName}
               email={profile.email}
             />
+          ) : null}
+
+          {application ? (
+            <div className="store-bento-card space-y-3 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="store-headline-lg">{t('account.merchantApplication')}</h2>
+                <Badge variant={applicationStatusVariant(application.onboardingStatus)}>
+                  {applicationStatusLabel(application.onboardingStatus)}
+                </Badge>
+              </div>
+              <p className="text-sm font-medium text-foreground">{application.businessName}</p>
+              {application.submittedAt ? (
+                <p className="text-sm text-muted-foreground">
+                  {t('account.applicationSubmittedAt', {
+                    date: new Date(application.submittedAt).toLocaleDateString(locale),
+                  })}
+                </p>
+              ) : null}
+              {application.onboardingStatus === 'APPROVED' ? (
+                <a
+                  href={MERCHANT_PORTAL_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex text-sm font-medium text-primary hover:underline"
+                >
+                  {t('account.goToMerchant')} →
+                </a>
+              ) : null}
+              {application.onboardingStatus === 'REJECTED' ? (
+                <Link
+                  href="/open-shop"
+                  className="inline-flex text-sm font-medium text-primary hover:underline"
+                >
+                  {t('account.reapply')} →
+                </Link>
+              ) : null}
+            </div>
           ) : null}
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

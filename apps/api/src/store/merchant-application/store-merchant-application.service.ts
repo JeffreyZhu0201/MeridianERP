@@ -71,9 +71,9 @@ export class StoreMerchantApplicationService {
       throw new ConflictException('Merchant application already in progress');
     }
 
-    const invite = await this.recruitInvite.validateMerchantRecruitCode(
-      dto.inviteCode,
-    );
+    const invite = dto.inviteCode?.trim()
+      ? await this.recruitInvite.validateMerchantRecruitCode(dto.inviteCode)
+      : null;
 
     const tenant = await this.prisma.tenant.create({
       data: { slug: draftSlug() },
@@ -87,7 +87,7 @@ export class StoreMerchantApplicationService {
         contactEmail: account.email,
         contactPhone: dto.contactPhone?.trim() || account.phone || null,
         onboardingStatus: OnboardingStatus.DRAFT,
-        pendingRecruitInviteCode: invite.code,
+        pendingRecruitInviteCode: invite?.code ?? null,
       },
     });
 

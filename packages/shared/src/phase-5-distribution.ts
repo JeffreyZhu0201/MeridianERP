@@ -119,7 +119,7 @@ export interface InviteCodePreview {
 }
 
 export interface StoreMerchantApplicationRequest {
-  inviteCode: string;
+  inviteCode?: string;
   businessName: string;
   legalName?: string;
   contactPhone?: string;

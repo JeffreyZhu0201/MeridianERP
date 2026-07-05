@@ -27,6 +27,7 @@ export interface StoreShellProps {
   onLogout?: () => void;
   basePath?: string;
   branchSelect?: ReactNode;
+  showBecomeMerchant?: boolean;
 }
 
 export function StoreShell({
@@ -38,6 +39,7 @@ export function StoreShell({
   onLogout,
   basePath,
   branchSelect,
+  showBecomeMerchant = false,
 }: StoreShellProps) {
   const pathname = usePathname();
   const base = basePath ?? '/shop';
@@ -85,6 +87,11 @@ export function StoreShell({
                   </Link>
                 );
               })}
+              {showBecomeMerchant && userEmail ? (
+                <Link href="/open-shop" className="store-nav-link">
+                  {t('becomeMerchant')}
+                </Link>
+              ) : null}
             </nav>
           </div>
 

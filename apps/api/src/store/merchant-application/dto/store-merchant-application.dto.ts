@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class StoreMerchantApplicationDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  inviteCode!: string;
+  inviteCode?: string;
 
   @IsString()
   @MinLength(1)

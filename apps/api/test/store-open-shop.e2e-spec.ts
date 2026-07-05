@@ -94,6 +94,34 @@ describe('StoreOpenShop (e2e)', () => {
     expect(me.body.onboardingStatus).toBe('SUBMITTED');
   });
 
+  it('submits merchant application without invite code', async () => {
+    const register = await request(app.getHttpServer())
+      .post('/api/v1/store/auth/register')
+      .send({
+        email: 'direct-owner@example.com',
+        password: 'password12',
+        firstName: 'Direct',
+        lastName: 'Owner',
+      })
+      .expect(201);
+
+    const storeToken = register.body.accessToken as string;
+
+    const submit = await request(app.getHttpServer())
+      .post('/api/v1/store/merchant-applications')
+      .set('Authorization', `Bearer ${storeToken}`)
+      .send({
+        businessName: 'Direct Shop',
+      })
+      .expect(201);
+
+    expect(submit.body).toMatchObject({
+      businessName: 'Direct Shop',
+      onboardingStatus: 'SUBMITTED',
+      pendingRecruitInviteCode: null,
+    });
+  });
+
   it('creates promoter from platform account', async () => {
     const register = await request(app.getHttpServer())
       .post('/api/v1/store/auth/register')

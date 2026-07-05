@@ -1,20 +1,24 @@
+import Link from 'next/link';
 import {
+  IconBuildingStore,
   IconMapPin,
   IconReceipt,
   IconSettings,
 } from '@tabler/icons-react';
 import { cn } from '../../lib/utils';
 
-export type StoreAccountSection = 'orders' | 'addresses' | 'settings';
+export type StoreAccountSection = 'orders' | 'addresses' | 'settings' | 'becomeMerchant';
 
 export interface StoreAccountSidebarProps {
   active?: StoreAccountSection;
   navLabel?: string;
+  showBecomeMerchant?: boolean;
   labels: {
     orders: string;
     addresses: string;
     settings: string;
     comingSoon: string;
+    becomeMerchant?: string;
   };
   className?: string;
 }
@@ -25,6 +29,7 @@ export interface StoreAccountSidebarProps {
 export function StoreAccountSidebar({
   active = 'orders',
   navLabel = 'Account',
+  showBecomeMerchant = false,
   labels,
   className,
 }: StoreAccountSidebarProps) {
@@ -34,18 +39,21 @@ export function StoreAccountSidebar({
       label: labels.orders,
       icon: IconReceipt,
       enabled: true,
+      href: undefined as string | undefined,
     },
     {
       id: 'addresses' as const,
       label: labels.addresses,
       icon: IconMapPin,
       enabled: false,
+      href: undefined as string | undefined,
     },
     {
       id: 'settings' as const,
       label: labels.settings,
       icon: IconSettings,
       enabled: false,
+      href: undefined as string | undefined,
     },
   ];
 
@@ -91,6 +99,21 @@ export function StoreAccountSidebar({
             </div>
           );
         })}
+
+        {showBecomeMerchant && labels.becomeMerchant ? (
+          <Link
+            href="/open-shop"
+            className={cn(
+              'store-label flex min-h-11 w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors hover:bg-muted',
+              active === 'becomeMerchant'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground',
+            )}
+          >
+            <IconBuildingStore className="size-5 shrink-0" stroke={1.5} />
+            {labels.becomeMerchant}
+          </Link>
+        ) : null}
       </nav>
     </aside>
   );
