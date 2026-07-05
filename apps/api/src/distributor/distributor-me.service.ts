@@ -106,7 +106,6 @@ export class DistributorMeService {
             select: {
               createdAt: true, // 订单创建时间
               total: true, // 订单总金额
-              commissionEntry: { select: { amount: true, status: true } }, // 关联的佣金条目
             },
           })
         : Promise.resolve([]),

@@ -1,6 +1,5 @@
 import {
   ActivityType,
-  BindType,
   CommissionType,
   LeadStage,
   LedgerStatus,
@@ -15,6 +14,11 @@ import {
   StockTransferStatus,
   WithdrawalRequestStatus,
 } from '@prisma/client';
+
+enum BindType {
+  MERCHANT = 'MERCHANT',
+  CUSTOMER = 'CUSTOMER',
+}
 
 type Id = string;
 let idCounter = 0;

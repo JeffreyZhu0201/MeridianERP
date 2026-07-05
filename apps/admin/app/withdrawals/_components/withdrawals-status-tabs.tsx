@@ -17,6 +17,9 @@ export function WithdrawalsStatusTabs() {
     const params = new URLSearchParams();
     if (status !== 'PENDING') params.set('status', status);
     if (distributorId) params.set('distributorId', distributorId);
+    params.delete('tab');
+    params.delete('ledgerPage');
+    params.delete('ledgerStatus');
     const query = params.toString();
     return query ? `/withdrawals?${query}` : '/withdrawals';
   }
@@ -29,18 +32,24 @@ export function WithdrawalsStatusTabs() {
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div
+      className="flex flex-wrap gap-2 rounded-xl bg-muted/50 p-1 ring-1 ring-border"
+      role="tablist"
+      aria-label={t('statusFilter')}
+    >
       {STATUSES.map((status) => {
         const active = current === status || (status === 'PENDING' && !searchParams.get('status'));
         return (
           <Link
             key={status}
             href={hrefFor(status)}
+            role="tab"
+            aria-selected={active}
             className={cn(
-              'rounded-md px-3 py-1.5 text-sm transition-colors',
+              'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               active
-                ? 'bg-muted font-medium text-foreground'
-                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {labelFor(status)}
@@ -50,7 +59,7 @@ export function WithdrawalsStatusTabs() {
       {distributorId ? (
         <Link
           href="/withdrawals"
-          className="ml-auto text-sm text-muted-foreground underline-offset-4 hover:underline"
+          className="ml-auto self-center text-sm text-muted-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm px-1"
         >
           {t('clearDistributorFilter')}
         </Link>

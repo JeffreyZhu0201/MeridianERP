@@ -1,5 +1,3 @@
-import type { MerchantDistributorSummary } from './distributors.js';
-
 /**
  * 驳回商户请求
  * 平台管理员拒绝商户入驻申请时填写的原因
@@ -48,7 +46,6 @@ export interface PlatformMerchantDetail {
   storePublished: boolean;
   isFlagship: boolean;
   crmSummary: MerchantCrmSummary;
-  distributors: MerchantDistributorSummary[];
 }
 
 export type UserIdentity =

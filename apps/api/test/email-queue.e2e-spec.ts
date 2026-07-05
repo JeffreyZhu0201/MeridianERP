@@ -1,51 +1,14 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidationPipe } from '@nestjs/common';
-import { BindType, CommissionType, Prisma } from '@prisma/client';
-import { JwtService } from '@nestjs/jwt';
-import { randomUUID } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { EmailQueueService } from '../src/queue/email-queue.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { EnvService } from '../src/config/env.service';
 import { createMockPrisma } from './helpers/mock-prisma';
 import { EmailJobName } from '@meridian/shared';
-
-async function seedMerchantBindToken(
-  app: INestApplication<App>,
-  prisma: ReturnType<typeof createMockPrisma>,
-  tenantId: string,
-  distributorId: string,
-) {
-  const jwt = app.get(JwtService);
-  const env = app.get(EnvService);
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  const token = jwt.sign(
-    {
-      distributorId,
-      tenantId,
-      bindType: BindType.MERCHANT,
-      purpose: 'bind',
-      jti: randomUUID(),
-    },
-    {
-      secret: env.getOrThrow('BIND_TOKEN_SECRET'),
-      expiresIn: '7d',
-    },
-  );
-  await prisma.distributorQrCode.create({
-    data: {
-      distributorId,
-      token,
-      bindType: BindType.MERCHANT,
-      expiresAt,
-    },
-  });
-  return token;
-}
 
 describe('EmailQueue (e2e)', () => {
   let app: INestApplication<App>;
@@ -56,7 +19,6 @@ describe('EmailQueue (e2e)', () => {
     EmailQueueService,
     | 'sendMerchantWelcome'
     | 'sendMerchantRejected'
-    | 'sendBindingCreated'
     | 'sendCommissionAccrued'
     | 'sendOrderConfirmation'
   > = {
@@ -70,12 +32,6 @@ describe('EmailQueue (e2e)', () => {
       enqueued.push({
         name: EmailJobName.MERCHANT_REJECTED,
         payload: { email, reason },
-      });
-    },
-    sendBindingCreated: async (payload) => {
-      enqueued.push({
-        name: EmailJobName.DISTRIBUTOR_BINDING_CREATED,
-        payload,
       });
     },
     sendCommissionAccrued: async (payload) => {
@@ -115,7 +71,7 @@ describe('EmailQueue (e2e)', () => {
 
   it('enqueues order confirmation after checkout simulate-payment', async () => {
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner(
+    const { tenant } = await prisma._seedMerchantOwner(
       'email-store',
       'Email Store',
       'owner@email.test',
@@ -136,6 +92,10 @@ describe('EmailQueue (e2e)', () => {
       })
       .expect(201);
     const variantId = product.body.variants[0].id;
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant.id },
+      data: { isFlagship: false },
+    });
 
     const sessionId = 'email-guest-session';
     await request(app.getHttpServer())
@@ -164,66 +124,6 @@ describe('EmailQueue (e2e)', () => {
       email: 'guest@email.test',
       orderId: checkout.body.order.id,
     });
-  });
-
-  it('enqueues binding created email when merchant claims QR binding', async () => {
-    const hash = await bcrypt.hash('admin123', 10);
-    await prisma._seedPlatformAdmin('admin@meridian.test', hash, 'SUPER_ADMIN');
-    const adminLogin = await request(app.getHttpServer())
-      .post('/api/v1/platform/auth/login')
-      .send({ email: 'admin@meridian.test', password: 'admin123' });
-
-    const register = await request(app.getHttpServer())
-      .post('/api/v1/merchant/auth/register')
-      .send({
-        businessName: 'Bind Email Corp',
-        email: 'bind-email@corp.test',
-        password: 'secret12',
-      });
-    const draftToken = register.body.accessToken;
-    const profile = await request(app.getHttpServer())
-      .get('/api/v1/merchant/onboarding')
-      .set('Authorization', `Bearer ${draftToken}`);
-    await request(app.getHttpServer())
-      .post('/api/v1/merchant/onboarding/submit')
-      .set('Authorization', `Bearer ${draftToken}`);
-    await request(app.getHttpServer())
-      .post(`/api/v1/platform/merchants/${profile.body.id}/approve`)
-      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`);
-
-    const login = await request(app.getHttpServer())
-      .post('/api/v1/merchant/auth/login')
-      .send({ email: 'bind-email@corp.test', password: 'secret12' });
-    const merchantToken = login.body.accessToken as string;
-
-    const merchantProfile = await prisma.merchantProfile.findFirst({
-      where: { contactEmail: 'bind-email@corp.test' },
-    });
-    const distributor = await prisma.distributor.create({
-      data: {
-        tenantId: merchantProfile!.tenantId,
-        name: 'Email Dist',
-        commissionRate: new Prisma.Decimal(5),
-        commissionType: CommissionType.PERCENT,
-      },
-    });
-    const token = await seedMerchantBindToken(
-      app,
-      prisma,
-      merchantProfile!.tenantId,
-      distributor.id,
-    );
-
-    await request(app.getHttpServer())
-      .post('/api/v1/bindings/claim')
-      .set('Authorization', `Bearer ${merchantToken}`)
-      .send({ token })
-      .expect(201);
-
-    const bindingJob = enqueued.find(
-      (j) => j.name === EmailJobName.DISTRIBUTOR_BINDING_CREATED,
-    );
-    expect(bindingJob).toBeDefined();
   });
 
   it('enqueues merchant welcome on approve', async () => {

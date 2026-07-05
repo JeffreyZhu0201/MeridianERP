@@ -123,7 +123,6 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
                 <TableHead>{t('tableStage')}</TableHead>
                 <TableHead>{t('tableSource')}</TableHead>
                 <TableHead>{t('tableContact')}</TableHead>
-                <TableHead>{t('tableDistributor')}</TableHead>
                 <TableHead>{t('tableUpdated')}</TableHead>
                 <TableHead className="text-right">{t('changeStage')}</TableHead>
               </TableRow>
@@ -147,7 +146,6 @@ export function LeadsTable({ leads: initial, contacts, token }: LeadsTableProps)
                       ? `${lead.contact.firstName} ${lead.contact.lastName}`
                       : '—'}
                   </TableCell>
-                  <TableCell>{lead.distributor?.name ?? '—'}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(lead.updatedAt).toLocaleDateString()}
                   </TableCell>

@@ -44,6 +44,14 @@ export default async function InventoryIndexPage() {
           ]}
         />
         <ListPageFrame title={t('indexTitle')} description={t('indexDescription')}>
+          <div className="mb-4">
+            <Link
+              href="/inventory/master-catalog"
+              className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {t('masterCatalogLink')}
+            </Link>
+          </div>
           {merchants.length === 0 ? (
             <EmptyState title={t('indexEmpty')} />
           ) : (

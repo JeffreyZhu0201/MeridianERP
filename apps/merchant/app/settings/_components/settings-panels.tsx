@@ -43,7 +43,6 @@ export function SettingsPanels({
       />
       <NotificationSettingsPanel
         settings={{
-          notifyOnBinding: settings.notifyOnBinding,
           notifyOnCommission: settings.notifyOnCommission,
         }}
         isOwner={isOwner}

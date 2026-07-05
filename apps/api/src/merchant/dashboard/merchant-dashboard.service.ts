@@ -32,14 +32,11 @@ export class MerchantDashboardService {
     const [
       contactsCount,
       openLeads,
-      activeDistributors,
-      recentBindings,
       orderAgg,
       commissionAccruedAgg,
       lowStockCount,
       trendOrders,
       recentLeads,
-      activityBindings,
       activityCommissions,
       activityOrders,
     ] = await Promise.all([
@@ -49,10 +46,6 @@ export class MerchantDashboardService {
           tenantId,
           stage: { in: [LeadStage.NEW, LeadStage.QUALIFIED] },
         },
-      }),
-      this.prisma.distributor.count({ where: { tenantId, isActive: true } }),
-      this.prisma.binding.count({
-        where: { tenantId, boundAt: { gte: windowStart } },
       }),
       this.prisma.order.aggregate({
         where: orderWhere,
@@ -76,7 +69,6 @@ export class MerchantDashboardService {
         select: {
           createdAt: true,
           total: true,
-          commissionEntry: { select: { amount: true, status: true } },
         },
       }),
       this.prisma.crmLead.findMany({
@@ -91,11 +83,6 @@ export class MerchantDashboardService {
           updatedAt: true,
         },
       }),
-      this.prisma.binding.findMany({
-        where: { tenantId, boundAt: { gte: activityStart } },
-        include: { distributor: { select: { id: true, name: true } } },
-        orderBy: { boundAt: 'desc' },
-      }),
       this.prisma.commissionLedger.findMany({
         where: { tenantId, createdAt: { gte: activityStart } },
         include: { distributor: { select: { id: true, name: true } } },
@@ -107,14 +94,12 @@ export class MerchantDashboardService {
           status: OrderStatus.PAID,
           createdAt: { gte: activityStart },
         },
-        include: { distributor: { select: { id: true, name: true } } },
         orderBy: { createdAt: 'desc' },
         take: 20,
       }),
     ]);
 
     const recentActivity = this.buildRecentActivity(
-      activityBindings,
       activityCommissions,
       activityOrders,
     );
@@ -123,8 +108,6 @@ export class MerchantDashboardService {
       businessName: profile?.businessName ?? 'Merchant',
       contactsCount,
       openLeads,
-      activeDistributors,
-      recentBindings,
       ordersLast30Days: orderAgg._count._all,
       revenueLast30Days: decimalSumToString(orderAgg._sum.total),
       commissionAccruedLast30Days: decimalSumToString(
@@ -165,12 +148,6 @@ export class MerchantDashboardService {
   }
 
   private buildRecentActivity(
-    bindings: Array<{
-      distributorId: string;
-      bindableType: string;
-      boundAt: Date;
-      distributor: { id: string; name: string };
-    }>,
     commissions: Array<{
       orderId: string | null;
       distributorId: string;
@@ -181,21 +158,9 @@ export class MerchantDashboardService {
     orders: Array<{
       id: string;
       total: { toString(): string };
-      distributorId: string | null;
       createdAt: Date;
-      distributor: { id: string; name: string } | null;
     }>,
   ): MerchantDashboardActivity[] {
-    const bindingEvents: MerchantDashboardActivity[] = bindings.map(
-      (binding) => ({
-        type: 'binding.created',
-        occurredAt: binding.boundAt.toISOString(),
-        distributorId: binding.distributorId,
-        distributorName: binding.distributor.name,
-        bindType: binding.bindableType,
-      }),
-    );
-
     const commissionEvents: MerchantDashboardActivity[] = commissions.map(
       (entry) => ({
         type: 'commission.accrued',
@@ -207,18 +172,14 @@ export class MerchantDashboardService {
       }),
     );
 
-    const orderEvents: MerchantDashboardActivity[] = orders
-      .filter((order) => order.distributor)
-      .map((order) => ({
-        type: 'order.paid',
-        occurredAt: order.createdAt.toISOString(),
-        distributorId: order.distributorId!,
-        distributorName: order.distributor!.name,
-        orderId: order.id,
-        amount: order.total.toString(),
-      }));
+    const orderEvents: MerchantDashboardActivity[] = orders.map((order) => ({
+      type: 'order.paid',
+      occurredAt: order.createdAt.toISOString(),
+      orderId: order.id,
+      amount: order.total.toString(),
+    }));
 
-    return [...bindingEvents, ...commissionEvents, ...orderEvents].sort(
+    return [...commissionEvents, ...orderEvents].sort(
       (a, b) =>
         new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
     );

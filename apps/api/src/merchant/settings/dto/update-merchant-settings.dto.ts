@@ -41,9 +41,5 @@ export class UpdateMerchantSettingsDto {
 
   @IsOptional()
   @IsBoolean()
-  notifyOnBinding?: boolean;
-
-  @IsOptional()
-  @IsBoolean()
   notifyOnCommission?: boolean;
 }

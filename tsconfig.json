@@ -7,6 +7,7 @@
     { "path": "apps/admin" },
     { "path": "apps/merchant" },
     { "path": "apps/store" },
-    { "path": "apps/distributor" }
+    { "path": "apps/distributor" },
+    { "path": "apps/landing" }
   ]
 }

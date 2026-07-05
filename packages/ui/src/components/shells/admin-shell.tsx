@@ -22,10 +22,8 @@ import { type ReactNode, useMemo, useState } from 'react';
 import {
   IconAddressBook,
   IconBox,
-  IconBuildingStore,
   IconCash,
   IconChevronRight,
-  IconClipboardList,
   IconLayoutDashboard,
   IconPackage,
   IconReceipt,
@@ -33,9 +31,6 @@ import {
   IconSettings,
   IconShield,
   IconTruckDelivery,
-  IconUserCircle,
-  IconUsers,
-  IconWallet,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { adminRoleHasPermission, type AdminPermission } from '@meridian/shared';
@@ -70,7 +65,7 @@ export interface AdminShellProps {
 }
 
 /** 导航子项类型 - 二级菜单项 */
-type NavChild = { href: string; labelKey: string };
+type NavChild = { href: string; labelKey: string; permissionKey: AdminPermission };
 /** 导航项类型 - 一级菜单（可包含子菜单） */
 type NavItem = {
   href: string;
@@ -79,49 +74,64 @@ type NavItem = {
   children?: NavChild[];
 };
 
+const CRM_SECTION_PREFIXES = ['/users', '/merchants', '/distributors'];
+
+function isCrmSectionPath(pathname: string): boolean {
+  return CRM_SECTION_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+function navItemAllowed(
+  permissionKey: AdminPermission,
+  role?: string,
+  permissions?: AdminPermission[],
+): boolean {
+  if (permissions?.length) {
+    return permissions.includes(permissionKey);
+  }
+  if (role) {
+    return adminRoleHasPermission(role, permissionKey);
+  }
+  return true;
+}
+
 /**
  * 平台管理员导航配置
  * - dashboard: 首页/仪表盘
- * - merchants: 商户管理
- * - distributors: 渠道经销商管理
+ * - crm: 用户、商户、拓店员
  * - orders: 订单管理
- * - allocations: 配额分配
- * - replenishment: 补货管理
+ * - allocations: 配送发货
+ * - procurement: 分店进货发货
  * - withdrawals: 提现管理
  * - funds: 资金管理
  * - settlements: 结算管理
- * - crm: CRM 客户管理（Contacts/Companies/Leads 子菜单）
  * - settings: 系统设置
  */
 const navItems: NavItem[] = [
   { href: '/', key: 'dashboard', icon: IconLayoutDashboard },
-  { href: '/users', key: 'users', icon: IconUserCircle },
   { href: '/admins', key: 'admins', icon: IconShield },
-  { href: '/merchants', key: 'merchants', icon: IconBuildingStore },
-  { href: '/inventory', key: 'inventory', icon: IconBox },
-  { href: '/distributors', key: 'distributors', icon: IconUsers },
-  { href: '/orders', key: 'orders', icon: IconReceipt },
-  { href: '/allocations', key: 'allocations', icon: IconPackage },
-  { href: '/procurement', key: 'procurement', icon: IconTruckDelivery },
-  { href: '/replenishment', key: 'replenishment', icon: IconClipboardList },
-  { href: '/withdrawals', key: 'withdrawals', icon: IconCash },
-  { href: '/funds', key: 'funds', icon: IconReportMoney },
-  { href: '/settlements', key: 'settlements', icon: IconWallet },
   {
-    href: '/crm/contacts',
+    href: '/users',
     key: 'crm',
     icon: IconAddressBook,
     children: [
-      { href: '/crm/contacts', labelKey: 'crmContacts' },
-      { href: '/crm/companies', labelKey: 'crmCompanies' },
-      { href: '/crm/leads', labelKey: 'crmLeads' },
+      { href: '/users', labelKey: 'users', permissionKey: 'users' },
+      { href: '/merchants', labelKey: 'merchants', permissionKey: 'merchants' },
+      { href: '/distributors', labelKey: 'distributors', permissionKey: 'distributors' },
     ],
   },
+  { href: '/inventory', key: 'inventory', icon: IconBox },
+  { href: '/orders', key: 'orders', icon: IconReceipt },
+  { href: '/allocations', key: 'allocations', icon: IconPackage },
+  { href: '/procurement', key: 'procurement', icon: IconTruckDelivery },
+  { href: '/withdrawals', key: 'withdrawals', icon: IconCash },
+  { href: '/funds', key: 'funds', icon: IconReportMoney },
   { href: '/settings', key: 'settings', icon: IconSettings },
 ];
 
 function sectionPrefix(href: string): string {
-  if (href.startsWith('/crm')) return '/crm';
+  if (CRM_SECTION_PREFIXES.includes(href)) return href;
   return href;
 }
 
@@ -141,15 +151,21 @@ function AdminNav({
   const t = useTranslations('admin.nav');
   const tc = useTranslations('common');
 
-  const visibleItems = navItems.filter(({ key }) => {
-    if (permissions?.length) {
-      return permissions.includes(key as AdminPermission);
+  const visibleItems: NavItem[] = [];
+  for (const item of navItems) {
+    if (item.children?.length) {
+      const visibleChildren = item.children.filter((child) =>
+        navItemAllowed(child.permissionKey, role, permissions),
+      );
+      if (visibleChildren.length > 0) {
+        visibleItems.push({ ...item, children: visibleChildren });
+      }
+      continue;
     }
-    if (role) {
-      return adminRoleHasPermission(role, key as AdminPermission);
+    if (navItemAllowed(item.key as AdminPermission, role, permissions)) {
+      visibleItems.push(item);
     }
-    return true;
-  });
+  }
 
   return (
     <SidebarGroup>
@@ -162,7 +178,9 @@ function AdminNav({
             const active =
               pathname === href ||
               (prefix !== '/' && pathname.startsWith(prefix)) ||
-              (children?.some((c) => pathname === c.href || pathname.startsWith(c.href)) ?? false);
+              (key === 'crm' && isCrmSectionPath(pathname)) ||
+              (children?.some((c) => pathname === c.href || pathname.startsWith(`${c.href}/`)) ??
+                false);
 
             if (children?.length) {
               const open = openSections[key] ?? active;
@@ -239,7 +257,7 @@ export function AdminShell({
 
   const initialOpen = useMemo(
     () => ({
-      crm: pathname.startsWith('/crm'),
+      crm: isCrmSectionPath(pathname),
     }),
     [pathname],
   );

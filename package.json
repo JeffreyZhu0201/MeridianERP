@@ -2,8 +2,10 @@
   "name": "meridian-erp",
   "private": true,
   "scripts": {
-    "dev": "turbo dev --filter=@meridian/api --filter=@meridian/admin --filter=@meridian/merchant --filter=@meridian/store --filter=@meridian/distributor",
+    "dev": "turbo dev --filter=@meridian/api --filter=@meridian/admin --filter=@meridian/merchant --filter=@meridian/store --filter=@meridian/distributor --filter=@meridian/landing",
     "dev:admin": "pnpm --filter @meridian/admin dev",
+    "dev:landing": "pnpm --filter @meridian/landing dev",
+    "dev:landing:clean": "pnpm --filter @meridian/landing dev:clean",
     "dev:merchant": "pnpm --filter @meridian/merchant dev",
     "dev:store": "pnpm --filter @meridian/store dev",
     "dev:distributor": "pnpm --filter @meridian/distributor dev",

@@ -28,7 +28,8 @@ import { apiFetch, type PlatformOrder } from '@/lib/api';
 interface OrdersViewProps {
   orders: PlatformOrder[];
   token: string;
-  activeTab: 'all' | 'delivery';
+  variant?: 'default' | 'flagshipDelivery';
+  activeTab?: 'all' | 'delivery';
   statusFilter?: string;
   tenantIdFilter?: string;
   guestEmailFilter?: string;
@@ -75,12 +76,15 @@ const ORDER_STATUSES = Object.values(OrderStatus);
 export function OrdersView({
   orders,
   token,
-  activeTab,
+  variant = 'default',
+  activeTab = 'all',
   statusFilter = '',
   tenantIdFilter = '',
   guestEmailFilter = '',
   merchants,
 }: OrdersViewProps) {
+  const isFlagshipDelivery = variant === 'flagshipDelivery';
+  const showShipActions = isFlagshipDelivery || activeTab === 'delivery';
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -99,16 +103,14 @@ export function OrdersView({
   }
 
   function setTab(tab: 'all' | 'delivery') {
+    if (tab === 'delivery') {
+      router.push('/allocations');
+      return;
+    }
     updateParams((params) => {
-      if (tab === 'delivery') {
-        params.set('tab', 'delivery');
-        params.delete('fulfillmentType');
-        params.delete('status');
-      } else {
-        params.delete('tab');
-        params.delete('fulfillmentType');
-        params.delete('status');
-      }
+      params.delete('tab');
+      params.delete('fulfillmentType');
+      params.delete('status');
       params.delete('page');
     });
   }
@@ -178,93 +180,99 @@ export function OrdersView({
     }
   }
 
+  if (isFlagshipDelivery && orders.length === 0) {
+    return null;
+  }
+
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-end gap-4">
-        <div className="flex gap-2 rounded-xl bg-muted/50 p-1 ring-1 ring-border w-fit">
-          <button
-            type="button"
-            onClick={() => setTab('all')}
-            className={cn(
-              'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
-              activeTab === 'all'
-                ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t('tabAll')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab('delivery')}
-            className={cn(
-              'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
-              activeTab === 'delivery'
-                ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
-                : 'text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {t('tabDelivery')}
-          </button>
-        </div>
+      {!isFlagshipDelivery ? (
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex gap-2 rounded-xl bg-muted/50 p-1 ring-1 ring-border w-fit">
+            <button
+              type="button"
+              onClick={() => setTab('all')}
+              className={cn(
+                'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
+                activeTab === 'all'
+                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t('tabAll')}
+            </button>
+            <button
+              type="button"
+              onClick={() => setTab('delivery')}
+              className={cn(
+                'rounded-lg px-4 py-1.5 text-sm font-medium transition-colors',
+                activeTab === 'delivery'
+                  ? 'bg-background text-foreground shadow-sm ring-1 ring-border'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {t('tabDelivery')}
+            </button>
+          </div>
 
-        {activeTab === 'all' ? (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="order-status-filter">{t('filterStatus')}</Label>
-              <Select
-                id="order-status-filter"
-                value={statusFilter}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-[180px]"
-              >
-                <option value="">{t('allStatuses')}</option>
-                {ORDER_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {t(`status.${status}`)}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="order-merchant-filter">{t('filterMerchant')}</Label>
-              <Select
-                id="order-merchant-filter"
-                value={tenantIdFilter}
-                onChange={(e) => setTenantId(e.target.value)}
-                className="min-w-[200px]"
-              >
-                <option value="">{t('allMerchants')}</option>
-                {merchants.map((m) => (
-                  <option key={m.tenantId} value={m.tenantId}>
-                    {m.businessName}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="order-guest-email">{t('filterGuestEmail')}</Label>
-              <Input
-                id="order-guest-email"
-                type="search"
-                defaultValue={guestEmailFilter}
-                placeholder={t('guestEmailPlaceholder')}
-                className="w-[220px]"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    setGuestEmail((e.target as HTMLInputElement).value);
-                  }
-                }}
-                onBlur={(e) => {
-                  if (e.target.value !== guestEmailFilter) {
-                    setGuestEmail(e.target.value);
-                  }
-                }}
-              />
-            </div>
-          </>
-        ) : null}
-      </div>
+          {activeTab === 'all' ? (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="order-status-filter">{t('filterStatus')}</Label>
+                <Select
+                  id="order-status-filter"
+                  value={statusFilter}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-[180px]"
+                >
+                  <option value="">{t('allStatuses')}</option>
+                  {ORDER_STATUSES.map((status) => (
+                    <option key={status} value={status}>
+                      {t(`status.${status}`)}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-merchant-filter">{t('filterMerchant')}</Label>
+                <Select
+                  id="order-merchant-filter"
+                  value={tenantIdFilter}
+                  onChange={(e) => setTenantId(e.target.value)}
+                  className="min-w-[200px]"
+                >
+                  <option value="">{t('allMerchants')}</option>
+                  {merchants.map((m) => (
+                    <option key={m.tenantId} value={m.tenantId}>
+                      {m.businessName}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="order-guest-email">{t('filterGuestEmail')}</Label>
+                <Input
+                  id="order-guest-email"
+                  type="search"
+                  defaultValue={guestEmailFilter}
+                  placeholder={t('guestEmailPlaceholder')}
+                  className="w-[220px]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setGuestEmail((e.target as HTMLInputElement).value);
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value !== guestEmailFilter) {
+                      setGuestEmail(e.target.value);
+                    }
+                  }}
+                />
+              </div>
+            </>
+          ) : null}
+        </div>
+      ) : null}
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
@@ -280,12 +288,11 @@ export function OrdersView({
                 <TableHead>{t('columns.orderId')}</TableHead>
                 <TableHead>{t('columns.merchant')}</TableHead>
                 <TableHead>{t('columns.customer')}</TableHead>
-                <TableHead>{t('columns.distributor')}</TableHead>
-                <TableHead>{t('columns.fulfillment')}</TableHead>
+                {!isFlagshipDelivery ? <TableHead>{t('columns.fulfillment')}</TableHead> : null}
                 <TableHead>{t('columns.status')}</TableHead>
                 <TableHead className="text-right">{t('columns.total')}</TableHead>
                 <TableHead>{t('columns.date')}</TableHead>
-                {activeTab === 'delivery' ? (
+                {showShipActions ? (
                   <TableHead className="text-right">{t('columns.actions')}</TableHead>
                 ) : null}
               </TableRow>
@@ -300,18 +307,19 @@ export function OrdersView({
                   </TableCell>
                   <TableCell>{order.tenant.businessName ?? order.tenant.slug}</TableCell>
                   <TableCell>{order.guestEmail ?? tc('emptyDash')}</TableCell>
-                  <TableCell>{order.distributor?.name ?? tc('emptyDash')}</TableCell>
-                  <TableCell>
-                    {order.fulfillmentType ? (
-                      <Badge variant={fulfillmentVariant[order.fulfillmentType] ?? 'secondary'}>
-                        {order.fulfillmentType === 'DELIVERY'
-                          ? t('fulfillmentDelivery')
-                          : t('fulfillmentPickup')}
-                      </Badge>
-                    ) : (
-                      tc('emptyDash')
-                    )}
-                  </TableCell>
+                  {!isFlagshipDelivery ? (
+                    <TableCell>
+                      {order.fulfillmentType ? (
+                        <Badge variant={fulfillmentVariant[order.fulfillmentType] ?? 'secondary'}>
+                          {order.fulfillmentType === 'DELIVERY'
+                            ? t('fulfillmentDelivery')
+                            : t('fulfillmentPickup')}
+                        </Badge>
+                      ) : (
+                        tc('emptyDash')
+                      )}
+                    </TableCell>
+                  ) : null}
                   <TableCell>
                     <Badge variant={statusVariant[order.status] ?? 'secondary'}>
                       {t(`status.${order.status}` as `status.${OrderStatus}`)}
@@ -323,7 +331,7 @@ export function OrdersView({
                   <TableCell className="text-xs text-muted-foreground">
                     {formatDate(order.createdAt, locale)}
                   </TableCell>
-                  {activeTab === 'delivery' ? (
+                  {showShipActions ? (
                     <TableCell className="text-right">
                       {order.status === 'PAID' && order.fulfillmentType === 'DELIVERY' ? (
                         <Button

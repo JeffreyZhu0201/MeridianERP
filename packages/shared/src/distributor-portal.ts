@@ -1,4 +1,3 @@
-import type { BindType } from './enums.js';
 import type { CommissionListResponse, CommissionSummary, PerformanceTrendPoint } from './distributors.js';
 
 /**
@@ -43,18 +42,6 @@ export interface DistributorDashboard {
   availableBalance: string | number;
   commissionSummary: CommissionSummary;
   trend: PerformanceTrendPoint[];
-}
-
-export interface DistributorBindingRow {
-  id: string;
-  bindableType: BindType;
-  bindableId: string;
-  boundAt: string;
-}
-
-export interface DistributorBindingsResponse {
-  items: DistributorBindingRow[];
-  total: number;
 }
 
 export type DistributorCommissionListResponse = CommissionListResponse;

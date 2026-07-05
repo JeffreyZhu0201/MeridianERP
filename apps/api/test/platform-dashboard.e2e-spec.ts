@@ -1,13 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import {
-  BindType,
   CommissionType,
   LedgerStatus,
   OnboardingStatus,
   OrderStatus,
   Prisma,
 } from '@prisma/client';
-import { DEFAULT_COMMISSION_WINDOW_DAYS } from '@meridian/shared';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -17,6 +15,8 @@ import { MockPrisma } from './helpers/mock-prisma';
 function daysAgo(days: number): Date {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
+
+const DASHBOARD_WINDOW_DAYS = 30;
 
 async function loginPlatform(
   app: INestApplication<App>,
@@ -73,7 +73,7 @@ describe('Platform dashboard (e2e)', () => {
 
     const activeOne = await prisma.distributor.create({
       data: {
-        tenantId: tenantA.id,
+        tenantId: null,
         name: 'Active One',
         commissionRate: new Prisma.Decimal(10),
         commissionType: CommissionType.PERCENT,
@@ -82,7 +82,7 @@ describe('Platform dashboard (e2e)', () => {
     });
     await prisma.distributor.create({
       data: {
-        tenantId: tenantA.id,
+        tenantId: null,
         name: 'Active Two',
         commissionRate: new Prisma.Decimal(8),
         commissionType: CommissionType.PERCENT,
@@ -91,7 +91,7 @@ describe('Platform dashboard (e2e)', () => {
     });
     await prisma.distributor.create({
       data: {
-        tenantId: tenantB.id,
+        tenantId: null,
         name: 'Active Three',
         commissionRate: new Prisma.Decimal(5),
         commissionType: CommissionType.PERCENT,
@@ -100,7 +100,7 @@ describe('Platform dashboard (e2e)', () => {
     });
     await prisma.distributor.create({
       data: {
-        tenantId: tenantB.id,
+        tenantId: null,
         name: 'Inactive',
         commissionRate: new Prisma.Decimal(5),
         commissionType: CommissionType.PERCENT,
@@ -108,29 +108,9 @@ describe('Platform dashboard (e2e)', () => {
       },
     });
 
-    await prisma.binding.create({
-      data: {
-        tenantId: tenantA.id,
-        distributorId: activeOne.id,
-        bindableType: BindType.MERCHANT,
-        bindableId: tenantA.id,
-        boundAt: daysAgo(5),
-      },
-    });
-    await prisma.binding.create({
-      data: {
-        tenantId: tenantB.id,
-        distributorId: activeOne.id,
-        bindableType: BindType.CUSTOMER,
-        bindableId: 'customer-old',
-        boundAt: daysAgo(DEFAULT_COMMISSION_WINDOW_DAYS + 5),
-      },
-    });
-
     const inWindowOrder = await prisma.order.create({
       data: {
         tenantId: tenantA.id,
-        distributorId: activeOne.id,
         status: OrderStatus.PAID,
         subtotal: new Prisma.Decimal(100),
         tax: new Prisma.Decimal(0),
@@ -152,7 +132,6 @@ describe('Platform dashboard (e2e)', () => {
     const settledOrder = await prisma.order.create({
       data: {
         tenantId: tenantA.id,
-        distributorId: activeOne.id,
         status: OrderStatus.PAID,
         subtotal: new Prisma.Decimal(50),
         tax: new Prisma.Decimal(0),
@@ -174,12 +153,11 @@ describe('Platform dashboard (e2e)', () => {
     const oldOrder = await prisma.order.create({
       data: {
         tenantId: tenantA.id,
-        distributorId: activeOne.id,
         status: OrderStatus.PAID,
         subtotal: new Prisma.Decimal(20),
         tax: new Prisma.Decimal(0),
         total: new Prisma.Decimal(20),
-        createdAt: daysAgo(DEFAULT_COMMISSION_WINDOW_DAYS + 10),
+        createdAt: daysAgo(DASHBOARD_WINDOW_DAYS + 10),
       },
     });
     await prisma.commissionLedger.create({
@@ -189,7 +167,7 @@ describe('Platform dashboard (e2e)', () => {
         distributorId: activeOne.id,
         amount: new Prisma.Decimal(50),
         status: LedgerStatus.ACCRUED,
-        createdAt: daysAgo(DEFAULT_COMMISSION_WINDOW_DAYS + 10),
+        createdAt: daysAgo(DASHBOARD_WINDOW_DAYS + 10),
       },
     });
 
@@ -201,7 +179,6 @@ describe('Platform dashboard (e2e)', () => {
     expect(res.body.totalMerchants).toBe(3);
     expect(res.body.pendingReview).toBe(1);
     expect(res.body.activeDistributors).toBe(3);
-    expect(res.body.bindingsLast30Days).toBe(1);
     expect(res.body.commissionAccruedLast30Days).toBe('12.5');
     expect(res.body.commissionSettledLast30Days).toBe('99');
     expect(res.body.ordersLast30Days).toBe(2);
@@ -213,7 +190,7 @@ describe('Platform dashboard (e2e)', () => {
     expect(res.body.recentMerchants.length).toBeLessThanOrEqual(5);
   });
 
-  it('GET /platform/merchants/:id returns crmSummary and distributor metrics', async () => {
+  it('GET /platform/merchants/:id returns crmSummary', async () => {
     const { tenant } = await prisma._seedMerchantOwner(
       'metrics-corp',
       'Metrics Corp',
@@ -254,75 +231,6 @@ describe('Platform dashboard (e2e)', () => {
       data: { tenantId: tenant.id, title: 'Partner intro' },
     });
 
-    const alpha = await prisma.distributor.create({
-      data: {
-        tenantId: tenant.id,
-        name: 'Alpha Partner',
-        commissionRate: new Prisma.Decimal(10),
-        commissionType: CommissionType.PERCENT,
-      },
-    });
-    const beta = await prisma.distributor.create({
-      data: {
-        tenantId: tenant.id,
-        name: 'Beta Partner',
-        commissionRate: new Prisma.Decimal(5),
-        commissionType: CommissionType.PERCENT,
-        isActive: false,
-      },
-    });
-
-    await prisma.binding.create({
-      data: {
-        tenantId: tenant.id,
-        distributorId: alpha.id,
-        bindableType: BindType.MERCHANT,
-        bindableId: tenant.id,
-        boundAt: daysAgo(40),
-      },
-    });
-    await prisma.binding.create({
-      data: {
-        tenantId: tenant.id,
-        distributorId: alpha.id,
-        bindableType: BindType.CUSTOMER,
-        bindableId: 'cust-1',
-        boundAt: daysAgo(10),
-      },
-    });
-    await prisma.binding.create({
-      data: {
-        tenantId: tenant.id,
-        distributorId: beta.id,
-        bindableType: BindType.CUSTOMER,
-        bindableId: 'cust-2',
-        boundAt: daysAgo(5),
-      },
-    });
-
-    await prisma.order.create({
-      data: {
-        tenantId: tenant.id,
-        distributorId: alpha.id,
-        status: OrderStatus.PAID,
-        subtotal: new Prisma.Decimal(80),
-        tax: new Prisma.Decimal(0),
-        total: new Prisma.Decimal(80),
-        createdAt: daysAgo(7),
-      },
-    });
-    await prisma.order.create({
-      data: {
-        tenantId: tenant.id,
-        distributorId: alpha.id,
-        status: OrderStatus.PAID,
-        subtotal: new Prisma.Decimal(20),
-        tax: new Prisma.Decimal(0),
-        total: new Prisma.Decimal(20),
-        createdAt: daysAgo(45),
-      },
-    });
-
     const res = await request(app.getHttpServer())
       .get(`/api/v1/platform/merchants/${profile!.id}`)
       .set('Authorization', `Bearer ${platformToken}`)
@@ -333,28 +241,12 @@ describe('Platform dashboard (e2e)', () => {
       companies: 1,
       leads: 3,
     });
-    expect(res.body.distributors).toHaveLength(2);
-    expect(res.body.distributors[0]).toMatchObject({
-      id: alpha.id,
-      name: 'Alpha Partner',
-      isActive: true,
-      bindingCount: 2,
-      bindingsLast30Days: 1,
-      attributedOrdersLast30Days: 1,
-    });
-    expect(res.body.distributors[1]).toMatchObject({
-      id: beta.id,
-      name: 'Beta Partner',
-      isActive: false,
-      bindingCount: 1,
-      bindingsLast30Days: 1,
-      attributedOrdersLast30Days: 0,
-    });
+    expect(res.body.distributors).toBeUndefined();
     expect(res.body.tenant).toBeUndefined();
     expect(res.body.businessName).toBe('Metrics Corp');
   });
 
-  it('GET /platform/merchants/:id returns empty distributors with crmSummary', async () => {
+  it('GET /platform/merchants/:id returns crmSummary without distributor list', async () => {
     const { tenant } = await prisma._seedMerchantOwner(
       'empty-dist',
       'Empty Dist Corp',
@@ -374,7 +266,7 @@ describe('Platform dashboard (e2e)', () => {
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
 
-    expect(res.body.distributors).toEqual([]);
+    expect(res.body.distributors).toBeUndefined();
     expect(res.body.crmSummary).toEqual({
       contacts: 0,
       companies: 1,

@@ -26,7 +26,7 @@ describe('StoreOrders (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedMerchantOwner(
+    const { tenant } = await prisma._seedMerchantOwner(
       'acme-store',
       'Acme Store',
       'owner@acme.test',
@@ -44,6 +44,10 @@ describe('StoreOrders (e2e)', () => {
       })
       .expect(201);
     variantId = product.body.variants[0].id;
+    await prisma.merchantProfile.update({
+      where: { tenantId: tenant.id },
+      data: { isFlagship: false },
+    });
 
     const register = await request(app.getHttpServer())
       .post('/api/v1/store/acme-store/auth/register')

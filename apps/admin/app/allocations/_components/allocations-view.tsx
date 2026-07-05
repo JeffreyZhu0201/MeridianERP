@@ -42,7 +42,7 @@ export function AllocationsView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const locale = useLocale();
-  const t = useTranslations('admin.allocations');
+  const t = useTranslations('admin.masterCatalog');
   const tc = useTranslations('common');
   const [skuOpen, setSkuOpen] = useState(false);
   const [skuEditOpen, setSkuEditOpen] = useState(false);

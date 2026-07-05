@@ -1,4 +1,4 @@
-import type { AllocationOrderStatus, ReplenishmentRequestStatus } from './phase-5-distribution.js';
+import type { AllocationOrderStatus } from './phase-5-distribution.js';
 
 /**
  * 总部主 SKU 摘要
@@ -53,18 +53,4 @@ export interface AllocationOrderSummary {
   lineCount: number;
   totalWholesale: string | number;
   createdAt: string;
-}
-
-export interface ReplenishmentRequestSummary {
-  id: string;
-  tenantId: string;
-  status: ReplenishmentRequestStatus;
-  note: string | null;
-  lineCount: number;
-  createdAt: string;
-}
-
-export interface CreateReplenishmentRequest {
-  note?: string;
-  lines: Array<{ masterSkuId: string; quantity: number }>;
 }

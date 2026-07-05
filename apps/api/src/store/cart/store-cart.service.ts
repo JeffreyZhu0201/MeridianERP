@@ -25,7 +25,6 @@ const CART_INCLUDE = {
     },
     orderBy: { createdAt: 'asc' as const }, // 按添加时间升序排列
   },
-  distributor: { select: { id: true, name: true } }, // 关联的经销商信息
 };
 
 @Injectable()
@@ -237,8 +236,6 @@ export class StoreCartService {
     return {
       id: cart.id,
       sessionId: sessionId ?? cart.sessionId ?? randomUUID(), // 确保有 sessionId
-      distributorId: cart.distributorId, // 关联的经销商 ID
-      distributor: cart.distributor, // 经销商信息
       items: cart.items.map((item) => ({
         id: item.id,
         quantity: item.quantity,

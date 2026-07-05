@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 const AUTH_COOKIE = 'merchant_token';
-const PUBLIC_PATHS = ['/login', '/register', '/onboarding/pending', '/bind'];
+const PUBLIC_PATHS = ['/login', '/register', '/onboarding/pending', '/embed-preview'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

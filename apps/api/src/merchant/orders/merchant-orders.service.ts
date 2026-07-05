@@ -93,7 +93,6 @@ export class MerchantOrdersService {
         customer: {
           select: { id: true, email: true, firstName: true, lastName: true },
         },
-        commissionEntry: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -150,7 +149,6 @@ export class MerchantOrdersService {
         customer: {
           select: { id: true, email: true, firstName: true, lastName: true },
         },
-        commissionEntry: true,
       },
     });
     if (!order) {
@@ -174,7 +172,6 @@ export class MerchantOrdersService {
             }
           : null,
       })),
-      commissionEntry: order.commissionEntry,
     };
   }
 }

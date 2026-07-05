@@ -98,7 +98,7 @@ export class FulfillmentService {
   ) {
     const order = await this.prisma.order.findFirst({
       where: { id: orderId, tenantId },
-      include: { lines: true, commissionEntry: true },
+      include: { lines: true },
     });
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -181,7 +181,6 @@ export class FulfillmentService {
       where: { id: orderId },
       include: {
         lines: { include: { variant: true } },
-        commissionEntry: true,
         tenant: {
           include: { merchantProfile: { select: { isFlagship: true } } },
         },

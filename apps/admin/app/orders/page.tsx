@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, EmptyState, ListPageFrame } from '@meridian/ui/server';
@@ -27,18 +28,20 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
   const t = await getTranslations('admin.orders');
   const tc = await getTranslations('common');
   const params = await searchParams;
-  const activeTab = params.tab === 'delivery' ? 'delivery' : 'all';
-  const statusFilter = activeTab === 'delivery' ? 'PAID' : (params.status ?? '');
+  if (params.tab === 'delivery') {
+    const redirectQuery = new URLSearchParams();
+    if (params.page) redirectQuery.set('page', params.page);
+    const suffix = redirectQuery.toString();
+    redirect(suffix ? `/allocations?${suffix}` : '/allocations');
+  }
+  const activeTab = 'all';
+  const statusFilter = params.status ?? '';
 
   const query = new URLSearchParams();
   query.set('page', params.page ?? '1');
   query.set('limit', '20');
-  if (activeTab === 'delivery') {
-    query.set('deliveryQueue', 'true');
-  } else {
-    if (params.status) query.set('status', params.status);
-    if (params.fulfillmentType) query.set('fulfillmentType', params.fulfillmentType);
-  }
+  if (params.status) query.set('status', params.status);
+  if (params.fulfillmentType) query.set('fulfillmentType', params.fulfillmentType);
   if (params.guestEmail) query.set('guestEmail', params.guestEmail);
   if (params.tenantId) query.set('tenantId', params.tenantId);
 
@@ -67,9 +70,8 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
   const metrics = [
     {
-      title: activeTab === 'delivery' ? t('tabDelivery') : t('title'),
+      title: t('title'),
       value: meta.total,
-      description: activeTab === 'delivery' ? t('description') : undefined,
     },
     {
       title: tc('pageOf', { page: meta.page, total: totalPages }),

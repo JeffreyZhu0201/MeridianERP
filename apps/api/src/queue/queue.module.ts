@@ -20,9 +20,7 @@ const bullImports = isTest
           },
         }),
       }),
-      BullModule.registerQueue(
-        { name: EMAIL_QUEUE },
-      ),
+      BullModule.registerQueue({ name: EMAIL_QUEUE }),
     ];
 
 const queueProviders = [

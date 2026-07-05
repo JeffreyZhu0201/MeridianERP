@@ -24,11 +24,6 @@ export enum CommissionType {
   FIXED = 'FIXED',
 }
 
-export enum BindType {
-  MERCHANT = 'MERCHANT',
-  CUSTOMER = 'CUSTOMER',
-}
-
 export enum PlatformRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   FINANCE = 'FINANCE',

@@ -22,6 +22,70 @@ export interface PlatformFundsSummary {
   gmvTrend?: Array<{ date: string; amount: number }>;
 }
 
+/** HQ funds dashboard — five headline metrics */
+export interface PlatformFundsOverview {
+  inventoryCost: number;
+  expectedProfit: number;
+  procurementSales: number;
+  procurementProfit: number;
+  distributorCommissions: number;
+  netProfit: number;
+  from: string;
+  to: string;
+}
+
+export interface PlatformFundsInventoryCostLine {
+  id: string;
+  skuCode: string;
+  name: string;
+  quantityOnHand: number;
+  unitCost: string;
+  lineCost: number;
+}
+
+export interface PlatformFundsExpectedProfitLine {
+  id: string;
+  skuCode: string;
+  name: string;
+  quantityOnHand: number;
+  unitCost: string;
+  wholesalePrice: string;
+  expectedProfit: number;
+}
+
+export interface PlatformFundsProcurementRow {
+  id: string;
+  orderNumber: string;
+  merchantName: string;
+  status: string;
+  salesAmount: number;
+  costAmount: number;
+  profitAmount: number;
+  paidAt: string | null;
+}
+
+export interface PlatformFundsCommissionRow {
+  id: string;
+  distributorName: string;
+  merchantLabel: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+}
+
+export interface PlatformFundsNetProfitBreakdown {
+  wholesaleFromAllocations: number;
+  wholesaleFromDelivery: number;
+  totalRevenue: number;
+  cogsFromAllocations: number;
+  cogsFromDelivery: number;
+  totalCogs: number;
+  distributorCommissions: number;
+  netProfit: number;
+  from: string;
+  to: string;
+}
+
 export interface MerchantFundsSummary {
   pickupGmv: string | number;
   pickupCostOfGoods: string | number;

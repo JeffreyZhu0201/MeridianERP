@@ -3,7 +3,6 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import {
   EmailJobName,
-  type BindingCreatedEmailPayload,
   type CommissionAccruedEmailPayload,
   type MerchantRejectedEmailPayload,
   type MerchantWelcomeEmailPayload,
@@ -32,10 +31,6 @@ export class EmailProcessor extends WorkerHost {
         return this.handleMerchantRejected(
           job.data as MerchantRejectedEmailPayload,
         );
-      case EmailJobName.DISTRIBUTOR_BINDING_CREATED:
-        return this.handleBindingCreated(
-          job.data as BindingCreatedEmailPayload,
-        );
       case EmailJobName.COMMISSION_ACCRUED:
         return this.handleCommissionAccrued(
           job.data as CommissionAccruedEmailPayload,
@@ -60,31 +55,6 @@ export class EmailProcessor extends WorkerHost {
     this.mail.send(payload.email, 'Merchant application update', {
       template: EmailJobName.MERCHANT_REJECTED,
       reason: payload.reason,
-    });
-  }
-
-  private async handleBindingCreated(
-    payload: BindingCreatedEmailPayload,
-  ): Promise<void> {
-    const recipient = await this.resolveMerchantOwnerEmail(payload.tenantId);
-    if (!recipient) {
-      this.logger.warn(
-        `No merchant owner email for binding notification tenant=${payload.tenantId}`,
-      );
-      return;
-    }
-
-    const distributor = await this.prisma.distributor.findFirst({
-      where: { id: payload.distributorId, tenantId: payload.tenantId },
-      select: { name: true },
-    });
-
-    this.mail.send(recipient, 'New distributor binding', {
-      template: EmailJobName.DISTRIBUTOR_BINDING_CREATED,
-      distributorId: payload.distributorId,
-      distributorName: distributor?.name,
-      bindType: payload.bindType,
-      boundAt: payload.boundAt,
     });
   }
 

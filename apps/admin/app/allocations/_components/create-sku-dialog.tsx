@@ -44,7 +44,7 @@ export function CreateSkuDialog({
   onFlagshipPriceChange,
   onSubmit,
 }: CreateSkuDialogProps) {
-  const t = useTranslations('admin.allocations');
+  const t = useTranslations('admin.masterCatalog');
   const tc = useTranslations('common');
 
   return (

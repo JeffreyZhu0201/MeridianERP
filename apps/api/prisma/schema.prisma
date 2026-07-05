@@ -332,18 +332,16 @@ model CrmContact {
 
 // CRM 线索
 model CrmLead {
-  id            String       @id @default(cuid()) // 主键
-  tenantId      String // 租户 ID
-  tenant        Tenant       @relation(fields: [tenantId], references: [id]) // 所属租户
-  contactId     String? // 联系人 ID
-  contact       CrmContact?  @relation(fields: [contactId], references: [id]) // 所属联系人
-  title         String // 线索标题
-  stage         LeadStage    @default(NEW) // 阶段
-  source        String? // 来源
-  distributorId String? // 关联经销商 ID
-  distributor   Distributor? @relation(fields: [distributorId], references: [id]) // 关联经销商
-  createdAt     DateTime     @default(now()) // 创建时间
-  updatedAt     DateTime     @updatedAt // 更新时间
+  id        String      @id @default(cuid()) // 主键
+  tenantId  String // 租户 ID
+  tenant    Tenant      @relation(fields: [tenantId], references: [id]) // 所属租户
+  contactId String? // 联系人 ID
+  contact   CrmContact? @relation(fields: [contactId], references: [id]) // 所属联系人
+  title     String // 线索标题
+  stage     LeadStage   @default(NEW) // 阶段
+  source    String? // 来源
+  createdAt DateTime    @default(now()) // 创建时间
+  updatedAt DateTime    @updatedAt // 更新时间
 
   @@index([tenantId])
   @@index([stage])
@@ -384,7 +382,6 @@ model Distributor {
   commissionRate     Decimal                     @db.Decimal(10, 4) // 佣金比例/金额
   commissionType     CommissionType              @default(PERCENT) // 佣金类型
   isActive           Boolean                     @default(true) // 是否启用
-  leads              CrmLead[] // 线索
   commissionEntries  CommissionLedger[] // 佣金账本
   recruitedMerchants MerchantProfile[]           @relation("RecruitedMerchants") // 招募的商户
   recruitInviteCodes MerchantRecruitInviteCode[] // 招募邀请码

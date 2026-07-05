@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 const AUTH_COOKIE = 'admin_token';
 const ADMIN_ROLE_COOKIE = 'admin_role';
-const PUBLIC_PATHS = ['/login'];
+const PUBLIC_PATHS = ['/login', '/embed-preview'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

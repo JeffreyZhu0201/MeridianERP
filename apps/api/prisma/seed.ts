@@ -193,7 +193,6 @@ async function main() {
         tenantId: tenant.id,
         defaultCommissionRate: 10,
         defaultCommissionType: 'PERCENT',
-        notifyOnBinding: true,
         notifyOnCommission: true,
       },
     });
@@ -207,7 +206,6 @@ async function main() {
         tenantId: existingTenant.id,
         defaultCommissionRate: 10,
         defaultCommissionType: 'PERCENT',
-        notifyOnBinding: true,
         notifyOnCommission: true,
       },
     });

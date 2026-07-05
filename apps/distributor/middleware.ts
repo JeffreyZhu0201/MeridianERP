@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 const AUTH_COOKIE = 'distributor_token';
-const PUBLIC_PATHS = ['/login', '/logout'];
+const PUBLIC_PATHS = ['/login', '/logout', '/embed-preview'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

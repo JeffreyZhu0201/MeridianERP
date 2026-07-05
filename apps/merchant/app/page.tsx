@@ -48,8 +48,6 @@ export default async function DashboardPage() {
           <>
             <BentoMetricTile title={t('contacts')} value={stats.contactsCount} />
             <BentoMetricTile title={t('openLeads')} value={stats.openLeads} />
-            <BentoMetricTile title={t('activeDistributors')} value={stats.activeDistributors} />
-            <BentoMetricTile title={t('bindingsLast30')} value={stats.recentBindings} />
             <BentoMetricTile title={t('ordersLast30')} value={stats.ordersLast30Days} />
             <BentoMetricTile
               title={t('revenueLast30')}
@@ -129,13 +127,9 @@ export default async function DashboardPage() {
                         className="flex justify-between gap-4 py-3 first:pt-0 last:pb-0"
                       >
                         <span>
-                          {item.type === 'binding.created'
-                            ? t('activityBindingCreated', {
-                                bindType: item.bindType ?? '—',
-                              })
-                            : item.type === 'order.paid'
-                              ? t('activityOrderPaid')
-                              : t('activityCommissionAccrued')}
+                          {item.type === 'order.paid'
+                            ? t('activityOrderPaid')
+                            : t('activityCommissionAccrued')}
                           {item.distributorName ? ` · ${item.distributorName}` : null}
                           {item.amount != null
                             ? ` · ${formatMoney(item.amount, locale)}`

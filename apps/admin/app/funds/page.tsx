@@ -1,12 +1,12 @@
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Alert, AlertDescription } from '@meridian/ui';
-import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server';
-import type { PlatformFundsSummary } from '@meridian/shared';
+import { BentoListHeader, ListPageFrame } from '@meridian/ui/server';
+import type { PlatformFundsOverview } from '@meridian/shared';
 
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { requireToken } from '@/lib/auth';
-import { FundsView } from './_components/funds-view';
+import { FundsOverview } from './_components/funds-overview';
 
 export default async function FundsPage({
   searchParams,
@@ -14,42 +14,34 @@ export default async function FundsPage({
   searchParams: Promise<{ from?: string; to?: string }>;
 }) {
   const token = await requireToken();
-
   const t = await getTranslations('admin.funds');
-  const locale = await getLocale();
   const params = await searchParams;
   const query = new URLSearchParams();
   if (params.from) query.set('from', params.from);
   if (params.to) query.set('to', params.to);
-  const path = `/platform/funds/summary${query.toString() ? `?${query}` : ''}`;
+  const path = `/platform/funds/overview${query.toString() ? `?${query}` : ''}`;
 
-  let summary: PlatformFundsSummary | null = null;
+  let overview: PlatformFundsOverview | null = null;
   try {
-    summary = await apiFetch<PlatformFundsSummary>(path, {}, token);
+    overview = await apiFetch<PlatformFundsOverview>(path, {}, token);
   } catch {
-    summary = null;
+    overview = null;
   }
 
   return (
     <AdminShellWithSession>
       <div className="space-y-6">
-        {summary ? (
+        {overview ? (
           <BentoListHeader
             metrics={[
-              {
-                title: t('consumerGmv'),
-                value: formatMoney(summary.consumerGmv ?? summary.gmv, locale),
-              },
-              {
-                title: t('pickupMarginAcrossBranches'),
-                value: formatMoney(summary.pickupMarginAcrossBranches ?? 0, locale),
-              },
+              { title: t('netProfit'), value: overview.netProfit },
+              { title: t('inventoryCost'), value: overview.inventoryCost },
             ]}
           />
         ) : null}
         <ListPageFrame title={t('title')} description={t('description')}>
-          {summary ? (
-            <FundsView initialSummary={summary} token={token} />
+          {overview ? (
+            <FundsOverview initialOverview={overview} token={token} />
           ) : (
             <Alert variant="destructive">
               <AlertDescription>{t('loadError')}</AlertDescription>

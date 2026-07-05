@@ -26,6 +26,7 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 
 | Service | Path | URL |
 |---|---|---|
+| Landing | `apps/landing` | http://localhost:3004 |
 | Admin | `apps/admin` | http://localhost:3000 |
 | API | `apps/api` | http://localhost:3001 |
 | Merchant | `apps/merchant` | http://localhost:3002 |
@@ -38,7 +39,8 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 |---|---|
 | `rtk pnpm dev` | Start API and all portals through Turborepo |
 | `rtk pnpm dev:api` | Start API only |
-| `rtk pnpm dev:admin` | Start Admin only |
+| `rtk pnpm dev:landing` | Start product landing page only |
+| `rtk pnpm dev:landing:clean` | Clear landing `.next` cache and start (fixes stale chunk errors) |
 | `rtk pnpm dev:merchant` | Start Merchant only |
 | `rtk pnpm dev:store` | Start Store only |
 | `rtk pnpm dev:distributor` | Start Distributor only |
@@ -92,3 +94,4 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Redis connection errors | Run `rtk pnpm deps` and confirm Docker is running |
 | Missing distributor JWT secret | Copy `JWT_DISTRIBUTOR_SECRET` from `.env.example` into `.env` |
 | Frontend styles look wrong | Rebuild shared packages with `rtk pnpm --filter @meridian/shared build` |
+| Landing `Cannot find module './787.js'` | Stop dev, run `rtk pnpm dev:landing:clean` (do not run `build` while `dev` is active) |

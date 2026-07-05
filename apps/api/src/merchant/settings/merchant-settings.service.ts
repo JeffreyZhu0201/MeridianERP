@@ -50,7 +50,6 @@ export class MerchantSettingsService {
     row: {
       defaultCommissionRate: Prisma.Decimal | null;
       defaultCommissionType: string | null;
-      notifyOnBinding: boolean;
       notifyOnCommission: boolean;
       updatedAt: Date;
     },
@@ -59,7 +58,6 @@ export class MerchantSettingsService {
       tenantId,
       defaultCommissionRate: row.defaultCommissionRate?.toString() ?? null,
       defaultCommissionType: row.defaultCommissionType,
-      notifyOnBinding: row.notifyOnBinding,
       notifyOnCommission: row.notifyOnCommission,
       updatedAt: row.updatedAt.toISOString(),
     };
@@ -132,9 +130,6 @@ export class MerchantSettingsService {
     if (dto.defaultCommissionType !== undefined) {
       settingsData.defaultCommissionType = dto.defaultCommissionType;
     }
-    if (dto.notifyOnBinding !== undefined) {
-      settingsData.notifyOnBinding = dto.notifyOnBinding;
-    }
     if (dto.notifyOnCommission !== undefined) {
       settingsData.notifyOnCommission = dto.notifyOnCommission;
     }
@@ -178,9 +173,6 @@ export class MerchantSettingsService {
               }),
               ...(dto.defaultCommissionType !== undefined && {
                 defaultCommissionType: dto.defaultCommissionType,
-              }),
-              ...(dto.notifyOnBinding !== undefined && {
-                notifyOnBinding: dto.notifyOnBinding,
               }),
               ...(dto.notifyOnCommission !== undefined && {
                 notifyOnCommission: dto.notifyOnCommission,

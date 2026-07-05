@@ -56,7 +56,7 @@ export class BranchPurchaseOrderListQueryDto {
 export class PlatformBranchPurchaseOrderListQueryDto {
   @IsOptional()
   @IsString()
-  status?: BranchPurchaseOrderStatus;
+  status?: BranchPurchaseOrderStatus | 'ALL';
 
   @IsOptional()
   @IsString()

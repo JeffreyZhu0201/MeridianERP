@@ -59,3 +59,35 @@ export function computeCommissionLiability(
 ): number {
   return accrued + settled;
 }
+
+export function computeInventoryCost(
+  skus: Array<{ quantityOnHand: number; unitCost: string | number }>,
+): number {
+  return skus.reduce(
+    (sum, sku) => sum + sku.quantityOnHand * Number(sku.unitCost),
+    0,
+  );
+}
+
+export function computeExpectedInventoryProfit(
+  skus: Array<{
+    quantityOnHand: number;
+    unitCost: string | number;
+    wholesalePrice: string | number;
+  }>,
+): number {
+  return skus.reduce((sum, sku) => {
+    const margin = Number(sku.wholesalePrice) - Number(sku.unitCost);
+    return sum + sku.quantityOnHand * margin;
+  }, 0);
+}
+
+export function computePlatformNetProfit(input: {
+  wholesaleRevenue: number;
+  cogs: number;
+  distributorCommissions: number;
+}): number {
+  return Number(
+    (input.wholesaleRevenue - input.cogs - input.distributorCommissions).toFixed(2),
+  );
+}

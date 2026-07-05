@@ -10,7 +10,7 @@ import { apiFetch } from '@/lib/api';
 import { SaveStatus } from './save-status';
 
 interface NotificationSettingsPanelProps {
-  settings: Pick<MerchantSettingsDto, 'notifyOnBinding' | 'notifyOnCommission'>;
+  settings: Pick<MerchantSettingsDto, 'notifyOnCommission'>;
   isOwner: boolean;
   token: string;
 }
@@ -20,7 +20,6 @@ export function NotificationSettingsPanel({ settings, isOwner, token }: Notifica
   const t = useTranslations('merchant.settings');
   const tCommon = useTranslations('common');
 
-  const [notifyOnBinding, setNotifyOnBinding] = useState(settings.notifyOnBinding);
   const [notifyOnCommission, setNotifyOnCommission] = useState(settings.notifyOnCommission);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +36,7 @@ export function NotificationSettingsPanel({ settings, isOwner, token }: Notifica
         '/merchant/settings',
         {
           method: 'PATCH',
-          body: JSON.stringify({ notifyOnBinding, notifyOnCommission }),
+          body: JSON.stringify({ notifyOnCommission }),
         },
         token,
       );
@@ -57,16 +56,6 @@ export function NotificationSettingsPanel({ settings, isOwner, token }: Notifica
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="max-w-lg space-y-4">
-          <label className="flex items-center gap-3 text-sm">
-            <input
-              type="checkbox"
-              checked={notifyOnBinding}
-              onChange={(e) => setNotifyOnBinding(e.target.checked)}
-              disabled={!isOwner}
-              className="size-4 rounded border"
-            />
-            {t('notifyOnBinding')}
-          </label>
           <label className="flex items-center gap-3 text-sm">
             <input
               type="checkbox"

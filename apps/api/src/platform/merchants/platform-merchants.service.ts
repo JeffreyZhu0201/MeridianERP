@@ -7,18 +7,15 @@ import {
   MerchantProfile,
   MerchantRole,
   OnboardingStatus,
-  OrderStatus,
   Prisma,
 } from '@prisma/client';
 import type {
   MerchantCrmSummary,
-  MerchantDistributorSummary,
   PlatformMerchantDetail,
 } from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
 import { slugify } from '../../common/utils/slug.util';
-import { dashboardWindowStart } from '../../common/date-range';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';
 import { CreatePlatformMerchantDto } from './dto/create-platform-merchant.dto';
 import { ListMerchantsQueryDto } from './dto/list-merchants-query.dto';
@@ -83,13 +80,11 @@ export class PlatformMerchantsService {
     const profile = await this.findProfileById(id);
     const [
       crmSummary,
-      distributors,
       pendingRecruiter,
       recruitedDistributor,
       ownerUser,
     ] = await Promise.all([
       this.getCrmSummary(profile.tenantId),
-      this.getDistributorSummaries(profile.tenantId),
       profile.pendingRecruitInviteCode
         ? this.prisma.merchantRecruitInviteCode.findFirst({
             where: { code: profile.pendingRecruitInviteCode },
@@ -113,7 +108,6 @@ export class PlatformMerchantsService {
     return this.toPlatformMerchantDetail(
       profile,
       crmSummary,
-      distributors,
       pendingRecruiter,
       recruitedDistributor,
       ownerUser?.accountId ?? null,
@@ -364,64 +358,9 @@ export class PlatformMerchantsService {
     return { contacts, companies, leads };
   }
 
-  private async getDistributorSummaries(
-    tenantId: string,
-  ): Promise<MerchantDistributorSummary[]> {
-    const windowStart = dashboardWindowStart();
-
-    const [distributorRows, bindingTotals, bindingRecent, orderRecent] =
-      await Promise.all([
-        this.prisma.distributor.findMany({
-          where: { tenantId },
-          orderBy: { name: 'asc' },
-          select: { id: true, name: true, isActive: true },
-        }),
-        this.prisma.binding.groupBy({
-          by: ['distributorId'],
-          where: { tenantId },
-          _count: true,
-        }),
-        this.prisma.binding.groupBy({
-          by: ['distributorId'],
-          where: { tenantId, boundAt: { gte: windowStart } },
-          _count: true,
-        }),
-        this.prisma.order.groupBy({
-          by: ['distributorId'],
-          where: {
-            tenantId,
-            status: OrderStatus.PAID,
-            createdAt: { gte: windowStart },
-          },
-          _count: true,
-        }),
-      ]);
-    const totalByDistributor = new Map(
-      bindingTotals.map((row) => [row.distributorId, row._count]),
-    );
-    const recentBindingsByDistributor = new Map(
-      bindingRecent.map((row) => [row.distributorId, row._count]),
-    );
-    const recentOrdersByDistributor = new Map(
-      orderRecent
-        .filter((row) => row.distributorId != null)
-        .map((row) => [row.distributorId!, row._count]),
-    );
-
-    return distributorRows.map((distributor) => ({
-      id: distributor.id,
-      name: distributor.name,
-      isActive: distributor.isActive,
-      bindingCount: totalByDistributor.get(distributor.id) ?? 0,
-      bindingsLast30Days: recentBindingsByDistributor.get(distributor.id) ?? 0,
-      attributedOrdersLast30Days:
-        recentOrdersByDistributor.get(distributor.id) ?? 0,
-    }));
-  }
   private toPlatformMerchantDetail(
     profile: MerchantProfile,
     crmSummary: MerchantCrmSummary,
-    distributors: MerchantDistributorSummary[],
     pendingRecruiter: {
       distributorId: string;
       distributor: { name: string };
@@ -449,7 +388,6 @@ export class PlatformMerchantsService {
       storePublished: profile.storePublished,
       isFlagship: profile.isFlagship,
       crmSummary,
-      distributors,
     };
   }
 

@@ -24,10 +24,6 @@ async function seedStoreWithProduct(app: INestApplication<App>, prisma: MockPris
     'owner@acme.test',
     password,
   );
-  await prisma.merchantProfile.update({
-    where: { tenantId: tenant.id },
-    data: { isFlagship: true },
-  });
   const merchantToken = await loginMerchant(app, 'owner@acme.test', 'secret12');
 
   await request(app.getHttpServer())
@@ -44,6 +40,11 @@ async function seedStoreWithProduct(app: INestApplication<App>, prisma: MockPris
       variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 }],
     })
     .expect(201);
+
+  await prisma.merchantProfile.update({
+    where: { tenantId: tenant.id },
+    data: { isFlagship: false },
+  });
 
   return {
     tenant,

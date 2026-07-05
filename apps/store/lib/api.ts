@@ -1,12 +1,10 @@
 import {
   ApiError,
   CART_SESSION_HEADER,
-  type BindVerifyResponse,
   type PublishedStoreListResponse,
-  type StoreClaimBindingResponse,
 } from '@meridian/shared';
 
-export type { BindVerifyResponse, PublishedStoreListResponse, StoreClaimBindingResponse };
+export type { PublishedStoreListResponse };
 export { ApiError };
 
 import { ensureCartSessionId } from './cart-session.client';

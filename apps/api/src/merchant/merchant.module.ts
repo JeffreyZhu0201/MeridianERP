@@ -27,8 +27,6 @@ import { MerchantInventoryModule } from './inventory/merchant-inventory.module';
 import { MerchantOrdersController } from './orders/merchant-orders.controller';
 import { MerchantOrdersService } from './orders/merchant-orders.service';
 import { MerchantFundsController } from './funds/merchant-funds.controller';
-import { MerchantReplenishmentController } from './replenishment/merchant-replenishment.controller';
-import { MerchantReplenishmentService } from './replenishment/merchant-replenishment.service';
 import { MerchantAllocationsController } from './allocations/merchant-allocations.controller';
 import { MerchantDashboardModule } from './dashboard/merchant-dashboard.module';
 import { MerchantSettingsModule } from './settings/merchant-settings.module';
@@ -63,7 +61,6 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     MerchantProductsController,
     MerchantOrdersController,
     MerchantFundsController,
-    MerchantReplenishmentController,
     MerchantAllocationsController,
   ],
   providers: [
@@ -77,7 +74,6 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     MerchantCategoriesService,
     MerchantProductsService,
     MerchantOrdersService,
-    MerchantReplenishmentService,
     PluginGuard,
     CrmPluginGuard,
   ],

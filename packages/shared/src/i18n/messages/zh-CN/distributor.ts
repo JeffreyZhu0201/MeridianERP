@@ -99,7 +99,6 @@ export const distributor = {
     wholesaleBase: '批发基数',
     commissionSource: '来源',
     sourceAllocation: '配货',
-    sourceRetail: '零售（历史）',
     orderSequence: '订单序号',
     orderSequenceFirst: '首单',
     orderSequenceSecond: '次单',

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import {
+  Alert,
+  AlertDescription,
   Badge,
   Button,
   EmptyState,
@@ -261,7 +263,11 @@ export function ProcurementShop({ catalog, addresses, token }: ProcurementShopPr
             rows={2}
           />
         </div>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
         <Button
           type="submit"
           className="min-h-11 w-full"

@@ -2,11 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
+  Alert,
+  AlertDescription,
   Badge,
   Button,
-  EmptyState,
   formatMoney,
   Table,
   TableBody,
@@ -15,56 +16,42 @@ import {
   TableHeader,
   TableRow,
 } from '@meridian/ui';
+import type {
+  BranchPurchaseOrderStatus,
+  PlatformProcurementOrderSummary,
+  PlatformProcurementTabStatus,
+} from '@meridian/shared';
+import { formatBranchPurchaseOrderStatus } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
-export interface PlatformProcurementOrderRow {
-  id: string;
-  orderNumber: string;
-  tenantName: string;
-  status: string;
-  totalAmount: string | number;
-  lineCount: number;
-  paidAt: string | null;
-  createdAt: string;
-  receivingAddress: {
-    label: string;
-    contactName: string;
-    contactPhone: string;
-    address: string;
-  } | null;
-  lines: Array<{
-    skuCode: string;
-    productName: string;
-    quantityOrdered: number;
-    unitWholesalePrice: string | number;
-  }>;
-}
-
 interface ProcurementViewProps {
-  orders: PlatformProcurementOrderRow[];
+  orders: PlatformProcurementOrderSummary[];
   token: string;
+  tab: PlatformProcurementTabStatus;
 }
 
-export function ProcurementView({ orders, token }: ProcurementViewProps) {
+export function ProcurementView({ orders, token, tab }: ProcurementViewProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.procurement');
   const [shippingId, setShippingId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
+  const showActions = tab === 'PROCESSING';
 
-  function statusLabel(status: string) {
-    if (
-      status === 'PROCESSING' ||
-      status === 'SHIPPED' ||
-      status === 'RECEIVED' ||
-      status === 'PENDING_PAYMENT'
-    ) {
-      return t(`orderStatus.${status as 'orderStatus.PROCESSING'}`);
-    }
-    return status;
-  }
+  const statusLabels = useMemo(
+    () =>
+      ({
+        PENDING_PAYMENT: t('orderStatus.PENDING_PAYMENT'),
+        PAID: t('orderStatus.PAID'),
+        PROCESSING: t('orderStatus.PROCESSING'),
+        SHIPPED: t('orderStatus.SHIPPED'),
+        RECEIVED: t('orderStatus.RECEIVED'),
+        CANCELLED: t('orderStatus.CANCELLED'),
+      }) satisfies Record<BranchPurchaseOrderStatus, string>,
+    [t],
+  );
 
   async function handleShip(id: string) {
     setShippingId(id);
@@ -80,13 +67,17 @@ export function ProcurementView({ orders, token }: ProcurementViewProps) {
   }
 
   if (orders.length === 0) {
-    return <EmptyState title={t('empty')} description={t('emptyDescription')} />;
+    return null;
   }
 
   return (
     <>
-      {error ? <p className="mb-4 text-sm text-destructive">{error}</p> : null}
-      <div className="rounded-xl ring-1 ring-border">
+      {error ? (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+      <div className="overflow-x-auto rounded-xl ring-1 ring-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -97,7 +88,9 @@ export function ProcurementView({ orders, token }: ProcurementViewProps) {
               <TableHead className="text-right">{t('columns.total')}</TableHead>
               <TableHead>{t('columns.status')}</TableHead>
               <TableHead>{t('columns.paidAt')}</TableHead>
-              <TableHead className="text-right">{t('columns.actions')}</TableHead>
+              {showActions ? (
+                <TableHead className="text-right">{t('columns.actions')}</TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -129,22 +122,26 @@ export function ProcurementView({ orders, token }: ProcurementViewProps) {
                   {formatCNY(order.totalAmount)}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{statusLabel(order.status)}</Badge>
+                  <Badge variant="secondary">
+                    {formatBranchPurchaseOrderStatus(order.status, statusLabels)}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {order.paidAt ? new Date(order.paidAt).toLocaleString(locale) : '—'}
                 </TableCell>
-                <TableCell className="text-right">
-                  {order.status === 'PROCESSING' ? (
-                    <Button
-                      size="sm"
-                      disabled={shippingId === order.id}
-                      onClick={() => handleShip(order.id)}
-                    >
-                      {shippingId === order.id ? '…' : t('ship')}
-                    </Button>
-                  ) : null}
-                </TableCell>
+                {showActions ? (
+                  <TableCell className="text-right">
+                    {order.status === 'PROCESSING' ? (
+                      <Button
+                        size="sm"
+                        disabled={shippingId === order.id}
+                        onClick={() => handleShip(order.id)}
+                      >
+                        {shippingId === order.id ? '…' : t('ship')}
+                      </Button>
+                    ) : null}
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))}
           </TableBody>

@@ -50,8 +50,6 @@ export interface MerchantOrderListItem {
 }
 
 export interface MerchantOrderDetail extends MerchantOrderListItem {
-  distributor?: { id: string; name: string } | null;
-  commissionEntry?: { id: string; amount: string | number; status: string } | null;
   lines: Array<
     MerchantOrderLine & {
       variant?: {

@@ -1,20 +1,13 @@
 export const EMAIL_QUEUE = 'email' as const;
 
-export const COMMISSION_QUEUE = 'commission' as const;
-
 export const EmailJobName = {
   MERCHANT_WELCOME: 'merchant.welcome',
   MERCHANT_REJECTED: 'merchant.rejected',
-  DISTRIBUTOR_BINDING_CREATED: 'distributor.binding.created',
   COMMISSION_ACCRUED: 'commission.accrued',
   ORDER_CONFIRMATION: 'order.confirmation',
 } as const;
 
 export type EmailJobNameValue = (typeof EmailJobName)[keyof typeof EmailJobName];
-
-export const CommissionJobName = {
-  ORDER_ACCRUE: 'order.accrue',
-} as const;
 
 export interface MerchantWelcomeEmailPayload {
   email: string;
@@ -24,13 +17,6 @@ export interface MerchantWelcomeEmailPayload {
 export interface MerchantRejectedEmailPayload {
   email: string;
   reason: string;
-}
-
-export interface BindingCreatedEmailPayload {
-  tenantId: string;
-  distributorId: string;
-  bindType: string;
-  boundAt: string;
 }
 
 export interface CommissionAccruedEmailPayload {
@@ -44,10 +30,6 @@ export interface OrderConfirmationEmailPayload {
   tenantId: string;
   orderId: string;
   email: string;
-}
-
-export interface CommissionAccrueJobPayload {
-  orderId: string;
 }
 
 export const DEFAULT_QUEUE_ATTEMPTS = 3;

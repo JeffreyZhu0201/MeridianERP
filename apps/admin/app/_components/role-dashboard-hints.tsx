@@ -16,18 +16,17 @@ export async function RoleDashboardHints({ role }: RoleDashboardHintsProps) {
         return [
           { href: '/funds', label: t('finance.funds') },
           { href: '/withdrawals', label: t('finance.withdrawals') },
-          { href: '/settlements', label: t('finance.settlements') },
         ];
       case 'FULFILLMENT':
         return [
-          { href: '/orders?tab=delivery', label: t('fulfillment.orders') },
           { href: '/allocations', label: t('fulfillment.allocations') },
-          { href: '/replenishment', label: t('fulfillment.replenishment') },
+          { href: '/orders', label: t('fulfillment.orders') },
+          { href: '/procurement', label: t('fulfillment.procurement') },
         ];
       case 'REVIEWER':
         return [
           { href: '/merchants?status=SUBMITTED', label: t('reviewer.merchants') },
-          { href: '/replenishment?status=PENDING', label: t('reviewer.replenishment') },
+          { href: '/procurement', label: t('reviewer.procurement') },
           { href: '/withdrawals?status=PENDING', label: t('reviewer.withdrawals') },
         ];
       case 'SUPER_ADMIN':

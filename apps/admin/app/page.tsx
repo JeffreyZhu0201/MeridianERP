@@ -72,7 +72,6 @@ export default async function DashboardPage() {
               title={t('orderRevenueLast30Days')}
               value={formatMoney(stats.orderRevenueLast30Days, locale)}
             />
-            <BentoMetricTile title={t('bindingsLast30Days')} value={stats.bindingsLast30Days} />
             <BentoMetricTile
               title={t('commissionAccruedLast30Days')}
               value={formatMoney(stats.commissionAccruedLast30Days, locale)}

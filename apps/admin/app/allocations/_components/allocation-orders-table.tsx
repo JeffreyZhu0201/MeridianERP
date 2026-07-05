@@ -55,7 +55,7 @@ export function AllocationOrdersTable({
   onIssue,
 }: AllocationOrdersTableProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const t = useTranslations('admin.allocations');
+  const t = useTranslations('admin.masterCatalog');
 
   function statusLabel(status: string): string {
     if (status === 'DRAFT' || status === 'ISSUED' || status === 'CONFIRMED' || status === 'CANCELLED') {

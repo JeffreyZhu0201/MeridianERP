@@ -2,7 +2,6 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import {
-  BindingCreatedEmailPayload,
   CommissionAccruedEmailPayload,
   DEFAULT_QUEUE_ATTEMPTS,
   DEFAULT_QUEUE_BACKOFF_MS,
@@ -32,10 +31,6 @@ export class EmailQueueService {
 
   async sendMerchantRejected(email: string, reason: string): Promise<void> {
     await this.enqueue(EmailJobName.MERCHANT_REJECTED, { email, reason });
-  }
-
-  async sendBindingCreated(payload: BindingCreatedEmailPayload): Promise<void> {
-    await this.enqueue(EmailJobName.DISTRIBUTOR_BINDING_CREATED, payload);
   }
 
   async sendCommissionAccrued(

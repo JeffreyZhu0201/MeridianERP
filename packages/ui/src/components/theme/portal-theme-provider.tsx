@@ -23,7 +23,7 @@
  * ```
  */
 
-import { ThemeProvider } from '@meridian/ui';
+import { ThemeProvider } from './theme-provider';
 
 export function PortalThemeProvider({
   storageKey,

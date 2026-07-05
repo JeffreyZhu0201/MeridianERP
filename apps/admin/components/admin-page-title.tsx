@@ -13,14 +13,10 @@ function resolveNavKey(pathname: string): string | null {
   if (pathname.startsWith('/orders')) return 'orders';
   if (pathname.startsWith('/allocations')) return 'allocations';
   if (pathname.startsWith('/procurement')) return 'procurement';
-  if (pathname.startsWith('/replenishment')) return 'replenishment';
+  if (pathname.startsWith('/replenishment')) return 'procurement';
   if (pathname.startsWith('/withdrawals')) return 'withdrawals';
   if (pathname.startsWith('/funds')) return 'funds';
-  if (pathname.startsWith('/settlements')) return 'settlements';
-  if (pathname.startsWith('/crm/contacts')) return 'crmContacts';
-  if (pathname.startsWith('/crm/companies')) return 'crmCompanies';
-  if (pathname.startsWith('/crm/leads')) return 'crmLeads';
-  if (pathname.startsWith('/crm')) return 'crm';
+  if (pathname.startsWith('/settlements')) return 'withdrawals';
   if (pathname.startsWith('/settings')) return 'settings';
   return null;
 }

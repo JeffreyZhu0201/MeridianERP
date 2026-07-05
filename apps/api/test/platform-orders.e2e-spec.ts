@@ -1,8 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import {
-  CommissionType,
   FulfillmentType,
-  LedgerStatus,
   Prisma,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
@@ -23,7 +21,6 @@ describe('Platform orders (e2e)', () => {
   let prisma: MockPrisma;
   let platformToken: string;
   let tenantId: string;
-  let distributorId: string;
   let orderId: string;
 
   beforeEach(async () => {
@@ -42,23 +39,9 @@ describe('Platform orders (e2e)', () => {
     );
     tenantId = tenant.id;
 
-    const distributor = await prisma.distributor.create({
-      data: {
-        tenantId: null,
-        name: 'Attributed Promoter',
-        email: 'promoter@orders.test',
-        commissionRate: new Prisma.Decimal(10),
-        commissionType: CommissionType.PERCENT,
-        isActive: true,
-        portalEnabled: false,
-      },
-    });
-    distributorId = distributor.id;
-
     const order = await prisma.order.create({
       data: {
         tenantId,
-        distributorId,
         status: 'PAID',
         fulfillmentType: FulfillmentType.DELIVERY,
         guestEmail: 'buyer@orders.test',
@@ -87,24 +70,13 @@ describe('Platform orders (e2e)', () => {
       },
     });
     orderId = order.id;
-
-    await prisma.commissionLedger.create({
-      data: {
-        tenantId,
-        orderId: order.id,
-        distributorId,
-        amount: new Prisma.Decimal(5),
-        status: LedgerStatus.ACCRUED,
-        customerOrderSequence: 1,
-      },
-    });
   });
 
   afterEach(async () => {
     await app.close();
   });
 
-  it('GET /platform/orders includes distributor when set', async () => {
+  it('GET /platform/orders returns order rows', async () => {
     const res = await request(app.getHttpServer())
       .get('/api/v1/platform/orders')
       .set('Authorization', `Bearer ${platformToken}`)
@@ -115,10 +87,7 @@ describe('Platform orders (e2e)', () => {
 
     const row = res.body.data.find((o: { id: string }) => o.id === orderId);
     expect(row).toBeDefined();
-    expect(row.distributor).toEqual({
-      id: distributorId,
-      name: 'Attributed Promoter',
-    });
+    expect(row.distributor).toBeUndefined();
   });
 
   it('GET /platform/orders filters by guestEmail and tenantId', async () => {
@@ -157,7 +126,6 @@ describe('Platform orders (e2e)', () => {
       guestEmail: 'buyer@orders.test',
       pickupVerifiedAt: null,
       shippedAt: null,
-      distributor: { id: distributorId, name: 'Attributed Promoter' },
     });
     expect(res.body.lines).toHaveLength(1);
     expect(res.body.lines[0]).toMatchObject({

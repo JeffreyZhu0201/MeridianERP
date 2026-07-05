@@ -80,40 +80,13 @@ export interface Lead {
   stage: string;
   source?: string;
   contact?: { id: string; firstName: string; lastName: string };
-  distributor?: { name: string };
   updatedAt: string;
-}
-
-export interface Distributor {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  commissionRate: string | number;
-  commissionType: string;
-  isActive: boolean;
-  portalEnabled?: boolean;
-  lastLoginAt?: string | null;
-  _count?: { bindings: number };
-}
-
-import type { BindVerifyResponse, GenerateQrResponse } from '@meridian/shared';
-
-export type { BindVerifyResponse, GenerateQrResponse };
-
-export interface Binding {
-  id: string;
-  bindableType: string;
-  boundAt: string;
-  lead?: { title: string };
 }
 
 export interface MerchantDashboard {
   businessName: string;
   contactsCount: number;
   openLeads: number;
-  activeDistributors: number;
-  recentBindings: number;
   recentLeads: Lead[];
 }
 

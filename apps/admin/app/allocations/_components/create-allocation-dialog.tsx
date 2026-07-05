@@ -48,7 +48,7 @@ export function CreateAllocationDialog({
   onAddLine,
   onSubmit,
 }: CreateAllocationDialogProps) {
-  const t = useTranslations('admin.allocations');
+  const t = useTranslations('admin.masterCatalog');
   const tc = useTranslations('common');
 
   return (

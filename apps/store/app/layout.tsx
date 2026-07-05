@@ -27,10 +27,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning data-portal="store">
-      <body
-        className={`${inter.variable} min-h-screen bg-background font-sans antialiased`}
-        data-portal="store"
-      >
+      <body className={`${inter.variable} min-h-screen bg-background font-sans antialiased`}>
         <PortalLocaleProvider locale={locale} messages={messages} timeZone={timeZone}>
           <PortalThemeProvider storageKey="meridian-theme-store">
             {children}

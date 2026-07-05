@@ -15,16 +15,9 @@ import {
   DetailPageFrame,
   Dialog,
   DialogCloseButton,
-  EmptyState,
   Input,
   Label,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
   Textarea,
 } from '@meridian/ui';
 import { OnboardingStatus } from '@meridian/shared';
@@ -180,7 +173,6 @@ export function MerchantDetailView({ merchant, token, distributors = [], plugins
           { title: td('contacts'), value: merchant.crmSummary.contacts },
           { title: td('companies'), value: merchant.crmSummary.companies },
           { title: td('leads'), value: merchant.crmSummary.leads },
-          { title: td('distributors'), value: merchant.distributors.length },
         ]}
       />
 
@@ -344,57 +336,6 @@ export function MerchantDetailView({ merchant, token, distributors = [], plugins
               </span>
             </div>
           </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{td('distributors')}</CardTitle>
-          </CardHeader>
-        <CardContent>
-          {merchant.distributors.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{td('columns.name')}</TableHead>
-                  <TableHead>{td('columns.status')}</TableHead>
-                  <TableHead className="text-right">{td('columns.totalBindings')}</TableHead>
-                  <TableHead className="text-right">{td('columns.bindingsLast30Days')}</TableHead>
-                  <TableHead className="text-right">{td('columns.ordersLast30Days')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {merchant.distributors.map((distributor) => (
-                  <TableRow key={distributor.id}>
-                    <TableCell className="font-medium">
-                      <Link
-                        href={`/distributors/${distributor.id}`}
-                        className="text-primary hover:underline"
-                      >
-                        {distributor.name}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={distributor.isActive ? 'success' : 'secondary'}>
-                        {distributor.isActive ? tc('active') : tc('inactive')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {distributor.bindingCount}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {distributor.bindingsLast30Days}
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {distributor.attributedOrdersLast30Days}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <EmptyState title={td('noDistributors')} />
-          )}
-        </CardContent>
         </Card>
       </div>
 

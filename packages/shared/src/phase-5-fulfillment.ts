@@ -62,7 +62,6 @@ export interface PlatformOrderListItem {
     slug: string;
     businessName?: string | null;
   };
-  distributor?: { id: string; name: string } | null;
 }
 
 export interface PlatformOrderDetail {
@@ -83,7 +82,6 @@ export interface PlatformOrderDetail {
     slug: string;
     businessName?: string | null;
   };
-  distributor?: { id: string; name: string } | null;
   customer?: {
     id: string;
     email: string;

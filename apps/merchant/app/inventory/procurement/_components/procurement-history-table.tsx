@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 import {
   Badge,
-  EmptyState,
   formatMoney,
   Table,
   TableBody,
@@ -13,7 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from '@meridian/ui';
-import type { BranchPurchaseOrderSummary } from '@meridian/shared';
+import type { BranchPurchaseOrderStatus, BranchPurchaseOrderSummary } from '@meridian/shared';
+import { formatBranchPurchaseOrderStatus } from '@meridian/shared';
 
 interface ProcurementHistoryTableProps {
   orders: BranchPurchaseOrderSummary[];
@@ -24,24 +25,21 @@ export function ProcurementHistoryTable({ orders }: ProcurementHistoryTableProps
   const t = useTranslations('merchant.inventory.procurement');
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
 
-  function statusLabel(status: string) {
-    if (
-      status === 'PENDING_PAYMENT' ||
-      status === 'PAID' ||
-      status === 'PROCESSING' ||
-      status === 'SHIPPED' ||
-      status === 'RECEIVED' ||
-      status === 'CANCELLED'
-    ) {
-      return t(`orderStatus.${status}` as 'orderStatus.PENDING_PAYMENT');
-    }
-    return status;
-  }
+  const statusLabels = useMemo(
+    () =>
+      ({
+        PENDING_PAYMENT: t('orderStatus.PENDING_PAYMENT'),
+        PAID: t('orderStatus.PAID'),
+        PROCESSING: t('orderStatus.PROCESSING'),
+        SHIPPED: t('orderStatus.SHIPPED'),
+        RECEIVED: t('orderStatus.RECEIVED'),
+        CANCELLED: t('orderStatus.CANCELLED'),
+      }) satisfies Record<BranchPurchaseOrderStatus, string>,
+    [t],
+  );
 
   if (orders.length === 0) {
-    return (
-      <EmptyState title={t('emptyHistory')} description={t('emptyHistoryDescription')} />
-    );
+    return null;
   }
 
   return (
@@ -62,7 +60,9 @@ export function ProcurementHistoryTable({ orders }: ProcurementHistoryTableProps
             <TableRow key={order.id}>
               <TableCell className="font-mono text-xs">{order.orderNumber}</TableCell>
               <TableCell>
-                <Badge variant="secondary">{statusLabel(order.status)}</Badge>
+                <Badge variant="secondary">
+                  {formatBranchPurchaseOrderStatus(order.status, statusLabels)}
+                </Badge>
               </TableCell>
               <TableCell className="text-right tabular-nums">
                 {formatCNY(order.totalAmount)}

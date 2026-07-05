@@ -88,22 +88,15 @@ describe('Phase5 Platform (e2e)', () => {
     });
   });
 
-  it('merchant distributor APIs return 403', async () => {
-    await request(app.getHttpServer())
-      .get('/api/v1/merchant/distributors')
-      .set('Authorization', `Bearer ${merchantToken}`)
-      .expect(403);
-  });
-
   it('platform allocation routes require auth', async () => {
     await request(app.getHttpServer())
       .get('/api/v1/platform/allocations')
       .expect(401);
   });
 
-  it('GET /platform/replenishment returns list for admin', async () => {
+  it('GET /platform/procurement/orders returns list for admin', async () => {
     const res = await request(app.getHttpServer())
-      .get('/api/v1/platform/replenishment')
+      .get('/api/v1/platform/procurement/orders?status=ALL')
       .set('Authorization', `Bearer ${platformToken}`)
       .expect(200);
     expect(Array.isArray(res.body)).toBe(true);

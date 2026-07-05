@@ -1,6 +1,6 @@
 # Admin Platform RBAC — Architecture
 
-**Updated:** 2026-07-04  
+**Updated:** 2026-07-05  
 **Status:** Shipped  
 **Contracts:** `packages/shared/src/admin-rbac.ts`
 
@@ -13,9 +13,9 @@ Platform admin (`apps/admin`) uses role-based access control (RBAC) with four fi
 | Role | Code | Home route | Purpose |
 |------|------|------------|---------|
 | 超级管理员 | `SUPER_ADMIN` | `/` | Full platform control |
-| 财务 | `FINANCE` | `/funds` | Withdrawals, funds, settlements |
-| 发货员 | `FULFILLMENT` | `/orders` | Orders, allocations, replenishment fulfillment |
-| 审核员 | `REVIEWER` | `/merchants` | Merchant onboarding, replenishment, withdrawal review |
+| 财务 | `FINANCE` | `/funds` | Funds KPIs, withdrawal approval, commission settlement |
+| 发货员 | `FULFILLMENT` | `/allocations` | Delivery shipping, branch procurement shipping, orders |
+| 审核员 | `REVIEWER` | `/merchants` | Merchant onboarding, procurement review, withdrawal list (read-only approve) |
 
 `PLATFORM_OPS` was replaced by the scoped roles above (Prisma `PlatformRole` enum).
 
@@ -31,14 +31,31 @@ Platform admin (`apps/admin`) uses role-based access control (RBAC) with four fi
 | distributors | ✓ | | | |
 | orders | ✓ | | ✓ | |
 | allocations | ✓ | | ✓ | |
-| replenishment | ✓ | | ✓ | ✓ |
+| procurement | ✓ | | ✓ | ✓ |
 | withdrawals | ✓ | ✓ | | ✓ |
 | funds | ✓ | ✓ | | |
 | settlements | ✓ | ✓ | | |
-| crm | ✓ | | | |
 | settings | ✓ | | | |
 
+`settlements` permission gates the **结算批次** section on `/withdrawals` (`#settlements`) and `platform/settlements/*` APIs. `/settlements` redirects to `/withdrawals#settlements`.
+
+The **CRM** sidebar group shows children filtered by permission: `users`, `merchants`, `distributors`. There is no separate `crm` permission.
+
 Source: `ADMIN_ROLE_PERMISSIONS` in `@meridian/shared`.
+
+## Navigation vs permissions
+
+| UI | Routes | Permission |
+|----|--------|------------|
+| CRM → 用户 | `/users` | `users` |
+| CRM → 商户 | `/merchants` | `merchants` |
+| CRM → 拓店员 | `/distributors` | `distributors` |
+| 库存 | `/inventory`, `/inventory/*` | `inventory` |
+| 配送发货 | `/allocations` | `allocations` |
+| 分店进货 | `/procurement` | `procurement` |
+| 拓店分润 | `/withdrawals`, `/settlements` (redirect) | `withdrawals` |
+| 结算批次 section | `/withdrawals#settlements` | `settlements` |
+| 资金 | `/funds`, `/funds/*` | `funds` |
 
 ## Enforcement layers
 
@@ -52,7 +69,7 @@ Source: `ADMIN_ROLE_PERMISSIONS` in `@meridian/shared`.
 
 ### Server pages
 
-- `requireAdminSession()` — validates token via `GET /platform/auth/me`; redirects to login or logout on failure
+- `requireAdminSession()` — validates token via `GET /platform/auth/me`
 - `requireToken()` — same validation for API-backed pages
 - Invalid sessions redirect to `/api/auth/logout` to clear stale cookies
 
@@ -60,7 +77,10 @@ Source: `ADMIN_ROLE_PERMISSIONS` in `@meridian/shared`.
 
 - `PlatformAuthGuard` — JWT audience `admin`
 - `PlatformRolesGuard` + `@PlatformRoles(...)` — endpoint-level role checks
-- `GET /platform/auth/me` — returns `{ id, email, role, permissions }`
+- `GET /platform/auth/me` — returns `{ id, email, role, permissions, homePath }`
+- Withdrawal approve/reject: `SUPER_ADMIN`, `FINANCE` only
+- Settlement export: `SUPER_ADMIN`, `FINANCE` only
+- Withdrawal list: `SUPER_ADMIN`, `FINANCE`, `REVIEWER`
 
 ## Admin management
 
@@ -83,6 +103,6 @@ After `pnpm db:seed`:
 
 ## Related docs
 
-- [System overview](./system-overview.md) — platform auth appendix
-- [Product state](../PRODUCT.md) — shipped capabilities
+- [Product state](../PRODUCT.md) — current nav and routes
+- [System overview](./system-overview.md)
 - API e2e: `apps/api/test/platform-rbac.e2e-spec.ts`

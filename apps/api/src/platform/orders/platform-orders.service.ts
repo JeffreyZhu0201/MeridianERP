@@ -3,24 +3,12 @@ import { Prisma } from '@prisma/client';
 import { FulfillmentService } from '../../fulfillment/fulfillment.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
-type DistributorRef = { id: string; name: string };
-
 @Injectable()
 export class PlatformOrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly fulfillmentService: FulfillmentService,
   ) {}
-
-  private resolveDistributor(order: {
-    distributor: DistributorRef | null;
-    commissionEntry: { distributor: DistributorRef } | null;
-  }): DistributorRef | null {
-    if (order.distributor) {
-      return order.distributor;
-    }
-    return order.commissionEntry?.distributor ?? null;
-  }
 
   async findAll(
     page = 1,
@@ -62,10 +50,6 @@ export class PlatformOrdersService {
               merchantProfile: { select: { businessName: true } },
             },
           },
-          distributor: { select: { id: true, name: true } },
-          commissionEntry: {
-            include: { distributor: { select: { id: true, name: true } } },
-          },
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -87,7 +71,6 @@ export class PlatformOrdersService {
           slug: order.tenant.slug,
           businessName: order.tenant.merchantProfile?.businessName,
         },
-        distributor: this.resolveDistributor(order),
       })),
       meta: { total, page, limit },
     };
@@ -117,10 +100,6 @@ export class PlatformOrdersService {
             accountId: true,
           },
         },
-        distributor: { select: { id: true, name: true } },
-        commissionEntry: {
-          include: { distributor: { select: { id: true, name: true } } },
-        },
         lines: { include: { variant: { select: { sku: true } } } },
       },
     });
@@ -145,7 +124,6 @@ export class PlatformOrdersService {
         slug: order.tenant.slug,
         businessName: order.tenant.merchantProfile?.businessName ?? null,
       },
-      distributor: this.resolveDistributor(order),
       customer: order.customer
         ? {
             id: order.customer.id,

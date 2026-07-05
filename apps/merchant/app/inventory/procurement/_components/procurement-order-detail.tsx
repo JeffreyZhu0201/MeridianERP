@@ -3,8 +3,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
+  Alert,
+  AlertDescription,
   Badge,
   Button,
   formatMoney,
@@ -16,7 +18,8 @@ import {
   TableRow,
   toast,
 } from '@meridian/ui';
-import type { BranchPurchaseOrderDetail } from '@meridian/shared';
+import type { BranchPurchaseOrderDetail, BranchPurchaseOrderStatus } from '@meridian/shared';
+import { formatBranchPurchaseOrderStatus } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
 
@@ -34,19 +37,18 @@ export function ProcurementOrderDetail({ order, token }: ProcurementOrderDetailP
   const [error, setError] = useState('');
   const formatCNY = (value: string | number) => formatMoney(value, 'CNY', locale);
 
-  function statusLabel(status: string) {
-    if (
-      status === 'PENDING_PAYMENT' ||
-      status === 'PAID' ||
-      status === 'PROCESSING' ||
-      status === 'SHIPPED' ||
-      status === 'RECEIVED' ||
-      status === 'CANCELLED'
-    ) {
-      return t(`orderStatus.${status}` as 'orderStatus.PENDING_PAYMENT');
-    }
-    return status;
-  }
+  const statusLabels = useMemo(
+    () =>
+      ({
+        PENDING_PAYMENT: t('orderStatus.PENDING_PAYMENT'),
+        PAID: t('orderStatus.PAID'),
+        PROCESSING: t('orderStatus.PROCESSING'),
+        SHIPPED: t('orderStatus.SHIPPED'),
+        RECEIVED: t('orderStatus.RECEIVED'),
+        CANCELLED: t('orderStatus.CANCELLED'),
+      }) satisfies Record<BranchPurchaseOrderStatus, string>,
+    [t],
+  );
 
   async function handlePay() {
     setPaying(true);
@@ -87,10 +89,12 @@ export function ProcurementOrderDetail({ order, token }: ProcurementOrderDetailP
           <p className="text-sm text-muted-foreground">{t('orderNumber')}</p>
           <h2 className="font-mono text-lg">{order.orderNumber}</h2>
         </div>
-        <Badge variant="secondary">{statusLabel(order.status)}</Badge>
+        <Badge variant="secondary">
+          {formatBranchPurchaseOrderStatus(order.status, statusLabels)}
+        </Badge>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3 text-sm">
+      <div className="grid gap-4 text-sm sm:grid-cols-3">
         <div>
           <p className="text-muted-foreground">{t('total')}</p>
           <p className="font-medium tabular-nums">{formatCNY(order.totalAmount)}</p>
@@ -155,7 +159,11 @@ export function ProcurementOrderDetail({ order, token }: ProcurementOrderDetailP
         </Table>
       </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
       <div className="flex flex-wrap gap-3">
         {order.status === 'PENDING_PAYMENT' && order.mockPayment ? (
@@ -163,7 +171,7 @@ export function ProcurementOrderDetail({ order, token }: ProcurementOrderDetailP
             <Button className="min-h-11" disabled={paying} onClick={handlePay}>
               {paying ? '…' : t('pay')}
             </Button>
-            <p className="text-sm text-muted-foreground self-center">{t('mockPaymentHint')}</p>
+            <p className="self-center text-sm text-muted-foreground">{t('mockPaymentHint')}</p>
           </>
         ) : null}
         {order.status === 'SHIPPED' ? (

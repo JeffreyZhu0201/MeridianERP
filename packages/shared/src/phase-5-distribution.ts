@@ -10,8 +10,6 @@ export type FulfillmentType = 'PICKUP' | 'DELIVERY';
 
 export type AllocationOrderStatus = 'DRAFT' | 'ISSUED' | 'CONFIRMED' | 'CANCELLED';
 
-export type ReplenishmentRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'FULFILLED';
-
 export type WithdrawalRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface PlatformDistributorSummary {

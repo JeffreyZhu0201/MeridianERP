@@ -39,10 +39,9 @@ function sequenceLabel(
 }
 
 function sourceLabel(
-  source: string | null | undefined,
+  _source: string | null | undefined,
   t: Awaited<ReturnType<typeof getTranslations>>,
 ): string {
-  if (source === 'RETAIL') return t('sourceRetail');
   return t('sourceAllocation');
 }
 

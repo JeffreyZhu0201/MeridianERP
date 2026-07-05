@@ -13,10 +13,6 @@ export class CreateLeadDto {
   @IsOptional()
   @IsString()
   source?: string;
-
-  @IsOptional()
-  @IsString()
-  distributorId?: string;
 }
 
 export class UpdateLeadStageDto {

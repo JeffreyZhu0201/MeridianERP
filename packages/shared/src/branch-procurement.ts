@@ -8,6 +8,60 @@ export type BranchPurchaseOrderStatus =
   | 'RECEIVED'
   | 'CANCELLED';
 
+export const BRANCH_PURCHASE_ORDER_STATUSES = [
+  'PENDING_PAYMENT',
+  'PAID',
+  'PROCESSING',
+  'SHIPPED',
+  'RECEIVED',
+  'CANCELLED',
+] as const satisfies readonly BranchPurchaseOrderStatus[];
+
+export const PLATFORM_PROCUREMENT_TAB_STATUSES = [
+  'PROCESSING',
+  'SHIPPED',
+  'RECEIVED',
+  'ALL',
+] as const;
+
+export type PlatformProcurementTabStatus =
+  (typeof PLATFORM_PROCUREMENT_TAB_STATUSES)[number];
+
+export function isBranchPurchaseOrderStatus(
+  value: string,
+): value is BranchPurchaseOrderStatus {
+  return (BRANCH_PURCHASE_ORDER_STATUSES as readonly string[]).includes(value);
+}
+
+export function formatBranchPurchaseOrderStatus(
+  status: string,
+  labels: Record<BranchPurchaseOrderStatus, string>,
+): string {
+  return isBranchPurchaseOrderStatus(status) ? labels[status] : status;
+}
+
+export interface PlatformProcurementOrderLine {
+  skuCode: string;
+  productName: string;
+  quantityOrdered: number;
+  unitWholesalePrice: string | number;
+}
+
+export interface PlatformProcurementOrderSummary {
+  id: string;
+  orderNumber: string;
+  tenantId: string;
+  tenantName: string;
+  status: BranchPurchaseOrderStatus;
+  totalAmount: string | number;
+  lineCount: number;
+  paidAt: string | null;
+  allocationOrderId: string | null;
+  createdAt: string;
+  lines: PlatformProcurementOrderLine[];
+  receivingAddress: ProcurementReceivingAddressSnapshot | null;
+}
+
 export interface BranchProcurementCatalogItem {
   id: string;
   skuCode: string;

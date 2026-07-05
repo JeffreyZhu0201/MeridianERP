@@ -1,11 +1,10 @@
-import { LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import { OrderStatus, Prisma } from '@prisma/client';
 import type { PerformanceTrendPoint } from '@meridian/shared';
 import { eachUtcDay } from './date-range';
 
 type OrderTrendRow = {
   createdAt: Date;
   total: Prisma.Decimal;
-  commissionEntry?: { amount: Prisma.Decimal; status: LedgerStatus } | null;
 };
 
 export function buildOrderTrend(
@@ -34,11 +33,6 @@ export function buildOrderTrend(
     if (!bucket) continue; // 跳过不在日期范围内的订单
     bucket.orderCount += 1;
     bucket.orderRevenue = bucket.orderRevenue.plus(order.total);
-    if (order.commissionEntry?.status === LedgerStatus.ACCRUED) {
-      bucket.commissionAccrued = bucket.commissionAccrued.plus(
-        order.commissionEntry.amount,
-      );
-    }
   }
   return [...trendMap.entries()].map(([date, bucket]) => ({
     date,

@@ -19,11 +19,10 @@ export interface MerchantDashboardLead {
 }
 
 export interface MerchantDashboardActivity {
-  type: 'binding.created' | 'commission.accrued' | 'order.paid';
+  type: 'commission.accrued' | 'order.paid';
   occurredAt: string;
-  distributorId: string;
-  distributorName: string;
-  bindType?: string;
+  distributorId?: string;
+  distributorName?: string;
   orderId?: string;
   amount?: string;
 }
@@ -32,8 +31,6 @@ export interface MerchantDashboardStats {
   businessName: string;
   contactsCount: number;
   openLeads: number;
-  activeDistributors: number;
-  recentBindings: number;
   ordersLast30Days: number;
   revenueLast30Days: string | number;
   commissionAccruedLast30Days: string | number;

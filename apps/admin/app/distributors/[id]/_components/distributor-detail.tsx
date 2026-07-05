@@ -88,9 +88,7 @@ export function DistributorDetailView({
     return emptyDash;
   };
 
-  const sourceLabel = (source: string | null | undefined) => {
-    if (source === 'ALLOCATION') return td('sourceAllocation');
-    if (source === 'RETAIL') return td('sourceRetail');
+  const sourceLabel = (_source: string | null | undefined) => {
     return td('sourceAllocation');
   };
 

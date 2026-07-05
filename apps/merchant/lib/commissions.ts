@@ -4,8 +4,6 @@ import {
   type CommissionListResponse,
   type CommissionSummary,
   type CommissionSummaryQuery,
-  type DistributorPerformanceQuery,
-  type DistributorPerformanceSummary,
 } from '@meridian/shared';
 
 import { apiFetch } from './api';
@@ -56,13 +54,6 @@ export function buildCommissionSummaryQuery(params: CommissionSummaryQuery = {})
   return qs ? `?${qs}` : '';
 }
 
-export function buildPerformanceQuery(params: DistributorPerformanceQuery = {}): string {
-  const search = new URLSearchParams();
-  appendDateRangeQuery(search, params);
-  const qs = search.toString();
-  return qs ? `?${qs}` : '';
-}
-
 export async function fetchCommissions(
   token: string,
   query: CommissionListQuery = {},
@@ -85,22 +76,6 @@ export async function fetchCommissionSummary(
   const range = defaultDateRange();
   return apiFetch<CommissionSummary>(
     `/merchant/commissions/summary${buildCommissionSummaryQuery({
-      ...range,
-      ...query,
-    })}`,
-    {},
-    token,
-  );
-}
-
-export async function fetchDistributorPerformance(
-  distributorId: string,
-  token: string,
-  query: DistributorPerformanceQuery = {},
-): Promise<DistributorPerformanceSummary> {
-  const range = defaultDateRange();
-  return apiFetch<DistributorPerformanceSummary>(
-    `/merchant/distributors/${distributorId}/performance${buildPerformanceQuery({
       ...range,
       ...query,
     })}`,

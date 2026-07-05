@@ -33,23 +33,25 @@ export default async function ProcurementShopPage() {
 
   return (
     <MerchantShellWrapper businessName={profile?.businessName}>
-      <ListPageFrame
-        title={t('shopTitle')}
-        description={t('shopDescription')}
-        action={
-          <Link
-            href="/inventory/procurement/history"
-            className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
-          >
-            {t('historyTitle')}
-          </Link>
-        }
-      >
+      <div className="space-y-6">
         <BentoListHeader metrics={[{ title: t('catalog'), value: catalog.length }]} />
-        <Suspense>
-          <ProcurementShop catalog={catalog} addresses={addresses} token={token} />
-        </Suspense>
-      </ListPageFrame>
+        <ListPageFrame
+          title={t('shopTitle')}
+          description={t('shopDescription')}
+          action={
+            <Link
+              href="/inventory/procurement/history"
+              className="inline-flex min-h-11 items-center text-sm text-primary hover:underline"
+            >
+              {t('historyTitle')}
+            </Link>
+          }
+        >
+          <Suspense>
+            <ProcurementShop catalog={catalog} addresses={addresses} token={token} />
+          </Suspense>
+        </ListPageFrame>
+      </div>
     </MerchantShellWrapper>
   );
 }

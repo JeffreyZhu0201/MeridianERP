@@ -1,0 +1,13 @@
+export function GrainOverlay() {
+  return (
+    <svg
+      className="pointer-events-none fixed inset-0 z-[1] h-full w-full opacity-[var(--grain-opacity)]"
+      aria-hidden
+    >
+      <filter id="grain">
+        <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+      </filter>
+      <rect width="100%" height="100%" filter="url(#grain)" />
+    </svg>
+  );
+}

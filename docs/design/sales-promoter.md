@@ -1,8 +1,10 @@
 # Sales Promoter (拓店员) — Design
 
-**Updated:** 2026-07-03
+**Updated:** 2026-07-05
 
 ## Admin — Distributors (拓店员)
+
+Located under **CRM** nav group → `/distributors`.
 
 ### List `/distributors`
 
@@ -23,13 +25,34 @@
 - **Withdrawal history** table (latest 10) + link to `/withdrawals?distributorId=`
 - Sections: **Profile** | **Promoted stores** | **Order commission**
 
-## Admin — Withdrawals `/withdrawals`
+## Admin — Promoter payouts `/withdrawals`
+
+Single page for the promoter payout workflow (replaces separate `/settlements` nav). Nav label: **拓店分润** / Promoter payouts.
+
+Finance roles see **two sections on one scrollable page** (top → bottom):
+
+### Section 1: 结算批次 (`#settlements`)
+
+- Visible only with `settlements` permission (SUPER_ADMIN, FINANCE)
+- Export settlement batch (month or last 30 days) → marks ACCRUED ledger as SETTLED
+- Settlement batch history table (`?batchPage=`)
+- Commission ledger with status filter (`?ledgerStatus=`, `?ledgerPage=`)
+- `/settlements` and legacy `?tab=settlements` redirect to `#settlements`
+
+### Section 2: 提现审批 (`#approval`)
 
 - Status tabs: Pending / Approved / Rejected / All (`?status=`)
 - Optional `?distributorId=` filter from promoter detail
+- Header metrics: pending count / amount; finance also sees accrued summary in workflow hint
 - Columns: promoter, amount, status, requested, reviewed, note/rejection
 - Pending rows: approve/reject dialogs; processed rows read-only
-- Approve copy: disburse confirm (no bank API)
+- Roles: list = SUPER_ADMIN, FINANCE, REVIEWER; approve/reject = SUPER_ADMIN, FINANCE
+
+### Workflow (single page)
+
+1. Finance exports settlement batch in **section 1**
+2. Promoter requests withdrawal from distributor portal
+3. Finance approves in **section 2**
 
 ## Distributor portal — Share `/share`
 

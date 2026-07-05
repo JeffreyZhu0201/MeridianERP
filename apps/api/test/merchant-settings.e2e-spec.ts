@@ -61,7 +61,6 @@ describe('MerchantSettings (e2e)', () => {
     expect(res.body.profile.businessName).toBe('Settings Store');
     expect(res.body.stripeMode).toBe('mock');
     expect(res.body.storeUrl).toContain('/s/settings-store');
-    expect(res.body.notifyOnBinding).toBe(true);
   });
 
   it('owner can PATCH settings', async () => {
@@ -72,13 +71,13 @@ describe('MerchantSettings (e2e)', () => {
         businessName: 'Updated Store',
         defaultCommissionRate: 12.5,
         defaultCommissionType: CommissionType.PERCENT,
-        notifyOnBinding: false,
+        notifyOnCommission: false,
       })
       .expect(200);
 
     expect(res.body.profile.businessName).toBe('Updated Store');
     expect(res.body.defaultCommissionRate).toBe('12.5');
-    expect(res.body.notifyOnBinding).toBe(false);
+    expect(res.body.notifyOnCommission).toBe(false);
   });
 
   it('owner can PATCH legalName and storeAddress', async () => {

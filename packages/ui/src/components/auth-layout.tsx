@@ -79,9 +79,11 @@ export function AuthLayout({
           </div>
         </div>
 
-        {/* 表单卡片 */}
-        <Card>
-          <CardContent className="pt-6">{children}</CardContent>
+        {/* 表单卡片 — 认证页使用中性灰边框，便于与背景区分 */}
+        <Card className="border border-neutral-300 ring-0 shadow-none dark:border-neutral-700">
+          <CardContent className="pt-6 [&_input]:border-neutral-300 dark:[&_input]:border-neutral-600">
+            {children}
+          </CardContent>
         </Card>
 
         {/* 底部链接 */}

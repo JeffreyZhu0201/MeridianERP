@@ -18,7 +18,6 @@ export class PlatformDashboardService {
       totalMerchants,
       pendingReview,
       activeDistributors,
-      bindingsLast30Days,
       commissionAccruedAgg,
       commissionSettledAgg,
       orderAgg,
@@ -33,8 +32,7 @@ export class PlatformDashboardService {
           },
         },
       }),
-      this.prisma.distributor.count({ where: { isActive: true } }),
-      this.prisma.binding.count({ where: { boundAt: { gte: windowStart } } }),
+      this.prisma.distributor.count({ where: { tenantId: null, isActive: true } }),
       this.prisma.commissionLedger.aggregate({
         where: {
           status: LedgerStatus.ACCRUED,
@@ -65,7 +63,6 @@ export class PlatformDashboardService {
         select: {
           createdAt: true,
           total: true,
-          commissionEntry: { select: { amount: true, status: true } },
         },
       }),
       this.prisma.merchantProfile.findMany({
@@ -85,7 +82,6 @@ export class PlatformDashboardService {
       totalMerchants,
       pendingReview,
       activeDistributors,
-      bindingsLast30Days,
       commissionAccruedLast30Days: decimalSumToString(
         commissionAccruedAgg._sum.amount,
       ),

@@ -35,10 +35,9 @@ function sequenceLabel(
 }
 
 function sourceLabel(
-  row: CommissionStatementRow,
+  _row: CommissionStatementRow,
   t: ReturnType<typeof useTranslations>,
 ): string {
-  if (row.commissionSource === 'RETAIL') return t('sourceRetail');
   return t('sourceAllocation');
 }
 

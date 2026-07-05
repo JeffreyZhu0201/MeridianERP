@@ -21,7 +21,6 @@ export interface TenantSettingsDto {
   tenantId: string;
   defaultCommissionRate: string | number | null;
   defaultCommissionType: CommissionType | null;
-  notifyOnBinding: boolean;
   notifyOnCommission: boolean;
   updatedAt: string;
 }
@@ -40,7 +39,6 @@ export interface UpdateMerchantSettingsRequest {
   storeAddress?: string | null;
   defaultCommissionRate?: number | string | null;
   defaultCommissionType?: CommissionType | null;
-  notifyOnBinding?: boolean;
   notifyOnCommission?: boolean;
 }
 

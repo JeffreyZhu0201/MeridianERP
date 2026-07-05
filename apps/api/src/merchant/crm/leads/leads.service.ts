@@ -9,7 +9,7 @@ export class LeadsService {
   findAll(tenantId: string) {
     return this.prisma.crmLead.findMany({
       where: { tenantId },
-      include: { contact: true, distributor: true },
+      include: { contact: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -17,7 +17,7 @@ export class LeadsService {
   async findOne(tenantId: string, id: string) {
     const lead = await this.prisma.crmLead.findFirst({
       where: { id, tenantId },
-      include: { contact: true, distributor: true },
+      include: { contact: true },
     });
     if (!lead) {
       throw new NotFoundException('Lead not found');
@@ -27,8 +27,13 @@ export class LeadsService {
 
   create(tenantId: string, dto: CreateLeadDto) {
     return this.prisma.crmLead.create({
-      data: { ...dto, tenantId },
-      include: { contact: true, distributor: true },
+      data: {
+        tenantId,
+        title: dto.title,
+        contactId: dto.contactId,
+        source: dto.source,
+      },
+      include: { contact: true },
     });
   }
 
@@ -37,7 +42,7 @@ export class LeadsService {
     return this.prisma.crmLead.update({
       where: { id },
       data: { stage: dto.stage },
-      include: { contact: true, distributor: true },
+      include: { contact: true },
     });
   }
 

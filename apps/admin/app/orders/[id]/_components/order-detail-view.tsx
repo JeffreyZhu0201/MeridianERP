@@ -120,21 +120,6 @@ export async function OrderDetailView({ order, locale, shipActions }: OrderDetai
               <span className="text-muted-foreground">{td('merchant')}</span>
               <span>{order.tenant.businessName ?? order.tenant.slug}</span>
             </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">{td('distributor')}</span>
-              <span>
-                {order.distributor ? (
-                  <Link
-                    href={`/distributors/${order.distributor.id}`}
-                    className="text-primary hover:underline"
-                  >
-                    {order.distributor.name}
-                  </Link>
-                ) : (
-                  tc('emptyDash')
-                )}
-              </span>
-            </div>
           </CardContent>
         </Card>
 

@@ -102,7 +102,6 @@ export const distributor = {
     wholesaleBase: 'Wholesale base',
     commissionSource: 'Source',
     sourceAllocation: 'Allocation',
-    sourceRetail: 'Retail (legacy)',
     orderSequence: 'Order #',
     orderSequenceFirst: '1st order',
     orderSequenceSecond: '2nd order',
