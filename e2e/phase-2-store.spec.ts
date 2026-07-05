@@ -114,7 +114,7 @@ test.describe('Phase 2 store smoke', () => {
   });
 
   test('demo store catalog renders products', async ({ page }) => {
-    const res = await page.goto('/s/demo');
+    const res = await page.goto('/shop');
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running or demo seed missing');
     }

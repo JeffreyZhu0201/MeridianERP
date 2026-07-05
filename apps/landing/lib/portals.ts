@@ -41,7 +41,7 @@ export const portals: PortalLink[] = [
     title: '消费者商城',
     titleEn: 'Storefront',
     description: '统一旗舰目录、购物车、结账与订单',
-    href: envUrl(['NEXT_PUBLIC_STORE_URL', 'STORE_APP_URL'], 'http://localhost:3003/s/demo'),
+    href: envUrl(['NEXT_PUBLIC_STORE_URL', 'STORE_APP_URL'], 'http://localhost:3003/shop'),
     port: 3003,
     accent: 'mist',
   },

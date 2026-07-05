@@ -52,7 +52,7 @@ test.describe('Locale switching (merchant)', { tag: '@merchant-app' }, () => {
 
 test.describe('Locale switching (store)', { tag: '@store-app' }, () => {
   test('store nav shows Chinese after locale toggle', async ({ page }) => {
-    const res = await page.goto(`${STORE_URL}/s/demo`);
+    const res = await page.goto(`${STORE_URL}/shop`);
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running or demo seed missing');
     }

@@ -33,7 +33,7 @@ export function CheckoutForm({
   storeSlug,
   cart,
   token,
-  basePath = `/s/${storeSlug}`,
+  basePath = '/shop',
   allowPickup = true,
   defaultFulfillmentType = 'PICKUP',
 }: CheckoutFormProps) {

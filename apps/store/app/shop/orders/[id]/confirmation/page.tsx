@@ -8,42 +8,58 @@ import {
 } from '@meridian/ui/server';
 import type { OrderStatus, StoreOrderDetail } from '@meridian/shared';
 
-import { StoreShellWrapper } from '@/components/store-shell-wrapper';
+import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
-import { FulfillmentSummary } from './_components/fulfillment-summary';
-import { PaymentStatusBanner } from './_components/payment-status-banner';
+import { getFulfillmentSlug } from '@/lib/fulfillment';
+import { FulfillmentSummary } from '../../_components/fulfillment-summary';
+import { PaymentStatusBanner } from '../../_components/payment-status-banner';
 
 interface OrderConfirmationPageProps {
-  params: Promise<{ slug: string; id: string }>;
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ redirect_status?: string; payment_intent?: string }>;
 }
 
-export default async function OrderConfirmationPage({
+export default async function ShopOrderConfirmationPage({
   params,
   searchParams,
 }: OrderConfirmationPageProps) {
-  const { slug, id } = await params;
+  const { id } = await params;
   const { redirect_status: redirectStatus } = await searchParams;
   const token = await getToken();
+  const fulfillmentSlug = await getFulfillmentSlug();
   const t = await getTranslations('store');
   const ts = await getTranslations('store.orderStatus');
 
   if (!token) {
-    redirect(`/s/${slug}/login?from=${encodeURIComponent(`/s/${slug}/orders/${id}/confirmation`)}`);
+    redirect(
+      `/login?from=${encodeURIComponent(`/shop/orders/${id}/confirmation`)}`,
+    );
+  }
+
+  if (!fulfillmentSlug) {
+    redirect('/shop');
   }
 
   const [order, cart] = await Promise.all([
-    apiFetch<StoreOrderDetail>(storePath(slug, `orders/${id}`), {}, token).catch(() => null),
-    apiFetch<Cart>(storePath(slug, 'cart'), {}, token).catch(() => null),
+    apiFetch<StoreOrderDetail>(
+      storePath(fulfillmentSlug, `orders/${id}`),
+      {},
+      token,
+    ).catch(() => null),
+    apiFetch<Cart>(storePath(fulfillmentSlug, 'cart'), {}, token).catch(() => null),
   ]);
 
-  const storeName = slug.charAt(0).toUpperCase() + slug.slice(1);
+  const storeName = fulfillmentSlug.charAt(0).toUpperCase() + fulfillmentSlug.slice(1);
   const cartCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   if (!order) {
     return (
-      <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
+      <ShopShellWrapper
+        fulfillmentSlug={fulfillmentSlug}
+        storeName={storeName}
+        cartCount={cartCount}
+      >
         <DetailPageFrame
           title={t('confirmation.notFound')}
           backHref="/shop/account"
@@ -51,7 +67,7 @@ export default async function OrderConfirmationPage({
         >
           <p className="text-sm text-muted-foreground">{t('confirmation.notFoundDescription')}</p>
         </DetailPageFrame>
-      </StoreShellWrapper>
+      </ShopShellWrapper>
     );
   }
 
@@ -59,7 +75,11 @@ export default async function OrderConfirmationPage({
   const lineCount = order.lines.reduce((sum, line) => sum + line.quantity, 0);
 
   return (
-    <StoreShellWrapper storeSlug={slug} storeName={storeName} cartCount={cartCount}>
+    <ShopShellWrapper
+      fulfillmentSlug={fulfillmentSlug}
+      storeName={storeName}
+      cartCount={cartCount}
+    >
       <DetailPageFrame
         title={t('confirmation.title')}
         description={t('confirmation.orderDescription', {
@@ -80,7 +100,11 @@ export default async function OrderConfirmationPage({
         {order.fulfillmentType ? (
           <FulfillmentTypeBadge type={order.fulfillmentType} />
         ) : null}
-        <FulfillmentSummary slug={slug} order={order} token={token} />
+        <FulfillmentSummary
+          fulfillmentSlug={fulfillmentSlug}
+          order={order}
+          token={token}
+        />
         <div className="space-y-4 rounded-xl ring-1 ring-border p-4 text-sm">
           <p className="text-lg font-semibold tabular-nums">
             {t('confirmation.orderTotal', {
@@ -99,6 +123,6 @@ export default async function OrderConfirmationPage({
           </ul>
         </div>
       </DetailPageFrame>
-    </StoreShellWrapper>
+    </ShopShellWrapper>
   );
 }

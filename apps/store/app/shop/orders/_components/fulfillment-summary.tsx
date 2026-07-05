@@ -4,7 +4,7 @@ import type { DeliveryAddress, StoreOrderDetail } from '@meridian/shared';
 import { PickupFulfillmentCard } from './pickup-fulfillment-card';
 
 interface FulfillmentSummaryProps {
-  slug: string;
+  fulfillmentSlug: string;
   order: StoreOrderDetail;
   token: string;
 }
@@ -21,7 +21,11 @@ function formatAddress(address: DeliveryAddress): string {
     .join(' · ');
 }
 
-export async function FulfillmentSummary({ slug, order, token }: FulfillmentSummaryProps) {
+export async function FulfillmentSummary({
+  fulfillmentSlug,
+  order,
+  token,
+}: FulfillmentSummaryProps) {
   const t = await getTranslations('store.confirmation');
 
   if (order.fulfillmentType === 'DELIVERY' && order.deliveryAddress) {
@@ -41,7 +45,13 @@ export async function FulfillmentSummary({ slug, order, token }: FulfillmentSumm
   }
 
   if (order.fulfillmentType === 'PICKUP') {
-    return <PickupFulfillmentCard slug={slug} order={order} token={token} />;
+    return (
+      <PickupFulfillmentCard
+        fulfillmentSlug={fulfillmentSlug}
+        order={order}
+        token={token}
+      />
+    );
   }
 
   return null;

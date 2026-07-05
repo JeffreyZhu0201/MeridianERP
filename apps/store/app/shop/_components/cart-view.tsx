@@ -15,7 +15,12 @@ interface CartViewProps {
   shopBasePath?: string;
 }
 
-export function CartView({ cart: initial, storeSlug, token, shopBasePath }: CartViewProps) {
+export function CartView({
+  cart: initial,
+  storeSlug,
+  token,
+  shopBasePath = '/shop',
+}: CartViewProps) {
   const router = useRouter();
   const t = useTranslations('store');
   const [cart, setCart] = useState(initial);
@@ -64,7 +69,6 @@ export function CartView({ cart: initial, storeSlug, token, shopBasePath }: Cart
     (sum, item) => sum + Number(item.variant.price) * item.quantity,
     0,
   );
-  const checkoutBase = shopBasePath ?? `/s/${storeSlug}`;
 
   return (
     <div className="grid gap-8 lg:grid-cols-12">
@@ -127,13 +131,13 @@ export function CartView({ cart: initial, storeSlug, token, shopBasePath }: Cart
             <span className="store-label text-muted-foreground">{t('cart.subtotal')}</span>
             <span className="store-price text-lg">{formatMoney(subtotal)}</span>
           </div>
-          <Link href={`${checkoutBase}/checkout`} className="block">
+          <Link href={`${shopBasePath}/checkout`} className="block">
             <Button className="min-h-11 w-full rounded-full" size="lg">
               {t('cart.checkout')}
             </Button>
           </Link>
           <Link
-            href={checkoutBase}
+            href={shopBasePath}
             className="block text-center text-sm text-primary hover:underline"
           >
             {t('cart.continueShopping')}

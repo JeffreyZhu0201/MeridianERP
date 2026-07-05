@@ -102,7 +102,7 @@ export default async function ShopAccountPage() {
               totalLabel: formatMoney(order.total, locale, order.currency),
               viewAction: (
                 <Link
-                  href={`/s/${fulfillmentSlug}/orders/${order.id}/confirmation`}
+                  href={`/shop/orders/${order.id}/confirmation`}
                   className="store-label text-primary hover:underline"
                 >
                   {t('account.viewOrder')}

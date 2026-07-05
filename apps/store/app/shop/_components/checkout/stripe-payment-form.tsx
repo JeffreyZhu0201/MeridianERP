@@ -15,11 +15,9 @@ import type { CheckoutResponse } from '@meridian/shared';
 const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 function StripePayButton({
-  storeSlug,
   orderId,
   onError,
 }: {
-  storeSlug: string;
   orderId: string;
   onError: (message: string) => void;
 }) {
@@ -35,7 +33,7 @@ function StripePayButton({
     setLoading(true);
     onError('');
 
-    const returnUrl = `${window.location.origin}/s/${storeSlug}/orders/${orderId}/confirmation`;
+    const returnUrl = `${window.location.origin}/shop/orders/${orderId}/confirmation`;
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -64,7 +62,7 @@ interface StripePaymentFormProps {
   onError: (message: string) => void;
 }
 
-export function StripePaymentForm({ storeSlug, checkout, onError }: StripePaymentFormProps) {
+export function StripePaymentForm({ checkout, onError }: StripePaymentFormProps) {
   const t = useTranslations('store');
 
   if (!publishableKey) {
@@ -83,11 +81,7 @@ export function StripePaymentForm({ storeSlug, checkout, onError }: StripePaymen
 
   return (
     <Elements stripe={stripePromise} options={options}>
-      <StripePayButton
-        storeSlug={storeSlug}
-        orderId={checkout.order.id}
-        onError={onError}
-      />
+      <StripePayButton orderId={checkout.order.id} onError={onError} />
     </Elements>
   );
 }

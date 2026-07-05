@@ -306,7 +306,7 @@ export class MerchantPurchaseOrdersService {
     if (lines.length === 0) {
       throw new BadRequestException('At least one line is required');
     }
-    const variantIds = [...new Set(lines.map((l) => l.variantId))];
+    const variantIds = Array.from(new Set(lines.map((l) => l.variantId)));
     if (variantIds.length !== lines.length) {
       throw new BadRequestException(
         'Duplicate variants in purchase order lines',

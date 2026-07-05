@@ -30,7 +30,7 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 | Admin | `apps/admin` | http://localhost:3000 |
 | API | `apps/api` | http://localhost:3001 |
 | Merchant | `apps/merchant` | http://localhost:3002 |
-| Store | `apps/store` | http://localhost:3003/s/demo |
+| Store | `apps/store` | http://localhost:3003/shop |
 | Distributor | `apps/distributor` | http://localhost:3005 |
 
 ## Commands

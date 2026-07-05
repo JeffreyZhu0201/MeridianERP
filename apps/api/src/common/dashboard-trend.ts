@@ -34,7 +34,7 @@ export function buildOrderTrend(
     bucket.orderCount += 1;
     bucket.orderRevenue = bucket.orderRevenue.plus(order.total);
   }
-  return [...trendMap.entries()].map(([date, bucket]) => ({
+  return Array.from(trendMap.entries()).map(([date, bucket]) => ({
     date,
     orderCount: bucket.orderCount,
     orderRevenue: bucket.orderRevenue.toString(),

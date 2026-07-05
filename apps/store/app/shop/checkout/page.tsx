@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { StoreCheckoutShell } from '@meridian/ui';
 
-import { CheckoutForm } from '@/app/s/[slug]/checkout/_components/checkout-form';
+import { CheckoutForm } from '@/app/shop/_components/checkout/checkout-form';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getServerCartSession } from '@/lib/cart-session.server';
 import { getToken } from '@/lib/auth';

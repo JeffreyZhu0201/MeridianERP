@@ -60,7 +60,7 @@ describe('MerchantSettings (e2e)', () => {
 
     expect(res.body.profile.businessName).toBe('Settings Store');
     expect(res.body.stripeMode).toBe('mock');
-    expect(res.body.storeUrl).toContain('/s/settings-store');
+    expect(res.body.storeUrl).toContain('/shop');
   });
 
   it('owner can PATCH settings', async () => {

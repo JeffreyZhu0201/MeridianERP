@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { Button, EmptyState, formatMoney, StoreCatalogHeader } from '@meridian/ui/server';
 
 import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
-import { CartView } from '@/app/s/[slug]/cart/_components/cart-view';
+import { CartView } from '@/app/shop/_components/cart-view';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getServerCartSession } from '@/lib/cart-session.server';
 import { getToken } from '@/lib/auth';

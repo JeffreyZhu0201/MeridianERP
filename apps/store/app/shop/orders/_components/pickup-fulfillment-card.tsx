@@ -9,12 +9,16 @@ import type { PickupTokenResponse, StoreOrderDetail } from '@meridian/shared';
 import { apiFetch, storePath } from '@/lib/api';
 
 interface PickupFulfillmentCardProps {
-  slug: string;
+  fulfillmentSlug: string;
   order: StoreOrderDetail;
   token: string;
 }
 
-export function PickupFulfillmentCard({ slug, order, token }: PickupFulfillmentCardProps) {
+export function PickupFulfillmentCard({
+  fulfillmentSlug,
+  order,
+  token,
+}: PickupFulfillmentCardProps) {
   const t = useTranslations('store.confirmation');
   const [pickupToken, setPickupToken] = useState<PickupTokenResponse | null>(null);
   const [loadError, setLoadError] = useState('');
@@ -32,7 +36,11 @@ export function PickupFulfillmentCard({ slug, order, token }: PickupFulfillmentC
     let cancelled = false;
     setLoadError('');
 
-    apiFetch<PickupTokenResponse>(storePath(slug, `orders/${order.id}/pickup-token`), {}, token)
+    apiFetch<PickupTokenResponse>(
+      storePath(fulfillmentSlug, `orders/${order.id}/pickup-token`),
+      {},
+      token,
+    )
       .then((data) => {
         if (!cancelled) setPickupToken(data);
       })
@@ -45,7 +53,7 @@ export function PickupFulfillmentCard({ slug, order, token }: PickupFulfillmentC
     return () => {
       cancelled = true;
     };
-  }, [showCredentials, slug, order.id, token]);
+  }, [showCredentials, fulfillmentSlug, order.id, token]);
 
   if (order.fulfillmentType !== 'PICKUP') {
     return null;

@@ -40,7 +40,7 @@ export function StoreShell({
   branchSelect,
 }: StoreShellProps) {
   const pathname = usePathname();
-  const base = basePath ?? `/s/${storeSlug}`;
+  const base = basePath ?? '/shop';
   const t = useTranslations('store.nav');
   const tc = useTranslations('common');
 

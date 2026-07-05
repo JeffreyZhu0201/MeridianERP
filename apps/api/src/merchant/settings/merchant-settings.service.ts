@@ -85,7 +85,7 @@ export class MerchantSettingsService {
       }),
     ]);
 
-    const storeUrl = `${this.storeAppUrl()}/s/${tenant.slug}`;
+    const storeUrl = `${this.storeAppUrl()}/shop`;
 
     return {
       ...this.mapSettings(tenantId, settings),

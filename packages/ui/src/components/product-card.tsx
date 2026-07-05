@@ -42,7 +42,7 @@ export function ProductCard({
   flagshipBadge,
   addToCartLabel = 'Add to Cart',
 }: ProductCardProps) {
-  const linkHref = href ?? `/s/${storeSlug}/products/${slug}`;
+  const linkHref = href ?? `/shop/products/${slug}`;
 
   if (variant === 'store') {
     return (

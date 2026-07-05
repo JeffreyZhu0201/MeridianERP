@@ -39,17 +39,3 @@ export function catalogApiPath(
 export function catalogFiltersApiPath(fulfillmentSlug: string): string {
   return `/store/catalog/filters?fulfillment=${encodeURIComponent(fulfillmentSlug)}`;
 }
-
-export function storeProductsApiPath(
-  slug: string,
-  query?: StoreCatalogQuery,
-): string {
-  const params = new URLSearchParams();
-  appendStoreCatalogQuery(params, query);
-  const qs = params.toString();
-  return qs ? `/store/${slug}/products?${qs}` : `/store/${slug}/products`;
-}
-
-export function storeProductsFiltersApiPath(slug: string): string {
-  return `/store/${slug}/products/filters`;
-}

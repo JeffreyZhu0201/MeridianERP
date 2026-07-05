@@ -4,7 +4,7 @@ const API = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 test.describe('Gaps store UI smoke', () => {
   test('ModeToggle switches store to dark theme', async ({ page }) => {
-    const res = await page.goto('/s/demo');
+    const res = await page.goto('/shop');
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running or demo seed missing');
     }
@@ -66,7 +66,7 @@ test.describe('Gaps store UI smoke', () => {
       },
     ]);
 
-    const pageRes = await page.goto('/s/demo/account');
+    const pageRes = await page.goto('/shop/account');
     if (!pageRes || pageRes.status() >= 500) {
       test.skip(true, 'Store app not running');
     }
