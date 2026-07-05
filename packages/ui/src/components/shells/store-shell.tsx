@@ -99,25 +99,6 @@ export function StoreShell({
             {branchSelect ? <div className="md:hidden">{branchSelect}</div> : null}
             <LocaleToggle portal="store" />
             <ModeToggle />
-            {userEmail ? (
-              <div className="hidden items-center gap-2 pl-2 text-sm lg:flex">
-                <span className="max-w-[140px] truncate text-muted-foreground">{userEmail}</span>
-                {onLogout ? (
-                  <button
-                    type="button"
-                    onClick={onLogout}
-                    className="rounded-full px-3 py-1.5 text-sm hover:bg-muted"
-                  >
-                    {tc('signOut')}
-                  </button>
-                ) : null}
-              </div>
-            ) : (
-              <Link href={`${base}/login`} className="store-icon-btn hidden md:flex" aria-label={tc('signIn')}>
-                <IconUser className="size-5" stroke={1.5} />
-              </Link>
-            )}
-
             <Link
               href={`${base}/cart`}
               className="store-icon-btn"
@@ -133,11 +114,31 @@ export function StoreShell({
 
             <Link
               href={userEmail ? accountHref : loginHref}
-              className="store-icon-btn md:hidden"
-              aria-label={t('account')}
+              className="store-icon-btn"
+              aria-label={userEmail ? t('account') : tc('signIn')}
             >
               <IconUser className="size-5" stroke={1.5} />
             </Link>
+
+            {userEmail ? (
+              <div className="hidden items-center gap-2 pl-1 text-sm lg:flex">
+                <Link
+                  href={accountHref}
+                  className="max-w-[140px] truncate text-muted-foreground hover:text-foreground"
+                >
+                  {userEmail}
+                </Link>
+                {onLogout ? (
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="rounded-full px-3 py-1.5 text-sm hover:bg-muted"
+                  >
+                    {tc('signOut')}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </header>

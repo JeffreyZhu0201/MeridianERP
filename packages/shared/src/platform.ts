@@ -1,3 +1,5 @@
+import type { PerformanceTrendPoint } from './distributors.js';
+
 /**
  * 驳回商户请求
  * 平台管理员拒绝商户入驻申请时填写的原因
@@ -46,6 +48,24 @@ export interface PlatformMerchantDetail {
   storePublished: boolean;
   isFlagship: boolean;
   crmSummary: MerchantCrmSummary;
+}
+
+export interface PlatformMerchantStatisticsOrder {
+  id: string;
+  total: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface PlatformMerchantStatistics {
+  ordersLast30Days: number;
+  revenueLast30Days: string;
+  productCount: number;
+  skuCount: number;
+  totalUnitsOnHand: number;
+  lowStockCount: number;
+  trend: PerformanceTrendPoint[];
+  recentOrders: PlatformMerchantStatisticsOrder[];
 }
 
 export type UserIdentity =

@@ -11,6 +11,7 @@ import type {
   PlatformDistributorSummary,
   PlatformFundsSummary,
   PlatformMerchantDetail,
+  PlatformMerchantStatistics,
   PlatformRecentMerchant,
   UpdatePlatformAccountIdentitiesRequest,
   UpdatePlatformAccountRequest,
@@ -76,6 +77,7 @@ export async function apiFetch<T>(
 }
 export type MerchantListItem = PlatformRecentMerchant;
 export type MerchantDetail = PlatformMerchantDetail;
+export type MerchantStatistics = PlatformMerchantStatistics;
 export type DashboardStats = PlatformDashboardStats;
 
 export interface AuthResponse {

@@ -15,13 +15,26 @@ import {
   DetailPageFrame,
   Dialog,
   DialogCloseButton,
+  EmptyState,
+  formatMoney,
   Input,
   Label,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
   Textarea,
 } from '@meridian/ui';
+import { BentoChartTile } from '@meridian/ui/client-widgets';
 import { OnboardingStatus } from '@meridian/shared';
-import type { PlatformMerchantPluginsResponse } from '@meridian/shared';
+import type {
+  PlatformMerchantPluginItem,
+  PlatformMerchantPluginsResponse,
+  PlatformMerchantStatistics,
+} from '@meridian/shared';
 
 import { OnboardingStatusBadge } from '@meridian/ui';
 import { apiFetch, type MerchantDetail, type PlatformDistributor } from '@/lib/api';
@@ -33,13 +46,29 @@ interface MerchantDetailActionsProps {
   token: string;
   distributors?: PlatformDistributor[];
   plugins?: PlatformMerchantPluginsResponse;
+  statistics?: PlatformMerchantStatistics;
 }
 
-export function MerchantDetailView({ merchant, token, distributors = [], plugins }: MerchantDetailActionsProps) {
+const orderStatusVariant: Record<string, 'default' | 'secondary' | 'destructive'> = {
+  PAID: 'default',
+  FULFILLED: 'default',
+  PENDING_PAYMENT: 'secondary',
+  CANCELLED: 'destructive',
+  REFUNDED: 'destructive',
+};
+
+export function MerchantDetailView({
+  merchant,
+  token,
+  distributors = [],
+  plugins,
+  statistics,
+}: MerchantDetailActionsProps) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations('admin.merchants');
   const td = useTranslations('admin.merchants.detail');
+  const to = useTranslations('admin.orders');
   const tc = useTranslations('common');
   const [approveOpen, setApproveOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
@@ -142,6 +171,9 @@ export function MerchantDetailView({ merchant, token, distributors = [], plugins
     }
   }
 
+  const showBusinessStats =
+    merchant.onboardingStatus === OnboardingStatus.APPROVED && statistics;
+
   return (
     <DetailPageFrame
       title={merchant.businessName}
@@ -169,12 +201,94 @@ export function MerchantDetailView({ merchant, token, distributors = [], plugins
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <BentoDetailHero
-        metrics={[
-          { title: td('contacts'), value: merchant.crmSummary.contacts },
-          { title: td('companies'), value: merchant.crmSummary.companies },
-          { title: td('leads'), value: merchant.crmSummary.leads },
-        ]}
+        metrics={
+          showBusinessStats
+            ? [
+                { title: td('orders30d'), value: statistics.ordersLast30Days },
+                {
+                  title: td('revenue30d'),
+                  value: formatMoney(statistics.revenueLast30Days, locale),
+                },
+                { title: td('products'), value: statistics.productCount },
+                { title: td('skus'), value: statistics.skuCount },
+                { title: td('lowStock'), value: statistics.lowStockCount },
+              ]
+            : [
+                { title: td('contacts'), value: merchant.crmSummary.contacts },
+                { title: td('companies'), value: merchant.crmSummary.companies },
+                { title: td('leads'), value: merchant.crmSummary.leads },
+              ]
+        }
       />
+
+      {showBusinessStats ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <BentoChartTile
+            title={td('salesTrend')}
+            colSpan={2}
+            rowSpan={2}
+            data={statistics.trend.map((point) => ({
+              date: point.date,
+              orderCount: point.orderCount,
+              orderRevenue: Number(point.orderRevenue),
+            }))}
+            series={[
+              { key: 'orderCount', label: td('orders30d') },
+              { key: 'orderRevenue', label: td('revenue30d') },
+            ]}
+          />
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>{td('recentOrders')}</CardTitle>
+              <Link
+                href={`/orders?tenantId=${encodeURIComponent(merchant.tenantId)}`}
+                className="text-sm text-primary hover:underline"
+              >
+                {td('viewAllOrders')}
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {statistics.recentOrders.length === 0 ? (
+                <EmptyState title={td('noOrders')} />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{td('orderId')}</TableHead>
+                      <TableHead>{to('columns.status')}</TableHead>
+                      <TableHead>{td('orderTotal')}</TableHead>
+                      <TableHead>{td('orderDate')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {statistics.recentOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          <Link
+                            href={`/orders/${order.id}`}
+                            className="font-mono text-sm text-primary hover:underline"
+                          >
+                            {order.id.slice(0, 8)}…
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={orderStatusVariant[order.status] ?? 'secondary'}>
+                            {to(`status.${order.status}` as 'status.PAID')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{formatMoney(order.total, locale)}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(order.createdAt).toLocaleString(locale)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
 
       {merchant.onboardingStatus === OnboardingStatus.REJECTED && merchant.rejectionReason ? (
         <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm">

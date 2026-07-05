@@ -20,6 +20,14 @@ function isPublicStorePath(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === '/shop/login') {
+    const loginUrl = new URL('/login', request.url);
+    const from = request.nextUrl.searchParams.get('from');
+    loginUrl.searchParams.set('from', from ?? '/shop/account');
+    return NextResponse.redirect(loginUrl);
+  }
+
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   const isPublic = isPublicStorePath(pathname);
 

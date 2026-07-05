@@ -7,12 +7,17 @@ import {
   MerchantProfile,
   MerchantRole,
   OnboardingStatus,
+  OrderStatus,
   Prisma,
 } from '@prisma/client';
 import type {
   MerchantCrmSummary,
   PlatformMerchantDetail,
+  PlatformMerchantStatistics,
 } from '@meridian/shared';
+import { dashboardWindowStart } from '../../common/date-range';
+import { buildOrderTrend } from '../../common/dashboard-trend';
+import { decimalSumToString } from '../../merchant/commissions/commission-mappers';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueService } from '../../queue/email-queue.service';
 import { slugify } from '../../common/utils/slug.util';
@@ -116,6 +121,81 @@ export class PlatformMerchantsService {
 
   listPlugins(merchantProfileId: string) {
     return this.pluginService.listForPlatformMerchant(merchantProfileId);
+  }
+
+  async getMerchantStatistics(
+    merchantId: string,
+    days = 30,
+  ): Promise<PlatformMerchantStatistics> {
+    const profile = await this.findProfileById(merchantId);
+    if (profile.onboardingStatus !== OnboardingStatus.APPROVED) {
+      throw new BadRequestException(
+        'Statistics only available for approved merchants',
+      );
+    }
+
+    const tenantId = profile.tenantId;
+    const windowStart = dashboardWindowStart(days);
+    const windowEnd = new Date();
+    const orderWhere = {
+      tenantId,
+      status: OrderStatus.PAID,
+      createdAt: { gte: windowStart },
+    };
+
+    const [
+      orderAgg,
+      productCount,
+      variantCount,
+      trendOrders,
+      recentOrders,
+      inventoryStats,
+    ] = await Promise.all([
+      this.prisma.order.aggregate({
+        where: orderWhere,
+        _count: { _all: true },
+        _sum: { total: true },
+      }),
+      this.prisma.product.count({ where: { tenantId } }),
+      this.prisma.productVariant.count({
+        where: { product: { tenantId } },
+      }),
+      this.prisma.order.findMany({
+        where: {
+          ...orderWhere,
+          createdAt: { gte: windowStart, lte: windowEnd },
+        },
+        select: { createdAt: true, total: true },
+      }),
+      this.prisma.order.findMany({
+        where: { tenantId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: {
+          id: true,
+          total: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
+      this.getTenantInventoryStats(tenantId),
+    ]);
+
+    return {
+      ordersLast30Days: orderAgg._count._all,
+      revenueLast30Days: decimalSumToString(orderAgg._sum.total),
+      productCount,
+      skuCount: inventoryStats.skuCount || variantCount,
+      totalUnitsOnHand: inventoryStats.totalUnitsOnHand,
+      lowStockCount: inventoryStats.lowStockCount,
+      trend: buildOrderTrend(windowStart, windowEnd, trendOrders),
+      recentOrders: recentOrders.map((order) => ({
+        id: order.id,
+        total: order.total.toString(),
+        status: order.status,
+        createdAt: order.createdAt.toISOString(),
+      })),
+    };
   }
 
   async create(dto: CreatePlatformMerchantDto) {
@@ -349,6 +429,56 @@ export class PlatformMerchantsService {
     }
     return profile;
   }
+  private async getTenantInventoryStats(tenantId: string): Promise<{
+    skuCount: number;
+    totalUnitsOnHand: number;
+    lowStockCount: number;
+  }> {
+    const warehouses = await this.prisma.warehouse.findMany({
+      where: { tenantId },
+      include: {
+        stockLevels: { select: { quantityOnHand: true, variantId: true } },
+      },
+    });
+
+    const settings = await this.prisma.tenantInventorySettings.findUnique({
+      where: { tenantId },
+    });
+    const defaultThreshold = settings?.defaultReorderThreshold ?? 5;
+    const defaultWarehouse = warehouses.find((w) => w.isDefault);
+
+    let lowStockCount = 0;
+    if (defaultWarehouse) {
+      const variants = await this.prisma.productVariant.findMany({
+        where: { product: { tenantId } },
+        select: { id: true, reorderThreshold: true },
+      });
+      const thresholdByVariant = new Map(
+        variants.map((v) => [v.id, v.reorderThreshold ?? defaultThreshold]),
+      );
+      for (const sl of defaultWarehouse.stockLevels) {
+        const threshold =
+          thresholdByVariant.get(sl.variantId) ?? defaultThreshold;
+        if (sl.quantityOnHand <= threshold) lowStockCount++;
+      }
+    }
+
+    const skuIds = new Set<string>();
+    let totalUnitsOnHand = 0;
+    for (const warehouse of warehouses) {
+      for (const sl of warehouse.stockLevels) {
+        skuIds.add(sl.variantId);
+        totalUnitsOnHand += sl.quantityOnHand;
+      }
+    }
+
+    return {
+      skuCount: skuIds.size,
+      totalUnitsOnHand,
+      lowStockCount,
+    };
+  }
+
   private async getCrmSummary(tenantId: string): Promise<MerchantCrmSummary> {
     const [contacts, companies, leads] = await Promise.all([
       this.prisma.crmContact.count({ where: { tenantId } }),

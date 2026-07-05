@@ -46,6 +46,16 @@ export class PlatformMerchantsController {
     return this.platformMerchantsService.listPlugins(id);
   }
 
+  @Get(':id/statistics')
+  @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
+  getStatistics(
+    @Param('id') id: string,
+    @Query('days') days?: string,
+  ) {
+    const windowDays = days ? parseInt(days, 10) : 30;
+    return this.platformMerchantsService.getMerchantStatistics(id, windowDays);
+  }
+
   @Get(':id')
   @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
   getById(@Param('id') id: string) {
