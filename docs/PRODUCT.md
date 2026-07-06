@@ -1,8 +1,8 @@
 # MeridianERP Product State
 
-**Version:** 1.0.9  
-**Updated:** 2026-07-05  
-**Status:** Phase 1–5 complete; admin nav consolidated; branch downstream-distributor binding removed; HQ funds & withdrawal UX polished.
+**Version:** 1.1.0  
+**Updated:** 2026-07-06  
+**Status:** Phase 1–5 complete; AI diagnosis (mock) shipped; mock payout on withdrawal approval.
 
 ## Status
 
@@ -54,6 +54,7 @@ All portals share the NestJS API in `apps/api` on port 3001.
 | 分店进货 | `/procurement` | Paid branch purchase orders — HQ shipment |
 | 提现审批 | `/withdrawals` | Promoter withdrawal approval **and** commission settlement export |
 | 资金 | `/funds` | Five HQ financial KPIs with drill-down detail pages |
+| 运营诊断 | `/diagnosis` | Mock AI ops diagnosis (SUPER_ADMIN, FINANCE) |
 | 设置 | `/settings` | Platform settings |
 
 Legacy routes redirect: `/replenishment` → `/procurement`; `/orders?tab=delivery` → `/allocations`; `/settlements` → `/withdrawals?tab=settlements`.
@@ -90,7 +91,7 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 - Merchant manages CRM (plugin), inventory, orders, pickup verification, **HQ procurement** (`/inventory/procurement`), funds, and settings. **No** branch downstream-distributor management or customer QR binding UI.
 - Store supports unified flagship catalog at `/shop`, header branch selector, cart, Stripe checkout, account orders, pickup, and delivery. **No** customer–distributor binding or cart distributor attribution.
 - Sales promoters recruit branches via store-portal share links (`/open-shop?invite=`), self-service invite codes on `apps/distributor`, performance views, commission ledger, and withdrawals.
-- HQ withdrawal approval confirms disbursement (`APPROVED` + `reviewedAt`); no third-party payout integration in P0.
+- HQ withdrawal approval confirms disbursement via **mock payout provider** (`PAYOUT_PROVIDER=mock`); records `payoutReference` and `disbursedAt` on approval.
 
 ## Business Rules
 
@@ -115,7 +116,7 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 
 | Layer | Command | Status |
 |---|---|---|
-| API e2e | `cd apps/api && rtk pnpm test:e2e` | 39 suites, 161 tests |
+| API e2e | `cd apps/api && rtk pnpm test:e2e` | 41 suites, 172 tests |
 | Playwright UI | `rtk pnpm exec playwright install chromium && rtk pnpm test:e2e` | 18 tests (admin, store, merchant) |
 | UX patterns | List/detail Bento frames, Toaster feedback, status i18n, accessible tab/filter toolbars | See `docs/design/design-system.md` |
 | Typecheck | `rtk pnpm typecheck` | Strict monorepo build |
@@ -123,11 +124,11 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 
 ## Known Open Work
 
-- `ReplenishmentRequest` and `PlatformCrm*` Prisma tables remain for legacy data; APIs and UI removed.
-- Phase 4 architecture docs still describe removed branch binding / QR flows; prefer this file for current promoter semantics.
+- Merchant plugin stub pages (OA, HRM, etc.) remain placeholders until plugins ship full modules.
 - API package ESLint (`apps/api`) has legacy `@typescript-eslint/no-unsafe-*` debt.
 - Historical phase docs may lag `PRODUCT.md`; prefer this file and `admin-rbac.md` for current nav semantics.
 - Add feature-specific PRD, architecture, and design docs **before** new feature implementation.
+- Live LLM provider for AI diagnosis (`AI_DIAGNOSIS_MODE=live`) not yet implemented.
 
 ## References
 

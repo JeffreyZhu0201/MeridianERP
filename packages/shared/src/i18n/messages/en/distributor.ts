@@ -81,6 +81,7 @@ export const distributor = {
     emptyDescription: 'Submit a request when you are ready to withdraw settled commission.',
     status: 'Status',
     created: 'Created',
+    payoutReference: 'Payout ref',
     reviewed: 'Reviewed',
     rejectionReason: 'Rejection reason',
     loadError: 'Failed to load withdrawals',

@@ -1,18 +1,18 @@
 # Summary
 
-Date : 2026-07-05 16:54:41
+Date : 2026-07-05 17:14:49
 
 Directory /Users/zhuzy2024/Documents/Workspace/MeridianERP
 
-Total : 884 files,  89214 codes, 2380 comments, 13330 blanks, all 104924 lines
+Total : 884 files,  89235 codes, 2381 comments, 13331 blanks, all 104947 lines
 
 Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| TypeScript | 368 | 34,774 | 687 | 3,243 | 38,704 |
-| TypeScript JSX | 299 | 25,706 | 1,258 | 2,464 | 29,428 |
+| TypeScript | 368 | 34,781 | 687 | 3,244 | 38,712 |
+| TypeScript JSX | 299 | 25,720 | 1,259 | 2,464 | 29,443 |
 | Markdown | 146 | 15,546 | 14 | 4,632 | 20,192 |
 | YAML | 4 | 10,168 | 0 | 2,387 | 12,555 |
 | MS SQL | 20 | 972 | 273 | 353 | 1,598 |
@@ -26,14 +26,14 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 884 | 89,214 | 2,380 | 13,330 | 104,924 |
+| . | 884 | 89,235 | 2,381 | 13,331 | 104,947 |
 | . (Files) | 9 | 10,295 | 0 | 2,430 | 12,725 |
 | .cursor | 15 | 524 | 0 | 191 | 715 |
 | .cursor/agents | 7 | 247 | 0 | 92 | 339 |
 | .cursor/rules | 8 | 277 | 0 | 99 | 376 |
 | .github | 1 | 38 | 0 | 10 | 48 |
 | .github/workflows | 1 | 38 | 0 | 10 | 48 |
-| apps | 571 | 49,839 | 720 | 5,101 | 55,660 |
+| apps | 571 | 49,857 | 720 | 5,102 | 55,679 |
 | apps/admin | 84 | 9,181 | 31 | 737 | 9,949 |
 | apps/admin (Files) | 9 | 210 | 7 | 29 | 246 |
 | apps/admin/app | 67 | 8,655 | 12 | 651 | 9,318 |
@@ -380,10 +380,10 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | apps/merchant/components | 1 | 113 | 0 | 14 | 127 |
 | apps/merchant/i18n | 1 | 18 | 0 | 3 | 21 |
 | apps/merchant/lib | 6 | 304 | 0 | 48 | 352 |
-| apps/store | 42 | 2,730 | 8 | 341 | 3,079 |
-| apps/store (Files) | 9 | 228 | 7 | 33 | 268 |
-| apps/store/app | 23 | 2,157 | 1 | 241 | 2,399 |
-| apps/store/app (Files) | 3 | 132 | 1 | 23 | 156 |
+| apps/store | 42 | 2,748 | 8 | 342 | 3,098 |
+| apps/store (Files) | 9 | 235 | 7 | 34 | 276 |
+| apps/store/app | 23 | 2,168 | 1 | 241 | 2,410 |
+| apps/store/app (Files) | 3 | 143 | 1 | 23 | 167 |
 | apps/store/app/embed-preview | 1 | 62 | 0 | 8 | 70 |
 | apps/store/app/login | 1 | 100 | 0 | 11 | 111 |
 | apps/store/app/open-shop | 2 | 277 | 0 | 23 | 300 |
@@ -420,7 +420,7 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | docs/superpowers/plans | 1 | 15 | 0 | 11 | 26 |
 | docs/superpowers/specs | 2 | 689 | 0 | 188 | 877 |
 | e2e | 7 | 433 | 2 | 76 | 511 |
-| packages | 151 | 13,129 | 1,646 | 1,154 | 15,929 |
+| packages | 151 | 13,132 | 1,647 | 1,154 | 15,933 |
 | packages/shared | 43 | 6,203 | 120 | 284 | 6,607 |
 | packages/shared (Files) | 2 | 39 | 0 | 2 | 41 |
 | packages/shared/src | 41 | 6,164 | 120 | 282 | 6,566 |
@@ -430,11 +430,11 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | packages/shared/src/i18n/messages | 12 | 4,322 | 0 | 14 | 4,336 |
 | packages/shared/src/i18n/messages/en | 6 | 2,175 | 0 | 7 | 2,182 |
 | packages/shared/src/i18n/messages/zh-CN | 6 | 2,147 | 0 | 7 | 2,154 |
-| packages/ui | 108 | 6,926 | 1,526 | 870 | 9,322 |
+| packages/ui | 108 | 6,929 | 1,527 | 870 | 9,326 |
 | packages/ui (Files) | 2 | 82 | 0 | 2 | 84 |
-| packages/ui/src | 105 | 6,756 | 1,526 | 861 | 9,143 |
+| packages/ui/src | 105 | 6,759 | 1,527 | 861 | 9,147 |
 | packages/ui/src (Files) | 4 | 358 | 108 | 90 | 556 |
-| packages/ui/src/components | 97 | 6,321 | 1,352 | 751 | 8,424 |
+| packages/ui/src/components | 97 | 6,324 | 1,353 | 751 | 8,428 |
 | packages/ui/src/components (Files) | 7 | 411 | 198 | 45 | 654 |
 | packages/ui/src/components/bento | 6 | 272 | 260 | 38 | 570 |
 | packages/ui/src/components/frameworks | 10 | 358 | 334 | 64 | 756 |
@@ -443,7 +443,7 @@ Summary / [Details](details.md) / [Diff Summary](diff.md) / [Diff Details](diff-
 | packages/ui/src/components/shells | 7 | 990 | 85 | 92 | 1,167 |
 | packages/ui/src/components/status | 2 | 54 | 3 | 15 | 72 |
 | packages/ui/src/components/store | 6 | 626 | 21 | 49 | 696 |
-| packages/ui/src/components/theme | 7 | 176 | 161 | 46 | 383 |
+| packages/ui/src/components/theme | 7 | 179 | 162 | 46 | 387 |
 | packages/ui/src/components/ui | 45 | 2,753 | 19 | 324 | 3,096 |
 | packages/ui/src/hooks | 1 | 16 | 23 | 6 | 45 |
 | packages/ui/src/lib | 3 | 61 | 43 | 14 | 118 |

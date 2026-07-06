@@ -1,5 +1,7 @@
 # Phase 4 — Distributor Enhancements Architecture
 
+> **Superseded (2026-07-06):** Customer QR bindings and retail-order commission were removed. See [`docs/PRODUCT.md`](../PRODUCT.md) and [`docs/handoffs/remove-branch-distributors-implementation.md`](../handoffs/remove-branch-distributors-implementation.md).
+
 **Version:** 1.1  
 **Last updated:** 2025-06-25  
 **Status:** Implemented; retained as Phase 4 distributor architecture reference  

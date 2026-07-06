@@ -1,5 +1,7 @@
 # Phase 4 Slice 3 — Merchant Visibility Architecture
 
+> **Superseded (2026-07-06):** Bindings-based metrics removed. See [`docs/handoffs/remove-branch-distributors-implementation.md`](../handoffs/remove-branch-distributors-implementation.md).
+
 **Version:** 1.0  
 **Last updated:** 2025-06-25  
 **Status:** Implemented; retained as historical architecture reference  

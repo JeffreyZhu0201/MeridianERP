@@ -104,6 +104,7 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
               <TableHead className="text-right">{t('columns.amount')}</TableHead>
               <TableHead>{t('columns.note')}</TableHead>
               <TableHead>{t('columns.status')}</TableHead>
+              <TableHead>{t('columns.payoutReference')}</TableHead>
               <TableHead>{t('columns.created')}</TableHead>
               <TableHead>{t('columns.reviewed')}</TableHead>
               <TableHead className="text-right">{t('columns.actions')}</TableHead>
@@ -123,6 +124,9 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
                   <Badge variant={statusVariant(withdrawal.status)}>
                     {withdrawalStatusLabel(withdrawal.status, t)}
                   </Badge>
+                </TableCell>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {withdrawal.payoutReference ?? emptyDash}
                 </TableCell>
                 <TableCell className="text-xs text-muted-foreground">
                   {new Date(withdrawal.createdAt).toLocaleDateString(locale)}

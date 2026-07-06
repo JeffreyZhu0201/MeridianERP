@@ -79,6 +79,7 @@ export const distributor = {
     emptyDescription: '余额充足时可提交提现申请。',
     status: '状态',
     created: '申请时间',
+    payoutReference: '打款单号',
     reviewed: '审核时间',
     rejectionReason: '驳回原因',
     loadError: '加载提现记录失败',

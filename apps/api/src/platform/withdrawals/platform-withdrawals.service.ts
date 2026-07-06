@@ -7,11 +7,15 @@ import {
 import { LedgerStatus, WithdrawalRequestStatus } from '@prisma/client';
 import { Prisma } from '@prisma/client';
 import type { WithdrawalListQuery } from '@meridian/shared';
+import { PayoutService } from '../../payout/payout.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PlatformWithdrawalsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly payoutService: PayoutService,
+  ) {}
 
   private mapWithdrawalRow(row: {
     id: string;
@@ -21,6 +25,10 @@ export class PlatformWithdrawalsService {
     note: string | null;
     rejectionReason: string | null;
     reviewedAt: Date | null;
+    payoutProvider: string | null;
+    payoutReference: string | null;
+    disbursedAt: Date | null;
+    payoutError: string | null;
     createdAt: Date;
     distributor: { name: string; email: string | null };
   }) {
@@ -34,6 +42,10 @@ export class PlatformWithdrawalsService {
       note: row.note,
       rejectionReason: row.rejectionReason,
       reviewedAt: row.reviewedAt?.toISOString() ?? null,
+      payoutProvider: row.payoutProvider,
+      payoutReference: row.payoutReference,
+      disbursedAt: row.disbursedAt?.toISOString() ?? null,
+      payoutError: row.payoutError,
       createdAt: row.createdAt.toISOString(),
     };
   }
@@ -105,12 +117,22 @@ export class PlatformWithdrawalsService {
         throw new BadRequestException('Insufficient distributor balance');
       }
 
+      const payout = await this.payoutService.disburse({
+        withdrawalId: req.id,
+        amount: req.amount.toString(),
+        payeeEmail: req.distributor.email,
+      });
+
       const updated = await tx.withdrawalRequest.update({
         where: { id, status: WithdrawalRequestStatus.PENDING },
         data: {
           status: WithdrawalRequestStatus.APPROVED,
           reviewedAt: new Date(),
           reviewedByPlatformUserId: platformUserId,
+          payoutProvider: payout.provider,
+          payoutReference: payout.reference,
+          disbursedAt: payout.disbursedAt,
+          payoutError: null,
         },
         include: { distributor: { select: { name: true, email: true } } },
       });

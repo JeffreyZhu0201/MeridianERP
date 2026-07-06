@@ -134,6 +134,25 @@ async function main() {
     });
   }
 
+  const promoterEmail = 'promoter@meridian.test';
+  const existingPromoter = await prisma.distributor.findFirst({
+    where: { email: promoterEmail },
+  });
+  if (!existingPromoter) {
+    await prisma.distributor.create({
+      data: {
+        tenantId: null,
+        name: 'Demo Promoter',
+        email: promoterEmail,
+        passwordHash: await bcrypt.hash('promo1234', 10),
+        portalEnabled: true,
+        commissionRate: 10,
+        commissionType: 'PERCENT',
+        isActive: true,
+      },
+    });
+  }
+
   const demoSlug = 'demo';
   const existingTenant = await prisma.tenant.findUnique({ where: { slug: demoSlug } });
   if (!existingTenant) {

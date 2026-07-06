@@ -143,6 +143,10 @@ export interface WithdrawalRequestRow {
   note: string | null;
   rejectionReason: string | null;
   reviewedAt: string | null;
+  payoutProvider?: string | null;
+  payoutReference?: string | null;
+  disbursedAt?: string | null;
+  payoutError?: string | null;
   createdAt: string;
 }
 

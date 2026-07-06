@@ -5,6 +5,7 @@ const ADMIN_URL = process.env.ADMIN_APP_URL ?? 'http://localhost:3000';
 const STORE_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';
 
 const MERCHANT_URL = process.env.MERCHANT_APP_URL ?? 'http://localhost:3002';
+const DISTRIBUTOR_URL = process.env.DISTRIBUTOR_APP_URL ?? 'http://localhost:3005';
 
 export default defineConfig({
   testDir: './e2e',
@@ -36,6 +37,11 @@ export default defineConfig({
       grepInvert: /@store-app/,
       use: { ...devices['Desktop Chrome'], baseURL: MERCHANT_URL },
     },
+    {
+      name: 'distributor',
+      testMatch: /distributor-portal\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], baseURL: DISTRIBUTOR_URL },
+    },
   ],
   webServer: process.env.CI
     ? undefined
@@ -61,6 +67,12 @@ export default defineConfig({
         {
           command: 'pnpm --filter @meridian/merchant dev',
           url: MERCHANT_URL,
+          reuseExistingServer: true,
+          timeout: 120_000,
+        },
+        {
+          command: 'pnpm --filter @meridian/distributor dev',
+          url: DISTRIBUTOR_URL,
           reuseExistingServer: true,
           timeout: 120_000,
         },

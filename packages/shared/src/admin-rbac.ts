@@ -17,7 +17,8 @@ export type AdminPermission =
   | 'withdrawals'
   | 'funds'
   | 'settlements'
-  | 'settings';
+  | 'settings'
+  | 'diagnosis';
 
 export const ADMIN_ROLE_PERMISSIONS: Record<AdminPlatformRole, AdminPermission[]> = {
   SUPER_ADMIN: [
@@ -34,8 +35,9 @@ export const ADMIN_ROLE_PERMISSIONS: Record<AdminPlatformRole, AdminPermission[]
     'funds',
     'settlements',
     'settings',
+    'diagnosis',
   ],
-  FINANCE: ['dashboard', 'withdrawals', 'funds', 'settlements'],
+  FINANCE: ['dashboard', 'withdrawals', 'funds', 'settlements', 'diagnosis'],
   FULFILLMENT: ['dashboard', 'orders', 'allocations', 'procurement'],
   REVIEWER: ['dashboard', 'merchants', 'procurement', 'withdrawals'],
 };
@@ -61,6 +63,7 @@ const PATH_PERMISSION_MAP: Array<{ prefix: string; permission: AdminPermission }
   { prefix: '/funds', permission: 'funds' },
   { prefix: '/settlements', permission: 'withdrawals' },
   { prefix: '/settings', permission: 'settings' },
+  { prefix: '/diagnosis', permission: 'diagnosis' },
   { prefix: '/flagship-catalog', permission: 'inventory' },
 ];
 

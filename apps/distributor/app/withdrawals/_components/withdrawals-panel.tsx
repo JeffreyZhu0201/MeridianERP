@@ -134,6 +134,7 @@ export function WithdrawalsPanel({
                 <TableHead>{t('amount')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
                 <TableHead>{t('note')}</TableHead>
+                <TableHead>{t('payoutReference')}</TableHead>
                 <TableHead>{t('created')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -150,6 +151,9 @@ export function WithdrawalsPanel({
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-sm text-muted-foreground">
                     {row.note ?? emptyDash}
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-muted-foreground">
+                    {row.payoutReference ?? emptyDash}
                   </TableCell>
                   <TableCell className="text-xs text-muted-foreground">
                     {new Date(row.createdAt).toLocaleDateString(locale)}

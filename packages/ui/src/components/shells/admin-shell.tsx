@@ -30,6 +30,7 @@ import {
   IconReportMoney,
   IconSettings,
   IconShield,
+  IconSparkles,
   IconTruckDelivery,
 } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
@@ -127,6 +128,7 @@ const navItems: NavItem[] = [
   { href: '/procurement', key: 'procurement', icon: IconTruckDelivery },
   { href: '/withdrawals', key: 'withdrawals', icon: IconCash },
   { href: '/funds', key: 'funds', icon: IconReportMoney },
+  { href: '/diagnosis', key: 'diagnosis', icon: IconSparkles },
   { href: '/settings', key: 'settings', icon: IconSettings },
 ];
 

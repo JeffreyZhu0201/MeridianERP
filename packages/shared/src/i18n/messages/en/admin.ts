@@ -15,6 +15,7 @@ export const admin = {
     crm: 'CRM',
     inventory: 'Inventory',
     admins: 'Admins',
+    diagnosis: 'Ops diagnosis',
   },
   roles: {
     SUPER_ADMIN: 'Super admin',
@@ -591,7 +592,7 @@ export const admin = {
     title: 'Promoter payouts',
     description: 'Settlement batch export and withdrawal approval for the promoter payout loop.',
     approvalSectionDescription:
-      'Review promoter withdrawal requests; approval confirms disbursement (no payment gateway).',
+      'Review promoter withdrawal requests; approval triggers mock payout and records a reference.',
     settlementsSectionDescription:
       'Export settlement batches to mark accrued commissions as withdrawable.',
     settlementsHint:
@@ -626,7 +627,8 @@ export const admin = {
     },
     approve: 'Approve',
     approveTitle: 'Approve withdrawal',
-    approveConfirm: 'This will transfer funds to the distributor. Continue?',
+    approveConfirm:
+      'Approve this withdrawal? A mock payout reference will be recorded on success.',
     reject: 'Reject',
     approveFailed: 'Approve failed',
     rejectFailed: 'Reject failed',
@@ -644,6 +646,7 @@ export const admin = {
       status: 'Status',
       created: 'Requested',
       reviewed: 'Reviewed',
+      payoutReference: 'Payout ref',
       actions: 'Actions',
     },
   },
@@ -868,5 +871,22 @@ export const admin = {
     stripeKeyHint: 'Secret key hint',
     webhookUrl: 'Webhook URL',
     loadError: 'Could not load platform settings. Restart the API if you recently updated.',
+  },
+  diagnosis: {
+    title: 'Operations diagnosis',
+    description:
+      'Ask in natural language; the system aggregates order, commission, inventory, and fund data (mock mode).',
+    queryLabel: 'Question',
+    queryPlaceholder: 'e.g. Why is there no commission for order cxxx? Branch demo allocation commissions?',
+    submit: 'Run diagnosis',
+    submitting: 'Diagnosing…',
+    submitFailed: 'Diagnosis request failed',
+    emptyHint: 'Include an order ID, branch slug, or commission/inventory/fund keywords.',
+    reportTitle: 'Report',
+    cardStatus: {
+      normal: 'Normal',
+      warning: 'Attention',
+      error: 'Issue',
+    },
   },
 } as const;

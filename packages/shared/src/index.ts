@@ -23,4 +23,5 @@ export * from './procurement-addresses.js';
 export * from './fund-formulas.js';
 export * from './order-list.js';
 export * from './plugins.js';
+export * from './ai.js';
 export * from './i18n/index.js';

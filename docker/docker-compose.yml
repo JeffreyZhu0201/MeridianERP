@@ -97,5 +97,31 @@ services:
       STORE_APP_URL: http://localhost:3003
     profiles: [dev, prod]
 
+  distributor:
+    build:
+      context: ..
+      dockerfile: apps/distributor/Dockerfile
+    ports:
+      - "3005:3005"
+    depends_on:
+      api:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3001
+      DISTRIBUTOR_APP_URL: http://localhost:3005
+    profiles: [dev, prod]
+
+  landing:
+    build:
+      context: ..
+      dockerfile: apps/landing/Dockerfile
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: "3004"
+    profiles: [dev, prod]
+
 volumes:
   postgres_data:

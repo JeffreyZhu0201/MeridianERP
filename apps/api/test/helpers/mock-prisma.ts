@@ -42,7 +42,6 @@ export function createMockPrisma() {
   const activities = new Map<Id, CrmActivityRecord>();
   const distributors = new Map<Id, DistributorRecord>();
   const qrCodes = new Map<Id, DistributorQrCodeRecord>();
-  const bindings = new Map<Id, BindingRecord>();
   const customers = new Map<Id, CustomerRecord>();
   const categories = new Map<Id, CategoryRecord>();
   const products = new Map<Id, ProductRecord>();
@@ -212,15 +211,6 @@ export function createMockPrisma() {
     expiresAt: Date;
     revokedAt: Date | null;
     createdAt: Date;
-  }
-
-  interface BindingRecord {
-    id: Id;
-    tenantId: Id;
-    distributorId: Id;
-    bindableType: BindType;
-    bindableId: string;
-    boundAt: Date;
   }
 
   interface CustomerRecord {
@@ -422,6 +412,10 @@ export function createMockPrisma() {
     reviewedByPlatformUserId: string | null;
     rejectionReason: string | null;
     reviewedAt: Date | null;
+    payoutProvider: string | null;
+    payoutReference: string | null;
+    disbursedAt: Date | null;
+    payoutError: string | null;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -1038,50 +1032,6 @@ export function createMockPrisma() {
     if (range.gte && date < range.gte) return false;
     if (range.lte && date > range.lte) return false;
     return true;
-  };
-
-  const attachBinding = (
-    binding: BindingRecord,
-    include?: Record<string, unknown>,
-  ) => {
-    const result: Record<string, unknown> = { ...binding };
-    if (include?.distributor) {
-      const distributor = distributors.get(binding.distributorId);
-      if (
-        typeof include.distributor === 'object' &&
-        'select' in include.distributor
-      ) {
-        const select = include.distributor.select as Record<string, boolean>;
-        result.distributor = distributor
-          ? Object.fromEntries(
-              Object.keys(select)
-                .filter((k) => select[k])
-                .map((k) => [k, distributor[k as keyof DistributorRecord]]),
-            )
-          : null;
-      } else {
-        result.distributor = distributor;
-      }
-    }
-    return result;
-  };
-
-  const filterBindings = (where: Record<string, unknown>) => {
-    let items = [...bindings.values()];
-    if (where.tenantId)
-      items = items.filter((b) => b.tenantId === where.tenantId);
-    if (where.distributorId) {
-      items = items.filter((b) => b.distributorId === where.distributorId);
-    }
-    if (where.bindableType) {
-      items = items.filter((b) => b.bindableType === where.bindableType);
-    }
-    if (where.boundAt) {
-      items = items.filter((b) =>
-        applyDateRange(b.boundAt, where.boundAt as { gte?: Date; lte?: Date }),
-      );
-    }
-    return items;
   };
 
   const filterOrders = (where: Record<string, unknown>) => {
@@ -4900,77 +4850,12 @@ export function createMockPrisma() {
       },
     },
     binding: {
-      findUnique: async ({
-        where,
-      }: {
-        where: {
-          bindableType_bindableId: {
-            bindableType: BindType;
-            bindableId: string;
-          };
-        };
-      }) => {
-        const { bindableType, bindableId } = where.bindableType_bindableId;
-        return (
-          [...bindings.values()].find(
-            (b) =>
-              b.bindableType === bindableType && b.bindableId === bindableId,
-          ) ?? null
-        );
-      },
-      findMany: async ({
-        where,
-        include,
-        orderBy,
-      }: {
-        where?: Record<string, unknown>;
-        include?: Record<string, unknown>;
-        orderBy?: { boundAt?: 'desc' | 'asc' };
-      }) => {
-        let items = filterBindings(where ?? {});
-        if (orderBy?.boundAt === 'desc') {
-          items = items.sort(
-            (a, b) => b.boundAt.getTime() - a.boundAt.getTime(),
-          );
-        }
-        return items.map((binding) => attachBinding(binding, include));
-      },
-      count: async ({ where }: { where?: Record<string, unknown> }) =>
-        filterBindings(where ?? {}).length,
-      groupBy: async ({
-        by,
-        where,
-        _count,
-      }: {
-        by: ['distributorId'];
-        where?: Record<string, unknown>;
-        _count?: true | { _all?: boolean };
-      }) => {
-        const items = filterBindings(where ?? {});
-        const counts = new Map<string, number>();
-        for (const binding of items) {
-          counts.set(
-            binding.distributorId,
-            (counts.get(binding.distributorId) ?? 0) + 1,
-          );
-        }
-        return [...counts.entries()].map(([distributorId, count]) => ({
-          distributorId,
-          _count: _count ? count : undefined,
-        }));
-      },
-      create: async ({
-        data,
-      }: {
-        data: Omit<BindingRecord, 'id' | 'boundAt'> & { boundAt?: Date };
-      }) => {
-        const record: BindingRecord = {
-          id: nextId('bind'),
-          boundAt: data.boundAt ?? now(),
-          ...data,
-        };
-        bindings.set(record.id, record);
-        return record;
+      findUnique: async () => null,
+      findMany: async () => [],
+      count: async () => 0,
+      groupBy: async () => [],
+      create: async () => {
+        throw new Error('Bindings removed');
       },
     },
     masterSku: {
@@ -5486,36 +5371,6 @@ export function createMockPrisma() {
         return record;
       },
     },
-    replenishmentRequest: {
-      findMany: async () => [],
-      findUnique: async () => null,
-      create: async ({
-        data,
-        include,
-      }: {
-        data: Record<string, unknown>;
-        include?: unknown;
-      }) => ({
-        id: nextId('repl'),
-        status: 'PENDING',
-        lines: [],
-        createdAt: now(),
-        updatedAt: now(),
-        ...data,
-      }),
-      update: async ({
-        where,
-        data,
-        include,
-      }: {
-        where: { id: string };
-        data: Record<string, unknown>;
-        include?: unknown;
-      }) => ({ id: where.id, lines: [], ...data }),
-    },
-    replenishmentRequestLine: {
-      create: async () => ({}),
-    },
     deliveryAllocationLedger: {
       aggregate: async () => ({ _sum: { lineTotal: null } }),
     },
@@ -5657,6 +5512,10 @@ export function createMockPrisma() {
           reviewedByPlatformUserId: null,
           rejectionReason: null,
           reviewedAt: null,
+          payoutProvider: null,
+          payoutReference: null,
+          disbursedAt: null,
+          payoutError: null,
           createdAt: now(),
           updatedAt: now(),
         };

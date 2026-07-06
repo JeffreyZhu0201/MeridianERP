@@ -1,7 +1,9 @@
 # Phase 5 — HQ Branch Channel & Factory Allocation
 
-**Version:** 2.0  
-**Last updated:** 2025-06-25  
+> **Partially superseded (2026-07-06):** Retail-order / FULFILLED commission triggers and customer QR bindings were removed. Current promoter commission is **allocation-only** (max 2 per branch). See [`docs/PRODUCT.md`](../PRODUCT.md) and [`docs/handoffs/remove-branch-distributors-implementation.md`](../handoffs/remove-branch-distributors-implementation.md).
+
+**Version:** 2.1  
+**Last updated:** 2026-07-06  
 **Status:** Complete; retained as shipped Phase 5 product reference  
 **Depends on:** Phase 1–4 (auth, store commerce, inventory, distributor portal shell), Bento UI (US-5.1 store picker delivered)
 
@@ -11,8 +13,8 @@
 |-------|----|----|
 | Distributor scope | Tenant-scoped; merchant CRUD | **Platform-level** B2B channel partners; **Admin CRUD only** |
 | Distributor role | Customer-facing QR bind + downline tree | **Recruit branch stores (merchants)** only; no terminal-customer attribution |
-| Commission source | `order.distributorId` from customer binding | `MerchantProfile.recruitedByDistributorId` on **branch sales** |
-| Commission trigger | Order `PAID` | Order **`FULFILLED`** (pickup verify or HQ ship) |
+| Commission source | `order.distributorId` from customer binding | `MerchantProfile.recruitedByDistributorId` on **allocation orders** |
+| Commission trigger | Order `PAID` / `FULFILLED` (historical) | **Allocation order `CONFIRMED`** (1st–2nd per branch only) |
 | Withdrawal approval | Merchant | **Platform Admin** |
 | Inventory on pay | Decrement branch stock on `PAID` | **No decrement on `PAID`**; pickup verify → branch stock; delivery ship → MasterSku |
 | Epic F | — | Pickup/delivery fulfillment, HQ delivery queue, shared `OrderListFrame` |

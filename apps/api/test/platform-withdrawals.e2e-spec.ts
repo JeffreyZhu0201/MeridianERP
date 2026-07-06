@@ -152,6 +152,9 @@ describe('Platform withdrawals (e2e)', () => {
 
     expect(approved.body.status).toBe(WithdrawalRequestStatus.APPROVED);
     expect(approved.body.reviewedAt).not.toBeNull();
+    expect(approved.body.payoutReference).toMatch(/^mock_payout_/);
+    expect(approved.body.disbursedAt).not.toBeNull();
+    expect(approved.body.payoutProvider).toBe('mock');
 
     const created2 = await request(app.getHttpServer())
       .post('/api/v1/distributor/me/withdrawals')

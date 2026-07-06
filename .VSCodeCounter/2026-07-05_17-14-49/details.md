@@ -1,10 +1,10 @@
 # Details
 
-Date : 2026-07-05 16:54:41
+Date : 2026-07-05 17:14:49
 
 Directory /Users/zhuzy2024/Documents/Workspace/MeridianERP
 
-Total : 884 files,  89214 codes, 2380 comments, 13330 blanks, all 104924 lines
+Total : 884 files,  89235 codes, 2381 comments, 13331 blanks, all 104947 lines
 
 [Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
 
@@ -561,7 +561,7 @@ Total : 884 files,  89214 codes, 2380 comments, 13330 blanks, all 104924 lines
 | [apps/store/Dockerfile](/apps/store/Dockerfile) | Docker | 32 | 1 | 5 | 38 |
 | [apps/store/app/embed-preview/page.tsx](/apps/store/app/embed-preview/page.tsx) | TypeScript JSX | 62 | 0 | 8 | 70 |
 | [apps/store/app/globals.css](/apps/store/app/globals.css) | CSS | 92 | 1 | 16 | 109 |
-| [apps/store/app/layout.tsx](/apps/store/app/layout.tsx) | TypeScript JSX | 36 | 0 | 5 | 41 |
+| [apps/store/app/layout.tsx](/apps/store/app/layout.tsx) | TypeScript JSX | 47 | 0 | 5 | 52 |
 | [apps/store/app/login/page.tsx](/apps/store/app/login/page.tsx) | TypeScript JSX | 100 | 0 | 11 | 111 |
 | [apps/store/app/open-shop/page.tsx](/apps/store/app/open-shop/page.tsx) | TypeScript JSX | 260 | 0 | 20 | 280 |
 | [apps/store/app/open-shop/pending/page.tsx](/apps/store/app/open-shop/pending/page.tsx) | TypeScript JSX | 17 | 0 | 3 | 20 |
@@ -593,7 +593,7 @@ Total : 884 files,  89214 codes, 2380 comments, 13330 blanks, all 104924 lines
 | [apps/store/lib/cart-session.shared.ts](/apps/store/lib/cart-session.shared.ts) | TypeScript | 4 | 0 | 2 | 6 |
 | [apps/store/lib/fulfillment.ts](/apps/store/lib/fulfillment.ts) | TypeScript | 35 | 0 | 7 | 42 |
 | [apps/store/lib/pricing.ts](/apps/store/lib/pricing.ts) | TypeScript | 18 | 0 | 6 | 24 |
-| [apps/store/middleware.ts](/apps/store/middleware.ts) | TypeScript | 44 | 0 | 11 | 55 |
+| [apps/store/middleware.ts](/apps/store/middleware.ts) | TypeScript | 51 | 0 | 12 | 63 |
 | [apps/store/next-env.d.ts](/apps/store/next-env.d.ts) | TypeScript | 0 | 5 | 2 | 7 |
 | [apps/store/next.config.ts](/apps/store/next.config.ts) | TypeScript | 8 | 0 | 4 | 12 |
 | [apps/store/package.json](/apps/store/package.json) | JSON | 36 | 0 | 1 | 37 |
@@ -832,7 +832,7 @@ Total : 884 files,  89214 codes, 2380 comments, 13330 blanks, all 104924 lines
 | [packages/ui/src/components/theme/locale-toggle.tsx](/packages/ui/src/components/theme/locale-toggle.tsx) | TypeScript JSX | 61 | 28 | 11 | 100 |
 | [packages/ui/src/components/theme/mode-toggle.tsx](/packages/ui/src/components/theme/mode-toggle.tsx) | TypeScript JSX | 51 | 27 | 10 | 88 |
 | [packages/ui/src/components/theme/portal-locale-provider.tsx](/packages/ui/src/components/theme/portal-locale-provider.tsx) | TypeScript JSX | 16 | 26 | 5 | 47 |
-| [packages/ui/src/components/theme/portal-theme-provider.tsx](/packages/ui/src/components/theme/portal-theme-provider.tsx) | TypeScript JSX | 21 | 23 | 4 | 48 |
+| [packages/ui/src/components/theme/portal-theme-provider.tsx](/packages/ui/src/components/theme/portal-theme-provider.tsx) | TypeScript JSX | 24 | 24 | 4 | 52 |
 | [packages/ui/src/components/theme/theme-provider.tsx](/packages/ui/src/components/theme/theme-provider.tsx) | TypeScript JSX | 9 | 16 | 4 | 29 |
 | [packages/ui/src/components/ui/accordion.tsx](/packages/ui/src/components/ui/accordion.tsx) | TypeScript JSX | 51 | 0 | 7 | 58 |
 | [packages/ui/src/components/ui/alert-dialog.tsx](/packages/ui/src/components/ui/alert-dialog.tsx) | TypeScript JSX | 127 | 0 | 14 | 141 |

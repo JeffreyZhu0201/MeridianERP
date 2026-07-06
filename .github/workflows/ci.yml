@@ -40,8 +40,81 @@ jobs:
           JWT_MERCHANT_SECRET: test-merchant-jwt-secret
           JWT_STORE_SECRET: test-store-jwt-secret
           JWT_DISTRIBUTOR_SECRET: test-distributor-jwt-secret
-          BIND_TOKEN_SECRET: test-bind-token-secret
           STRIPE_SECRET_KEY: sk_test_mock
+          PAYOUT_PROVIDER: mock
 
       - name: Build all apps
         run: pnpm build
+
+  ui-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: meridian
+          POSTGRES_PASSWORD: meridian
+          POSTGRES_DB: meridian
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U meridian"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared packages
+        run: pnpm --filter @meridian/shared build
+
+      - name: Database setup
+        run: pnpm db:setup
+        env:
+          DATABASE_URL: postgresql://meridian:meridian@localhost:5432/meridian
+          DIRECT_DATABASE_URL: postgresql://meridian:meridian@localhost:5432/meridian
+          JWT_SECRET: test-jwt-secret
+          JWT_MERCHANT_SECRET: test-merchant-jwt-secret
+          JWT_STORE_SECRET: test-store-jwt-secret
+          JWT_DISTRIBUTOR_SECRET: test-distributor-jwt-secret
+          STRIPE_SECRET_KEY: sk_test_mock
+          PAYOUT_PROVIDER: mock
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Distributor Playwright smoke
+        run: pnpm exec playwright test --project=distributor
+        env:
+          DATABASE_URL: postgresql://meridian:meridian@localhost:5432/meridian
+          DIRECT_DATABASE_URL: postgresql://meridian:meridian@localhost:5432/meridian
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret
+          JWT_MERCHANT_SECRET: test-merchant-jwt-secret
+          JWT_STORE_SECRET: test-store-jwt-secret
+          JWT_DISTRIBUTOR_SECRET: test-distributor-jwt-secret
+          STRIPE_SECRET_KEY: sk_test_mock
+          PAYOUT_PROVIDER: mock
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          DISTRIBUTOR_APP_URL: http://localhost:3005

@@ -1,6 +1,6 @@
 # MeridianERP
 
-**Version:** v1.0.5 (Phase 5 + admin RBAC complete)  
+**Version:** v1.1.0 (Phase 5 + AI diagnosis + mock payout)  
 **Project:** QTWBJFXT20250904
 
 ## What This Is
@@ -55,10 +55,10 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 | `rtk pnpm lint`                    | Run workspace lint                                                                   |
 | `rtk pnpm build`                   | Build all workspaces                                                                 |
 | `rtk pnpm test:e2e`                | Run Playwright UI tests (run `rtk pnpm exec playwright install chromium` once first) |
-| `cd apps/api && rtk pnpm test:e2e` | Run API integration tests (144 cases)                                                |
+| `cd apps/api && rtk pnpm test:e2e` | Run API integration tests (172 cases)                                                |
 
 
-Optional full stack:
+Optional full stack (all six portals + API + Postgres + Redis):
 
 ```bash
 rtk docker compose -f docker/docker-compose.yml --profile dev up --build
@@ -77,7 +77,7 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Admin (reviewer)    | [http://localhost:3000](http://localhost:3000)               | `reviewer@meridian.test`        | `review123`  |
 | Merchant            | [http://localhost:3002](http://localhost:3002)               | `demo@merchant.test`            | `demo1234`   |
 | Store               | [http://localhost:3003/s/demo](http://localhost:3003/s/demo) | Register at `/s/demo/register`  | n/a          |
-| Distributor         | [http://localhost:3005](http://localhost:3005)               | Create in Admin -> Distributors | n/a          |
+| Distributor         | [http://localhost:3005](http://localhost:3005)               | `promoter@meridian.test` / `promo1234` (after `db:seed`) |
 
 
 
@@ -90,6 +90,7 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Current product state     | `docs/PRODUCT.md`                                     |
 | System architecture       | `docs/architecture/system-overview.md`                |
 | Admin RBAC roles          | `docs/architecture/admin-rbac.md`                     |
+| AI ops diagnosis          | `docs/architecture/ai-diagnosis.md`                 |
 | Flagship unified store    | `docs/architecture/flagship-catalog-store.md`         |
 | UI design system          | `docs/design/design-system.md`                        |
 | Agent execution workflow  | `docs/execution/README.md`                            |

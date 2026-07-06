@@ -16,6 +16,7 @@ import { QueueModule } from './queue/queue.module';
 import { StoreModule } from './store/store.module';
 import { DistributorModule } from './distributor/distributor.module';
 import { PluginModule } from './plugins/plugin.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { PluginModule } from './plugins/plugin.module';
     CommissionModule,
     InventoryModule,
     PluginModule,
+    AiModule,
     PlatformModule,
     MerchantModule,
     StoreModule,

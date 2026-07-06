@@ -210,6 +210,10 @@ export class DistributorMeService {
       note: row.note,
       rejectionReason: row.rejectionReason,
       reviewedAt: row.reviewedAt?.toISOString() ?? null,
+      payoutProvider: row.payoutProvider,
+      payoutReference: row.payoutReference,
+      disbursedAt: row.disbursedAt?.toISOString() ?? null,
+      payoutError: row.payoutError,
       createdAt: row.createdAt.toISOString(),
     }));
   }
