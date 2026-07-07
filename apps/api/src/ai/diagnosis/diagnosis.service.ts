@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type { DiagnosisRequest, DiagnosisResult } from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
-import { MockLlmClient, type ToolRunResult } from '../llm/mock-llm.client';
+import { AiLlmService } from '../llm/ai-llm.service';
+import type { ToolRunResult } from '../llm/tool-run-result';
 import { CommissionDiagnosisTool } from './tools/commission.tool';
 import { FundDiagnosisTool } from './tools/fund.tool';
 import { InventoryDiagnosisTool } from './tools/inventory.tool';
@@ -29,7 +30,7 @@ export class DiagnosisService {
     private readonly commissionTool: CommissionDiagnosisTool,
     private readonly inventoryTool: InventoryDiagnosisTool,
     private readonly fundTool: FundDiagnosisTool,
-    private readonly mockLlm: MockLlmClient,
+    private readonly llm: AiLlmService,
   ) {}
 
   async diagnose(
@@ -100,7 +101,7 @@ export class DiagnosisService {
       });
     }
 
-    return this.mockLlm.synthesize(query, toolRuns);
+    return this.llm.synthesizeDiagnosis(query, toolRuns);
   }
 
   private async parseQuery(query: string): Promise<ParsedQuery> {

@@ -3,6 +3,7 @@ import { BentoListHeader, ListPageFrame, formatMoney } from '@meridian/ui/server
 import type { PlatformFundsNetProfitBreakdown } from '@meridian/shared';
 
 import { AdminBackLink } from '@/components/admin-back-link';
+import { AdminFundsAiInsight } from '@/app/_components/admin-funds-ai-insight';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { requireToken } from '@/lib/auth';
@@ -79,6 +80,12 @@ export default async function NetProfitPage({
           description={t('description')}
           action={<AdminBackLink href="/funds" label={tb('backToFunds')} />}
         >
+          <AdminFundsAiInsight
+            token={token}
+            metric="net-profit"
+            from={params.from}
+            to={params.to}
+          />
           {breakdown ? (
             <div className="overflow-hidden rounded-xl ring-1 ring-border">
               {rows.map((row) => (

@@ -22,6 +22,7 @@ import {
 import type { WithdrawalRequestRow, WithdrawalRequestStatus } from '@meridian/shared';
 
 import { apiFetch } from '@/lib/api';
+import { AdminAiInsightPanel } from '@/app/_components/admin-ai-insight-panel';
 
 interface WithdrawalsTableProps {
   withdrawals: WithdrawalRequestRow[];
@@ -179,6 +180,14 @@ export function WithdrawalsTable({ withdrawals, token }: WithdrawalsTableProps) 
         }
       >
         <p className="text-sm text-muted-foreground">{t('approveConfirm')}</p>
+        {approveId ? (
+          <AdminAiInsightPanel
+            token={token}
+            endpoint="/platform/ai/insights/withdrawal"
+            body={{ withdrawalId: approveId }}
+            compact
+          />
+        ) : null}
       </Dialog>
 
       <Dialog

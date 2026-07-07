@@ -1,7 +1,7 @@
 # AI Operations Diagnosis
 
 **Version:** 1.0  
-**Status:** Shipped (mock mode)  
+**Status:** Shipped (mock + live Anthropic-compatible)  
 **Canonical contracts:** [`packages/shared/src/ai.ts`](../../packages/shared/src/ai.ts)
 
 ## Overview
@@ -27,10 +27,12 @@ apps/api/src/ai/
 │   ├── diagnosis.service.ts
 │   └── tools/          # Prisma-backed domain queries
 └── llm/
-    └── mock-llm.client.ts   # Deterministic report synthesis
+    ├── anthropic-llm.client.ts  # Live: Anthropic-compatible API (Volcengine Ark, etc.)
+    ├── llm.service.ts           # mock/live router with fallback
+    └── mock-llm.client.ts       # Deterministic report synthesis
 ```
 
-`DiagnosisService` parses the query (order id, tenant slug, domain keywords), runs applicable tools in parallel, then delegates to `MockLlmClient`.
+`DiagnosisService` parses the query (order id, tenant slug, domain keywords), runs applicable tools in parallel, then delegates to `LlmService` (mock or live Anthropic-compatible client).
 
 ## Tools
 
@@ -50,7 +52,13 @@ apps/api/src/ai/
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `AI_DIAGNOSIS_MODE` | `mock` | `mock` = deterministic client; `live` reserved for future OpenAI/Anthropic |
+| `AI_MODE` | `mock` | Global `mock` / `live`; legacy `AI_DIAGNOSIS_MODE` still honored |
+| `AI_ANTHROPIC_BASE_URL` | — | Also `AI_DIAGNOSIS_ANTHROPIC_BASE_URL` / `ANTHROPIC_BASE_URL` |
+| `AI_ANTHROPIC_API_KEY` | — | Also diagnosis / `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY` |
+| `AI_ANTHROPIC_MODEL` | `ark-code-latest` | Also `AI_DIAGNOSIS_ANTHROPIC_MODEL` / `ANTHROPIC_MODEL` |
+| `AI_DIAGNOSIS_MODE` | `mock` | Legacy per-feature flag; use `AI_MODE` for new features |
+
+When `AI_DIAGNOSIS_MODE=live` and base URL + API key are set, `AnthropicLlmClient` calls `{baseURL}/v1/messages` (Anthropic Messages API). On failure, the service falls back to mock synthesis.
 
 ## Security
 
@@ -60,4 +68,4 @@ apps/api/src/ai/
 
 ## ADR
 
-**Mock-first LLM:** Ship operator value without external dependencies. Replace `MockLlmClient` with a live provider when `AI_DIAGNOSIS_MODE=live` without changing tool contracts.
+**Mock-first LLM:** Default mode needs no external API. Set `AI_DIAGNOSIS_MODE=live` with Anthropic-compatible base URL (e.g. Volcengine Ark Coding Plan) for natural-language reports; tool contracts unchanged.

@@ -16,6 +16,7 @@ import {
 import { LeadStage } from '@meridian/shared';
 
 import { apiFetch, type Lead } from '@/lib/api';
+import { CrmAiFollowUpPanel } from '../../../_components/crm-ai-follow-up-panel';
 
 interface LeadDetailProps {
   lead: Lead;
@@ -110,6 +111,8 @@ export function LeadDetail({ lead, token }: LeadDetailProps) {
           </div>
         </CardContent>
       </Card>
+
+      <CrmAiFollowUpPanel token={token} leadId={lead.id} />
     </DetailPageFrame>
   );
 }

@@ -4,8 +4,11 @@ import { FulfillmentModule } from '../fulfillment/fulfillment.module';
 import { OrderLifecycleModule } from '../orders/order-lifecycle.module';
 import { PlatformAllocationsModule } from '../platform/allocations/platform-allocations.module';
 import { PlatformFundsModule } from '../platform/funds/platform-funds.module';
+import { AiModule } from '../ai/ai.module';
 import { MerchantAuthController } from './auth/merchant-auth.controller';
 import { MerchantAuthService } from './auth/merchant-auth.service';
+import { CatalogAiController } from './catalog/ai/catalog-ai.controller';
+import { ProductCopyAiService } from './catalog/ai/product-copy-ai.service';
 import { MerchantCategoriesController } from './catalog/categories.controller';
 import { MerchantCategoriesService } from './catalog/categories.service';
 import { MerchantProductsController } from './catalog/products.controller';
@@ -18,6 +21,8 @@ import { ContactsController } from './crm/contacts/contacts.controller';
 import { ContactsService } from './crm/contacts/contacts.service';
 import { StoreCustomersController } from './crm/store-customers/store-customers.controller';
 import { StoreCustomersService } from './crm/store-customers/store-customers.service';
+import { CrmAiController } from './crm/ai/crm-ai.controller';
+import { CrmFollowUpService } from './crm/ai/crm-follow-up.service';
 import { LeadsController } from './crm/leads/leads.controller';
 import { LeadsService } from './crm/leads/leads.service';
 import { ActivitiesController } from './crm/activities/activities.controller';
@@ -46,6 +51,7 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     MerchantSettingsModule,
     MerchantPluginsModule,
     MerchantProcurementModule,
+    AiModule,
     FulfillmentModule,
     OrderLifecycleModule,
     PlatformAllocationsModule,
@@ -58,8 +64,10 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     ContactsController,
     StoreCustomersController,
     LeadsController,
+    CrmAiController,
     ActivitiesController,
     MerchantCategoriesController,
+    CatalogAiController,
     MerchantProductsController,
     MerchantOrdersController,
     MerchantFundsController,
@@ -72,8 +80,10 @@ import { CrmPluginGuard } from '../plugins/crm-plugin.guard';
     ContactsService,
     StoreCustomersService,
     LeadsService,
+    CrmFollowUpService,
     ActivitiesService,
     MerchantCategoriesService,
+    ProductCopyAiService,
     MerchantProductsService,
     MerchantOrdersService,
     PluginGuard,

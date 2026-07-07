@@ -23,6 +23,7 @@ import {
 } from '@meridian/ui';
 
 import { apiFetch, type Product } from '@/lib/api';
+import { ProductCopyAiPanel } from './product-copy-ai-panel';
 
 interface ProductsTableProps {
   products: Product[];
@@ -341,6 +342,15 @@ export function ProductsTable({ products: initial, categories, token }: Products
               </div>
             </div>
           </div>
+          <ProductCopyAiPanel
+            token={token}
+            productId={editing?.id}
+            draft={form}
+            onAdoptTitle={(title) => setForm({ ...form, name: title })}
+            onAdoptDescription={(description) =>
+              setForm({ ...form, description })
+            }
+          />
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </div>
       </Sheet>

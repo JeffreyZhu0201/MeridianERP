@@ -872,6 +872,19 @@ export const admin = {
     webhookUrl: 'Webhook URL',
     loadError: 'Could not load platform settings. Restart the API if you recently updated.',
   },
+  aiInsight: {
+    title: 'AI operations insight',
+    readonly: 'Read-only',
+    generate: 'Generate insight',
+    generating: 'Generating…',
+    submitFailed: 'Could not generate insight. Please try again.',
+    summary: 'Summary',
+    findings: 'Findings',
+    recommendations: 'Recommendations',
+    risks: 'Risks',
+    orderButton: 'AI',
+    orderDialogTitle: 'Order AI insight',
+  },
   diagnosis: {
     title: 'Operations diagnosis',
     description:

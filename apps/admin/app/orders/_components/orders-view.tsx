@@ -9,6 +9,8 @@ import {
   Button,
   cn,
   DeliveryShipDialog,
+  Dialog,
+  DialogCloseButton,
   formatMoney,
   Input,
   Label,
@@ -24,6 +26,7 @@ import type { DeliveryAddress, PlatformOrderDetail } from '@meridian/shared';
 import { OrderStatus } from '@meridian/shared';
 
 import { apiFetch, type PlatformOrder } from '@/lib/api';
+import { AdminAiInsightPanel } from '@/app/_components/admin-ai-insight-panel';
 
 interface OrdersViewProps {
   orders: PlatformOrder[];
@@ -89,10 +92,12 @@ export function OrdersView({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations('admin.orders');
+  const ta = useTranslations('admin.aiInsight');
   const tc = useTranslations('common');
   const locale = useLocale();
   const [error, setError] = useState('');
   const [shipTarget, setShipTarget] = useState<PlatformOrderDetail | null>(null);
+  const [insightOrderId, setInsightOrderId] = useState<string | null>(null);
   const [shipLoading, setShipLoading] = useState(false);
   const [shipping, setShipping] = useState(false);
 
@@ -333,15 +338,26 @@ export function OrdersView({
                   </TableCell>
                   {showShipActions ? (
                     <TableCell className="text-right">
-                      {order.status === 'PAID' && order.fulfillmentType === 'DELIVERY' ? (
-                        <Button
-                          size="sm"
-                          onClick={() => openShipDialog(order.id)}
-                          disabled={shipLoading && shipTarget?.id === order.id}
-                        >
-                          {t('ship')}
-                        </Button>
-                      ) : null}
+                      <div className="flex justify-end gap-2">
+                        {isFlagshipDelivery && order.fulfillmentType === 'DELIVERY' ? (
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setInsightOrderId(order.id)}
+                          >
+                            {ta('orderButton')}
+                          </Button>
+                        ) : null}
+                        {order.status === 'PAID' && order.fulfillmentType === 'DELIVERY' ? (
+                          <Button
+                            size="sm"
+                            onClick={() => openShipDialog(order.id)}
+                            disabled={shipLoading && shipTarget?.id === order.id}
+                          >
+                            {t('ship')}
+                          </Button>
+                        ) : null}
+                      </div>
                     </TableCell>
                   ) : null}
                 </TableRow>
@@ -372,6 +388,26 @@ export function OrdersView({
           isSubmitting={shipping}
         />
       ) : null}
+
+      <Dialog
+        open={!!insightOrderId}
+        onOpenChange={(open) => !open && setInsightOrderId(null)}
+        title={ta('orderDialogTitle')}
+        footer={
+          <DialogCloseButton onClose={() => setInsightOrderId(null)}>
+            {tc('cancel')}
+          </DialogCloseButton>
+        }
+      >
+        {insightOrderId ? (
+          <AdminAiInsightPanel
+            token={token}
+            endpoint="/platform/ai/insights/delivery-order"
+            body={{ orderId: insightOrderId }}
+            compact
+          />
+        ) : null}
+      </Dialog>
     </div>
   );
 }

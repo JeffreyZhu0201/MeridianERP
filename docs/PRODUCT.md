@@ -2,7 +2,7 @@
 
 **Version:** 1.1.1  
 **Updated:** 2026-07-06  
-**Status:** Phase 1–5 complete; AI diagnosis (mock) shipped; mock payout on withdrawal approval.
+**Status:** Phase 1–5 complete; AI diagnosis + merchant CRM AI + admin contextual AI + merchant inventory/catalog AI shipped; mock payout on withdrawal approval.
 
 ## Status
 
@@ -56,7 +56,8 @@ All portals share the NestJS API in `apps/api` on port 3001.
 | 分店进货 | `/procurement` | Paid branch purchase orders — HQ shipment |
 | 提现审批 | `/withdrawals` | Promoter withdrawal approval **and** commission settlement export |
 | 资金 | `/funds` | Five HQ financial KPIs with drill-down detail pages |
-| 运营诊断 | `/diagnosis` | Mock AI ops diagnosis (SUPER_ADMIN, FINANCE) |
+| 运营诊断 | `/diagnosis` | AI ops diagnosis — mock default; live via Volcengine Ark / Anthropic API (SUPER_ADMIN, FINANCE) |
+| 场景化 AI | (embedded) | Withdrawal approve dialog, `/allocations` delivery rows, `/funds/*` detail pages — on-demand insights |
 | 设置 | `/settings` | Platform settings |
 
 Legacy routes redirect: `/replenishment` → `/procurement`; `/orders?tab=delivery` → `/allocations`; `/settlements` → `/withdrawals?tab=settlements`.
@@ -130,7 +131,10 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 - API package ESLint (`apps/api`) has legacy `@typescript-eslint/no-unsafe-*` debt.
 - Historical phase docs may lag `PRODUCT.md`; prefer this file and `admin-rbac.md` for current nav semantics.
 - Add feature-specific PRD, architecture, and design docs **before** new feature implementation.
-- Live LLM provider for AI diagnosis (`AI_DIAGNOSIS_MODE=live`) not yet implemented.
+- Merchant CRM plugin includes **AI follow-up suggestions** on lead/contact detail (`POST /merchant/crm/ai/follow-up`); see `docs/architecture/crm-ai-follow-up.md`.
+- Merchant **inventory replenishment AI** on `/inventory/alerts` and **product copy AI** in catalog edit sheet (`POST /merchant/inventory/ai/replenishment`, `POST /merchant/catalog/ai/product-copy`); see `docs/architecture/merchant-ai-efficiency.md`.
+- Admin **contextual AI insights** on withdrawals, delivery queue, and funds KPI pages (`POST /platform/ai/insights/*`); see `docs/architecture/admin-ai-insights.md`.
+- Configure `AI_MODE=live` + Anthropic-compatible base URL for production-quality AI narratives (see `docs/architecture/ai-diagnosis.md`).
 
 ## References
 

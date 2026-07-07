@@ -16,6 +16,7 @@ import type { PlatformFundsExpectedProfitLine } from '@meridian/shared';
 
 import { ListPagination } from '@meridian/ui';
 import { AdminBackLink } from '@/components/admin-back-link';
+import { AdminFundsAiInsight } from '@/app/_components/admin-funds-ai-insight';
 import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { apiFetch } from '@/lib/api';
 import { requireToken } from '@/lib/auth';
@@ -69,6 +70,7 @@ export default async function ExpectedProfitPage({
           action={<AdminBackLink href="/funds" label={tb('backToFunds')} />}
           emptyState={rows.length === 0 ? <EmptyState title={t('empty')} /> : undefined}
         >
+          <AdminFundsAiInsight token={token} metric="expected-profit" />
           {rows.length > 0 ? (
             <div className="rounded-xl ring-1 ring-border">
               <Table>

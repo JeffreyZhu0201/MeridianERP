@@ -25,4 +25,7 @@ export * from './fund-formulas.js';
 export * from './order-list.js';
 export * from './plugins.js';
 export * from './ai.js';
+export * from './crm-ai.js';
+export * from './admin-ai.js';
+export * from './merchant-ai.js';
 export * from './i18n/index.js';

@@ -19,6 +19,7 @@ import {
 } from '@meridian/ui';
 
 import { apiFetch, type Contact } from '@/lib/api';
+import { CrmAiFollowUpPanel } from '../../../_components/crm-ai-follow-up-panel';
 
 interface ContactDetailProps {
   contact: Contact;
@@ -124,6 +125,8 @@ export function ContactDetail({ contact, token }: ContactDetailProps) {
             </div>
           </CardContent>
         </Card>
+
+        <CrmAiFollowUpPanel token={token} contactId={contact.id} />
       </DetailPageFrame>
 
       <Sheet

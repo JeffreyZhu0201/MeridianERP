@@ -10,6 +10,7 @@ import { getTranslations } from 'next-intl/server';
 import type { LowStockAlertItem } from '@meridian/shared';
 
 import { LowStockAlertsTable } from './_components/low-stock-alerts-table';
+import { InventoryAiReplenishmentPanel } from './_components/inventory-ai-replenishment-panel';
 
 export default async function AlertsPage() {
   const token = await getToken();
@@ -47,6 +48,7 @@ export default async function AlertsPage() {
             { title: t('onHand'), value: items.reduce((sum, i) => sum + i.quantityOnHand, 0) },
           ]}
         />
+        <InventoryAiReplenishmentPanel token={token} />
         <Suspense>
           <LowStockAlertsTable items={items} />
         </Suspense>
