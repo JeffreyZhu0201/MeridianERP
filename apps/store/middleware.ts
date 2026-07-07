@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const AUTH_COOKIE = 'store_token';
 
 function isPublicStorePath(pathname: string): boolean {
-  if (pathname === '/shop/account') {
+  if (pathname.startsWith('/shop/account')) {
     return false;
   }
 

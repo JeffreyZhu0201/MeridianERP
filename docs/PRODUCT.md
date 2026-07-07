@@ -1,6 +1,6 @@
 # MeridianERP Product State
 
-**Version:** 1.1.0  
+**Version:** 1.1.1  
 **Updated:** 2026-07-06  
 **Status:** Phase 1–5 complete; AI diagnosis (mock) shipped; mock payout on withdrawal approval.
 
@@ -23,7 +23,9 @@ MeridianERP is a multi-tenant ERP platform for factory HQ, branch merchants, B2B
 | Promoter model simplification | Branch downstream-distributor binding & retail-order commission removed | Complete |
 | UI consistency | EmptyState, Alert, Tabs, Bento shells, design-system alignment | Complete |
 | Settings | Platform and merchant settings, team management | Complete |
-| Branch procurement | HQ catalog purchase orders; legacy replenishment requests removed from product UX | Complete |
+| Store account | `/shop/account`, addresses, settings, saved delivery addresses | Complete |
+| Distributor shell | ErpShell sidebar (拓店员) | Complete |
+| Landing embed | Portal iframe previews at `/embed-preview` | Complete |
 
 ## Users And Portals
 
@@ -89,8 +91,8 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 - Tenant isolation is enforced with `tenantId` on merchant-owned data and guarded API access.
 - Admin manages users, merchants, and promoters under the **CRM** nav group; MasterSku & branch allocations at `/inventory/master-catalog`; flagship delivery at `/allocations`; branch procurement shipping at `/procurement`; HQ funds at `/funds`; withdrawal approval at `/withdrawals`.
 - Merchant manages CRM (plugin), inventory, orders, pickup verification, **HQ procurement** (`/inventory/procurement`), funds, and settings. **No** branch downstream-distributor management or customer QR binding UI.
-- Store supports unified flagship catalog at `/shop`, header branch selector, cart, Stripe checkout, account orders, pickup, and delivery. **No** customer–distributor binding or cart distributor attribution.
-- Sales promoters recruit branches via store-portal share links (`/open-shop?invite=`), self-service invite codes on `apps/distributor`, performance views, commission ledger, and withdrawals.
+- Store supports unified flagship catalog at `/shop`, header branch selector, cart, Stripe checkout, account hub (`/shop/account` with orders, saved addresses, settings), pickup, and delivery. **No** customer–distributor binding or cart distributor attribution.
+- Sales promoters use **ErpShell sidebar** on `apps/distributor` (dashboard, share, branches, commissions, withdrawals).
 - HQ withdrawal approval confirms disbursement via **mock payout provider** (`PAYOUT_PROVIDER=mock`); records `payoutReference` and `disbursedAt` on approval.
 
 ## Business Rules
@@ -116,8 +118,8 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 
 | Layer | Command | Status |
 |---|---|---|
-| API e2e | `cd apps/api && rtk pnpm test:e2e` | 41 suites, 172 tests |
-| Playwright UI | `rtk pnpm exec playwright install chromium && rtk pnpm test:e2e` | 18 tests (admin, store, merchant) |
+| API e2e | `cd apps/api && rtk pnpm test:e2e` | 42 suites, 176 tests |
+| Playwright UI | `rtk pnpm exec playwright install chromium && rtk pnpm test:e2e` | 20 tests (admin, store, merchant) |
 | UX patterns | List/detail Bento frames, Toaster feedback, status i18n, accessible tab/filter toolbars | See `docs/design/design-system.md` |
 | Typecheck | `rtk pnpm typecheck` | Strict monorepo build |
 | Next.js lint | `rtk pnpm --filter @meridian/admin --filter @meridian/merchant --filter @meridian/store --filter @meridian/distributor lint` | Flat ESLint config per app |
@@ -138,6 +140,7 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 - Admin nav consolidation handoff: `docs/handoffs/admin-nav-consolidation-implementation.md`.
 - Remove branch distributors handoff: `docs/handoffs/remove-branch-distributors-implementation.md`.
 - Flagship catalog: `docs/architecture/flagship-catalog-store.md`.
+- Store account: `docs/prd/store-account.md`, `docs/architecture/store-account.md`.
 - Design system: `docs/design/design-system.md`.
 - Sales promoter design: `docs/design/sales-promoter.md`.
 - Execution workflow: `docs/execution/README.md`.

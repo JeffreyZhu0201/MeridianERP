@@ -1,7 +1,7 @@
 # Store Portal — Design Spec
 
 **Reference:** [`stich.md`](./stich.md) (HTML mockups)  
-**Updated:** 2026-07-04  
+**Updated:** 2026-07-06  
 **Scope:** `apps/store` consumer storefront only
 
 ## Theme
@@ -35,7 +35,10 @@ Store uses a **scoped M3-inspired palette** via `[data-portal="store"]` in `apps
 | `StoreCatalogHeader` | 8+4 title + metrics row |
 | `StoreFeaturedHero` | Glass overlay featured product |
 | `StoreCatalogToolbar` | Filter/sort via URL query params |
-| `StoreAccountSidebar` | Account nav (Orders active; Addresses/Settings stubs) |
+| `StoreAccountSidebar` | Account nav — Orders / Addresses / Settings links |
+| `StoreAddressList` | Saved address cards + default badge |
+| `StoreAddressForm` | Dialog form (label, name, phone, line1/2, city, province, postal) |
+| `StoreAccountSettingsForm` | Profile fields + change-password section |
 | `StoreAccountProfileHero` | Avatar initials, name, email |
 | `StoreAccountOrderList` | Card-wrapped order history |
 | `ProductCard variant="store"` | Catalog grid cards |
@@ -46,7 +49,9 @@ Store uses a **scoped M3-inspired palette** via `[data-portal="store"]` in `apps
 | Route | Pattern |
 |-------|---------|
 | `/shop`, `/s/{slug}` | Header → Hero → Toolbar → Grid (filter/sort in URL) |
-| `/shop/account` | Sidebar + profile hero + metrics + order list (branch from cookie) |
+| `/shop/account` | Sidebar (`active=orders`) + profile hero + metrics + order list |
+| `/shop/account/addresses` | Sidebar + address list; empty state + add dialog |
+| `/shop/account/settings` | Sidebar + profile form + password change |
 | `/shop/cart`, `/s/{slug}/cart` | Header metrics → card rows + sticky summary |
 | `/shop/checkout`, `/s/{slug}/checkout` | `StoreCheckoutShell` + 7+5 form + sticky summary |
 | PDP | 7+5 column, sticky details card |
@@ -58,6 +63,12 @@ Store uses a **scoped M3-inspired palette** via `[data-portal="store"]` in `apps
 - Per-store: `GET /store/:slug/products?…` and `GET /store/:slug/products/filters`
 
 Sort values: `newest`, `name_asc`, `price_asc`, `price_desc`.
+
+## Account API
+
+- `GET/POST/PATCH/DELETE /store/auth/addresses`
+- `PATCH /store/auth/me` — profile
+- `POST /store/auth/change-password`
 
 ## Accessibility
 

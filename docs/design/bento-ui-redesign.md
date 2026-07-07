@@ -36,7 +36,7 @@
 
 ### Distributor (`apps/distributor`)
 
-- **`DistributorShell`:** top nav + locale/theme (matches store shell density)
+- **`DistributorShell`:** ErpShell sidebar + locale/theme (matches admin/merchant density)
 - **Dashboard:** 7 metrics in Bento + chart span-2
 - **Commissions:** summary Bento header + ledger table
 

@@ -14,6 +14,7 @@ export * from './settings.js';
 export * from './store.js';
 export * from './flagship-catalog.js';
 export * from './store-catalog-query.js';
+export * from './store-account.js';
 export * from './phase-5-distribution.js';
 export * from './phase-5-allocation.js';
 export * from './phase-5-fulfillment.js';

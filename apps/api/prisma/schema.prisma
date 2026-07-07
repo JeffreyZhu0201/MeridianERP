@@ -175,6 +175,7 @@ model PlatformAccount {
   customers     Customer[] // 各租户消费者档案
   merchantUsers User[] // 商户门户用户
   distributor   Distributor? // 拓店员身份（可选）
+  deliveryAddresses CustomerDeliveryAddress[] // 消费者收货地址
 }
 
 // ============================================================
@@ -420,6 +421,26 @@ model Customer {
 
   @@unique([tenantId, email]) // 同一租户下邮箱唯一
   @@index([tenantId])
+  @@index([accountId])
+}
+
+// 消费者收货地址（平台账号级，统一商城）
+model CustomerDeliveryAddress {
+  id         String          @id @default(cuid())
+  accountId  String
+  account    PlatformAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  label      String?
+  name       String
+  phone      String
+  line1      String
+  line2      String?
+  city       String
+  province   String?
+  postalCode String?
+  isDefault  Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
   @@index([accountId])
 }
 

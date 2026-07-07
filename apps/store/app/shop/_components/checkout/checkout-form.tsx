@@ -3,9 +3,14 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, formatMoney, Input, Label } from '@meridian/ui';
-import type { CheckoutResponse, DeliveryAddress, FulfillmentType } from '@meridian/shared';
+import type {
+  CheckoutResponse,
+  CustomerDeliveryAddressRow,
+  DeliveryAddress,
+  FulfillmentType,
+} from '@meridian/shared';
 
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { CheckoutPaymentStep } from './checkout-payment-step';
@@ -47,6 +52,31 @@ export function CheckoutForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [checkout, setCheckout] = useState<CheckoutResponse | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    void apiFetch<CustomerDeliveryAddressRow[]>('/store/auth/addresses', {}, token)
+      .then((addresses) => {
+        if (cancelled) return;
+        const defaultAddress =
+          addresses.find((item) => item.isDefault) ?? addresses[0];
+        if (!defaultAddress) return;
+        setDeliveryAddress({
+          name: defaultAddress.name,
+          phone: defaultAddress.phone,
+          line1: defaultAddress.line1,
+          line2: defaultAddress.line2,
+          city: defaultAddress.city,
+          province: defaultAddress.province,
+          postalCode: defaultAddress.postalCode,
+        });
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   const subtotal =
     cart?.items.reduce(

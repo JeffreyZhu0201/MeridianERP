@@ -7,7 +7,6 @@ import {
   formatMoney,
   StoreAccountOrderList,
   StoreAccountProfileHero,
-  StoreAccountSidebar,
 } from '@meridian/ui/server';
 import type {
   OrderStatus,
@@ -20,6 +19,8 @@ import { ShopShellWrapper } from '@/components/shop-shell-wrapper';
 import { apiFetch, storePath, type Cart } from '@/lib/api';
 import { getToken } from '@/lib/auth';
 import { getFulfillmentSlug } from '@/lib/fulfillment';
+
+import { AccountLayout } from './_components/account-layout';
 
 const MERCHANT_PORTAL_URL =
   process.env.NEXT_PUBLIC_MERCHANT_URL ??
@@ -110,20 +111,7 @@ export default async function ShopAccountPage() {
       userEmail={profile?.email}
       showBecomeMerchant={showBecomeMerchant}
     >
-      <div className="flex flex-col gap-8 md:flex-row">
-        <StoreAccountSidebar
-          navLabel={t('account.title')}
-          showBecomeMerchant={showBecomeMerchant}
-          labels={{
-            orders: t('account.sidebar.orders'),
-            addresses: t('account.sidebar.addresses'),
-            settings: t('account.sidebar.settings'),
-            comingSoon: t('account.sidebar.comingSoon'),
-            becomeMerchant: t('account.sidebar.becomeMerchant'),
-          }}
-        />
-
-        <div className="min-w-0 flex-1 space-y-6">
+      <AccountLayout active="orders" showBecomeMerchant={showBecomeMerchant}>
           {profile ? (
             <StoreAccountProfileHero
               firstName={profile.firstName}
@@ -209,8 +197,7 @@ export default async function ShopAccountPage() {
               />
             }
           />
-        </div>
-      </div>
+      </AccountLayout>
     </ShopShellWrapper>
   );
 }

@@ -115,4 +115,5 @@ export interface StoreCustomerProfile {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  phone: string | null;
 }

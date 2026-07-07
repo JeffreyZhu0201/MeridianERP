@@ -47,7 +47,6 @@ export type {
   DistributorLoginResponse,
   DistributorDashboard,
   DistributorCommissionListResponse,
-  DistributorBindingsResponse,
   DistributorBranchSummary,
   WithdrawalRequestRow,
 } from '@meridian/shared';

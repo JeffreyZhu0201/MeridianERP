@@ -78,6 +78,7 @@ export function createMockPrisma() {
   const masterSkus = new Map<Id, MasterSkuRecord>();
   const branchPurchaseOrders = new Map<Id, BranchPurchaseOrderRecord>();
   const procurementReceivingAddresses = new Map<Id, ProcurementReceivingAddressRecord>();
+  const customerDeliveryAddresses = new Map<Id, CustomerDeliveryAddressRecord>();
   const branchPurchaseOrderPayments = new Map<Id, BranchPurchaseOrderPaymentRecord>();
 
   const orderByPaymentIntent = new Map<string, Id>();
@@ -368,6 +369,22 @@ export function createMockPrisma() {
     address: string;
     isDefault: boolean;
     isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  interface CustomerDeliveryAddressRecord {
+    id: Id;
+    accountId: Id;
+    label: string | null;
+    name: string;
+    phone: string;
+    line1: string;
+    line2: string | null;
+    city: string;
+    province: string | null;
+    postalCode: string | null;
+    isDefault: boolean;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -3075,6 +3092,21 @@ export function createMockPrisma() {
           return { ...customer, orders: mappedOrders };
         });
       },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where?: { accountId?: string };
+        data: Partial<Pick<CustomerRecord, 'firstName' | 'lastName'>>;
+      }) => {
+        let count = 0;
+        for (const [id, row] of customers.entries()) {
+          if (where?.accountId && row.accountId !== where.accountId) continue;
+          customers.set(id, { ...row, ...data, updatedAt: now() });
+          count++;
+        }
+        return { count };
+      },
     },
     category: {
       findMany: async ({ where }: { where: { tenantId: string } }) =>
@@ -5203,6 +5235,111 @@ export function createMockPrisma() {
       },
       delete: async ({ where }: { where: { id: string } }) => {
         procurementReceivingAddresses.delete(where.id);
+        return { id: where.id };
+      },
+    },
+    customerDeliveryAddress: {
+      findMany: async ({
+        where,
+        orderBy,
+      }: {
+        where?: { accountId?: string };
+        orderBy?: Array<{ isDefault?: 'asc' | 'desc'; createdAt?: 'asc' | 'desc' }>;
+      } = {}) => {
+        let items = [...customerDeliveryAddresses.values()];
+        if (where?.accountId) {
+          items = items.filter((a) => a.accountId === where.accountId);
+        }
+        if (orderBy?.length) {
+          items.sort((a, b) => {
+            for (const clause of orderBy) {
+              if (clause.isDefault) {
+                const cmp = Number(b.isDefault) - Number(a.isDefault);
+                if (cmp !== 0) return cmp;
+              }
+              if (clause.createdAt === 'asc') {
+                return a.createdAt.getTime() - b.createdAt.getTime();
+              }
+            }
+            return 0;
+          });
+        }
+        return items;
+      },
+      findFirst: async ({
+        where,
+        orderBy,
+      }: {
+        where?: { id?: string; accountId?: string; isDefault?: boolean };
+        orderBy?: { createdAt?: 'asc' | 'desc' };
+      } = {}) => {
+        let items = [...customerDeliveryAddresses.values()];
+        if (where?.id) items = items.filter((a) => a.id === where.id);
+        if (where?.accountId) items = items.filter((a) => a.accountId === where.accountId);
+        if (where?.isDefault !== undefined) {
+          items = items.filter((a) => a.isDefault === where.isDefault);
+        }
+        if (orderBy?.createdAt === 'asc') {
+          items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        }
+        return items[0] ?? null;
+      },
+      count: async ({ where }: { where?: { accountId?: string } } = {}) => {
+        let items = [...customerDeliveryAddresses.values()];
+        if (where?.accountId) {
+          items = items.filter((a) => a.accountId === where.accountId);
+        }
+        return items.length;
+      },
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: CustomerDeliveryAddressRecord = {
+          id: nextId('cda'),
+          accountId: data.accountId as string,
+          label: (data.label as string | null | undefined) ?? null,
+          name: data.name as string,
+          phone: data.phone as string,
+          line1: data.line1 as string,
+          line2: (data.line2 as string | null | undefined) ?? null,
+          city: data.city as string,
+          province: (data.province as string | null | undefined) ?? null,
+          postalCode: (data.postalCode as string | null | undefined) ?? null,
+          isDefault: (data.isDefault as boolean) ?? false,
+          createdAt: now(),
+          updatedAt: now(),
+        };
+        customerDeliveryAddresses.set(record.id, record);
+        return record;
+      },
+      update: async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, unknown>;
+      }) => {
+        const existing = customerDeliveryAddresses.get(where.id);
+        if (!existing) throw new Error('CustomerDeliveryAddress not found');
+        const updated = { ...existing, ...data, updatedAt: now() };
+        customerDeliveryAddresses.set(where.id, updated);
+        return updated;
+      },
+      updateMany: async ({
+        where,
+        data,
+      }: {
+        where?: { accountId?: string };
+        data: Record<string, unknown>;
+      }) => {
+        let count = 0;
+        for (const [id, row] of customerDeliveryAddresses.entries()) {
+          if (where?.accountId && row.accountId !== where.accountId) continue;
+          customerDeliveryAddresses.set(id, { ...row, ...data, updatedAt: now() });
+          count++;
+        }
+        return { count };
+      },
+      delete: async ({ where }: { where: { id: string } }) => {
+        customerDeliveryAddresses.delete(where.id);
         return { id: where.id };
       },
     },

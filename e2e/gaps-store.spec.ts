@@ -74,4 +74,58 @@ test.describe('Gaps store UI smoke', () => {
     await expect(page.getByRole('heading', { name: /My account/i })).toBeVisible();
     await expect(page.getByText('PAID')).toBeVisible();
   });
+
+  test('catalog sort query updates the shop URL', async ({ page }) => {
+    const res = await page.goto('/shop?sort=price_asc');
+    if (!res || res.status() >= 500) {
+      test.skip(true, 'Store app not running');
+    }
+    await expect(page).toHaveURL(/sort=price_asc/);
+  });
+
+  test('addresses page shows a saved address after API create', async ({ page, request }) => {
+    const health = await request.get(`${API}/api/v1/health`);
+    if (!health.ok()) {
+      test.skip(true, 'API not running');
+    }
+
+    const email = `pw-addr-${Date.now()}@e2e.test`;
+    const password = 'password12';
+    const register = await request.post(`${API}/api/v1/store/auth/register`, {
+      data: { email, password, firstName: 'Addr', lastName: 'Test' },
+    });
+    expect(register.ok()).toBeTruthy();
+    const token = (await register.json()).accessToken as string;
+
+    const create = await request.post(`${API}/api/v1/store/auth/addresses`, {
+      headers: { Authorization: `Bearer ${token}` },
+      data: {
+        name: 'Playwright User',
+        phone: '13800138000',
+        line1: '1 Test Lane',
+        city: 'Shanghai',
+      },
+    });
+    expect(create.ok()).toBeTruthy();
+
+    await page.context().addCookies([
+      {
+        name: 'store_token',
+        value: token,
+        domain: 'localhost',
+        path: '/',
+        httpOnly: false,
+        secure: false,
+        sameSite: 'Lax',
+      },
+    ]);
+
+    const pageRes = await page.goto('/shop/account/addresses');
+    if (!pageRes || pageRes.status() >= 500) {
+      test.skip(true, 'Store app not running');
+    }
+
+    await expect(page.getByText('Playwright User')).toBeVisible();
+    await expect(page.getByText('1 Test Lane')).toBeVisible();
+  });
 });

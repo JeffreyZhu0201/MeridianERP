@@ -11,6 +11,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { StoreTenantService } from '../common/store-tenant.service';
 import { StoreLoginDto, StoreRegisterDto } from './dto/store-auth.dto';
+import type {
+  ChangeStorePasswordDto,
+  UpdateStoreCustomerProfileDto,
+} from '../account/dto/store-account.dto';
 
 /**
  * @description: 店铺认证服务
@@ -268,28 +272,98 @@ export class StoreAuthService {
   }
 
   async getProfile(userId: string): Promise<StoreCustomerProfile> {
+    const accountId = await this.resolveAccountId(userId);
+    const account = await this.platformAccounts.findById(accountId);
+    if (!account) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const customer = await this.prisma.customer.findFirst({
+      where: { accountId: account.id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return {
+      id: customer?.id ?? account.id,
+      email: account.email,
+      firstName: customer?.firstName ?? account.firstName,
+      lastName: customer?.lastName ?? account.lastName,
+      phone: account.phone,
+    };
+  }
+
+  async resolveAccountId(userId: string): Promise<string> {
     const customer = await this.prisma.customer.findUnique({
       where: { id: userId },
     });
     if (customer) {
-      return {
-        id: customer.id,
-        email: customer.email,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-      };
+      return customer.accountId;
     }
 
     const account = await this.platformAccounts.findById(userId);
     if (account) {
-      return {
-        id: account.id,
-        email: account.email,
-        firstName: account.firstName,
-        lastName: account.lastName,
-      };
+      return account.id;
     }
 
-    throw new NotFoundException('Profile not found');
+    throw new UnauthorizedException('Invalid store session');
+  }
+
+  async updateProfile(userId: string, dto: UpdateStoreCustomerProfileDto) {
+    const accountId = await this.resolveAccountId(userId);
+    const account = await this.platformAccounts.findById(accountId);
+    if (!account) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const updated = await this.prisma.platformAccount.update({
+      where: { id: accountId },
+      data: {
+        ...(dto.firstName !== undefined ? { firstName: dto.firstName || null } : {}),
+        ...(dto.lastName !== undefined ? { lastName: dto.lastName || null } : {}),
+        ...(dto.phone !== undefined ? { phone: dto.phone || null } : {}),
+      },
+    });
+
+    if (dto.firstName !== undefined || dto.lastName !== undefined) {
+      await this.prisma.customer.updateMany({
+        where: { accountId },
+        data: {
+          ...(dto.firstName !== undefined ? { firstName: dto.firstName || null } : {}),
+          ...(dto.lastName !== undefined ? { lastName: dto.lastName || null } : {}),
+        },
+      });
+    }
+
+    const customer = await this.prisma.customer.findFirst({
+      where: { accountId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return {
+      id: customer?.id ?? updated.id,
+      email: updated.email,
+      firstName: customer?.firstName ?? updated.firstName,
+      lastName: customer?.lastName ?? updated.lastName,
+      phone: updated.phone,
+    } satisfies StoreCustomerProfile;
+  }
+
+  async changePassword(userId: string, dto: ChangeStorePasswordDto) {
+    const accountId = await this.resolveAccountId(userId);
+    const account = await this.platformAccounts.findById(accountId);
+    if (!account) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    const valid = await this.platformAccounts.verifyPassword(
+      account,
+      dto.currentPassword,
+    );
+    if (!valid) {
+      throw new UnauthorizedException('Invalid current password');
+    }
+
+    await this.platformAccounts.updatePassword(accountId, dto.newPassword);
+    return { ok: true };
   }
 }

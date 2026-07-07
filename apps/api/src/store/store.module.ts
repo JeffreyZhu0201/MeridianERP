@@ -29,6 +29,8 @@ import { StoreStoresService } from './stores/store-stores.service';
 import { StoreTenantService } from './common/store-tenant.service';
 import { StoreMerchantApplicationController } from './merchant-application/store-merchant-application.controller';
 import { StoreMerchantApplicationService } from './merchant-application/store-merchant-application.service';
+import { StoreAccountController } from './account/store-account.controller';
+import { StoreAccountAddressesService } from './account/store-account-addresses.service';
 
 @Module({
   imports: [
@@ -52,6 +54,7 @@ import { StoreMerchantApplicationService } from './merchant-application/store-me
     StoreOrdersController,
     StoreStoresController,
     StoreMerchantApplicationController,
+    StoreAccountController,
   ],
   providers: [
     StoreTenantService,
@@ -62,6 +65,7 @@ import { StoreMerchantApplicationService } from './merchant-application/store-me
     StoreOrdersService,
     StoreStoresService,
     StoreMerchantApplicationService,
+    StoreAccountAddressesService,
   ],
   exports: [StoreTenantService, StoreAuthService],
 })
