@@ -11,6 +11,7 @@ import type {
 } from '@meridian/shared';
 import { InventoryService } from '../../inventory/inventory.service';
 import { CommissionService } from '../../commission/commission.service';
+import { MediaService } from '../../media/media.service';
 import { FlagshipCatalogService } from '../flagship-catalog/flagship-catalog.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -27,6 +28,7 @@ export class PlatformAllocationsService {
     private readonly inventoryService: InventoryService,
     private readonly commissionService: CommissionService,
     private readonly flagshipCatalog: FlagshipCatalogService,
+    private readonly mediaService: MediaService,
   ) {}
 
   private mapMasterSku(
@@ -81,6 +83,7 @@ export class PlatformAllocationsService {
 
   async createMasterSku(dto: CreateMasterSkuRequest) {
     await this.validateImageInputs(dto.images);
+    let removedAssetIds: string[] = [];
     const sku = await this.prisma.$transaction(async (tx) => {
       const created = await tx.masterSku.create({
         data: {
@@ -96,12 +99,13 @@ export class PlatformAllocationsService {
         },
         include: masterSkuImageInclude,
       });
-      await replaceMasterSkuImages(tx, created.id, dto.images);
+      removedAssetIds = await replaceMasterSkuImages(tx, created.id, dto.images);
       return tx.masterSku.findUniqueOrThrow({
         where: { id: created.id },
         include: masterSkuImageInclude,
       });
     });
+    await this.mediaService.cleanupUnreferencedMediaAssets(removedAssetIds);
     await this.flagshipCatalog.syncMasterSkuToFlagship(sku.id);
     return this.mapMasterSku(sku);
   }
@@ -112,17 +116,19 @@ export class PlatformAllocationsService {
     await this.validateImageInputs(dto.images);
 
     const { images, ...fields } = dto;
+    let removedAssetIds: string[] = [];
     const sku = await this.prisma.$transaction(async (tx) => {
       await tx.masterSku.update({
         where: { id },
         data: fields,
       });
-      await replaceMasterSkuImages(tx, id, images);
+      removedAssetIds = await replaceMasterSkuImages(tx, id, images);
       return tx.masterSku.findUniqueOrThrow({
         where: { id },
         include: masterSkuImageInclude,
       });
     });
+    await this.mediaService.cleanupUnreferencedMediaAssets(removedAssetIds);
     await this.flagshipCatalog.syncMasterSkuToFlagship(id);
     return this.mapMasterSku(sku);
   }
@@ -266,7 +272,7 @@ export class PlatformAllocationsService {
             },
             include: { product: true },
           });
-        } else if (!variant.product.description) {
+        } else {
           await syncProductContentFromMasterSku(
             tx,
             variant.productId,

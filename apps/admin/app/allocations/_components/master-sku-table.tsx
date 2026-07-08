@@ -16,6 +16,13 @@ import { Button,
 
 import type { MasterSku } from '@/lib/api';
 
+function primaryImageUrl(sku: MasterSku): string | null {
+  const images = sku.images ?? [];
+  if (images.length === 0) return null;
+  const primary = images.find((image) => image.isPrimary);
+  return primary?.url ?? images[0]?.url ?? null;
+}
+
 interface MasterSkuTableProps {
   masterSkus: MasterSku[];
   labels: {
@@ -23,6 +30,7 @@ interface MasterSkuTableProps {
     create: string;
     syncAll: string;
     empty: string;
+    thumbnail: string;
     code: string;
     name: string;
     onHand: string;
@@ -68,6 +76,7 @@ export function MasterSkuTable({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-14">{labels.thumbnail}</TableHead>
                   <TableHead>{labels.code}</TableHead>
                   <TableHead>{labels.name}</TableHead>
                   <TableHead className="text-right">{labels.onHand}</TableHead>
@@ -79,24 +88,41 @@ export function MasterSkuTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {masterSkus.map((sku) => (
-                  <TableRow key={sku.id}>
-                    <TableCell className="font-mono text-xs">{sku.skuCode}</TableCell>
-                    <TableCell>{sku.name}</TableCell>
-                    <TableCell className="text-right tabular-nums">{sku.quantityOnHand}</TableCell>
-                    <TableCell className="text-right">{formatMoney(sku.wholesalePrice)}</TableCell>
-                    <TableCell className="text-right">{formatMoney(sku.retailPrice)}</TableCell>
-                    <TableCell className="text-right">{formatMoney(sku.flagshipPrice)}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {sku.synced ? labels.synced : labels.notSynced}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => onEdit(sku)}>
-                        {labels.edit}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {masterSkus.map((sku) => {
+                  const imageUrl = primaryImageUrl(sku);
+                  return (
+                    <TableRow key={sku.id}>
+                      <TableCell>
+                        {imageUrl ? (
+                          <div className="size-10 overflow-hidden rounded-md bg-muted/40">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={imageUrl}
+                              alt={sku.name}
+                              className="size-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="size-10 rounded-md bg-muted/40" aria-hidden />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{sku.skuCode}</TableCell>
+                      <TableCell>{sku.name}</TableCell>
+                      <TableCell className="text-right tabular-nums">{sku.quantityOnHand}</TableCell>
+                      <TableCell className="text-right">{formatMoney(sku.wholesalePrice)}</TableCell>
+                      <TableCell className="text-right">{formatMoney(sku.retailPrice)}</TableCell>
+                      <TableCell className="text-right">{formatMoney(sku.flagshipPrice)}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {sku.synced ? labels.synced : labels.notSynced}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="outline" onClick={() => onEdit(sku)}>
+                          {labels.edit}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

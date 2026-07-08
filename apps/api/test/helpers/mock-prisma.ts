@@ -5129,6 +5129,8 @@ export function createMockPrisma() {
       count: async () => masterSkus.size,
     },
     mediaAsset: {
+      findUnique: async ({ where }: { where: { id: string } }) =>
+        mediaAssets.get(where.id) ?? null,
       findMany: async ({
         where,
       }: {
@@ -5139,6 +5141,11 @@ export function createMockPrisma() {
           items = items.filter((asset) => where.id!.in.includes(asset.id));
         }
         return items;
+      },
+      delete: async ({ where }: { where: { id: string } }) => {
+        const existing = mediaAssets.get(where.id);
+        mediaAssets.delete(where.id);
+        return existing ?? null;
       },
       create: async ({ data }: { data: Record<string, unknown> }) => {
         const record: MediaAssetRecord = {
@@ -5208,6 +5215,19 @@ export function createMockPrisma() {
         }
         return items;
       },
+      count: async ({
+        where,
+      }: {
+        where?: { mediaAssetId?: string };
+      } = {}) => {
+        let items = [...masterSkuImages.values()];
+        if (where?.mediaAssetId) {
+          items = items.filter(
+            (image) => image.mediaAssetId === where.mediaAssetId,
+          );
+        }
+        return items.length;
+      },
     },
     productImage: {
       deleteMany: async ({ where }: { where: { productId: string } }) => {
@@ -5238,6 +5258,19 @@ export function createMockPrisma() {
           productImages.set(record.id, record);
         }
         return { count: data.length };
+      },
+      count: async ({
+        where,
+      }: {
+        where?: { sourceMediaAssetId?: string };
+      } = {}) => {
+        let items = [...productImages.values()];
+        if (where?.sourceMediaAssetId) {
+          items = items.filter(
+            (image) => image.sourceMediaAssetId === where.sourceMediaAssetId,
+          );
+        }
+        return items.length;
       },
     },
     allocationOrder: {

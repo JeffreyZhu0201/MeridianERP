@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { MediaAssetSummary } from '@meridian/shared';
@@ -85,14 +84,23 @@ export class MediaService {
     };
   }
 
-  async getLocalFilePath(storageKey: string): Promise<string> {
-    const asset = await this.prisma.mediaAsset.findUnique({
-      where: { storageKey },
-    });
-    if (!asset) {
-      throw new NotFoundException('File not found');
+  async cleanupUnreferencedMediaAssets(mediaAssetIds: string[]): Promise<void> {
+    if (mediaAssetIds.length === 0) return;
+
+    const storage = this.storage();
+    for (const id of mediaAssetIds) {
+      const [skuRefs, productRefs] = await Promise.all([
+        this.prisma.masterSkuImage.count({ where: { mediaAssetId: id } }),
+        this.prisma.productImage.count({ where: { sourceMediaAssetId: id } }),
+      ]);
+      if (skuRefs > 0 || productRefs > 0) continue;
+
+      const asset = await this.prisma.mediaAsset.findUnique({ where: { id } });
+      if (!asset) continue;
+
+      await storage.delete(asset.storageKey);
+      await this.prisma.mediaAsset.delete({ where: { id } });
     }
-    return asset.storageKey;
   }
 
   resolveMimeFromKey(key: string): string {

@@ -52,7 +52,14 @@ export class MediaFilesController {
     }
     const key = Array.isArray(filePath) ? filePath.join('/') : filePath;
     const base = this.env.get('MEDIA_LOCAL_PATH', './uploads');
-    const absolute = path.join(base, key);
+    const baseResolved = path.resolve(base);
+    const absolute = path.resolve(baseResolved, key);
+    if (
+      !absolute.startsWith(baseResolved + path.sep) &&
+      absolute !== baseResolved
+    ) {
+      throw new NotFoundException('File not found');
+    }
     if (!existsSync(absolute)) {
       throw new NotFoundException('File not found');
     }

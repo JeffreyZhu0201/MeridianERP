@@ -490,6 +490,7 @@ export const admin = {
     emptySkus: 'No master SKUs yet',
     emptyOrders: 'No allocation orders yet',
     skuColumns: {
+      thumbnail: 'Image',
       code: 'SKU code',
       name: 'Name',
       onHand: 'On hand',
@@ -558,6 +559,10 @@ export const admin = {
       setPrimary: 'Set primary',
       altText: 'Alt text',
       editProduct: 'Edit product',
+      saveSuccess: 'Product content saved',
+      moveUp: 'Move up',
+      moveDown: 'Move down',
+      removeImage: 'Remove image',
     },
   },
   allocations: {

@@ -126,6 +126,12 @@ export { ThemeProvider, ModeToggle, LocaleToggle, PortalThemeProvider, PortalLoc
 export { ProductCard, type ProductCardProps } from './components/product-card';
 export { MarkdownContent, type MarkdownContentProps } from './components/markdown-content';
 export { MarkdownEditor, type MarkdownEditorProps } from './components/markdown-editor';
+export {
+  ImageUploadGallery,
+  type ImageUploadGalleryProps,
+  type ImageUploadItem,
+  type ImageUploadResult,
+} from './components/image-upload-gallery';
 
 /** 购物车抽屉 - 商店前端快速查看购物车 */
 export { CartDrawer, type CartDrawerItem, type CartDrawerProps } from './components/cart-drawer';

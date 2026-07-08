@@ -57,14 +57,23 @@ export async function replaceMasterSkuImages(
   tx: Prisma.TransactionClient,
   masterSkuId: string,
   images: MasterSkuImageInput[] | undefined,
-) {
-  if (images === undefined) return;
+): Promise<string[]> {
+  if (images === undefined) return [];
+
+  const existing = await tx.masterSkuImage.findMany({
+    where: { masterSkuId },
+    select: { mediaAssetId: true },
+  });
+  const previousIds = existing.map((image) => image.mediaAssetId);
 
   await tx.masterSkuImage.deleteMany({ where: { masterSkuId } });
 
-  if (images.length === 0) return;
+  if (images.length === 0) {
+    return previousIds;
+  }
 
   let hasPrimary = images.some((image) => image.isPrimary);
+  const newIds = new Set(images.map((image) => image.mediaAssetId));
   await tx.masterSkuImage.createMany({
     data: images.map((image, index) => ({
       masterSkuId,
@@ -74,6 +83,8 @@ export async function replaceMasterSkuImages(
       isPrimary: image.isPrimary ?? (!hasPrimary && index === 0),
     })),
   });
+
+  return previousIds.filter((id) => !newIds.has(id));
 }
 
 export async function syncProductContentFromMasterSku(

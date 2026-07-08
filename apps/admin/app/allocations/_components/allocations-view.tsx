@@ -166,6 +166,7 @@ export function AllocationsView({
           create: t('createSku'),
           empty: t('emptySkus'),
           code: t('skuColumns.code'),
+          thumbnail: t('skuColumns.thumbnail'),
           name: t('skuColumns.name'),
           onHand: t('skuColumns.onHand'),
           wholesale: t('skuColumns.wholesale'),

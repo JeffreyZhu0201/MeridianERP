@@ -490,6 +490,7 @@ export const admin = {
     emptySkus: '暂无主 SKU',
     emptyOrders: '暂无配货单',
     skuColumns: {
+      thumbnail: '图片',
       code: 'SKU 编码',
       name: '名称',
       onHand: '库存',
@@ -558,6 +559,10 @@ export const admin = {
       setPrimary: '设为主图',
       altText: '替代文本',
       editProduct: '编辑商品',
+      saveSuccess: '商品内容已保存',
+      moveUp: '上移',
+      moveDown: '下移',
+      removeImage: '移除图片',
     },
   },
   allocations: {

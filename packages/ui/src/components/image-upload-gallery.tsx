@@ -1,48 +1,69 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { IconStar, IconStarFilled, IconTrash, IconUpload } from '@tabler/icons-react';
+import {
+  IconArrowDown,
+  IconArrowUp,
+  IconStar,
+  IconStarFilled,
+  IconTrash,
+  IconUpload,
+} from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { Button, Input, Label } from '@meridian/ui';
 import type { MasterSkuImageInput } from '@meridian/shared';
 
-import { apiUploadForm, type MediaAssetSummary } from '@/lib/api';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 export interface ImageUploadItem extends MasterSkuImageInput {
   url: string;
   originalName?: string;
 }
 
-interface ImageUploadGalleryProps {
-  token: string;
+export interface ImageUploadResult {
+  id: string;
+  url: string;
+  originalName?: string;
+}
+
+export interface ImageUploadGalleryProps {
   items: ImageUploadItem[];
   onChange: (items: ImageUploadItem[]) => void;
+  onUpload: (file: File) => Promise<ImageUploadResult>;
+  onUploadingChange?: (uploading: boolean) => void;
+  disabled?: boolean;
+}
+
+function withSortOrder(items: ImageUploadItem[]): ImageUploadItem[] {
+  return items.map((item, index) => ({ ...item, sortOrder: index }));
 }
 
 export function ImageUploadGallery({
-  token,
   items,
   onChange,
+  onUpload,
+  onUploadingChange,
+  disabled = false,
 }: ImageUploadGalleryProps) {
   const t = useTranslations('admin.masterCatalog.content');
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
+  function setUploadState(next: boolean) {
+    setUploading(next);
+    onUploadingChange?.(next);
+  }
+
   async function handleFiles(fileList: FileList | null) {
-    if (!fileList?.length) return;
-    setUploading(true);
+    if (!fileList?.length || disabled) return;
+    setUploadState(true);
     setError('');
     try {
       const uploaded: ImageUploadItem[] = [];
       for (const file of Array.from(fileList)) {
-        const formData = new FormData();
-        formData.append('file', file);
-        const asset = await apiUploadForm<MediaAssetSummary>(
-          '/platform/media/upload',
-          formData,
-          token,
-        );
+        const asset = await onUpload(file);
         uploaded.push({
           mediaAssetId: asset.id,
           url: asset.url,
@@ -56,7 +77,7 @@ export function ImageUploadGallery({
     } catch {
       setError(t('uploadFailed'));
     } finally {
-      setUploading(false);
+      setUploadState(false);
       if (inputRef.current) inputRef.current.value = '';
     }
   }
@@ -75,7 +96,16 @@ export function ImageUploadGallery({
     if (next.length > 0 && !next.some((item) => item.isPrimary)) {
       next[0] = { ...next[0], isPrimary: true };
     }
-    onChange(next.map((item, index) => ({ ...item, sortOrder: index })));
+    onChange(withSortOrder(next));
+  }
+
+  function moveItem(mediaAssetId: string, direction: -1 | 1) {
+    const index = items.findIndex((item) => item.mediaAssetId === mediaAssetId);
+    const target = index + direction;
+    if (index < 0 || target < 0 || target >= items.length) return;
+    const next = [...items];
+    [next[index], next[target]] = [next[target], next[index]];
+    onChange(withSortOrder(next));
   }
 
   function updateAltText(mediaAssetId: string, altText: string) {
@@ -95,12 +125,13 @@ export function ImageUploadGallery({
           accept="image/jpeg,image/png,image/webp,image/gif"
           multiple
           className="hidden"
+          disabled={disabled || uploading}
           onChange={(event) => void handleFiles(event.target.files)}
         />
         <Button
           type="button"
           variant="secondary"
-          disabled={uploading}
+          disabled={disabled || uploading}
           onClick={() => inputRef.current?.click()}
         >
           <IconUpload className="mr-2 size-4" aria-hidden />
@@ -115,7 +146,7 @@ export function ImageUploadGallery({
         <p className="text-sm text-muted-foreground">{t('emptyImages')}</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {items.map((item) => (
+          {items.map((item, index) => (
             <div
               key={item.mediaAssetId}
               className="rounded-xl border border-border p-3 dark:border-border/40"
@@ -128,11 +159,12 @@ export function ImageUploadGallery({
                   className="size-full object-contain"
                 />
               </div>
-              <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <Button
                   type="button"
                   size="sm"
                   variant={item.isPrimary ? 'default' : 'outline'}
+                  disabled={disabled}
                   onClick={() => setPrimary(item.mediaAssetId)}
                 >
                   {item.isPrimary ? (
@@ -142,20 +174,45 @@ export function ImageUploadGallery({
                   )}
                   {item.isPrimary ? t('primary') : t('setPrimary')}
                 </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => removeItem(item.mediaAssetId)}
-                >
-                  <IconTrash className="size-4" aria-hidden />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    disabled={disabled || index === 0}
+                    aria-label={t('moveUp')}
+                    onClick={() => moveItem(item.mediaAssetId, -1)}
+                  >
+                    <IconArrowUp className="size-4" aria-hidden />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    disabled={disabled || index === items.length - 1}
+                    aria-label={t('moveDown')}
+                    onClick={() => moveItem(item.mediaAssetId, 1)}
+                  >
+                    <IconArrowDown className="size-4" aria-hidden />
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    disabled={disabled}
+                    aria-label={t('removeImage')}
+                    onClick={() => removeItem(item.mediaAssetId)}
+                  >
+                    <IconTrash className="size-4" aria-hidden />
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`alt-${item.mediaAssetId}`}>{t('altText')}</Label>
                 <Input
                   id={`alt-${item.mediaAssetId}`}
                   value={item.altText ?? ''}
+                  disabled={disabled}
                   onChange={(event) =>
                     updateAltText(item.mediaAssetId, event.target.value)
                   }

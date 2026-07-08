@@ -31,6 +31,7 @@ Thumbs.db
 coverage/
 playwright-report/
 test-results/
+apps/api/test/.uploads-e2e/
 
 # Prisma
 apps/api/prisma/*.db

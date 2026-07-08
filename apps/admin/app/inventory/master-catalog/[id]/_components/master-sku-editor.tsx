@@ -1,11 +1,12 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   Button,
+  DetailPageFrame,
+  ImageUploadGallery,
   Input,
   Label,
   MarkdownContent,
@@ -15,13 +16,11 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
+  toast,
+  type ImageUploadItem,
 } from '@meridian/ui';
 
-import { apiFetch, type MasterSku } from '@/lib/api';
-import {
-  ImageUploadGallery,
-  type ImageUploadItem,
-} from '@/app/_components/image-upload-gallery';
+import { apiFetch, apiUploadForm, type MasterSku, type MediaAssetSummary } from '@/lib/api';
 
 interface MasterSkuEditorProps {
   sku: MasterSku;
@@ -36,6 +35,14 @@ function mapImages(sku: MasterSku): ImageUploadItem[] {
     sortOrder: image.sortOrder,
     isPrimary: image.isPrimary,
   }));
+}
+
+function parseNonNegativeNumber(value: string, label: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`${label} must be a non-negative number`);
+  }
+  return parsed;
 }
 
 export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
@@ -55,12 +62,25 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
   const [shortDescription, setShortDescription] = useState(sku.shortDescription ?? '');
   const [images, setImages] = useState<ImageUploadItem[]>(() => mapImages(sku));
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
   const [error, setError] = useState('');
 
   async function handleSave() {
     setSubmitting(true);
     setError('');
     try {
+      const quantityOnHand = parseNonNegativeNumber(onHand, t('form.onHand'));
+      const parsedUnitCost = parseNonNegativeNumber(unitCost, t('form.unitCost'));
+      const parsedWholesale = parseNonNegativeNumber(
+        wholesalePrice,
+        t('form.wholesalePrice'),
+      );
+      const parsedRetail = parseNonNegativeNumber(retailPrice, t('form.retailPrice'));
+      const parsedFlagship = parseNonNegativeNumber(
+        flagshipPrice,
+        t('form.flagshipPrice'),
+      );
+
       await apiFetch(
         `/platform/allocations/master-skus/${sku.id}`,
         {
@@ -69,11 +89,11 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
             name,
             description: description || null,
             shortDescription: shortDescription || null,
-            quantityOnHand: Number(onHand),
-            unitCost: Number(unitCost),
-            wholesalePrice: Number(wholesalePrice),
-            retailPrice: Number(retailPrice),
-            flagshipPrice: Number(flagshipPrice),
+            quantityOnHand,
+            unitCost: parsedUnitCost,
+            wholesalePrice: parsedWholesale,
+            retailPrice: parsedRetail,
+            flagshipPrice: parsedFlagship,
             isActive,
             images: images.map((image, index) => ({
               mediaAssetId: image.mediaAssetId,
@@ -85,6 +105,7 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
         },
         token,
       );
+      toast.success(tContent('saveSuccess'));
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('editSkuFailed'));
@@ -93,23 +114,36 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-mono text-sm text-muted-foreground">{sku.skuCode}</p>
-          <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/inventory/master-catalog">{tContent('backToList')}</Link>
-          </Button>
-          <Button onClick={() => void handleSave()} disabled={submitting}>
-            {submitting ? tc('saving') : tc('save')}
-          </Button>
-        </div>
-      </div>
+  async function handleUpload(file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const asset = await apiUploadForm<MediaAssetSummary>(
+      '/platform/media/upload',
+      formData,
+      token,
+    );
+    return {
+      id: asset.id,
+      url: asset.url,
+      originalName: asset.originalName,
+    };
+  }
 
+  return (
+    <DetailPageFrame
+      title={name}
+      description={sku.skuCode}
+      backHref="/inventory/master-catalog"
+      backLabel={tContent('backToList')}
+      actions={
+        <Button
+          onClick={() => void handleSave()}
+          disabled={submitting || uploadingImages}
+        >
+          {submitting ? tc('saving') : tc('save')}
+        </Button>
+      }
+    >
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
       <Tabs defaultValue="basic">
@@ -141,19 +175,19 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="unit-cost">{t('form.unitCost')}</Label>
-              <Input id="unit-cost" type="number" step="0.01" value={unitCost} onChange={(e) => setUnitCost(e.target.value)} />
+              <Input id="unit-cost" type="number" min="0" step="0.01" value={unitCost} onChange={(e) => setUnitCost(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="wholesale">{t('form.wholesalePrice')}</Label>
-              <Input id="wholesale" type="number" step="0.01" value={wholesalePrice} onChange={(e) => setWholesalePrice(e.target.value)} />
+              <Input id="wholesale" type="number" min="0" step="0.01" value={wholesalePrice} onChange={(e) => setWholesalePrice(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="retail">{t('form.retailPrice')}</Label>
-              <Input id="retail" type="number" step="0.01" value={retailPrice} onChange={(e) => setRetailPrice(e.target.value)} />
+              <Input id="retail" type="number" min="0" step="0.01" value={retailPrice} onChange={(e) => setRetailPrice(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="flagship">{t('form.flagshipPrice')}</Label>
-              <Input id="flagship" type="number" step="0.01" value={flagshipPrice} onChange={(e) => setFlagshipPrice(e.target.value)} />
+              <Input id="flagship" type="number" min="0" step="0.01" value={flagshipPrice} onChange={(e) => setFlagshipPrice(e.target.value)} />
             </div>
           </div>
           <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-3">
@@ -174,7 +208,13 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
         </TabsContent>
 
         <TabsContent value="images" className="pt-4">
-          <ImageUploadGallery token={token} items={images} onChange={setImages} />
+          <ImageUploadGallery
+            items={images}
+            onChange={setImages}
+            onUpload={handleUpload}
+            onUploadingChange={setUploadingImages}
+            disabled={submitting}
+          />
         </TabsContent>
 
         <TabsContent value="preview" className="space-y-6 pt-4">
@@ -194,6 +234,6 @@ export function MasterSkuEditor({ sku, token }: MasterSkuEditorProps) {
           <MarkdownContent content={description} />
         </TabsContent>
       </Tabs>
-    </div>
+    </DetailPageFrame>
   );
 }
