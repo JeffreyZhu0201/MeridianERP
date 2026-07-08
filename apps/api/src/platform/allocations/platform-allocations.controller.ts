@@ -10,6 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AllocationOrderStatus } from '@prisma/client';
+import type {
+  CreateMasterSkuRequest,
+  UpdateMasterSkuRequest,
+} from '@meridian/shared';
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
 import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
@@ -31,36 +35,21 @@ export class PlatformAllocationsController {
     );
   }
 
+  @Get('master-skus/:id')
+  getMasterSku(@Param('id') id: string) {
+    return this.service.getMasterSku(id);
+  }
+
   @Post('master-skus')
   @HttpCode(201)
-  createMasterSku(
-    @Body()
-    dto: {
-      skuCode: string;
-      name: string;
-      quantityOnHand?: number;
-      unitCost: number;
-      wholesalePrice: number;
-      retailPrice: number;
-      flagshipPrice: number;
-    },
-  ) {
+  createMasterSku(@Body() dto: CreateMasterSkuRequest) {
     return this.service.createMasterSku(dto);
   }
 
   @Patch('master-skus/:id')
   updateMasterSku(
     @Param('id') id: string,
-    @Body()
-    dto: {
-      name?: string;
-      quantityOnHand?: number;
-      unitCost?: number;
-      wholesalePrice?: number;
-      retailPrice?: number;
-      flagshipPrice?: number;
-      isActive?: boolean;
-    },
+    @Body() dto: UpdateMasterSkuRequest,
   ) {
     return this.service.updateMasterSku(id, dto);
   }

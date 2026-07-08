@@ -3,9 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { slugify } from '../../common/utils/slug.util';
+import {
+  mapProductImages,
+  masterSkuImageInclude,
+  primaryImageFromSummaries,
+  syncProductContentFromMasterSku,
+} from '../catalog/product-content.util';
 
 @Injectable()
 export class FlagshipCatalogService {
@@ -26,13 +31,22 @@ export class FlagshipCatalogService {
     const flagshipTenantId = await this.resolveFlagshipTenantId();
     const skus = await this.prisma.masterSku.findMany({
       orderBy: { skuCode: 'asc' },
+      include: masterSkuImageInclude,
     });
     const flagshipVariants = await this.prisma.productVariant.findMany({
       where: {
         masterSkuId: { in: skus.map((s) => s.id) },
         product: { tenantId: flagshipTenantId },
       },
-      include: { product: { select: { id: true, isPublished: true } } },
+      include: {
+        product: {
+          select: {
+            id: true,
+            isPublished: true,
+            images: { orderBy: { sortOrder: 'asc' } },
+          },
+        },
+      },
     });
     const variantByMaster = new Map(
       flagshipVariants.map((v) => [v.masterSkuId!, v]),
@@ -40,10 +54,14 @@ export class FlagshipCatalogService {
 
     return skus.map((sku) => {
       const variant = variantByMaster.get(sku.id);
+      const productImages = variant?.product.images ?? [];
+      const imageSummaries = mapProductImages(productImages);
       return {
         id: sku.id,
         skuCode: sku.skuCode,
         name: sku.name,
+        description: sku.description,
+        shortDescription: sku.shortDescription,
         quantityOnHand: sku.quantityOnHand,
         cumulativeShippedQty: sku.cumulativeShippedQty,
         unitCost: sku.unitCost.toString(),
@@ -53,6 +71,8 @@ export class FlagshipCatalogService {
         isActive: sku.isActive,
         synced: Boolean(variant),
         flagshipProductId: variant?.product.id ?? null,
+        images: imageSummaries,
+        primaryImageUrl: primaryImageFromSummaries(imageSummaries),
       };
     });
   }
@@ -70,6 +90,7 @@ export class FlagshipCatalogService {
   async syncMasterSkuToFlagship(masterSkuId: string) {
     const sku = await this.prisma.masterSku.findUnique({
       where: { id: masterSkuId },
+      include: masterSkuImageInclude,
     });
     if (!sku) throw new NotFoundException('Master SKU not found');
 
@@ -82,21 +103,26 @@ export class FlagshipCatalogService {
     });
 
     if (variant) {
-      await this.prisma.product.update({
-        where: { id: variant.productId },
-        data: {
-          name: sku.name,
-          isPublished: sku.isActive,
-        },
-      });
-      await this.prisma.productVariant.update({
-        where: { id: variant.id },
-        data: {
-          name: sku.name,
-          sku: sku.skuCode,
-          price: sku.flagshipPrice,
-          isActive: sku.isActive,
-        },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.product.update({
+          where: { id: variant!.productId },
+          data: {
+            name: sku.name,
+            description: sku.description,
+            shortDescription: sku.shortDescription,
+            isPublished: sku.isActive,
+          },
+        });
+        await tx.productVariant.update({
+          where: { id: variant!.id },
+          data: {
+            name: sku.name,
+            sku: sku.skuCode,
+            price: sku.flagshipPrice,
+            isActive: sku.isActive,
+          },
+        });
+        await syncProductContentFromMasterSku(tx, variant!.productId, sku);
       });
       return variant.product;
     }
@@ -111,9 +137,23 @@ export class FlagshipCatalogService {
           tenantId,
           name: sku.name,
           slug: productSlug,
+          description: sku.description,
+          shortDescription: sku.shortDescription,
           isPublished: sku.isActive,
         },
       }));
+
+    if (existingProduct) {
+      await this.prisma.product.update({
+        where: { id: product.id },
+        data: {
+          name: sku.name,
+          description: sku.description,
+          shortDescription: sku.shortDescription,
+          isPublished: sku.isActive,
+        },
+      });
+    }
 
     variant = await this.prisma.productVariant.create({
       data: {
@@ -125,6 +165,10 @@ export class FlagshipCatalogService {
         isActive: sku.isActive,
       },
       include: { product: true },
+    });
+
+    await this.prisma.$transaction(async (tx) => {
+      await syncProductContentFromMasterSku(tx, product.id, sku);
     });
 
     return variant.product;

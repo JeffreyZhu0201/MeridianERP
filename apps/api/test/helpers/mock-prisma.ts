@@ -76,6 +76,9 @@ export function createMockPrisma() {
   >();
   const withdrawalRequests = new Map<Id, WithdrawalRequestRecord>();
   const masterSkus = new Map<Id, MasterSkuRecord>();
+  const mediaAssets = new Map<Id, MediaAssetRecord>();
+  const masterSkuImages = new Map<Id, MasterSkuImageRecord>();
+  const productImages = new Map<Id, ProductImageRecord>();
   const branchPurchaseOrders = new Map<Id, BranchPurchaseOrderRecord>();
   const procurementReceivingAddresses = new Map<Id, ProcurementReceivingAddressRecord>();
   const customerDeliveryAddresses = new Map<Id, CustomerDeliveryAddressRecord>();
@@ -242,6 +245,7 @@ export function createMockPrisma() {
     name: string;
     slug: string;
     description: string | null;
+    shortDescription: string | null;
     isPublished: boolean;
     createdAt: Date;
     updatedAt: Date;
@@ -506,6 +510,8 @@ export function createMockPrisma() {
     id: Id;
     skuCode: string;
     name: string;
+    description: string | null;
+    shortDescription: string | null;
     quantityOnHand: number;
     cumulativeShippedQty: number;
     unitCost: Prisma.Decimal;
@@ -515,6 +521,38 @@ export function createMockPrisma() {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
+  }
+
+  interface MediaAssetRecord {
+    id: Id;
+    storageKey: string;
+    url: string;
+    mimeType: string;
+    sizeBytes: number;
+    originalName: string;
+    uploadedByPlatformUserId: string | null;
+    createdAt: Date;
+  }
+
+  interface MasterSkuImageRecord {
+    id: Id;
+    masterSkuId: Id;
+    mediaAssetId: Id;
+    sortOrder: number;
+    altText: string | null;
+    isPrimary: boolean;
+    createdAt: Date;
+  }
+
+  interface ProductImageRecord {
+    id: Id;
+    productId: Id;
+    url: string;
+    altText: string | null;
+    sortOrder: number;
+    isPrimary: boolean;
+    sourceMediaAssetId: string | null;
+    createdAt: Date;
   }
 
   interface WarehouseRecord {
@@ -674,6 +712,54 @@ export function createMockPrisma() {
     product: ProductRecord,
     include?: Record<string, unknown>,
   ) => {
+    const projection = include?.select as Record<string, unknown> | undefined;
+    if (projection) {
+      const result: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(projection)) {
+        if (value === true) {
+          result[key] = product[key as keyof ProductRecord];
+        } else if (key === 'images' && typeof value === 'object' && value) {
+          let images = [...productImages.values()].filter(
+            (image) => image.productId === product.id,
+          );
+          const imageInclude = value as {
+            orderBy?: { sortOrder: 'asc' | 'desc' };
+          };
+          if (imageInclude.orderBy?.sortOrder === 'asc') {
+            images = images.sort((a, b) => a.sortOrder - b.sortOrder);
+          }
+          result.images = images;
+        } else if (key === 'category' && typeof value === 'object' && value) {
+          result.category = product.categoryId
+            ? (categories.get(product.categoryId) ?? null)
+            : null;
+        } else if (key === 'variants' && typeof value === 'object' && value) {
+          let variants = [...productVariants.values()].filter(
+            (v) => v.productId === product.id,
+          );
+          const variantInclude = value as {
+            where?: { isActive?: boolean; masterSkuId?: { not: null } };
+            orderBy?: { createdAt: string };
+          };
+          if (variantInclude.where?.isActive !== undefined) {
+            variants = variants.filter(
+              (v) => v.isActive === variantInclude.where!.isActive,
+            );
+          }
+          if (variantInclude.where?.masterSkuId?.not === null) {
+            variants = variants.filter((v) => v.masterSkuId != null);
+          }
+          if (variantInclude.orderBy?.createdAt === 'asc') {
+            variants = variants.sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+            );
+          }
+          result.variants = variants;
+        }
+      }
+      return result;
+    }
+
     const result: Record<string, unknown> = { ...product };
     if (include?.category) {
       result.category = product.categoryId
@@ -702,6 +788,46 @@ export function createMockPrisma() {
         );
       }
       result.variants = variants;
+    }
+    if (include?.images) {
+      let images = [...productImages.values()].filter(
+        (image) => image.productId === product.id,
+      );
+      const imageInclude = include.images as {
+        orderBy?: { sortOrder: 'asc' | 'desc' };
+      };
+      if (imageInclude.orderBy?.sortOrder === 'asc') {
+        images = images.sort((a, b) => a.sortOrder - b.sortOrder);
+      }
+      result.images = images;
+    }
+    return result;
+  };
+
+  const attachMasterSku = (
+    sku: MasterSkuRecord,
+    include?: Record<string, unknown>,
+  ) => {
+    const result: Record<string, unknown> = { ...sku };
+    if (include?.images) {
+      let images = [...masterSkuImages.values()].filter(
+        (image) => image.masterSkuId === sku.id,
+      );
+      const imageInclude = include.images as {
+        include?: { mediaAsset?: boolean };
+        orderBy?: { sortOrder: 'asc' | 'desc' };
+      };
+      if (imageInclude.orderBy?.sortOrder === 'asc') {
+        images = images.sort((a, b) => a.sortOrder - b.sortOrder);
+      }
+      if (imageInclude.include?.mediaAsset) {
+        result.images = images.map((image) => ({
+          ...image,
+          mediaAsset: mediaAssets.get(image.mediaAssetId) ?? null,
+        }));
+      } else {
+        result.images = images;
+      }
     }
     return result;
   };
@@ -3385,7 +3511,12 @@ export function createMockPrisma() {
         if (!variant) return null;
         if (include?.product) {
           const product = products.get(variant.productId);
-          return { ...variant, product };
+          return {
+            ...variant,
+            product: product
+              ? attachProduct(product, include.product as Record<string, unknown>)
+              : null,
+          };
         }
         return attachVariant(variant, {
           product: {
@@ -3440,10 +3571,15 @@ export function createMockPrisma() {
           items.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
         }
         if (include?.product) {
-          return items.map((v) => ({
-            ...v,
-            product: products.get(v.productId) ?? null,
-          }));
+          return items.map((v) => {
+            const product = products.get(v.productId);
+            return {
+              ...v,
+              product: product
+                ? attachProduct(product, include.product as Record<string, unknown>)
+                : null,
+            };
+          });
         }
         if (select) {
           return items.map((v) => {
@@ -4896,11 +5032,13 @@ export function createMockPrisma() {
         orderBy,
         skip,
         take,
+        include,
       }: {
         where?: { id?: { in: string[] }; isActive?: boolean };
         orderBy?: { skuCode?: 'asc' | 'desc' };
         skip?: number;
         take?: number;
+        include?: Record<string, unknown>;
       } = {}) => {
         let items = [...masterSkus.values()];
         if (where?.id?.in) {
@@ -4914,10 +5052,33 @@ export function createMockPrisma() {
         }
         if (skip) items = items.slice(skip);
         if (take) items = items.slice(0, take);
+        if (include) {
+          return items.map((sku) => attachMasterSku(sku, include));
+        }
         return items;
       },
-      findUnique: async ({ where }: { where: { id: string } }) =>
-        masterSkus.get(where.id) ?? null,
+      findUnique: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: Record<string, unknown>;
+      }) => {
+        const sku = masterSkus.get(where.id) ?? null;
+        if (!sku) return null;
+        return include ? attachMasterSku(sku, include) : sku;
+      },
+      findUniqueOrThrow: async ({
+        where,
+        include,
+      }: {
+        where: { id: string };
+        include?: Record<string, unknown>;
+      }) => {
+        const sku = masterSkus.get(where.id);
+        if (!sku) throw new Error('MasterSku not found');
+        return include ? attachMasterSku(sku, include) : sku;
+      },
       findFirst: async ({
         where,
       }: {
@@ -4931,6 +5092,8 @@ export function createMockPrisma() {
           id: nextId('msku'),
           skuCode: data.skuCode as string,
           name: data.name as string,
+          description: (data.description as string | null) ?? null,
+          shortDescription: (data.shortDescription as string | null) ?? null,
           quantityOnHand: (data.quantityOnHand as number) ?? 0,
           cumulativeShippedQty: 0,
           unitCost: data.unitCost as Prisma.Decimal,
@@ -4964,6 +5127,118 @@ export function createMockPrisma() {
         return updated;
       },
       count: async () => masterSkus.size,
+    },
+    mediaAsset: {
+      findMany: async ({
+        where,
+      }: {
+        where?: { id?: { in: string[] } };
+      } = {}) => {
+        let items = [...mediaAssets.values()];
+        if (where?.id?.in) {
+          items = items.filter((asset) => where.id!.in.includes(asset.id));
+        }
+        return items;
+      },
+      create: async ({ data }: { data: Record<string, unknown> }) => {
+        const record: MediaAssetRecord = {
+          id: nextId('media'),
+          storageKey: data.storageKey as string,
+          url: data.url as string,
+          mimeType: data.mimeType as string,
+          sizeBytes: data.sizeBytes as number,
+          originalName: data.originalName as string,
+          uploadedByPlatformUserId:
+            (data.uploadedByPlatformUserId as string | null) ?? null,
+          createdAt: now(),
+        };
+        mediaAssets.set(record.id, record);
+        return record;
+      },
+    },
+    masterSkuImage: {
+      deleteMany: async ({ where }: { where: { masterSkuId: string } }) => {
+        for (const [id, image] of masterSkuImages.entries()) {
+          if (image.masterSkuId === where.masterSkuId) {
+            masterSkuImages.delete(id);
+          }
+        }
+        return { count: 0 };
+      },
+      createMany: async ({
+        data,
+      }: {
+        data: Array<Record<string, unknown>>;
+      }) => {
+        for (const item of data) {
+          const record: MasterSkuImageRecord = {
+            id: nextId('mskuimg'),
+            masterSkuId: item.masterSkuId as string,
+            mediaAssetId: item.mediaAssetId as string,
+            sortOrder: (item.sortOrder as number) ?? 0,
+            altText: (item.altText as string | null) ?? null,
+            isPrimary: (item.isPrimary as boolean) ?? false,
+            createdAt: now(),
+          };
+          masterSkuImages.set(record.id, record);
+        }
+        return { count: data.length };
+      },
+      findMany: async ({
+        where,
+        include,
+        orderBy,
+      }: {
+        where?: { masterSkuId?: string };
+        include?: { mediaAsset?: boolean };
+        orderBy?: { sortOrder: 'asc' | 'desc' };
+      } = {}) => {
+        let items = [...masterSkuImages.values()];
+        if (where?.masterSkuId) {
+          items = items.filter((image) => image.masterSkuId === where.masterSkuId);
+        }
+        if (orderBy?.sortOrder === 'asc') {
+          items = items.sort((a, b) => a.sortOrder - b.sortOrder);
+        }
+        if (include?.mediaAsset) {
+          return items.map((image) => ({
+            ...image,
+            mediaAsset: mediaAssets.get(image.mediaAssetId) ?? null,
+          }));
+        }
+        return items;
+      },
+    },
+    productImage: {
+      deleteMany: async ({ where }: { where: { productId: string } }) => {
+        for (const [id, image] of productImages.entries()) {
+          if (image.productId === where.productId) {
+            productImages.delete(id);
+          }
+        }
+        return { count: 0 };
+      },
+      createMany: async ({
+        data,
+      }: {
+        data: Array<Record<string, unknown>>;
+      }) => {
+        for (const item of data) {
+          const record: ProductImageRecord = {
+            id: nextId('prodimg'),
+            productId: item.productId as string,
+            url: item.url as string,
+            altText: (item.altText as string | null) ?? null,
+            sortOrder: (item.sortOrder as number) ?? 0,
+            isPrimary: (item.isPrimary as boolean) ?? false,
+            sourceMediaAssetId:
+              (item.sourceMediaAssetId as string | null) ?? null,
+            createdAt: now(),
+          };
+          productImages.set(record.id, record);
+        }
+        return { count: data.length };
+      },
     },
     allocationOrder: {
       findMany: async ({

@@ -16,6 +16,7 @@ import { QueueModule } from './queue/queue.module';
 import { StoreModule } from './store/store.module';
 import { DistributorModule } from './distributor/distributor.module';
 import { PluginModule } from './plugins/plugin.module';
+import { MediaModule } from './media/media.module';
 import { AiModule } from './ai/ai.module';
 
 @Module({
@@ -30,6 +31,7 @@ import { AiModule } from './ai/ai.module';
     InventoryModule,
     PluginModule,
     AiModule,
+    MediaModule,
     PlatformModule,
     MerchantModule,
     StoreModule,

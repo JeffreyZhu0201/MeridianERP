@@ -15,11 +15,16 @@ import { InventoryService } from '../../inventory/inventory.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { FlagshipCatalogService } from '../../platform/flagship-catalog/flagship-catalog.service';
 import { StoreTenantService } from '../common/store-tenant.service';
+import {
+  mapProductImages,
+  primaryImageFromSummaries,
+} from '../../platform/catalog/product-content.util';
 
 type ProductWithRelations = Prisma.ProductGetPayload<{
   include: {
     category: { select: { id: true; name: true; slug: true } };
     variants: true;
+    images: { orderBy: { sortOrder: 'asc' } };
   };
 }>;
 
@@ -138,6 +143,25 @@ export class StoreCatalogService {
     );
   }
 
+  private mapProductMedia(product: {
+    description: string | null;
+    shortDescription?: string | null;
+    images?: Array<{
+      url: string;
+      altText: string | null;
+      sortOrder: number;
+      isPrimary: boolean;
+    }>;
+  }) {
+    const images = mapProductImages(product.images ?? []);
+    return {
+      description: product.description,
+      shortDescription: product.shortDescription ?? null,
+      images,
+      primaryImageUrl: primaryImageFromSummaries(images),
+    };
+  }
+
   async getStoreCatalogFilters(slug: string): Promise<StoreCatalogFiltersResponse> {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     return this.getFilterMetaForTenant(tenant.id);
@@ -192,6 +216,7 @@ export class StoreCatalogService {
       include: {
         category: { select: { id: true, name: true, slug: true } },
         variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
+        images: { orderBy: { sortOrder: 'asc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -214,6 +239,7 @@ export class StoreCatalogService {
       include: {
         category: { select: { id: true, name: true, slug: true } },
         variants: { where: { isActive: true }, orderBy: { createdAt: 'asc' } },
+        images: { orderBy: { sortOrder: 'asc' } },
       },
     });
     if (!product) {
@@ -250,6 +276,7 @@ export class StoreCatalogService {
           where: { isActive: true, masterSkuId: { not: null } },
           orderBy: { createdAt: 'asc' },
         },
+        images: { orderBy: { sortOrder: 'asc' } },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -316,13 +343,17 @@ export class StoreCatalogService {
 
       if (variants.length === 0) continue;
 
+      const media = this.mapProductMedia(product);
       items.push({
         id: product.id,
         slug: product.slug,
         name: product.name,
-        description: product.description,
+        description: media.description,
+        shortDescription: media.shortDescription,
         category: product.category,
         variants,
+        images: media.images,
+        primaryImageUrl: media.primaryImageUrl,
       });
     }
 

@@ -5,3 +5,6 @@ process.env.JWT_DISTRIBUTOR_SECRET = 'test-distributor-jwt-secret';
 process.env.BIND_TOKEN_SECRET = 'test-bind-token-secret';
 process.env.MERCHANT_APP_URL = 'http://localhost:3002';
 process.env.STRIPE_SECRET_KEY = 'sk_test_mock';
+process.env.MEDIA_STORAGE = 'local';
+process.env.MEDIA_LOCAL_PATH = `${process.cwd()}/test/.uploads-e2e`;
+process.env.MEDIA_PUBLIC_BASE_URL = 'http://localhost:3001/api/v1/media/files';

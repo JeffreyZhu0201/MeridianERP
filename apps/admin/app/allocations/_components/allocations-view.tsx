@@ -9,7 +9,6 @@ import { apiFetch, type AllocationOrder, type MasterSku } from '@/lib/api';
 import { AllocationOrdersTable } from './allocation-orders-table';
 import { CreateAllocationDialog } from './create-allocation-dialog';
 import { CreateSkuDialog } from './create-sku-dialog';
-import { EditSkuDialog } from './edit-sku-dialog';
 import { MasterSkuTable } from './master-sku-table';
 
 interface ApprovedMerchant {
@@ -45,7 +44,6 @@ export function AllocationsView({
   const t = useTranslations('admin.masterCatalog');
   const tc = useTranslations('common');
   const [skuOpen, setSkuOpen] = useState(false);
-  const [skuEditOpen, setSkuEditOpen] = useState(false);
   const [allocOpen, setAllocOpen] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -57,15 +55,6 @@ export function AllocationsView({
   const [wholesalePrice, setWholesalePrice] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
   const [flagshipPrice, setFlagshipPrice] = useState('');
-
-  const [editSku, setEditSku] = useState<MasterSku | null>(null);
-  const [editSkuName, setEditSkuName] = useState('');
-  const [editOnHand, setEditOnHand] = useState('');
-  const [editUnitCost, setEditUnitCost] = useState('');
-  const [editWholesalePrice, setEditWholesalePrice] = useState('');
-  const [editRetailPrice, setEditRetailPrice] = useState('');
-  const [editFlagshipPrice, setEditFlagshipPrice] = useState('');
-  const [editIsActive, setEditIsActive] = useState(true);
 
   const [tenantId, setTenantId] = useState(merchants[0]?.tenantId ?? '');
   const [note, setNote] = useState('');
@@ -87,7 +76,7 @@ export function AllocationsView({
     setSubmitting(true);
     setError('');
     try {
-      await apiFetch(
+      const created = await apiFetch<MasterSku>(
         '/platform/allocations/master-skus',
         {
           method: 'POST',
@@ -104,7 +93,7 @@ export function AllocationsView({
         token,
       );
       setSkuOpen(false);
-      router.refresh();
+      router.push(`/inventory/master-catalog/${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('createSkuFailed'));
     } finally {
@@ -153,15 +142,7 @@ export function AllocationsView({
   }
 
   function openEditSku(sku: MasterSku) {
-    setEditSku(sku);
-    setEditSkuName(sku.name);
-    setEditOnHand(String(sku.quantityOnHand));
-    setEditUnitCost(String(sku.unitCost));
-    setEditWholesalePrice(String(sku.wholesalePrice));
-    setEditRetailPrice(String(sku.retailPrice));
-    setEditFlagshipPrice(String(sku.flagshipPrice));
-    setEditIsActive(sku.isActive);
-    setSkuEditOpen(true);
+    router.push(`/inventory/master-catalog/${sku.id}`);
   }
 
   async function handleSyncAll() {
@@ -171,36 +152,6 @@ export function AllocationsView({
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t('syncAllFailed'));
-    }
-  }
-
-  async function handleUpdateSku() {
-    if (!editSku) return;
-    setSubmitting(true);
-    setError('');
-    try {
-      await apiFetch(
-        `/platform/allocations/master-skus/${editSku.id}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify({
-            name: editSkuName,
-            quantityOnHand: Number(editOnHand),
-            unitCost: Number(editUnitCost),
-            wholesalePrice: Number(editWholesalePrice),
-            retailPrice: Number(editRetailPrice),
-            flagshipPrice: Number(editFlagshipPrice),
-            isActive: editIsActive,
-          }),
-        },
-        token,
-      );
-      setSkuEditOpen(false);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('editSkuFailed'));
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -224,7 +175,7 @@ export function AllocationsView({
           synced: t('skuColumns.synced'),
           notSynced: t('skuColumns.notSynced'),
           actions: t('skuColumns.actions'),
-          edit: tc('edit'),
+          edit: t('content.editProduct'),
           syncAll: t('syncAll'),
         }}
         onCreate={() => setSkuOpen(true)}
@@ -311,28 +262,6 @@ export function AllocationsView({
         onRetailPriceChange={setRetailPrice}
         onFlagshipPriceChange={setFlagshipPrice}
         onSubmit={handleCreateSku}
-      />
-
-      <EditSkuDialog
-        open={skuEditOpen}
-        onOpenChange={setSkuEditOpen}
-        sku={editSku}
-        skuName={editSkuName}
-        onHand={editOnHand}
-        unitCost={editUnitCost}
-        wholesalePrice={editWholesalePrice}
-        retailPrice={editRetailPrice}
-        flagshipPrice={editFlagshipPrice}
-        isActive={editIsActive}
-        submitting={submitting}
-        onSkuNameChange={setEditSkuName}
-        onOnHandChange={setEditOnHand}
-        onUnitCostChange={setEditUnitCost}
-        onWholesalePriceChange={setEditWholesalePrice}
-        onRetailPriceChange={setEditRetailPrice}
-        onFlagshipPriceChange={setEditFlagshipPrice}
-        onIsActiveChange={setEditIsActive}
-        onSubmit={handleUpdateSku}
       />
 
       <CreateAllocationDialog

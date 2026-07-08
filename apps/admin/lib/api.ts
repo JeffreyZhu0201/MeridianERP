@@ -3,7 +3,9 @@ import type {
   AdminPlatformRole,
   DistributorBranchAllocationSummary,
   DistributorBranchSummary,
+  MasterSkuImageInput,
   MasterSkuSummary,
+  MediaAssetSummary,
   MerchantRecruitInviteCodeResponse,
   PlatformAccountDetail,
   PlatformAccountListItem,
@@ -75,6 +77,32 @@ export async function apiFetch<T>(
 
   return res.json() as Promise<T>;
 }
+
+export async function apiUploadForm<T>(
+  path: string,
+  formData: FormData,
+  token?: string,
+): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const res = await fetch(`${API_URL}/api/v1${path}`, {
+    method: 'POST',
+    headers,
+    body: formData,
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, body.message ?? res.statusText);
+  }
+
+  return res.json() as Promise<T>;
+}
+
 export type MerchantListItem = PlatformRecentMerchant;
 export type MerchantDetail = PlatformMerchantDetail;
 export type MerchantStatistics = PlatformMerchantStatistics;
@@ -103,6 +131,7 @@ export type PlatformDistributor = PlatformDistributorSummary;
 export type DistributorBranch = DistributorBranchSummary;
 export type { DistributorBranchAllocationSummary };
 export type MasterSku = MasterSkuSummary;
+export type { MasterSkuImageInput, MediaAssetSummary };
 export type FundsSummary = PlatformFundsSummary;
 export type RecruitInviteCode = MerchantRecruitInviteCodeResponse;
 export type {

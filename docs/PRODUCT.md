@@ -50,7 +50,7 @@ All portals share the NestJS API in `apps/api` on port 3001.
 | → 商户 | `/merchants` | Onboarding & merchant management |
 | → 拓店员 | `/distributors` | Sales promoter management |
 | 库存 | `/inventory` | Branch inventory index; link to master catalog |
-| 主 SKU 与分店配货 | `/inventory/master-catalog` | MasterSku catalog & branch allocation orders |
+| 主 SKU 与分店配货 | `/inventory/master-catalog` | MasterSku catalog (Markdown + images) & branch allocation orders |
 | 订单 | `/orders` | All consumer orders (filters) |
 | 配送发货 | `/allocations` | Flagship delivery queue — ship paid delivery orders |
 | 分店进货 | `/procurement` | Paid branch purchase orders — HQ shipment |
@@ -133,6 +133,7 @@ Header metrics on the approval tab always reflect global **PENDING** queue total
 - Add feature-specific PRD, architecture, and design docs **before** new feature implementation.
 - Merchant CRM plugin includes **AI follow-up suggestions** on lead/contact detail (`POST /merchant/crm/ai/follow-up`); see `docs/architecture/crm-ai-follow-up.md`.
 - Merchant **inventory replenishment AI** on `/inventory/alerts` and **product copy AI** in catalog edit sheet (`POST /merchant/inventory/ai/replenishment`, `POST /merchant/catalog/ai/product-copy`); see `docs/architecture/merchant-ai-efficiency.md`.
+- Admin **Master SKU rich content** (Markdown description + image upload) at `/inventory/master-catalog/[id]`; syncs to flagship store catalog; see `docs/architecture/media-storage.md`.
 - Admin **contextual AI insights** on withdrawals, delivery queue, and funds KPI pages (`POST /platform/ai/insights/*`); see `docs/architecture/admin-ai-insights.md`.
 - Configure `AI_MODE=live` + Anthropic-compatible base URL for production-quality AI narratives (see `docs/architecture/ai-diagnosis.md`).
 

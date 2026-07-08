@@ -103,6 +103,14 @@ export interface Product {
   name: string;
   slug: string;
   description?: string;
+  shortDescription?: string | null;
+  primaryImageUrl?: string | null;
+  images?: Array<{
+    url: string;
+    altText?: string | null;
+    sortOrder?: number;
+    isPrimary: boolean;
+  }>;
   isPublished: boolean;
   variants: ProductVariant[];
   category?: { id: string; name: string };

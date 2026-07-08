@@ -1,3 +1,5 @@
+import type { ProductImageSummary } from './media.js';
+
 export interface UnifiedStoreVariant {
   id: string;
   masterSkuId: string;
@@ -17,8 +19,11 @@ export interface UnifiedStoreProduct {
   slug: string;
   name: string;
   description: string | null;
+  shortDescription?: string | null;
   category: { id: string; name: string; slug: string } | null;
   variants: UnifiedStoreVariant[];
+  images?: ProductImageSummary[];
+  primaryImageUrl?: string | null;
 }
 
 export type StoreCatalogSort = 'newest' | 'name_asc' | 'price_asc' | 'price_desc';
@@ -50,6 +55,8 @@ export interface FlagshipCatalogRow {
   id: string;
   skuCode: string;
   name: string;
+  description?: string | null;
+  shortDescription?: string | null;
   quantityOnHand: number;
   cumulativeShippedQty: number;
   unitCost: string | number;
@@ -59,6 +66,10 @@ export interface FlagshipCatalogRow {
   isActive: boolean;
   synced: boolean;
   flagshipProductId: string | null;
+  images?: ProductImageSummary[];
+  primaryImageUrl?: string | null;
 }
+
+export type { ProductImageSummary } from './media.js';
 
 export const FULFILLMENT_SLUG_COOKIE = 'meridian_fulfillment_slug';

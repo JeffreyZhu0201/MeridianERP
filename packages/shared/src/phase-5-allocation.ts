@@ -1,4 +1,5 @@
 import type { AllocationOrderStatus } from './phase-5-distribution.js';
+import type { MasterSkuImageInput, MasterSkuImageSummary } from './media.js';
 
 /**
  * 总部主 SKU 摘要
@@ -17,6 +18,8 @@ export interface MasterSkuSummary {
   id: string;
   skuCode: string;
   name: string;
+  description?: string | null;
+  shortDescription?: string | null;
   quantityOnHand: number;
   cumulativeShippedQty: number;
   unitCost: string | number;
@@ -26,17 +29,36 @@ export interface MasterSkuSummary {
   isActive: boolean;
   synced?: boolean;
   flagshipProductId?: string | null;
+  images?: MasterSkuImageSummary[];
 }
 
 export interface CreateMasterSkuRequest {
   skuCode: string;
   name: string;
+  description?: string;
+  shortDescription?: string;
   quantityOnHand?: number;
   unitCost: number;
   wholesalePrice: number;
   retailPrice: number;
   flagshipPrice: number;
+  images?: MasterSkuImageInput[];
 }
+
+export interface UpdateMasterSkuRequest {
+  name?: string;
+  description?: string | null;
+  shortDescription?: string | null;
+  quantityOnHand?: number;
+  unitCost?: number;
+  wholesalePrice?: number;
+  retailPrice?: number;
+  flagshipPrice?: number;
+  isActive?: boolean;
+  images?: MasterSkuImageInput[];
+}
+
+export type { MasterSkuImageInput, MasterSkuImageSummary };
 
 export interface AllocationOrderLineInput {
   masterSkuId: string;

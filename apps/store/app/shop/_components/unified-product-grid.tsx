@@ -35,6 +35,7 @@ export async function UnifiedProductGrid({
             storeSlug={fulfillmentSlug}
             href={`/shop/products/${product.slug}`}
             priceFrom={unifiedProductFromPrice(product)}
+            imageUrl={product.primaryImageUrl ?? undefined}
             outOfStock={!inStock}
             outOfStockLabel={t('catalog.outOfStock')}
             addToCartLabel={t('product.addToCart')}

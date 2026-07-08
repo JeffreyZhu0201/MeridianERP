@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
-import { Button, formatMoney, Select } from '@meridian/ui';
+import { useMemo, useState } from 'react';
+import { Button, formatMoney, MarkdownContent, Select } from '@meridian/ui';
 import type { UnifiedStoreProduct } from '@meridian/shared';
 
 import { apiFetch, storePath } from '@/lib/api';
@@ -22,6 +22,17 @@ export function UnifiedProductDetail({
   const router = useRouter();
   const t = useTranslations('store');
   const variants = product.variants;
+  const images = useMemo(
+    () =>
+      [...(product.images ?? [])].sort(
+        (a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0),
+      ),
+    [product.images],
+  );
+  const [activeImageIndex, setActiveImageIndex] = useState(() => {
+    const primaryIndex = images.findIndex((image) => image.isPrimary);
+    return primaryIndex >= 0 ? primaryIndex : 0;
+  });
   const [variantId, setVariantId] = useState(variants[0]?.id ?? '');
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +40,7 @@ export function UnifiedProductDetail({
   const selected = variants.find((v) => v.id === variantId);
   const outOfStock = !selected?.inStock || !selected.branchVariantId;
   const displayPrice = selected?.branchPrice ?? selected?.flagshipPrice ?? 0;
+  const activeImage = images[activeImageIndex];
 
   async function handleAddToCart() {
     if (!selected?.branchVariantId) return;
@@ -54,17 +66,52 @@ export function UnifiedProductDetail({
 
   return (
     <div className="grid gap-8 lg:grid-cols-12">
-      <div className="lg:col-span-7">
+      <div className="space-y-4 lg:col-span-7">
         <div className="store-bento-card relative aspect-square overflow-hidden bg-muted/50">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-muted to-accent/30" />
+          {activeImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={activeImage.url}
+              alt={activeImage.altText ?? product.name}
+              className="size-full object-contain p-4"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-muted to-accent/30" />
+          )}
         </div>
+
+        {images.length > 1 ? (
+          <div className="flex flex-wrap gap-2">
+            {images.map((image, index) => (
+              <button
+                key={`${image.url}-${index}`}
+                type="button"
+                onClick={() => setActiveImageIndex(index)}
+                className={`size-16 overflow-hidden rounded-lg border bg-muted/40 p-1 transition-colors ${
+                  index === activeImageIndex
+                    ? 'border-primary ring-2 ring-primary/30'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={image.url}
+                  alt={image.altText ?? product.name}
+                  className="size-full object-contain"
+                />
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       <div className="flex flex-col gap-6 lg:col-span-5 lg:sticky lg:top-28 lg:self-start">
         <div>
           <h1 className="store-headline-xl text-foreground">{product.name}</h1>
-          {product.description ? (
-            <p className="store-body-md mt-3 text-muted-foreground">{product.description}</p>
+          {product.shortDescription ? (
+            <p className="store-body-md mt-3 text-muted-foreground">
+              {product.shortDescription}
+            </p>
           ) : null}
         </div>
 
@@ -118,6 +165,12 @@ export function UnifiedProductDetail({
 
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </div>
+
+        {product.description ? (
+          <div className="store-bento-card p-5">
+            <MarkdownContent content={product.description} />
+          </div>
+        ) : null}
       </div>
     </div>
   );
