@@ -159,9 +159,9 @@ describe('Platform admin AI insights (e2e)', () => {
 
     expect(res.body.summary).toEqual(expect.any(String));
     expect(res.body.findings.length).toBeGreaterThan(0);
-    expect(res.body.sources.some((s: { type: string }) => s.type === 'funds')).toBe(
-      true,
-    );
+    expect(
+      res.body.sources.some((s: { type: string }) => s.type === 'funds'),
+    ).toBe(true);
   });
 
   it('forbids fulfillment role from withdrawal insight', async () => {

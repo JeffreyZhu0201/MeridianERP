@@ -22,6 +22,6 @@ CREATE UNIQUE INDEX "CommissionLedger_allocationOrderId_key" ON "CommissionLedge
 -- AddForeignKey
 ALTER TABLE "CommissionLedger" ADD CONSTRAINT "CommissionLedger_allocationOrderId_fkey" FOREIGN KEY ("allocationOrderId") REFERENCES "AllocationOrder"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
--- Flagship: demo store
+-- Flagship: HQ tenant (demo branch is not flagship)
 UPDATE "MerchantProfile" SET "isFlagship" = true
-WHERE "tenantId" IN (SELECT "id" FROM "Tenant" WHERE "slug" = 'demo');
+WHERE "tenantId" IN (SELECT "id" FROM "Tenant" WHERE "slug" = 'hq');

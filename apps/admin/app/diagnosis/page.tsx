@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { ListPageFrame } from '@meridian/ui/server';
 
@@ -5,14 +6,23 @@ import { AdminShellWithSession } from '@/components/admin-shell-with-session';
 import { requireToken } from '@/lib/auth';
 import { DiagnosisPanel } from './_components/diagnosis-panel';
 
-export default async function DiagnosisPage() {
+export default async function DiagnosisPage ()
+{
   const token = await requireToken();
   const t = await getTranslations('admin.diagnosis');
 
   return (
     <AdminShellWithSession>
-      <ListPageFrame title={t('title')} description={t('description')}>
-        <DiagnosisPanel token={token} />
+      <ListPageFrame title={ t('title') } description={ t('description') }>
+        <div className="mb-4">
+          <Link
+            href="/diagnosis/calls"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            { t('callsLink') }
+          </Link>
+        </div>
+        <DiagnosisPanel token={ token } />
       </ListPageFrame>
     </AdminShellWithSession>
   );

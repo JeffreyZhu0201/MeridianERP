@@ -12,8 +12,7 @@ export class ProductCopyMockClient {
       '商品';
     const category =
       context.product?.categoryName ?? context.draft?.categoryName;
-    const price =
-      context.variant?.price ?? context.draft?.price ?? undefined;
+    const price = context.variant?.price ?? context.draft?.price ?? undefined;
     const existingDesc =
       context.product?.description ?? context.draft?.description;
 

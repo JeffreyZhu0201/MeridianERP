@@ -83,33 +83,29 @@ export class PlatformMerchantsService {
 
   async getById(id: string): Promise<PlatformMerchantDetail> {
     const profile = await this.findProfileById(id);
-    const [
-      crmSummary,
-      pendingRecruiter,
-      recruitedDistributor,
-      ownerUser,
-    ] = await Promise.all([
-      this.getCrmSummary(profile.tenantId),
-      profile.pendingRecruitInviteCode
-        ? this.prisma.merchantRecruitInviteCode.findFirst({
-            where: { code: profile.pendingRecruitInviteCode },
-            include: { distributor: { select: { id: true, name: true } } },
-          })
-        : Promise.resolve(null),
-      profile.recruitedByDistributorId
-        ? this.prisma.distributor.findUnique({
-            where: { id: profile.recruitedByDistributorId },
-            select: { id: true, name: true },
-          })
-        : Promise.resolve(null),
-      this.prisma.user.findFirst({
-        where: {
-          tenantId: profile.tenantId,
-          role: MerchantRole.MERCHANT_OWNER,
-        },
-        select: { accountId: true },
-      }),
-    ]);
+    const [crmSummary, pendingRecruiter, recruitedDistributor, ownerUser] =
+      await Promise.all([
+        this.getCrmSummary(profile.tenantId),
+        profile.pendingRecruitInviteCode
+          ? this.prisma.merchantRecruitInviteCode.findFirst({
+              where: { code: profile.pendingRecruitInviteCode },
+              include: { distributor: { select: { id: true, name: true } } },
+            })
+          : Promise.resolve(null),
+        profile.recruitedByDistributorId
+          ? this.prisma.distributor.findUnique({
+              where: { id: profile.recruitedByDistributorId },
+              select: { id: true, name: true },
+            })
+          : Promise.resolve(null),
+        this.prisma.user.findFirst({
+          where: {
+            tenantId: profile.tenantId,
+            role: MerchantRole.MERCHANT_OWNER,
+          },
+          select: { accountId: true },
+        }),
+      ]);
     return this.toPlatformMerchantDetail(
       profile,
       crmSummary,

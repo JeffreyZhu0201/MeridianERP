@@ -214,7 +214,9 @@ export class PlatformFundsService {
         name: sku.name,
         quantityOnHand: sku.quantityOnHand,
         unitCost: sku.unitCost.toString(),
-        lineCost: Number((sku.quantityOnHand * Number(sku.unitCost)).toFixed(2)),
+        lineCost: Number(
+          (sku.quantityOnHand * Number(sku.unitCost)).toFixed(2),
+        ),
       })),
       meta: { total, page, limit },
       totalCost: computeInventoryCost(
@@ -293,7 +295,10 @@ export class PlatformFundsService {
         orderBy: { paidAt: 'desc' },
         include: {
           tenant: {
-            select: { merchantProfile: { select: { businessName: true } }, slug: true },
+            select: {
+              merchantProfile: { select: { businessName: true } },
+              slug: true,
+            },
           },
           lines: {
             include: { masterSku: { select: { unitCost: true } } },
@@ -351,7 +356,12 @@ export class PlatformFundsService {
         orderBy: { createdAt: 'desc' },
         include: {
           distributor: { select: { name: true } },
-          tenant: { select: { slug: true, merchantProfile: { select: { businessName: true } } } },
+          tenant: {
+            select: {
+              slug: true,
+              merchantProfile: { select: { businessName: true } },
+            },
+          },
         },
       }),
       this.prisma.commissionLedger.count({ where }),
@@ -484,16 +494,16 @@ export class PlatformFundsService {
     );
 
     const cogsFromAllocations = allocationLines.reduce(
-      (sum, line) =>
-        sum + line.quantity * Number(line.masterSku.unitCost),
+      (sum, line) => sum + line.quantity * Number(line.masterSku.unitCost),
       0,
     );
     const cogsFromDelivery = deliveryLedgers.reduce(
-      (sum, line) =>
-        sum + line.quantity * Number(line.masterSku.unitCost),
+      (sum, line) => sum + line.quantity * Number(line.masterSku.unitCost),
       0,
     );
-    const totalCogs = Number((cogsFromAllocations + cogsFromDelivery).toFixed(2));
+    const totalCogs = Number(
+      (cogsFromAllocations + cogsFromDelivery).toFixed(2),
+    );
 
     const accrued = Number(commissionAccrued._sum.amount ?? 0);
     const settled = Number(commissionSettled._sum.amount ?? 0);

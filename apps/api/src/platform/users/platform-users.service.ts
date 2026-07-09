@@ -13,7 +13,6 @@ import {
 import type {
   PlatformAccountDetail,
   PlatformAccountListItem,
-  UserIdentity,
 } from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformAccountsService } from '../accounts/platform-accounts.service';

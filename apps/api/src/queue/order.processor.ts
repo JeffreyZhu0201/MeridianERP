@@ -1,7 +1,6 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { ORDER_QUEUE, OrderJobName } from '@meridian/shared';
-import { PlatformAllocationsService } from '../platform/allocations/platform-allocations.service';
 import { AllocationExpiryService } from '../orders/allocation-expiry.service';
 import { OrderLifecycleService } from '../orders/order-lifecycle.service';
 import { SettlementReminderService } from '../orders/settlement-reminder.service';

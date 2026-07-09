@@ -1,6 +1,5 @@
 import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
-
 export class StoreRegisterDto {
   @IsEmail()
   email!: string; // 邮箱
@@ -23,7 +22,7 @@ export class StoreRegisterDto {
  * @version {1.0.0}
  * @example
  * const dto = new StoreLoginDto();
- */  
+ */
 export class StoreLoginDto {
   @IsEmail()
   email!: string; // 邮箱

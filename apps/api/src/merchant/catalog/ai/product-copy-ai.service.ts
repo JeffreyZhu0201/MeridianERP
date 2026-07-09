@@ -4,7 +4,12 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import type { ProductCopyRequest, ProductCopySuggestion } from '@meridian/shared';
+import type {
+  AiStreamEvent,
+  ProductCopyRequest,
+  ProductCopySuggestion,
+} from '@meridian/shared';
+import { AiLlmStreamService } from '../../../ai/llm/ai-llm-stream.service';
 import { AiLlmService } from '../../../ai/llm/ai-llm.service';
 import type { ProductCopyContext } from '../../../ai/llm/merchant-ai.types';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -18,12 +23,40 @@ export class ProductCopyAiService {
     private readonly products: MerchantProductsService,
     private readonly prisma: PrismaService,
     private readonly aiLlm: AiLlmService,
+    private readonly aiLlmStream: AiLlmStreamService,
   ) {}
 
   async suggest(
     tenantId: string,
     body: ProductCopyRequest,
   ): Promise<ProductCopySuggestion> {
+    const context = await this.buildContext(tenantId, body);
+    this.logger.log(
+      `Product copy AI tenantId=${tenantId} mode=${body.productId ? 'product' : 'draft'}`,
+    );
+
+    const { result } = await this.aiLlm.suggestProductCopy(context, {
+      tenantId,
+      actorType: 'MERCHANT',
+    });
+    return result;
+  }
+
+  async *suggestStream(
+    tenantId: string,
+    body: ProductCopyRequest,
+  ): AsyncGenerator<AiStreamEvent> {
+    const context = await this.buildContext(tenantId, body);
+    this.logger.log(
+      `Product copy AI stream tenantId=${tenantId} mode=${body.productId ? 'product' : 'draft'}`,
+    );
+    yield* this.aiLlmStream.streamProductCopy(context, tenantId);
+  }
+
+  private async buildContext(
+    tenantId: string,
+    body: ProductCopyRequest,
+  ): Promise<ProductCopyContext> {
     const productId = body.productId?.trim();
     const draft = body.draft;
 
@@ -31,15 +64,9 @@ export class ProductCopyAiService {
       throw new BadRequestException('productId or draft required');
     }
 
-    const context = productId
-      ? await this.buildProductContext(tenantId, productId)
-      : await this.buildDraftContext(tenantId, draft!);
-
-    this.logger.log(
-      `Product copy AI tenantId=${tenantId} mode=${productId ? 'product' : 'draft'}`,
-    );
-
-    return this.aiLlm.suggestProductCopy(context);
+    return productId
+      ? this.buildProductContext(tenantId, productId)
+      : this.buildDraftContext(tenantId, draft!);
   }
 
   private async buildProductContext(

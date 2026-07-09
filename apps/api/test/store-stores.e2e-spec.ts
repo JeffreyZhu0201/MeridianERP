@@ -17,27 +17,37 @@ describe('Store published list (e2e)', () => {
     await app.close();
   });
 
-  it('GET /store/stores lists flagship first when marked', async () => {
+  it('GET /store/stores excludes flagship from branch picker list', async () => {
     const flagship = await prisma._seedApprovedTenant(
       'flagship-shop',
       'Flagship Shop',
     );
     await prisma.merchantProfile.update({
       where: { tenantId: flagship.id },
-      data: { isFlagship: true },
+      data: { isFlagship: true, storePublished: true },
     });
-    await prisma._seedApprovedTenant('other-shop', 'Other Shop');
+    const branch = await prisma._seedApprovedTenant('other-shop', 'Other Shop');
+    await prisma.merchantProfile.update({
+      where: { tenantId: branch.id },
+      data: { storePublished: true, isFlagship: false },
+    });
 
     const res = await request(app.getHttpServer())
       .get('/api/v1/store/stores')
       .expect(200);
 
-    expect(res.body.items[0].slug).toBe('flagship-shop');
-    expect(res.body.items[0].isFlagship).toBe(true);
+    const slugs = res.body.items.map((s: { slug: string }) => s.slug);
+    expect(slugs).toContain('other-shop');
+    expect(slugs).not.toContain('flagship-shop');
+    expect(res.body.items[0].displayName).toBe('Other Shop');
   });
 
-  it('GET /store/stores returns APPROVED tenants only', async () => {
+  it('GET /store/stores returns APPROVED branch tenants only', async () => {
     const approved = await prisma._seedApprovedTenant('demo-shop', 'Demo Shop');
+    await prisma.merchantProfile.update({
+      where: { tenantId: approved.id },
+      data: { storePublished: true, isFlagship: false },
+    });
     const pendingTenant = await prisma.tenant.create({
       data: { slug: 'pending-shop' },
     });

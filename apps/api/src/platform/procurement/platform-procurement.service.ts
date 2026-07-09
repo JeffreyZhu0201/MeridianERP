@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BranchPurchaseOrderStatus, Prisma } from '@prisma/client';
 import type { PlatformProcurementOrderSummary } from '@meridian/shared';
 import { PlatformAllocationsService } from '../allocations/platform-allocations.service';
@@ -51,7 +55,10 @@ export class PlatformProcurementService {
       throw new BadRequestException('Allocation not linked');
     }
 
-    await this.allocations.issueAllocation(order.allocationOrderId, platformUserId);
+    await this.allocations.issueAllocation(
+      order.allocationOrderId,
+      platformUserId,
+    );
 
     await this.prisma.branchPurchaseOrder.update({
       where: { id },
@@ -89,7 +96,7 @@ export class PlatformProcurementService {
     if (query.status === 'ALL' || !query.status) {
       where.status = { not: BranchPurchaseOrderStatus.PENDING_PAYMENT };
     } else {
-      where.status = query.status as BranchPurchaseOrderStatus;
+      where.status = query.status;
     }
     if (query.tenantId) where.tenantId = query.tenantId;
     return where;
@@ -100,7 +107,8 @@ export class PlatformProcurementService {
       id: order.id,
       orderNumber: order.orderNumber,
       tenantId: order.tenantId,
-      tenantName: order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
+      tenantName:
+        order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
       status: order.status,
       totalAmount: order.totalAmount.toString(),
       lineCount: order.lines.length,
@@ -113,7 +121,8 @@ export class PlatformProcurementService {
         quantityOrdered: line.quantityOrdered,
         unitWholesalePrice: line.unitWholesalePrice.toString(),
       })),
-      receivingAddress: order.receivingAddressSnapshot as PlatformProcurementOrderSummary['receivingAddress'],
+      receivingAddress:
+        order.receivingAddressSnapshot as PlatformProcurementOrderSummary['receivingAddress'],
     };
   }
 }

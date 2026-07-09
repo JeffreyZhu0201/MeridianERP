@@ -12,6 +12,7 @@ export class StoreStoresService {
       where: {
         onboardingStatus: OnboardingStatus.APPROVED,
         storePublished: true,
+        isFlagship: false,
       },
       include: { tenant: true },
     });
@@ -21,12 +22,7 @@ export class StoreStoresService {
         displayName: profile.businessName,
         isFlagship: profile.isFlagship,
       }))
-      .sort((a, b) => {
-        if (a.isFlagship !== b.isFlagship) {
-          return a.isFlagship ? -1 : 1;
-        }
-        return a.displayName.localeCompare(b.displayName);
-      });
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
     return { items };
   }
 }

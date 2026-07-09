@@ -22,7 +22,9 @@ export class PlatformRolesGuard implements CanActivate {
       return true;
     }
 
-    const user = context.switchToHttp().getRequest().user as AuthenticatedUser;
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user?: AuthenticatedUser }>();
     const role = user?.roles?.[0];
     if (!role || !requiredRoles.includes(role as AdminPlatformRole)) {
       throw new ForbiddenException('Insufficient platform role');

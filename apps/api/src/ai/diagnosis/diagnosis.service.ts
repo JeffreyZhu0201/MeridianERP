@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import type { DiagnosisRequest, DiagnosisResult } from '@meridian/shared';
+import type { AiStreamEvent, DiagnosisRequest, DiagnosisResult } from '@meridian/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AiLlmStreamService } from '../llm/ai-llm-stream.service';
 import { AiLlmService } from '../llm/ai-llm.service';
 import type { ToolRunResult } from '../llm/tool-run-result';
 import { CommissionDiagnosisTool } from './tools/commission.tool';
@@ -31,6 +32,7 @@ export class DiagnosisService {
     private readonly inventoryTool: InventoryDiagnosisTool,
     private readonly fundTool: FundDiagnosisTool,
     private readonly llm: AiLlmService,
+    private readonly llmStream: AiLlmStreamService,
   ) {}
 
   async diagnose(
@@ -46,6 +48,32 @@ export class DiagnosisService {
       `AI diagnosis query="${query.slice(0, 120)}" userId=${platformUserId}`,
     );
 
+    const toolRuns = await this.buildToolRuns(query);
+    const { result } = await this.llm.synthesizeDiagnosis(query, toolRuns, {
+      actorUserId: platformUserId,
+      actorType: 'PLATFORM',
+    });
+    return result;
+  }
+
+  async *diagnoseStream(
+    body: DiagnosisRequest,
+    platformUserId: string,
+  ): AsyncGenerator<AiStreamEvent> {
+    const query = body.query?.trim();
+    if (!query) {
+      throw new BadRequestException('query is required');
+    }
+
+    this.logger.log(
+      `AI diagnosis stream query="${query.slice(0, 120)}" userId=${platformUserId}`,
+    );
+
+    const toolRuns = await this.buildToolRuns(query);
+    yield* this.llmStream.streamDiagnosis(query, toolRuns, platformUserId);
+  }
+
+  private async buildToolRuns(query: string): Promise<ToolRunResult[]> {
     const parsed = await this.parseQuery(query);
     const toolRuns: ToolRunResult[] = [];
 
@@ -101,7 +129,7 @@ export class DiagnosisService {
       });
     }
 
-    return this.llm.synthesizeDiagnosis(query, toolRuns);
+    return toolRuns;
   }
 
   private async parseQuery(query: string): Promise<ParsedQuery> {

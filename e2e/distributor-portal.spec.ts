@@ -10,11 +10,11 @@ test.describe('Distributor portal smoke', () => {
       page.click('button[type=submit]'),
     ]);
     await page.goto('/commissions');
-    await expect(page.getByRole('heading', { name: /commission/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /commission|佣金/i })).toBeVisible({
       timeout: 15_000,
     });
     await page.goto('/withdrawals');
-    await expect(page.getByRole('heading', { name: /withdrawal/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /withdrawal|提现/i })).toBeVisible({
       timeout: 15_000,
     });
   });

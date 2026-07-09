@@ -114,30 +114,28 @@ export class StoreCatalogService {
         sorted.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case 'price_asc':
-        sorted.sort(
-          (a, b) => this.minStorePrice(a) - this.minStorePrice(b),
-        );
+        sorted.sort((a, b) => this.minStorePrice(a) - this.minStorePrice(b));
         break;
       case 'price_desc':
-        sorted.sort(
-          (a, b) => this.minStorePrice(b) - this.minStorePrice(a),
-        );
+        sorted.sort((a, b) => this.minStorePrice(b) - this.minStorePrice(a));
         break;
       case 'newest':
       default:
-        sorted.sort(
-          (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-        );
+        sorted.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         break;
     }
     return sorted;
   }
 
-  private filterUnifiedInStock(items: UnifiedStoreProduct[]): UnifiedStoreProduct[] {
+  private filterUnifiedInStock(
+    items: UnifiedStoreProduct[],
+  ): UnifiedStoreProduct[] {
     return items.filter((p) => p.variants.some((v) => v.inStock));
   }
 
-  private filterStoreInStock(products: ProductWithRelations[]): ProductWithRelations[] {
+  private filterStoreInStock(
+    products: ProductWithRelations[],
+  ): ProductWithRelations[] {
     return products.filter((p) =>
       p.variants.some((v) => v.isActive && v.inventory > 0),
     );
@@ -162,7 +160,9 @@ export class StoreCatalogService {
     };
   }
 
-  async getStoreCatalogFilters(slug: string): Promise<StoreCatalogFiltersResponse> {
+  async getStoreCatalogFilters(
+    slug: string,
+  ): Promise<StoreCatalogFiltersResponse> {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     return this.getFilterMetaForTenant(tenant.id);
   }

@@ -138,11 +138,9 @@ describe('Allocation confirm content sync (e2e)', () => {
 
     await prisma.product.update({
       where: {
-        id: (
-          await prisma.productVariant.findFirst({
-            where: { id: branchVariantId },
-          })
-        )!.productId,
+        id: (await prisma.productVariant.findFirst({
+          where: { id: branchVariantId },
+        }))!.productId,
       },
       data: {
         description: 'Stale branch description',

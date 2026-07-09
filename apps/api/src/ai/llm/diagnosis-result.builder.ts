@@ -55,7 +55,10 @@ export function buildMockReport(query: string, cards: DiagnosisCard[]): string {
   const orderCard = cards.find((c) => c.domain === 'order');
 
   let conclusion = '综合上述域数据，当前业务状态已梳理完毕。';
-  if (commissionCard?.status === 'error' || commissionCard?.status === 'warning') {
+  if (
+    commissionCard?.status === 'error' ||
+    commissionCard?.status === 'warning'
+  ) {
     conclusion =
       '拓店员佣金仅在分店配货单确认（CONFIRMED）时计提，且每家 recruited 分店前 2 笔配货可计佣；零售订单履约不产生佣金。';
     if (orderCard) {

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -12,6 +11,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { draftSlug } from '../../common/utils/slug.util';
 import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { RecruitInviteService } from '../../recruit-invite/recruit-invite.service';
+import { audienceJwtSignOptions } from '../../auth/jwt-sign-options';
 import { MerchantLoginDto, MerchantRegisterDto } from './dto/merchant-auth.dto';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class MerchantAuthService {
         tenantId,
         roles: [role],
       },
-      { secret: this.env.getOrThrow('JWT_MERCHANT_SECRET') },
+      audienceJwtSignOptions(this.env, 'JWT_MERCHANT_SECRET'),
     );
   }
 
@@ -148,7 +148,7 @@ export class MerchantAuthService {
     const displayName =
       parts.length > 0
         ? parts.join(' ')
-        : (user.email.split('@')[0]?.trim() || user.email);
+        : user.email.split('@')[0]?.trim() || user.email;
 
     return {
       id: user.id,

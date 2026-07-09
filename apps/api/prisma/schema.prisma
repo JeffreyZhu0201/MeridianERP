@@ -123,7 +123,6 @@ enum AllocationOrderStatus {
   CANCELLED // 已取消
 }
 
-
 // 分店向总店进货单状态
 enum BranchPurchaseOrderStatus {
   PENDING_PAYMENT // 待支付
@@ -173,9 +172,9 @@ model PlatformAccount {
   createdAt DateTime @default(now()) // 创建时间
   updatedAt DateTime @updatedAt // 更新时间
 
-  customers     Customer[] // 各租户消费者档案
-  merchantUsers User[] // 商户门户用户
-  distributor   Distributor? // 拓店员身份（可选）
+  customers         Customer[] // 各租户消费者档案
+  merchantUsers     User[] // 商户门户用户
+  distributor       Distributor? // 拓店员身份（可选）
   deliveryAddresses CustomerDeliveryAddress[] // 消费者收货地址
 }
 
@@ -213,6 +212,8 @@ model Tenant {
   procurementReceivingAddresses ProcurementReceivingAddress[] // 进货收货地址
   deliveryAllocationLedgers     DeliveryAllocationLedger[] // 配送配额账本
   tenantPlugins                 TenantPlugin[] // 已安装插件
+  aiCallLogs                    AiCallLog[] // AI 调用审计日志
+  aiAnalysisRecords             AiAnalysisRecord[] // AI 分析历史
   createdAt                     DateTime                      @default(now()) // 创建时间
   updatedAt                     DateTime                      @updatedAt // 更新时间
 }
@@ -469,20 +470,20 @@ model Category {
 
 // 商品
 model Product {
-  id          String           @id @default(cuid()) // 主键
-  tenantId    String // 租户 ID
-  tenant      Tenant           @relation(fields: [tenantId], references: [id]) // 所属租户
-  categoryId  String? // 分类 ID
-  category    Category?        @relation(fields: [categoryId], references: [id]) // 所属分类
-  name        String // 商品名称
-  slug        String // 商品 slug
-  description String? // 商品描述
+  id               String           @id @default(cuid()) // 主键
+  tenantId         String // 租户 ID
+  tenant           Tenant           @relation(fields: [tenantId], references: [id]) // 所属租户
+  categoryId       String? // 分类 ID
+  category         Category?        @relation(fields: [categoryId], references: [id]) // 所属分类
+  name             String // 商品名称
+  slug             String // 商品 slug
+  description      String? // 商品描述
   shortDescription String? // 列表摘要
-  isPublished Boolean          @default(false) // 是否上架
-  variants    ProductVariant[] // SKU 变体
-  images      ProductImage[] // 商品图片
-  createdAt   DateTime         @default(now()) // 创建时间
-  updatedAt   DateTime         @updatedAt // 更新时间
+  isPublished      Boolean          @default(false) // 是否上架
+  variants         ProductVariant[] // SKU 变体
+  images           ProductImage[] // 商品图片
+  createdAt        DateTime         @default(now()) // 创建时间
+  updatedAt        DateTime         @updatedAt // 更新时间
 
   @@unique([tenantId, slug]) // 同一租户下 slug 唯一
   @@index([tenantId])
@@ -914,16 +915,16 @@ model MasterSku {
 
 // 平台媒体资产
 model MediaAsset {
-  id                       String            @id @default(cuid())
-  storageKey               String            @unique
+  id                       String           @id @default(cuid())
+  storageKey               String           @unique
   url                      String
   mimeType                 String
   sizeBytes                Int
   originalName             String
   uploadedByPlatformUserId String?
-  uploadedBy               PlatformUser?     @relation(fields: [uploadedByPlatformUserId], references: [id])
+  uploadedBy               PlatformUser?    @relation(fields: [uploadedByPlatformUserId], references: [id])
   masterSkuImages          MasterSkuImage[]
-  createdAt                DateTime          @default(now())
+  createdAt                DateTime         @default(now())
 
   @@index([uploadedByPlatformUserId])
 }
@@ -1093,6 +1094,72 @@ model DeliveryAllocationLedger {
 
   @@index([orderId])
   @@index([tenantId])
+}
+
+// ============================================================
+// AI 调用与分析历史
+// ============================================================
+
+enum AiFeature {
+  PLATFORM_DIAGNOSIS
+  PLATFORM_WITHDRAWAL_INSIGHT
+  PLATFORM_DELIVERY_INSIGHT
+  PLATFORM_FUNDS_INSIGHT
+  MERCHANT_REPLENISHMENT
+  MERCHANT_PRODUCT_COPY
+  MERCHANT_CRM_FOLLOW_UP
+}
+
+enum AiCallMode {
+  LIVE
+  MOCK
+  LIVE_FALLBACK_MOCK
+}
+
+enum AiCallStatus {
+  SUCCESS
+  ERROR
+  PARSE_FALLBACK
+}
+
+enum AiActorType {
+  PLATFORM
+  MERCHANT
+}
+
+model AiCallLog {
+  id             String            @id @default(cuid())
+  feature        AiFeature
+  mode           AiCallMode
+  status         AiCallStatus
+  tenantId       String?
+  tenant         Tenant?           @relation(fields: [tenantId], references: [id])
+  actorUserId    String?
+  actorType      AiActorType?
+  model          String?
+  latencyMs      Int?
+  errorMessage   String?
+  inputSummary   String?           @db.Text
+  outputSummary  String?           @db.Text
+  analysisRecord AiAnalysisRecord?
+  createdAt      DateTime          @default(now())
+
+  @@index([feature, createdAt])
+  @@index([tenantId, createdAt])
+}
+
+model AiAnalysisRecord {
+  id                String     @id @default(cuid())
+  tenantId          String
+  tenant            Tenant     @relation(fields: [tenantId], references: [id])
+  feature           AiFeature
+  triggeredByUserId String?
+  result            Json
+  callLogId         String?    @unique
+  callLog           AiCallLog? @relation(fields: [callLogId], references: [id])
+  createdAt         DateTime   @default(now())
+
+  @@index([tenantId, feature, createdAt(sort: Desc)])
 }
 
 // ============================================================

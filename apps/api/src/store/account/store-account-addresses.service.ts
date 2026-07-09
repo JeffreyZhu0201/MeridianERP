@@ -105,7 +105,11 @@ export class StoreAccountAddressesService {
     });
   }
 
-  async update(userId: string, addressId: string, dto: UpdateCustomerDeliveryAddressDto) {
+  async update(
+    userId: string,
+    addressId: string,
+    dto: UpdateCustomerDeliveryAddressDto,
+  ) {
     const accountId = await this.resolveAccountId(userId);
     const existing = await this.prisma.customerDeliveryAddress.findFirst({
       where: { id: addressId, accountId },
@@ -130,8 +134,12 @@ export class StoreAccountAddressesService {
           ...(dto.line1 !== undefined ? { line1: dto.line1 } : {}),
           ...(dto.line2 !== undefined ? { line2: dto.line2 || null } : {}),
           ...(dto.city !== undefined ? { city: dto.city } : {}),
-          ...(dto.province !== undefined ? { province: dto.province || null } : {}),
-          ...(dto.postalCode !== undefined ? { postalCode: dto.postalCode || null } : {}),
+          ...(dto.province !== undefined
+            ? { province: dto.province || null }
+            : {}),
+          ...(dto.postalCode !== undefined
+            ? { postalCode: dto.postalCode || null }
+            : {}),
           ...(dto.isDefault !== undefined ? { isDefault: dto.isDefault } : {}),
         },
       });

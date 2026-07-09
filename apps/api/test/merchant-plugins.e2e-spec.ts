@@ -80,7 +80,9 @@ describe('Merchant plugins (e2e)', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.items.length).toBeGreaterThanOrEqual(7);
-    const crm = res.body.items.find((item: { code: string }) => item.code === 'crm');
+    const crm = res.body.items.find(
+      (item: { code: string }) => item.code === 'crm',
+    );
     expect(crm.installed).toBe(true);
   });
 
@@ -144,7 +146,9 @@ describe('Merchant plugins (e2e)', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.plugins.length).toBeGreaterThanOrEqual(7);
-    const crm = res.body.plugins.find((p: { code: string }) => p.code === 'crm');
+    const crm = res.body.plugins.find(
+      (p: { code: string }) => p.code === 'crm',
+    );
     expect(crm.installed).toBe(true);
     expect(crm.installedAt).toBeTruthy();
   });

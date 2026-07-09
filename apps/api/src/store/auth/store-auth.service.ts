@@ -10,6 +10,7 @@ import { EnvService } from '../../config/env.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformAccountsService } from '../../platform/accounts/platform-accounts.service';
 import { StoreTenantService } from '../common/store-tenant.service';
+import { audienceJwtSignOptions } from '../../auth/jwt-sign-options';
 import { StoreLoginDto, StoreRegisterDto } from './dto/store-auth.dto';
 import type {
   ChangeStorePasswordDto,
@@ -24,7 +25,7 @@ import type {
  * @version {1.0.0}
  * @example
  * const service = new StoreAuthService(prisma, jwt, env, storeTenant, platformAccounts);
- */  
+ */
 @Injectable()
 export class StoreAuthService {
   constructor(
@@ -43,7 +44,7 @@ export class StoreAuthService {
    * @version {1.0.0}
    * @example
    * const service = new StoreAuthService(prisma, jwt, env, storeTenant, platformAccounts);
-   */  
+   */
   private signAccountToken(accountId: string) {
     return this.jwt.sign(
       {
@@ -51,7 +52,7 @@ export class StoreAuthService {
         aud: 'store' as const,
         roles: ['CUSTOMER'],
       },
-      { secret: this.env.getOrThrow('JWT_STORE_SECRET') },
+      audienceJwtSignOptions(this.env, 'JWT_STORE_SECRET'),
     );
   }
 
@@ -63,7 +64,7 @@ export class StoreAuthService {
    * @version {1.0.0}
    * @example
    * const service = new StoreAuthService(prisma, jwt, env, storeTenant, platformAccounts);
-   */  
+   */
   private signCustomerToken(customerId: string, tenantId: string) {
     return this.jwt.sign(
       {
@@ -72,7 +73,7 @@ export class StoreAuthService {
         tenantId,
         roles: ['CUSTOMER'],
       },
-      { secret: this.env.getOrThrow('JWT_STORE_SECRET') },
+      audienceJwtSignOptions(this.env, 'JWT_STORE_SECRET'),
     );
   }
 
@@ -84,7 +85,7 @@ export class StoreAuthService {
    * @version {1.0.0}
    * @example
    * const service = new StoreAuthService(prisma, jwt, env, storeTenant, platformAccounts);
-   */  
+   */
   async registerGlobal(dto: StoreRegisterDto) {
     // 创建店铺平台账户
     const account = await this.platformAccounts.createAccount({
@@ -133,7 +134,7 @@ export class StoreAuthService {
    * @version {1.0.0}
    * @example
    * const service = new StoreAuthService(prisma, jwt, env, storeTenant, platformAccounts);
-   */  
+   */
   async attachSession(slug: string, accountId: string) {
     const { tenant } = await this.storeTenant.resolveApprovedTenant(slug);
     const account = await this.platformAccounts.findById(accountId);
@@ -318,8 +319,12 @@ export class StoreAuthService {
     const updated = await this.prisma.platformAccount.update({
       where: { id: accountId },
       data: {
-        ...(dto.firstName !== undefined ? { firstName: dto.firstName || null } : {}),
-        ...(dto.lastName !== undefined ? { lastName: dto.lastName || null } : {}),
+        ...(dto.firstName !== undefined
+          ? { firstName: dto.firstName || null }
+          : {}),
+        ...(dto.lastName !== undefined
+          ? { lastName: dto.lastName || null }
+          : {}),
         ...(dto.phone !== undefined ? { phone: dto.phone || null } : {}),
       },
     });
@@ -328,8 +333,12 @@ export class StoreAuthService {
       await this.prisma.customer.updateMany({
         where: { accountId },
         data: {
-          ...(dto.firstName !== undefined ? { firstName: dto.firstName || null } : {}),
-          ...(dto.lastName !== undefined ? { lastName: dto.lastName || null } : {}),
+          ...(dto.firstName !== undefined
+            ? { firstName: dto.firstName || null }
+            : {}),
+          ...(dto.lastName !== undefined
+            ? { lastName: dto.lastName || null }
+            : {}),
         },
       });
     }

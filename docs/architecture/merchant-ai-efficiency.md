@@ -5,10 +5,15 @@
 
 ## API
 
-| Method | Path | Guard |
-|--------|------|-------|
-| `POST` | `/api/v1/merchant/inventory/ai/replenishment` | MerchantAuthGuard |
-| `POST` | `/api/v1/merchant/catalog/ai/product-copy` | MerchantAuthGuard |
+| Method | Path                                                  | Guard             |
+| ------ | ----------------------------------------------------- | ----------------- |
+| `POST` | `/api/v1/merchant/inventory/ai/replenishment`         | MerchantAuthGuard |
+| `POST` | `/api/v1/merchant/inventory/ai/replenishment/stream`    | MerchantAuthGuard |
+| `GET`  | `/api/v1/merchant/inventory/ai/replenishment/latest`  | MerchantAuthGuard |
+| `GET`  | `/api/v1/merchant/inventory/ai/replenishment/history` | MerchantAuthGuard |
+| `GET`  | `/api/v1/merchant/inventory/ai/replenishment/procurement-prefill` | MerchantAuthGuard |
+| `POST` | `/api/v1/merchant/catalog/ai/product-copy`            | MerchantAuthGuard |
+| `POST` | `/api/v1/merchant/catalog/ai/product-copy/stream`     | MerchantAuthGuard |
 
 ## Module
 
@@ -38,7 +43,9 @@ apps/api/src/ai/llm/
 
 `ProductCopyAiService` loads product by id or validates draft → `AiLlmService.suggestProductCopy`.
 
-Mock/live via `AI_MODE`; live JSON parse failure falls back to mock.
+Mock/live via `AI_MODE`; live JSON parse failure falls back to mock. Each replenishment call persists `AiAnalysisRecord` and an `AiCallLog` entry; the alerts page auto-loads the latest analysis on mount.
+
+Frontend panels use SSE stream endpoints for incremental rendering. The procurement shop page can prefill the cart from the latest analysis via `procurement-prefill` (see [`ai-streaming.md`](ai-streaming.md)).
 
 ## Environment
 

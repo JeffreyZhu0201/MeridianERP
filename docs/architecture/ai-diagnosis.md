@@ -10,8 +10,8 @@ Platform operators run natural-language diagnostics from Admin (`/diagnosis`). T
 
 ## API
 
-| Method | Path | Auth |
-|--------|------|------|
+| Method | Path                            | Auth                                             |
+| ------ | ------------------------------- | ------------------------------------------------ |
 | `POST` | `/api/v1/platform/ai/diagnosis` | `PlatformAuthGuard` + `SUPER_ADMIN` or `FINANCE` |
 
 **Request body:** `{ "query": string }`  
@@ -36,12 +36,12 @@ apps/api/src/ai/
 
 ## Tools
 
-| Tool | Inputs | Data |
-|------|--------|------|
-| `order_query` | `orderId?`, `tenantId?` | Order status, fulfillment, totals |
+| Tool               | Inputs                                        | Data                                               |
+| ------------------ | --------------------------------------------- | -------------------------------------------------- |
+| `order_query`      | `orderId?`, `tenantId?`                       | Order status, fulfillment, totals                  |
 | `commission_query` | `orderId?`, `tenantId?`, `allocationOrderId?` | Allocation-ledgers; explains ALLOCATION-only rules |
-| `inventory_query` | `tenantId?`, `skuCode?` | Stock levels, MasterSku on-hand |
-| `fund_query` | `tenantId?` | Branch net position snapshot |
+| `inventory_query`  | `tenantId?`, `skuCode?`                       | Stock levels, MasterSku on-hand                    |
+| `fund_query`       | `tenantId?`                                   | Branch net position snapshot                       |
 
 ## Commission semantics (prompt + tools)
 
@@ -50,15 +50,26 @@ apps/api/src/ai/
 
 ## Environment
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `AI_MODE` | `mock` | Global `mock` / `live`; legacy `AI_DIAGNOSIS_MODE` still honored |
-| `AI_ANTHROPIC_BASE_URL` | — | Also `AI_DIAGNOSIS_ANTHROPIC_BASE_URL` / `ANTHROPIC_BASE_URL` |
-| `AI_ANTHROPIC_API_KEY` | — | Also diagnosis / `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY` |
-| `AI_ANTHROPIC_MODEL` | `ark-code-latest` | Also `AI_DIAGNOSIS_ANTHROPIC_MODEL` / `ANTHROPIC_MODEL` |
-| `AI_DIAGNOSIS_MODE` | `mock` | Legacy per-feature flag; use `AI_MODE` for new features |
+| Variable                | Default           | Purpose                                                          |
+| ----------------------- | ----------------- | ---------------------------------------------------------------- |
+| `AI_MODE`               | `mock`            | Global `mock` / `live`; legacy `AI_DIAGNOSIS_MODE` still honored |
+| `AI_ANTHROPIC_BASE_URL` | —                 | Also `AI_DIAGNOSIS_ANTHROPIC_BASE_URL` / `ANTHROPIC_BASE_URL`    |
+| `AI_ANTHROPIC_API_KEY`  | —                 | Also diagnosis / `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_API_KEY`    |
+| `AI_ANTHROPIC_MODEL`    | `ark-code-latest` | Also `AI_DIAGNOSIS_ANTHROPIC_MODEL` / `ANTHROPIC_MODEL`          |
+| `AI_DIAGNOSIS_MODE`     | `mock`            | Legacy per-feature flag; use `AI_MODE` for new features          |
 
 When `AI_DIAGNOSIS_MODE=live` and base URL + API key are set, `AnthropicLlmClient` calls `{baseURL}/v1/messages` (Anthropic Messages API). On failure, the service falls back to mock synthesis.
+
+## Call logging
+
+Every AI invocation (diagnosis, admin insights, merchant replenishment/product copy/CRM) writes an `AiCallLog` row with:
+
+- `feature`, `mode` (`LIVE` | `MOCK` | `LIVE_FALLBACK_MOCK`), `status`, `latencyMs`
+- Optional `tenantId`, `actorUserId`, truncated `inputSummary` / `outputSummary`
+
+Platform admins list logs at `GET /api/v1/platform/ai/calls` (`SUPER_ADMIN`, `FINANCE`) and check runtime mode at `GET /api/v1/platform/ai/status`.
+
+Merchant replenishment analyses are also stored in `AiAnalysisRecord` for `/merchant/inventory/ai/replenishment/latest` and `/history`.
 
 ## Security
 

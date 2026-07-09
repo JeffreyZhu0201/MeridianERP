@@ -10,7 +10,7 @@ test.describe('Phase 1 smoke', () => {
       page.click('button[type=submit]'),
     ]);
     await page.goto('/merchants');
-    await expect(page.getByRole('heading', { name: /merchants/i })).toBeVisible({
+    await expect(page.getByRole('heading', { name: /merchants|商户/i })).toBeVisible({
       timeout: 15_000,
     });
   });

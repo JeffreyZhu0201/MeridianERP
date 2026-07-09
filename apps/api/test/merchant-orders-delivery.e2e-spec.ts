@@ -49,9 +49,7 @@ describe('Merchant delivery orders (e2e)', () => {
       .send({
         name: 'Delivery Widget',
         isPublished: true,
-        variants: [
-          { sku: 'DEL-1', name: 'Default', price: 50, inventory: 8 },
-        ],
+        variants: [{ sku: 'DEL-1', name: 'Default', price: 50, inventory: 8 }],
       })
       .expect(201);
 

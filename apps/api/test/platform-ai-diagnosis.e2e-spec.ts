@@ -61,9 +61,9 @@ describe('Platform AI diagnosis (e2e)', () => {
 
     expect(res.body.report).toEqual(expect.any(String));
     expect(res.body.cards.length).toBeGreaterThan(0);
-    expect(res.body.cards.some((c: { domain: string }) => c.domain === 'commission')).toBe(
-      true,
-    );
+    expect(
+      res.body.cards.some((c: { domain: string }) => c.domain === 'commission'),
+    ).toBe(true);
     expect(res.body.report).toMatch(/配货|ALLOCATION|佣金/);
   });
 

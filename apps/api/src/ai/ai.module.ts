@@ -14,8 +14,12 @@ import { DeliveryOrderInsightService } from './insights/delivery-order-insight.s
 import { FundsInsightService } from './insights/funds-insight.service';
 import { PlatformAiInsightsController } from './insights/platform-ai-insights.controller';
 import { WithdrawalInsightService } from './insights/withdrawal-insight.service';
+import { AiAnalysisRecordService } from './logging/ai-analysis-record.service';
+import { AiCallLogService } from './logging/ai-call-log.service';
+import { PlatformAiCallsController } from './logging/platform-ai-calls.controller';
 import { AdminInsightMockClient } from './llm/admin-insight-mock.client';
 import { AiLlmService } from './llm/ai-llm.service';
+import { AiLlmStreamService } from './llm/ai-llm-stream.service';
 import { AnthropicLlmClient } from './llm/anthropic-llm.client';
 import { CrmFollowUpMockClient } from './llm/crm-follow-up-mock.client';
 import { MockLlmClient } from './llm/mock-llm.client';
@@ -30,13 +34,20 @@ import { ReplenishmentMockClient } from './llm/replenishment-mock.client';
     PlatformWithdrawalsModule,
     PayoutModule,
   ],
-  controllers: [DiagnosisController, PlatformAiInsightsController],
+  controllers: [
+    DiagnosisController,
+    PlatformAiInsightsController,
+    PlatformAiCallsController,
+  ],
   providers: [
     DiagnosisService,
     WithdrawalInsightService,
     DeliveryOrderInsightService,
     FundsInsightService,
+    AiCallLogService,
+    AiAnalysisRecordService,
     AiLlmService,
+    AiLlmStreamService,
     MockLlmClient,
     AnthropicLlmClient,
     CrmFollowUpMockClient,
@@ -48,6 +59,6 @@ import { ReplenishmentMockClient } from './llm/replenishment-mock.client';
     InventoryDiagnosisTool,
     FundDiagnosisTool,
   ],
-  exports: [AiLlmService],
+  exports: [AiLlmService, AiLlmStreamService, AiAnalysisRecordService],
 })
 export class AiModule {}

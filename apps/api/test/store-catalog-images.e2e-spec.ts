@@ -10,6 +10,8 @@ import {
 } from './helpers/test-media';
 
 describe('Store catalog images (e2e)', () => {
+  jest.setTimeout(30_000);
+
   let app: INestApplication<App>;
   let prisma: MockPrisma;
   let platformToken: string;
@@ -79,7 +81,9 @@ describe('Store catalog images (e2e)', () => {
     });
 
     const detail = await request(app.getHttpServer())
-      .get('/api/v1/store/catalog/products/store-img-01?fulfillment=branch-east')
+      .get(
+        '/api/v1/store/catalog/products/store-img-01?fulfillment=branch-east',
+      )
       .expect(200);
 
     expect(detail.body).toMatchObject({

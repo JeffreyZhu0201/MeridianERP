@@ -1,4 +1,4 @@
-export type ReplenishmentUrgency = 'critical' | 'high' | 'medium';
+export type ReplenishmentUrgency = "critical" | "high" | "medium";
 
 export interface ReplenishmentPriorityItem {
   variantId: string;
@@ -13,6 +13,26 @@ export interface ReplenishmentSuggestion {
   priorities: ReplenishmentPriorityItem[];
   recommendations: string[];
   sources: { type: string; ref: string }[];
+}
+
+export interface ReplenishmentAnalysisResponse extends ReplenishmentSuggestion {
+  analysisId: string;
+  createdAt: string;
+}
+
+export interface ReplenishmentAnalysisHistoryItem {
+  id: string;
+  createdAt: string;
+  summary: string;
+  priorityCount: number;
+  result: ReplenishmentSuggestion;
+}
+
+export interface PaginatedReplenishmentAnalysisHistory {
+  items: ReplenishmentAnalysisHistoryItem[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface ProductCopyDraft {

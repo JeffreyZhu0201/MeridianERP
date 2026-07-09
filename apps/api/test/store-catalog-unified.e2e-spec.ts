@@ -106,9 +106,11 @@ describe('Store unified catalog (e2e)', () => {
       .get('/api/v1/store/catalog?fulfillment=branch-east&inStock=true')
       .expect(200);
 
-    expect(res.body.items.every((item: { variants: { inStock: boolean }[] }) =>
-      item.variants.some((v) => v.inStock),
-    )).toBe(true);
+    expect(
+      res.body.items.every((item: { variants: { inStock: boolean }[] }) =>
+        item.variants.some((v) => v.inStock),
+      ),
+    ).toBe(true);
     expect(
       res.body.items.some((item: { slug: string }) => item.slug === 'hat-200'),
     ).toBe(false);
@@ -122,9 +124,7 @@ describe('Store unified catalog (e2e)', () => {
     const prices = res.body.items.map(
       (item: { variants: { branchPrice: number; flagshipPrice: number }[] }) =>
         Math.min(
-          ...item.variants.map((v) =>
-            Number(v.branchPrice ?? v.flagshipPrice),
-          ),
+          ...item.variants.map((v) => Number(v.branchPrice ?? v.flagshipPrice)),
         ),
     );
     expect(prices).toEqual([...prices].sort((a, b) => a - b));

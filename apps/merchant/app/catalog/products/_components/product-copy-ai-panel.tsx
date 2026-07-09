@@ -15,7 +15,7 @@ import {
 } from '@meridian/ui';
 import type { ProductCopySuggestion } from '@meridian/shared';
 
-import { apiFetch } from '@/lib/api';
+import { streamAi } from '@/lib/ai-stream';
 
 interface ProductCopyDraftForm {
   name: string;
@@ -42,6 +42,12 @@ export function ProductCopyAiPanel({
 }: ProductCopyAiPanelProps) {
   const t = useTranslations('merchant.catalog.ai');
   const [result, setResult] = useState<ProductCopySuggestion | null>(null);
+  const [streaming, setStreaming] = useState<ProductCopySuggestion>({
+    title: '',
+    description: '',
+    bulletPoints: [],
+    sources: [],
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [adoptedTitle, setAdoptedTitle] = useState(false);
@@ -63,15 +69,42 @@ export function ProductCopyAiPanel({
           price: draft.price ? Number(draft.price) : undefined,
         },
       };
-      const data = await apiFetch<ProductCopySuggestion>(
+      setStreaming({ title: '', description: '', bulletPoints: [], sources: [] });
+      await streamAi(
         '/merchant/catalog/ai/product-copy',
-        { method: 'POST', body: JSON.stringify(body) },
+        body,
         token,
+        (event) => {
+          if (event.type === 'title_delta') {
+            setStreaming((current) => ({
+              ...current,
+              title: current.title + event.text,
+            }));
+          }
+          if (event.type === 'description_delta') {
+            setStreaming((current) => ({
+              ...current,
+              description: current.description + event.text,
+            }));
+          }
+          if (event.type === 'bullet') {
+            setStreaming((current) => ({
+              ...current,
+              bulletPoints: [...(current.bulletPoints ?? []), event.text],
+            }));
+          }
+          if (event.type === 'done') {
+            setResult(event.result as ProductCopySuggestion);
+          }
+          if (event.type === 'error') {
+            throw new Error(event.message);
+          }
+        },
       );
-      setResult(data);
     } catch {
       setError(t('submitFailed'));
       setResult(null);
+      setStreaming({ title: '', description: '', bulletPoints: [], sources: [] });
     } finally {
       setLoading(false);
     }
@@ -102,22 +135,30 @@ export function ProductCopyAiPanel({
           </Alert>
         ) : null}
 
-        {result ? (
+        {result || (loading && (streaming.title || streaming.description)) ? (
           <div className="space-y-4">
+            {(() => {
+              const display = result ?? streaming;
+              return (
+                <>
             <div className="space-y-2 rounded-lg border border-border p-3 dark:border-border/40">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="text-xs font-medium text-muted-foreground">
                     {t('titleSuggestion')}
                   </p>
-                  <p className="text-sm">{result.title}</p>
+                  <p className="text-sm">
+                    {display.title}
+                    {loading && !result ? '▍' : ''}
+                  </p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={loading && !result}
                   onClick={() => {
-                    onAdoptTitle(result.title);
+                    onAdoptTitle(display.title);
                     setAdoptedTitle(true);
                   }}
                 >
@@ -132,14 +173,18 @@ export function ProductCopyAiPanel({
                   <p className="text-xs font-medium text-muted-foreground">
                     {t('descriptionSuggestion')}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm">{result.description}</p>
+                  <p className="whitespace-pre-wrap text-sm">
+                    {display.description}
+                    {loading && !result ? '▍' : ''}
+                  </p>
                 </div>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  disabled={loading && !result}
                   onClick={() => {
-                    onAdoptDescription(result.description);
+                    onAdoptDescription(display.description);
                     setAdoptedDescription(true);
                   }}
                 >
@@ -148,13 +193,13 @@ export function ProductCopyAiPanel({
               </div>
             </div>
 
-            {result.bulletPoints && result.bulletPoints.length > 0 ? (
+            {display.bulletPoints && display.bulletPoints.length > 0 ? (
               <div>
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t('bulletPoints')}
                 </p>
                 <ul className="list-inside list-disc space-y-1 text-sm">
-                  {result.bulletPoints.map((point) => (
+                  {display.bulletPoints.map((point) => (
                     <li key={point}>{point}</li>
                   ))}
                 </ul>
@@ -162,6 +207,9 @@ export function ProductCopyAiPanel({
             ) : null}
 
             <p className="text-xs text-muted-foreground">{t('saveReminder')}</p>
+                </>
+              );
+            })()}
           </div>
         ) : null}
       </CardContent>

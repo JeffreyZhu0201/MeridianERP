@@ -99,7 +99,11 @@ export class PlatformAllocationsService {
         },
         include: masterSkuImageInclude,
       });
-      removedAssetIds = await replaceMasterSkuImages(tx, created.id, dto.images);
+      removedAssetIds = await replaceMasterSkuImages(
+        tx,
+        created.id,
+        dto.images,
+      );
       return tx.masterSku.findUniqueOrThrow({
         where: { id: created.id },
         include: masterSkuImageInclude,
@@ -175,7 +179,9 @@ export class PlatformAllocationsService {
           create: lines.map((l) => {
             const sku = skuMap.get(l.masterSkuId);
             if (!sku) {
-              throw new NotFoundException(`Master SKU ${l.masterSkuId} not found`);
+              throw new NotFoundException(
+                `Master SKU ${l.masterSkuId} not found`,
+              );
             }
             return {
               masterSkuId: l.masterSkuId,

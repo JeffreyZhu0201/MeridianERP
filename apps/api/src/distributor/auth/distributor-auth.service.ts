@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EnvService } from '../../config/env.service';
+import { audienceJwtSignOptions } from '../../auth/jwt-sign-options';
 import { PrismaService } from '../../prisma/prisma.service';
 import { DistributorLoginDto } from './dto/distributor-login.dto';
 
@@ -25,7 +26,7 @@ export class DistributorAuthService {
         tenantId: tenantId ?? undefined,
         roles: ['DISTRIBUTOR'],
       },
-      { secret: this.env.getOrThrow('JWT_DISTRIBUTOR_SECRET') },
+      audienceJwtSignOptions(this.env, 'JWT_DISTRIBUTOR_SECRET'),
     );
   }
 

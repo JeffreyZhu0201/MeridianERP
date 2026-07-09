@@ -46,7 +46,8 @@ export class StoreCheckoutService {
     sessionId: string | undefined,
     user?: AuthenticatedUser,
   ) {
-    const { tenant, profile } = await this.storeTenant.resolveApprovedTenant(slug);
+    const { tenant, profile } =
+      await this.storeTenant.resolveApprovedTenant(slug);
     const isFlagship = profile.isFlagship;
     let cart;
     let customerId: string | null = null;
@@ -125,9 +126,7 @@ export class StoreCheckoutService {
     }
     const subtotal = cart.items.reduce(
       (sum, item) =>
-        sum.add(
-          new Prisma.Decimal(item.variant.price).mul(item.quantity),
-        ),
+        sum.add(new Prisma.Decimal(item.variant.price).mul(item.quantity)),
       new Prisma.Decimal(0),
     );
     const settings = await this.prisma.tenantSettings.findUnique({

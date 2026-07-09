@@ -84,14 +84,17 @@ export class PluginService implements OnModuleInit {
       nameKey: plugin.nameKey,
       descriptionKey: plugin.descriptionKey,
       navRoutes: (plugin.navRoutes as PluginNavRoute[] | null) ?? null,
-      status: plugin.status as MerchantPluginCatalogItem['status'],
+      status: plugin.status,
       isDefaultOnSignup: plugin.isDefaultOnSignup,
       installed: installation != null,
       installedAt: installation?.installedAt.toISOString() ?? null,
     };
   }
 
-  async isInstalled(tenantId: string, code: MerchantPluginCode): Promise<boolean> {
+  async isInstalled(
+    tenantId: string,
+    code: MerchantPluginCode,
+  ): Promise<boolean> {
     const plugin = await this.prisma.pluginDefinition.findUnique({
       where: { code },
     });
@@ -114,16 +117,16 @@ export class PluginService implements OnModuleInit {
     }
   }
 
-  async getInstalledCodes(tenantId: string): Promise<MerchantInstalledPluginsResponse> {
+  async getInstalledCodes(
+    tenantId: string,
+  ): Promise<MerchantInstalledPluginsResponse> {
     const installations = await this.prisma.tenantPlugin.findMany({
       where: { tenantId, status: TenantPluginStatus.INSTALLED },
       include: { plugin: true },
       orderBy: { plugin: { sortOrder: 'asc' } },
     });
     return {
-      codes: installations.map(
-        (row) => row.plugin.code as MerchantPluginCode,
-      ),
+      codes: installations.map((row) => row.plugin.code as MerchantPluginCode),
     };
   }
 
@@ -146,10 +149,7 @@ export class PluginService implements OnModuleInit {
 
     return {
       items: plugins.map((plugin) =>
-        this.toCatalogItem(
-          plugin,
-          installedByPluginId.get(plugin.id) ?? null,
-        ),
+        this.toCatalogItem(plugin, installedByPluginId.get(plugin.id) ?? null),
       ),
     };
   }
@@ -279,15 +279,12 @@ export class PluginService implements OnModuleInit {
 
     const items: PlatformMerchantPluginItem[] = plugins.map((plugin) => {
       const installation = byPluginId.get(plugin.id);
-      const installed =
-        installation?.status === TenantPluginStatus.INSTALLED;
+      const installed = installation?.status === TenantPluginStatus.INSTALLED;
       return {
         code: plugin.code as MerchantPluginCode,
         nameKey: plugin.nameKey,
         installed,
-        installedAt: installed
-          ? installation!.installedAt.toISOString()
-          : null,
+        installedAt: installed ? installation.installedAt.toISOString() : null,
         uninstalledAt: installation?.uninstalledAt?.toISOString() ?? null,
       };
     });

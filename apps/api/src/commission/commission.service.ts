@@ -91,7 +91,9 @@ export class CommissionService {
 
   async voidOnRefund(orderId: string, tx?: Prisma.TransactionClient) {
     const client = tx ?? this.prisma;
-    const ledger = await client.commissionLedger.findUnique({ where: { orderId } });
+    const ledger = await client.commissionLedger.findUnique({
+      where: { orderId },
+    });
     if (!ledger || ledger.status === LedgerStatus.VOID) {
       return;
     }

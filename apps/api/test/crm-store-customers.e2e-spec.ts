@@ -16,7 +16,10 @@ async function loginMerchant(
   return res.body.accessToken as string;
 }
 
-async function seedStoreWithProduct(app: INestApplication<App>, prisma: MockPrisma) {
+async function seedStoreWithProduct(
+  app: INestApplication<App>,
+  prisma: MockPrisma,
+) {
   const password = await bcrypt.hash('secret12', 10);
   const { tenant } = await prisma._seedMerchantOwner(
     'acme-store',
@@ -37,7 +40,9 @@ async function seedStoreWithProduct(app: INestApplication<App>, prisma: MockPris
     .send({
       name: 'Blue Widget',
       isPublished: true,
-      variants: [{ sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 }],
+      variants: [
+        { sku: 'WIDGET-1', name: 'Default', price: 50, inventory: 10 },
+      ],
     })
     .expect(201);
 
@@ -117,9 +122,15 @@ describe('CRM store customers (e2e)', () => {
   });
 
   it('lists customers with fulfilled orders only', async () => {
-    const { merchantToken, variantId } = await seedStoreWithProduct(app, prisma);
+    const { merchantToken, variantId } = await seedStoreWithProduct(
+      app,
+      prisma,
+    );
 
-    const fulfilledToken = await registerStoreCustomer(app, 'fulfilled@acme.test');
+    const fulfilledToken = await registerStoreCustomer(
+      app,
+      'fulfilled@acme.test',
+    );
     await placePickupOrder(
       app,
       fulfilledToken,
@@ -129,7 +140,10 @@ describe('CRM store customers (e2e)', () => {
       prisma,
     );
 
-    const paidOnlyToken = await registerStoreCustomer(app, 'paid-only@acme.test');
+    const paidOnlyToken = await registerStoreCustomer(
+      app,
+      'paid-only@acme.test',
+    );
     await placePickupOrder(
       app,
       paidOnlyToken,
@@ -152,7 +166,10 @@ describe('CRM store customers (e2e)', () => {
   });
 
   it('enforces tenant isolation', async () => {
-    const { merchantToken, variantId } = await seedStoreWithProduct(app, prisma);
+    const { merchantToken, variantId } = await seedStoreWithProduct(
+      app,
+      prisma,
+    );
     const storeToken = await registerStoreCustomer(app, 'buyer@acme.test');
     await placePickupOrder(
       app,
@@ -186,7 +203,10 @@ describe('CRM store customers (e2e)', () => {
   });
 
   it('returns 403 when CRM plugin is not installed', async () => {
-    const { merchantToken, variantId } = await seedStoreWithProduct(app, prisma);
+    const { merchantToken, variantId } = await seedStoreWithProduct(
+      app,
+      prisma,
+    );
 
     const storeToken = await registerStoreCustomer(app, 'buyer@acme.test');
     await placePickupOrder(

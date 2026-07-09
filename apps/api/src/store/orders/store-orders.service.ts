@@ -187,7 +187,8 @@ export class StoreOrdersService {
       createdAt: order.createdAt.toISOString(),
       lineCount: order._count.lines,
       storeSlug: order.tenant.slug,
-      storeName: order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
+      storeName:
+        order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
     }));
   }
 }

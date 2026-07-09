@@ -34,7 +34,11 @@ describe('BranchProcurement (e2e)', () => {
   beforeEach(async () => {
     ({ app, prisma } = await createTestApp());
     const password = await bcrypt.hash('secret12', 10);
-    await prisma._seedPlatformAdmin('admin@meridian.test', password, 'SUPER_ADMIN');
+    await prisma._seedPlatformAdmin(
+      'admin@meridian.test',
+      password,
+      'SUPER_ADMIN',
+    );
     await prisma._seedMerchantOwner(
       'branch-store',
       'Branch Store',
@@ -123,7 +127,8 @@ describe('BranchProcurement (e2e)', () => {
       .expect(200);
 
     const onHand = levels.body.data.reduce(
-      (sum: number, row: { quantityOnHand: number }) => sum + row.quantityOnHand,
+      (sum: number, row: { quantityOnHand: number }) =>
+        sum + row.quantityOnHand,
       0,
     );
     expect(onHand).toBeGreaterThanOrEqual(5);

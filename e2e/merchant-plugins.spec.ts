@@ -27,6 +27,8 @@ test.describe('Merchant plugin marketplace', () => {
     }
 
     await page.goto('/hrm');
-    await expect(page.getByText(/coming soon|即将推出/i)).toBeVisible({ timeout: 15_000 });
+    await expect(
+      page.getByText(/HRM.*coming soon|HRM.*即将推出|coming soon|即将推出/i).first(),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

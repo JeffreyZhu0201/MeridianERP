@@ -16,7 +16,7 @@ import {
 } from '@meridian/ui';
 import type { DiagnosisCardStatus, DiagnosisResult } from '@meridian/shared';
 
-import { apiFetch } from '@/lib/api';
+import { streamAi } from '@/lib/ai-stream';
 
 interface DiagnosisPanelProps {
   token: string;
@@ -34,6 +34,10 @@ export function DiagnosisPanel({ token }: DiagnosisPanelProps) {
   const t = useTranslations('admin.diagnosis');
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<DiagnosisResult | null>(null);
+  const [streamingReport, setStreamingReport] = useState('');
+  const [streamingCards, setStreamingCards] = useState<DiagnosisResult['cards']>(
+    [],
+  );
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -41,23 +45,44 @@ export function DiagnosisPanel({ token }: DiagnosisPanelProps) {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setResult(null);
+    setStreamingReport('');
+    setStreamingCards([]);
     try {
-      const data = await apiFetch<DiagnosisResult>(
+      await streamAi(
         '/platform/ai/diagnosis',
-        {
-          method: 'POST',
-          body: JSON.stringify({ query }),
-        },
+        { query },
         token,
+        (event) => {
+          if (event.type === 'cards') {
+            setStreamingCards(event.cards);
+          }
+          if (event.type === 'report_delta') {
+            setStreamingReport((current) => current + event.text);
+          }
+          if (event.type === 'done') {
+            setResult(event.result as DiagnosisResult);
+          }
+          if (event.type === 'error') {
+            throw new Error(event.message);
+          }
+        },
       );
-      setResult(data);
     } catch {
       setError(t('submitFailed'));
       setResult(null);
+      setStreamingReport('');
+      setStreamingCards([]);
     } finally {
       setLoading(false);
     }
   }
+
+  const displayResult: DiagnosisResult | null =
+    result ??
+    (loading && (streamingReport || streamingCards.length > 0)
+      ? { report: streamingReport, cards: streamingCards, sources: [] }
+      : null);
 
   return (
     <div className="space-y-6">
@@ -85,18 +110,21 @@ export function DiagnosisPanel({ token }: DiagnosisPanelProps) {
         </Alert>
       ) : null}
 
-      {result ? (
+      {displayResult ? (
         <div className="space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-base">{t('reportTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="text-sm whitespace-pre-wrap font-sans">{result.report}</pre>
+              <pre className="text-sm whitespace-pre-wrap font-sans">
+                {displayResult.report}
+                {loading && !result ? '▍' : ''}
+              </pre>
             </CardContent>
           </Card>
           <div className="grid gap-4 md:grid-cols-2">
-            {result.cards.map((card) => (
+            {displayResult.cards.map((card) => (
               <Card key={`${card.domain}-${card.title}`}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">{card.title}</CardTitle>

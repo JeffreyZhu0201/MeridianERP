@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import type {
   DeliveryOrderInsightRequest,
   FundsInsightRequest,
@@ -7,6 +8,7 @@ import type {
 import { PlatformAuthGuard } from '../../auth/guards/platform-auth.guard';
 import { PlatformRolesGuard } from '../../auth/guards/platform-roles.guard';
 import { PlatformRoles } from '../../auth/decorators/platform-roles.decorator';
+import { pipeAiStream } from '../streaming/ai-sse.helper';
 import { DeliveryOrderInsightService } from './delivery-order-insight.service';
 import { FundsInsightService } from './funds-insight.service';
 import { WithdrawalInsightService } from './withdrawal-insight.service';
@@ -39,5 +41,32 @@ export class PlatformAiInsightsController {
   @PlatformRoles('SUPER_ADMIN', 'FINANCE')
   funds(@Body() body: FundsInsightRequest) {
     return this.fundsInsight.insight(body);
+  }
+
+  @Post('withdrawal/stream')
+  @PlatformRoles('SUPER_ADMIN', 'FINANCE', 'REVIEWER')
+  async withdrawalStream(
+    @Body() body: WithdrawalInsightRequest,
+    @Res() res: Response,
+  ): Promise<void> {
+    await pipeAiStream(res, this.withdrawalInsight.insightStream(body));
+  }
+
+  @Post('delivery-order/stream')
+  @PlatformRoles('SUPER_ADMIN', 'FULFILLMENT')
+  async deliveryOrderStream(
+    @Body() body: DeliveryOrderInsightRequest,
+    @Res() res: Response,
+  ): Promise<void> {
+    await pipeAiStream(res, this.deliveryOrderInsight.insightStream(body));
+  }
+
+  @Post('funds/stream')
+  @PlatformRoles('SUPER_ADMIN', 'FINANCE')
+  async fundsStream(
+    @Body() body: FundsInsightRequest,
+    @Res() res: Response,
+  ): Promise<void> {
+    await pipeAiStream(res, this.fundsInsight.insightStream(body));
   }
 }

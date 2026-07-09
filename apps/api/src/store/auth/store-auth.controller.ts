@@ -5,8 +5,8 @@
  * @LastEditTime: 2026-07-05 15:30:26
  * @FilePath: /MeridianERP/apps/api/src/store/auth/store-auth.controller.ts
  * @Description: 店铺平台认证控制器
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ *
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved.
  */
 import {
   Body,
@@ -51,7 +51,7 @@ export class StorePlatformAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Public()
   @Post('register')
   @HttpCode(201)
@@ -70,7 +70,7 @@ export class StorePlatformAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Public()
   @Post('login')
   @HttpCode(201)
@@ -89,7 +89,7 @@ export class StorePlatformAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Get('me')
   @UseGuards(StoreAuthGuard)
   getMe(@CurrentUser() user: AuthenticatedUser) {
@@ -108,7 +108,7 @@ export class StorePlatformAuthController {
  * controller.register({});
  * controller.login({});
  * controller.getMe({});
- */  
+ */
 @Controller('store/:slug/auth')
 export class StoreAuthController {
   constructor(private readonly authService: StoreAuthService) {}
@@ -124,7 +124,7 @@ export class StoreAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Public()
   @Post('register')
   @HttpCode(201)
@@ -143,7 +143,7 @@ export class StoreAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Public()
   @Post('login')
   @HttpCode(201)
@@ -162,7 +162,7 @@ export class StoreAuthController {
    * controller.register({});
    * controller.login({});
    * controller.getMe({});
-   */  
+   */
   @Post('session')
   @HttpCode(201)
   @UseGuards(StoreAuthGuard)

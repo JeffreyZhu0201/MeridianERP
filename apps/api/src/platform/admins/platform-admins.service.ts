@@ -53,7 +53,7 @@ export class PlatformAdminsService {
     return admin;
   }
 
-  async update(id: string, dto: UpdatePlatformAdminDto, actorId: string) {
+  async update(id: string, dto: UpdatePlatformAdminDto, _actorId: string) {
     const admin = await this.prisma.platformUser.findUnique({ where: { id } });
     if (!admin) {
       throw new NotFoundException('Admin not found');

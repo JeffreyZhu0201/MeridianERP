@@ -14,9 +14,12 @@ export class CommissionDiagnosisTool extends DiagnosisTool {
 
   async execute(args: Record<string, unknown>): Promise<ToolResult> {
     const orderId = typeof args.orderId === 'string' ? args.orderId : undefined;
-    const tenantId = typeof args.tenantId === 'string' ? args.tenantId : undefined;
+    const tenantId =
+      typeof args.tenantId === 'string' ? args.tenantId : undefined;
     const allocationOrderId =
-      typeof args.allocationOrderId === 'string' ? args.allocationOrderId : undefined;
+      typeof args.allocationOrderId === 'string'
+        ? args.allocationOrderId
+        : undefined;
 
     if (orderId) {
       const ledger = await this.prisma.commissionLedger.findUnique({
@@ -26,7 +29,7 @@ export class CommissionDiagnosisTool extends DiagnosisTool {
       if (ledger) {
         return {
           found: true,
-          summary: `订单关联佣金 ${ledger.amount}（${ledger.status}）`,
+          summary: `订单关联佣金 ${ledger.amount.toString()}（${ledger.status}）`,
           data: {
             id: ledger.id,
             amount: ledger.amount.toString(),
@@ -36,7 +39,9 @@ export class CommissionDiagnosisTool extends DiagnosisTool {
           },
         };
       }
-      const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+      const order = await this.prisma.order.findUnique({
+        where: { id: orderId },
+      });
       if (!order) {
         return this.notFound(orderId);
       }
@@ -99,7 +104,7 @@ export class CommissionDiagnosisTool extends DiagnosisTool {
       if (allocLedger) {
         return {
           found: true,
-          summary: `配货单已计提佣金 ${allocLedger.amount}（序号 ${allocLedger.merchantAllocationSequence}）`,
+          summary: `配货单已计提佣金 ${allocLedger.amount.toString()}（序号 ${allocLedger.merchantAllocationSequence}）`,
           data: {
             allocationOrderId,
             ledger: {
@@ -119,7 +124,9 @@ export class CommissionDiagnosisTool extends DiagnosisTool {
       }
       const reasons: string[] = [];
       if (allocation.status !== 'CONFIRMED') {
-        reasons.push(`配货单状态为 ${allocation.status}，需 CONFIRMED 后才计提`);
+        reasons.push(
+          `配货单状态为 ${allocation.status}，需 CONFIRMED 后才计提`,
+        );
       }
       if (!profile?.recruitedByDistributorId) {
         reasons.push('分店未绑定拓店员');

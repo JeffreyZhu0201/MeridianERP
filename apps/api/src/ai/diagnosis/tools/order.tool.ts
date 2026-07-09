@@ -13,7 +13,8 @@ export class OrderDiagnosisTool extends DiagnosisTool {
 
   async execute(args: Record<string, unknown>): Promise<ToolResult> {
     const orderId = typeof args.orderId === 'string' ? args.orderId : undefined;
-    const tenantId = typeof args.tenantId === 'string' ? args.tenantId : undefined;
+    const tenantId =
+      typeof args.tenantId === 'string' ? args.tenantId : undefined;
 
     if (!orderId && !tenantId) {
       return this.notFound('orderId or tenantId');
@@ -23,7 +24,12 @@ export class OrderDiagnosisTool extends DiagnosisTool {
       ? await this.prisma.order.findUnique({
           where: { id: orderId },
           include: {
-            tenant: { select: { slug: true, name: true } },
+            tenant: {
+              select: {
+                slug: true,
+                merchantProfile: { select: { businessName: true } },
+              },
+            },
             lines: true,
           },
         })
@@ -31,7 +37,12 @@ export class OrderDiagnosisTool extends DiagnosisTool {
           where: { tenantId },
           orderBy: { createdAt: 'desc' },
           include: {
-            tenant: { select: { slug: true, name: true } },
+            tenant: {
+              select: {
+                slug: true,
+                merchantProfile: { select: { businessName: true } },
+              },
+            },
             lines: true,
           },
         });
@@ -49,7 +60,8 @@ export class OrderDiagnosisTool extends DiagnosisTool {
         fulfillmentType: order.fulfillmentType,
         total: order.total.toString(),
         tenantSlug: order.tenant.slug,
-        tenantName: order.tenant.name,
+        tenantName:
+          order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
         lineCount: order.lines.length,
         pickupVerifiedAt: order.pickupVerifiedAt?.toISOString() ?? null,
         shippedAt: order.shippedAt?.toISOString() ?? null,

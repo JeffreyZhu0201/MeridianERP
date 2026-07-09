@@ -6,12 +6,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { slugify } from '../../common/utils/slug.util';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CreateCategoryDto,
-  CreateProductDto,
-  UpdateCategoryDto,
-  UpdateProductDto,
-} from './dto/catalog.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/catalog.dto';
 
 @Injectable()
 export class MerchantCategoriesService {

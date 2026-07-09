@@ -1,5 +1,10 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import type { AdminAiInsight, DeliveryOrderInsightRequest } from '@meridian/shared';
+import type {
+  AdminAiInsight,
+  AiStreamEvent,
+  DeliveryOrderInsightRequest,
+} from '@meridian/shared';
+import { AiLlmStreamService } from '../llm/ai-llm-stream.service';
 import { AiLlmService } from '../llm/ai-llm.service';
 import type { AdminInsightContext } from '../llm/admin-insight.types';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -11,9 +16,34 @@ export class DeliveryOrderInsightService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiLlm: AiLlmService,
+    private readonly aiLlmStream: AiLlmStreamService,
   ) {}
 
   async insight(body: DeliveryOrderInsightRequest): Promise<AdminAiInsight> {
+    const context = await this.buildContext(body);
+    this.logger.log(`Delivery order insight id=${body.orderId?.trim()}`);
+    const { result } = await this.aiLlm.suggestAdminInsight(context, {
+      actorType: 'PLATFORM',
+    });
+    return result;
+  }
+
+  async *insightStream(
+    body: DeliveryOrderInsightRequest,
+  ): AsyncGenerator<AiStreamEvent> {
+    const context = await this.buildContext(body);
+    this.logger.log(
+      `Delivery order insight stream id=${body.orderId?.trim()}`,
+    );
+    yield* this.aiLlmStream.streamAdminInsight(
+      'PLATFORM_DELIVERY_INSIGHT',
+      context,
+    );
+  }
+
+  private async buildContext(
+    body: DeliveryOrderInsightRequest,
+  ): Promise<AdminInsightContext> {
     const orderId = body.orderId?.trim();
     if (!orderId) {
       throw new NotFoundException('Order not found');
@@ -22,7 +52,12 @@ export class DeliveryOrderInsightService {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
-        tenant: { select: { slug: true, name: true } },
+        tenant: {
+          select: {
+            slug: true,
+            merchantProfile: { select: { businessName: true } },
+          },
+        },
         lines: true,
       },
     });
@@ -39,14 +74,14 @@ export class DeliveryOrderInsightService {
         total: order.total.toString(),
         currency: order.currency,
         tenantSlug: order.tenant.slug,
-        tenantName: order.tenant.name,
+        tenantName:
+          order.tenant.merchantProfile?.businessName ?? order.tenant.slug,
         guestEmail: order.guestEmail,
         lineCount: order.lines.length,
         createdAt: order.createdAt.toISOString(),
       },
     };
 
-    this.logger.log(`Delivery order insight id=${orderId}`);
-    return this.aiLlm.suggestAdminInsight(context);
+    return context;
   }
 }

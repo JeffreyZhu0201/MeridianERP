@@ -1,13 +1,31 @@
-import { OnboardingStatus, Prisma, PrismaClient } from '@prisma/client';
+import {
+  AllocationOrderStatus,
+  OnboardingStatus,
+  Prisma,
+  PrismaClient,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PLUGIN_CATALOG_SEED } from '../src/plugins/plugin-catalog.seed';
 
 const prisma = new PrismaClient();
 
-async function seedTenantInventory(tenantId: string) {
+const DEMO_BRANCH_STOCK = 3;
+const DEMO_REORDER_THRESHOLD = 5;
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+async function seedTenantInventory(
+  tenantId: string,
+  stockByVariantId?: Map<string, number>,
+) {
   await prisma.tenantInventorySettings.upsert({
     where: { tenantId },
-    create: { tenantId, defaultReorderThreshold: 5 },
+    create: { tenantId, defaultReorderThreshold: DEMO_REORDER_THRESHOLD },
     update: {},
   });
 
@@ -31,6 +49,8 @@ async function seedTenantInventory(tenantId: string) {
   });
 
   for (const variant of variants) {
+    const quantityOnHand =
+      stockByVariantId?.get(variant.id) ?? variant.inventory;
     await prisma.stockLevel.upsert({
       where: {
         warehouseId_variantId: {
@@ -42,9 +62,13 @@ async function seedTenantInventory(tenantId: string) {
         tenantId,
         warehouseId: warehouse.id,
         variantId: variant.id,
-        quantityOnHand: variant.inventory,
+        quantityOnHand,
       },
-      update: {},
+      update: { quantityOnHand },
+    });
+    await prisma.productVariant.update({
+      where: { id: variant.id },
+      data: { inventory: quantityOnHand },
     });
   }
 }
@@ -79,7 +103,9 @@ async function seedPluginCatalog() {
     });
   }
 
-  const crm = await prisma.pluginDefinition.findUnique({ where: { code: 'crm' } });
+  const crm = await prisma.pluginDefinition.findUnique({
+    where: { code: 'crm' },
+  });
   if (!crm) return;
 
   const tenants = await prisma.tenant.findMany({ select: { id: true } });
@@ -88,6 +114,309 @@ async function seedPluginCatalog() {
       where: { tenantId_pluginId: { tenantId: tenant.id, pluginId: crm.id } },
       create: { tenantId: tenant.id, pluginId: crm.id, status: 'INSTALLED' },
       update: {},
+    });
+  }
+}
+
+async function upsertApprovedTenant(
+  slug: string,
+  businessName: string,
+  profile: {
+    isFlagship: boolean;
+    storePublished: boolean;
+    contactEmail: string;
+  },
+) {
+  const tenant = await prisma.tenant.upsert({
+    where: { slug },
+    create: { slug },
+    update: {},
+  });
+
+  await prisma.merchantProfile.upsert({
+    where: { tenantId: tenant.id },
+    create: {
+      tenantId: tenant.id,
+      businessName,
+      contactEmail: profile.contactEmail,
+      onboardingStatus: OnboardingStatus.APPROVED,
+      storePublished: profile.storePublished,
+      isFlagship: profile.isFlagship,
+    },
+    update: {
+      businessName,
+      contactEmail: profile.contactEmail,
+      onboardingStatus: OnboardingStatus.APPROVED,
+      storePublished: profile.storePublished,
+      isFlagship: profile.isFlagship,
+    },
+  });
+
+  return tenant;
+}
+
+async function syncMasterSkuToFlagshipTenant(
+  masterSku: {
+    id: string;
+    skuCode: string;
+    name: string;
+    description: string | null;
+    shortDescription: string | null;
+    flagshipPrice: Prisma.Decimal;
+    isActive: boolean;
+  },
+  flagshipTenantId: string,
+) {
+  const productSlug = slugify(masterSku.skuCode) || 'starter-widget';
+
+  let variant = await prisma.productVariant.findFirst({
+    where: {
+      masterSkuId: masterSku.id,
+      product: { tenantId: flagshipTenantId },
+    },
+    include: { product: true },
+  });
+
+  if (variant) {
+    await prisma.product.update({
+      where: { id: variant.productId },
+      data: {
+        name: masterSku.name,
+        description: masterSku.description,
+        shortDescription: masterSku.shortDescription,
+        isPublished: masterSku.isActive,
+      },
+    });
+    await prisma.productVariant.update({
+      where: { id: variant.id },
+      data: {
+        name: masterSku.name,
+        sku: masterSku.skuCode,
+        price: masterSku.flagshipPrice,
+        isActive: masterSku.isActive,
+        inventory: 0,
+      },
+    });
+    return variant;
+  }
+
+  const product = await prisma.product.upsert({
+    where: {
+      tenantId_slug: { tenantId: flagshipTenantId, slug: productSlug },
+    },
+    create: {
+      tenantId: flagshipTenantId,
+      name: masterSku.name,
+      slug: productSlug,
+      description:
+        masterSku.description ?? 'A sample product for the demo catalog.',
+      shortDescription: masterSku.shortDescription,
+      isPublished: masterSku.isActive,
+    },
+    update: {
+      name: masterSku.name,
+      description: masterSku.description,
+      shortDescription: masterSku.shortDescription,
+      isPublished: masterSku.isActive,
+    },
+  });
+
+  variant = await prisma.productVariant.create({
+    data: {
+      productId: product.id,
+      masterSkuId: masterSku.id,
+      sku: masterSku.skuCode,
+      name: masterSku.name,
+      price: masterSku.flagshipPrice,
+      isActive: masterSku.isActive,
+      inventory: 0,
+    },
+    include: { product: true },
+  });
+
+  return variant;
+}
+
+async function ensureDemoBranchCatalog(
+  demoTenantId: string,
+  masterSku: {
+    id: string;
+    skuCode: string;
+    name: string;
+    description: string | null;
+    retailPrice: Prisma.Decimal;
+  },
+  demoOwnerUserId: string | null,
+) {
+  const productSlug = slugify(masterSku.skuCode) || 'starter-widget';
+
+  let variant = await prisma.productVariant.findFirst({
+    where: { masterSkuId: masterSku.id, product: { tenantId: demoTenantId } },
+    include: { product: true },
+  });
+
+  if (!variant) {
+    const product = await prisma.product.upsert({
+      where: {
+        tenantId_slug: { tenantId: demoTenantId, slug: productSlug },
+      },
+      create: {
+        tenantId: demoTenantId,
+        name: masterSku.name,
+        slug: productSlug,
+        description:
+          masterSku.description ?? 'Branch catalog item synced from HQ.',
+        isPublished: true,
+      },
+      update: {
+        name: masterSku.name,
+        isPublished: true,
+      },
+    });
+
+    variant = await prisma.productVariant.create({
+      data: {
+        productId: product.id,
+        masterSkuId: masterSku.id,
+        sku: masterSku.skuCode,
+        name: masterSku.name,
+        price: masterSku.retailPrice,
+        isActive: true,
+        inventory: DEMO_BRANCH_STOCK,
+      },
+      include: { product: true },
+    });
+  }
+
+  const existingAllocation = await prisma.allocationOrder.findFirst({
+    where: {
+      tenantId: demoTenantId,
+      status: AllocationOrderStatus.CONFIRMED,
+      lines: { some: { masterSkuId: masterSku.id } },
+    },
+  });
+
+  if (!existingAllocation) {
+    await prisma.allocationOrder.create({
+      data: {
+        tenantId: demoTenantId,
+        status: AllocationOrderStatus.CONFIRMED,
+        issuedAt: new Date(),
+        confirmedAt: new Date(),
+        confirmedByUserId: demoOwnerUserId ?? undefined,
+        note: 'Demo seed allocation',
+        lines: {
+          create: {
+            masterSkuId: masterSku.id,
+            quantity: 15,
+            wholesalePrice: 15,
+          },
+        },
+      },
+    });
+  }
+
+  const stockMap = new Map([[variant.id, DEMO_BRANCH_STOCK]]);
+  await seedTenantInventory(demoTenantId, stockMap);
+
+  return variant;
+}
+
+async function seedDemoShowcase() {
+  const hqTenant = await upsertApprovedTenant('hq', 'Meridian HQ', {
+    isFlagship: true,
+    storePublished: false,
+    contactEmail: 'hq@meridian.test',
+  });
+
+  const demoTenant = await upsertApprovedTenant('demo', 'Demo Store', {
+    isFlagship: false,
+    storePublished: true,
+    contactEmail: 'demo@merchant.test',
+  });
+
+  await prisma.merchantProfile.updateMany({
+    where: { tenantId: { not: hqTenant.id }, isFlagship: true },
+    data: { isFlagship: false },
+  });
+  await prisma.merchantProfile.update({
+    where: { tenantId: hqTenant.id },
+    data: { isFlagship: true, storePublished: false },
+  });
+  await prisma.merchantProfile.update({
+    where: { tenantId: demoTenant.id },
+    data: { isFlagship: false, storePublished: true },
+  });
+
+  const account = await prisma.platformAccount.upsert({
+    where: { email: 'demo@merchant.test' },
+    update: {},
+    create: {
+      email: 'demo@merchant.test',
+      password: await bcrypt.hash('demo1234', 10),
+    },
+  });
+
+  const demoUser = await prisma.user.upsert({
+    where: {
+      tenantId_email: { tenantId: demoTenant.id, email: 'demo@merchant.test' },
+    },
+    update: { accountId: account.id, role: 'MERCHANT_OWNER' },
+    create: {
+      tenantId: demoTenant.id,
+      accountId: account.id,
+      email: 'demo@merchant.test',
+      role: 'MERCHANT_OWNER',
+    },
+  });
+
+  const masterSku = await prisma.masterSku.upsert({
+    where: { skuCode: 'DEMO-001' },
+    create: {
+      skuCode: 'DEMO-001',
+      name: 'Starter Widget',
+      description: 'A sample product for the demo store.',
+      quantityOnHand: 100,
+      unitCost: 10,
+      wholesalePrice: 15,
+      retailPrice: 29.99,
+      flagshipPrice: 25,
+    },
+    update: {
+      name: 'Starter Widget',
+      description: 'A sample product for the demo store.',
+      quantityOnHand: 100,
+    },
+  });
+
+  await syncMasterSkuToFlagshipTenant(masterSku, hqTenant.id);
+  await ensureDemoBranchCatalog(demoTenant.id, masterSku, demoUser.id);
+
+  await prisma.tenantSettings.upsert({
+    where: { tenantId: demoTenant.id },
+    update: {},
+    create: {
+      tenantId: demoTenant.id,
+      defaultCommissionRate: 10,
+      defaultCommissionType: 'PERCENT',
+      notifyOnCommission: true,
+    },
+  });
+
+  const existingAddress = await prisma.procurementReceivingAddress.findFirst({
+    where: { tenantId: demoTenant.id, isDefault: true },
+  });
+  if (!existingAddress) {
+    await prisma.procurementReceivingAddress.create({
+      data: {
+        tenantId: demoTenant.id,
+        label: 'Main warehouse',
+        contactName: 'Demo Store',
+        contactPhone: '13800000000',
+        address: '123 Demo Street, Shanghai',
+        isDefault: true,
+        isActive: true,
+      },
     });
   }
 }
@@ -118,9 +447,21 @@ async function main() {
   });
 
   const roleSeeds = [
-    { email: 'finance@meridian.test', password: 'finance123', role: 'FINANCE' as const },
-    { email: 'fulfillment@meridian.test', password: 'fulfill123', role: 'FULFILLMENT' as const },
-    { email: 'reviewer@meridian.test', password: 'review123', role: 'REVIEWER' as const },
+    {
+      email: 'finance@meridian.test',
+      password: 'finance123',
+      role: 'FINANCE' as const,
+    },
+    {
+      email: 'fulfillment@meridian.test',
+      password: 'fulfill123',
+      role: 'FULFILLMENT' as const,
+    },
+    {
+      email: 'reviewer@meridian.test',
+      password: 'review123',
+      role: 'REVIEWER' as const,
+    },
   ];
   for (const entry of roleSeeds) {
     await prisma.platformUser.upsert({
@@ -153,82 +494,7 @@ async function main() {
     });
   }
 
-  const demoSlug = 'demo';
-  const existingTenant = await prisma.tenant.findUnique({ where: { slug: demoSlug } });
-  if (!existingTenant) {
-    const tenant = await prisma.tenant.create({ data: { slug: demoSlug } });
-    await prisma.merchantProfile.create({
-      data: {
-        tenantId: tenant.id,
-        businessName: 'Demo Store',
-        contactEmail: 'demo@merchant.test',
-        onboardingStatus: OnboardingStatus.APPROVED,
-        storePublished: true,
-        isFlagship: true,
-      },
-    });
-    const account = await prisma.platformAccount.upsert({
-      where: { email: 'demo@merchant.test' },
-      update: {},
-      create: {
-        email: 'demo@merchant.test',
-        password: await bcrypt.hash('demo1234', 10),
-      },
-    });
-    await prisma.user.create({
-      data: {
-        tenantId: tenant.id,
-        accountId: account.id,
-        email: 'demo@merchant.test',
-        role: 'MERCHANT_OWNER',
-      },
-    });
-
-    const product = await prisma.product.create({
-      data: {
-        tenantId: tenant.id,
-        name: 'Starter Widget',
-        slug: 'starter-widget',
-        description: 'A sample product for the demo store.',
-        isPublished: true,
-        variants: {
-          create: {
-            sku: 'DEMO-001',
-            name: 'Default',
-            price: 29.99,
-            inventory: 100,
-          },
-        },
-      },
-      include: { variants: true },
-    });
-
-    await seedTenantInventory(tenant.id);
-
-    await prisma.tenantSettings.upsert({
-      where: { tenantId: tenant.id },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        defaultCommissionRate: 10,
-        defaultCommissionType: 'PERCENT',
-        notifyOnCommission: true,
-      },
-    });
-    void product;
-  } else {
-    await seedTenantInventory(existingTenant.id);
-    await prisma.tenantSettings.upsert({
-      where: { tenantId: existingTenant.id },
-      update: {},
-      create: {
-        tenantId: existingTenant.id,
-        defaultCommissionRate: 10,
-        defaultCommissionType: 'PERCENT',
-        notifyOnCommission: true,
-      },
-    });
-  }
+  await seedDemoShowcase();
 }
 
 main()

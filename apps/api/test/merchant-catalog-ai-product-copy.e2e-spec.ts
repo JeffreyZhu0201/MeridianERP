@@ -40,9 +40,7 @@ describe('Merchant catalog AI product copy (e2e)', () => {
         name: 'Premium Tea Set',
         description: 'Handcrafted ceramic tea set.',
         isPublished: true,
-        variants: [
-          { sku: 'TEA-1', name: 'Default', price: 128, inventory: 5 },
-        ],
+        variants: [{ sku: 'TEA-1', name: 'Default', price: 128, inventory: 5 }],
       })
       .expect(201);
 

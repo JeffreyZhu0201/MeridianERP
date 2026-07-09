@@ -10,7 +10,10 @@ import type { ToolRunResult } from './tool-run-result';
 
 @Injectable()
 export class MockLlmClient implements LlmClient {
-  synthesize(query: string, toolRuns: ToolRunResult[]): Promise<DiagnosisResult> {
+  synthesize(
+    query: string,
+    toolRuns: ToolRunResult[],
+  ): Promise<DiagnosisResult> {
     const cards = buildCards(toolRuns);
     return Promise.resolve(
       buildDiagnosisResult(query, toolRuns, buildMockReport(query, cards)),

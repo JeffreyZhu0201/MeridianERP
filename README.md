@@ -1,3 +1,14 @@
+<!--
+ * @Author: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @Date: 2026-07-07 09:01:46
+ * @LastEditors: Jeffrey Zhu JeffreyZhu0201@gmail.com
+ * @LastEditTime: 2026-07-09 22:42:58
+ * @FilePath: /MeridianERP/README.md
+ * @Description:
+ *
+ * Copyright (c) 2026 by 重庆大学音像出版社有限公司, All Rights Reserved.
+-->
+
 # MeridianERP
 
 **Version:** v1.1.0 (Phase 5 + AI diagnosis + mock payout)  
@@ -24,7 +35,6 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 
 ## Services
 
-
 | Service     | Path               | URL                                                      |
 | ----------- | ------------------ | -------------------------------------------------------- |
 | Landing     | `apps/landing`     | [····](http://localhost:3004)                            |
@@ -34,11 +44,7 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 | Store       | `apps/store`       | [http://localhost:3003/shop](http://localhost:3003/shop) |
 | Distributor | `apps/distributor` | [http://localhost:3005](http://localhost:3005)           |
 
-
-
-
 ## Commands
-
 
 | Command                            | Purpose                                                                              |
 | ---------------------------------- | ------------------------------------------------------------------------------------ |
@@ -57,40 +63,45 @@ The local `.env.example` is configured for the Docker-backed development stack. 
 | `rtk pnpm test:e2e`                | Run Playwright UI tests (run `rtk pnpm exec playwright install chromium` once first) |
 | `cd apps/api && rtk pnpm test:e2e` | Run API integration tests (172 cases)                                                |
 
-
 Optional full stack (all six portals + API + Postgres + Redis):
 
 ```bash
 rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 ```
 
-
-
 ## Seed Accounts
 
+| Portal              | URL                                                      | Account                                  | Password                      |
+| ------------------- | -------------------------------------------------------- | ---------------------------------------- | ----------------------------- |
+| Admin (super)       | [http://localhost:3000](http://localhost:3000)           | `admin@meridian.test`                    | `admin123`                    |
+| Admin (finance)     | [http://localhost:3000](http://localhost:3000)           | `finance@meridian.test`                  | `finance123`                  |
+| Admin (fulfillment) | [http://localhost:3000](http://localhost:3000)           | `fulfillment@meridian.test`              | `fulfill123`                  |
+| Admin (reviewer)    | [http://localhost:3000](http://localhost:3000)           | `reviewer@meridian.test`                 | `review123`                   |
+| Merchant            | [http://localhost:3002](http://localhost:3002)           | `demo@merchant.test`                     | `demo1234`                    |
+| Store               | [http://localhost:3003/shop](http://localhost:3003/shop) | Guest checkout (fulfillment: Demo Store) | n/a                           |
+| Distributor         | [http://localhost:3005](http://localhost:3005)           | `promoter@meridian.test`                 | `promo1234` (after `db:seed`) |
 
-| Portal              | URL                                                          | Account                         | Password     |
-| ------------------- | ------------------------------------------------------------ | ------------------------------- | ------------ |
-| Admin (super)       | [http://localhost:3000](http://localhost:3000)               | `admin@meridian.test`           | `admin123`   |
-| Admin (finance)     | [http://localhost:3000](http://localhost:3000)               | `finance@meridian.test`         | `finance123` |
-| Admin (fulfillment) | [http://localhost:3000](http://localhost:3000)               | `fulfillment@meridian.test`     | `fulfill123` |
-| Admin (reviewer)    | [http://localhost:3000](http://localhost:3000)               | `reviewer@meridian.test`        | `review123`  |
-| Merchant            | [http://localhost:3002](http://localhost:3002)               | `demo@merchant.test`            | `demo1234`   |
-| Store               | [http://localhost:3003/s/demo](http://localhost:3003/s/demo) | Register at `/s/demo/register`  | n/a          |
-| Distributor         | [http://localhost:3005](http://localhost:3005)               | `promoter@meridian.test` / `promo1234` (after `db:seed`) |
+## Demo Walkthrough
 
+After `rtk pnpm db:setup`, use this path for a full showcase:
 
+1. **Store** — [http://localhost:3003/shop](http://localhost:3003/shop): unified HQ catalog, fulfillment from **Demo Store** branch (HQ is not in the branch picker). Add **Starter Widget** to cart and place a **pickup** order.
+2. **Merchant** — `demo@merchant.test` / `demo1234`: verify the pickup order, confirm allocation if issued, manage branch inventory.
+3. **Admin (fulfillment)** — `fulfillment@meridian.test` / `fulfill123`: [http://localhost:3000/allocations](http://localhost:3000/allocations) for HQ **delivery** ship queue (flagship tenant `hq`).
+4. **Admin (super)** — `admin@meridian.test` / `admin123`: [http://localhost:3000/inventory/master-catalog](http://localhost:3000/inventory/master-catalog) for Master SKU and branch allocations.
+5. **Merchant AI** — `/inventory/alerts`: generate replenishment analysis (streaming). Then `/inventory/procurement`: click **AI 一键预填** to fill the procurement cart from the latest analysis.
+6. **Admin AI** — `/diagnosis`: submit a natural-language ops query and watch the report stream in.
 
+**Seed layout:** `hq` tenant = flagship catalog + HQ delivery; `demo` tenant = showcase branch (`demo@merchant.test`) with low stock (3 units) for AI replenishment demos.
 
 ## Documentation Map
-
 
 | Need                      | Read                                                  |
 | ------------------------- | ----------------------------------------------------- |
 | Current product state     | `docs/PRODUCT.md`                                     |
 | System architecture       | `docs/architecture/system-overview.md`                |
 | Admin RBAC roles          | `docs/architecture/admin-rbac.md`                     |
-| AI ops diagnosis          | `docs/architecture/ai-diagnosis.md`                 |
+| AI ops diagnosis          | `docs/architecture/ai-diagnosis.md`                   |
 | Flagship unified store    | `docs/architecture/flagship-catalog-store.md`         |
 | UI design system          | `docs/design/design-system.md`                        |
 | Agent execution workflow  | `docs/execution/README.md`                            |
@@ -99,11 +110,7 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Code simplification rules | `.cursor/rules/quality.mdc`                           |
 | Historical plans/specs    | `docs/superpowers/`                                   |
 
-
-
-
 ## Troubleshooting
-
 
 | Symptom                                 | Fix                                                                                   |
 | --------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -113,5 +120,3 @@ rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 | Missing distributor JWT secret          | Copy `JWT_DISTRIBUTOR_SECRET` from `.env.example` into `.env`                         |
 | Frontend styles look wrong              | Rebuild shared packages with `rtk pnpm --filter @meridian/shared build`               |
 | Landing `Cannot find module './787.js'` | Stop dev, run `rtk pnpm dev:landing:clean` (do not run `build` while `dev` is active) |
-
-

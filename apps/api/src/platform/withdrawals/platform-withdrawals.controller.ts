@@ -32,7 +32,10 @@ export class PlatformWithdrawalsController {
     @Query('limit') limit?: string,
   ) {
     const pagination = getPagination(
-      { page: page ? Number(page) : undefined, limit: limit ? Number(limit) : undefined },
+      {
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined,
+      },
       { page: 1, limit: 50 },
     );
     return this.service.list({

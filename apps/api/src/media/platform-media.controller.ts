@@ -20,6 +20,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthenticatedUser } from '../auth/interfaces/jwt-payload.interface';
 import { EnvService } from '../config/env.service';
 import { MediaService } from './media.service';
+import type { UploadedImageFile } from './uploaded-image-file';
 
 @Controller('platform/media')
 @UseGuards(PlatformAuthGuard, PlatformRolesGuard)
@@ -31,7 +32,7 @@ export class PlatformMediaController {
   @UseInterceptors(FileInterceptor('file'))
   upload(
     @CurrentUser() user: AuthenticatedUser,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: UploadedImageFile,
   ) {
     return this.mediaService.uploadImage(file, user.userId);
   }
@@ -51,7 +52,7 @@ export class MediaFilesController {
       throw new NotFoundException('Local file serving disabled');
     }
     const key = Array.isArray(filePath) ? filePath.join('/') : filePath;
-    const base = this.env.get('MEDIA_LOCAL_PATH', './uploads');
+    const base = this.env.get('MEDIA_LOCAL_PATH') ?? './uploads';
     const baseResolved = path.resolve(base);
     const absolute = path.resolve(baseResolved, key);
     if (

@@ -72,7 +72,7 @@ export async function replaceMasterSkuImages(
     return previousIds;
   }
 
-  let hasPrimary = images.some((image) => image.isPrimary);
+  const hasPrimary = images.some((image) => image.isPrimary);
   const newIds = new Set(images.map((image) => image.mediaAssetId));
   await tx.masterSkuImage.createMany({
     data: images.map((image, index) => ({

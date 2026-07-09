@@ -74,7 +74,7 @@ export class MerchantSettingsService {
   async getSettings(tenantId: string) {
     await this.inventory.migrateTenantInventory(tenantId);
 
-    const [profile, tenant, settings, defaultWarehouse] = await Promise.all([
+    const [profile, , settings, defaultWarehouse] = await Promise.all([
       this.prisma.merchantProfile.findUniqueOrThrow({
         where: { tenantId },
       }),

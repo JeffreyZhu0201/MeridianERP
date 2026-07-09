@@ -298,7 +298,9 @@ export class FulfillmentService {
         },
       });
     }
-    await tx.deliveryAllocationLedger.deleteMany({ where: { orderId: order.id } });
+    await tx.deliveryAllocationLedger.deleteMany({
+      where: { orderId: order.id },
+    });
   }
 
   buildPickupQrPayload(orderId: string, pickupCode: string): string {

@@ -15,7 +15,7 @@ import {
 } from '@meridian/ui';
 import type { CrmFollowUpSuggestion } from '@meridian/shared';
 
-import { apiFetch } from '@/lib/api';
+import { streamAi } from '@/lib/ai-stream';
 
 interface CrmAiFollowUpPanelProps {
   token: string;
@@ -30,6 +30,12 @@ export function CrmAiFollowUpPanel({
 }: CrmAiFollowUpPanelProps) {
   const t = useTranslations('merchant.crm.ai');
   const [result, setResult] = useState<CrmFollowUpSuggestion | null>(null);
+  const [streaming, setStreaming] = useState<CrmFollowUpSuggestion>({
+    summary: '',
+    nextSteps: [],
+    talkingPoints: [],
+    sources: [],
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -38,18 +44,37 @@ export function CrmAiFollowUpPanel({
     setLoading(true);
     try {
       const body = leadId ? { leadId } : { contactId };
-      const data = await apiFetch<CrmFollowUpSuggestion>(
-        '/merchant/crm/ai/follow-up',
-        {
-          method: 'POST',
-          body: JSON.stringify(body),
-        },
-        token,
-      );
-      setResult(data);
+      setStreaming({ summary: '', nextSteps: [], talkingPoints: [], sources: [] });
+      await streamAi('/merchant/crm/ai/follow-up', body, token, (event) => {
+        if (event.type === 'summary_delta') {
+          setStreaming((current) => ({
+            ...current,
+            summary: current.summary + event.text,
+          }));
+        }
+        if (event.type === 'next_step') {
+          setStreaming((current) => ({
+            ...current,
+            nextSteps: [...current.nextSteps, event.text],
+          }));
+        }
+        if (event.type === 'talking_point') {
+          setStreaming((current) => ({
+            ...current,
+            talkingPoints: [...current.talkingPoints, event.text],
+          }));
+        }
+        if (event.type === 'done') {
+          setResult(event.result as CrmFollowUpSuggestion);
+        }
+        if (event.type === 'error') {
+          throw new Error(event.message);
+        }
+      });
     } catch {
       setError(t('submitFailed'));
       setResult(null);
+      setStreaming({ summary: '', nextSteps: [], talkingPoints: [], sources: [] });
     } finally {
       setLoading(false);
     }
@@ -80,52 +105,62 @@ export function CrmAiFollowUpPanel({
           </Alert>
         ) : null}
 
-        {result ? (
+        {(result || (loading && streaming.summary)) ? (
           <div className="space-y-4 text-sm">
+            {(() => {
+              const display = result ?? streaming;
+              return (
+                <>
             <div>
               <p className="text-muted-foreground mb-1 font-medium">{t('summary')}</p>
-              <p className="whitespace-pre-wrap">{result.summary}</p>
+              <p className="whitespace-pre-wrap">
+                {display.summary}
+                {loading && !result ? '▍' : ''}
+              </p>
             </div>
 
-            {result.stageInsight ? (
+            {display.stageInsight ? (
               <div>
                 <p className="text-muted-foreground mb-1 font-medium">{t('stageInsight')}</p>
-                <p className="whitespace-pre-wrap">{result.stageInsight}</p>
+                <p className="whitespace-pre-wrap">{display.stageInsight}</p>
               </div>
             ) : null}
 
-            {result.nextSteps.length > 0 ? (
+            {display.nextSteps.length > 0 ? (
               <div>
                 <p className="text-muted-foreground mb-2 font-medium">{t('nextSteps')}</p>
                 <ol className="list-decimal space-y-1 pl-5">
-                  {result.nextSteps.map((step) => (
+                  {display.nextSteps.map((step) => (
                     <li key={step}>{step}</li>
                   ))}
                 </ol>
               </div>
             ) : null}
 
-            {result.talkingPoints.length > 0 ? (
+            {display.talkingPoints.length > 0 ? (
               <div>
                 <p className="text-muted-foreground mb-2 font-medium">{t('talkingPoints')}</p>
                 <ul className="list-disc space-y-1 pl-5">
-                  {result.talkingPoints.map((point) => (
+                  {display.talkingPoints.map((point) => (
                     <li key={point}>{point}</li>
                   ))}
                 </ul>
               </div>
             ) : null}
 
-            {result.risks && result.risks.length > 0 ? (
+            {display.risks && display.risks.length > 0 ? (
               <div>
                 <p className="text-muted-foreground mb-2 font-medium">{t('risks')}</p>
                 <ul className="text-destructive list-disc space-y-1 pl-5">
-                  {result.risks.map((risk) => (
+                  {display.risks.map((risk) => (
                     <li key={risk}>{risk}</li>
                   ))}
                 </ul>
               </div>
             ) : null}
+                </>
+              );
+            })()}
           </div>
         ) : null}
       </CardContent>

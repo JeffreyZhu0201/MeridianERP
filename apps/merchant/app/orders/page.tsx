@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
 import { BentoListHeader, formatMoney, ListPageFrame } from '@meridian/ui/server';
 
@@ -39,7 +40,7 @@ export default async function OrdersPage() {
     .filter((o) => o.status === OrderStatus.PAID)
     .reduce((sum, o) => sum + Number(o.total), 0);
 
-  const metrics = [
+  const metrics: Array<{ title: string; value: ReactNode }> = [
     { title: t('title'), value: orders.length },
     { title: t('tabs.pickupPending'), value: pickupPending.length },
   ];

@@ -154,7 +154,10 @@ export class PlatformAccountsService {
     };
   }
 
-  async updatePassword(accountId: string, newPassword: string): Promise<PlatformAccount> {
+  async updatePassword(
+    accountId: string,
+    newPassword: string,
+  ): Promise<PlatformAccount> {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     return this.prisma.platformAccount.update({
       where: { id: accountId },

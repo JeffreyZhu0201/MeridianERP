@@ -12,7 +12,8 @@ export class InventoryDiagnosisTool extends DiagnosisTool {
   }
 
   async execute(args: Record<string, unknown>): Promise<ToolResult> {
-    const tenantId = typeof args.tenantId === 'string' ? args.tenantId : undefined;
+    const tenantId =
+      typeof args.tenantId === 'string' ? args.tenantId : undefined;
     const skuCode = typeof args.skuCode === 'string' ? args.skuCode : undefined;
 
     if (skuCode) {
@@ -52,7 +53,10 @@ export class InventoryDiagnosisTool extends DiagnosisTool {
       this.prisma.warehouse.count({ where: { tenantId } }),
     ]);
 
-    const totalQty = stockLevels.reduce((sum, row) => sum + row.quantityOnHand, 0);
+    const totalQty = stockLevels.reduce(
+      (sum, row) => sum + row.quantityOnHand,
+      0,
+    );
 
     return {
       found: stockLevels.length > 0 || warehouseCount > 0,

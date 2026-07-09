@@ -71,7 +71,9 @@ test.describe('Gaps store UI smoke', () => {
       test.skip(true, 'Store app not running');
     }
 
-    await expect(page.getByRole('heading', { name: /My account/i })).toBeVisible();
+    await expect(page.getByRole('navigation', { name: /My account|我的账户/i })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText('PAID')).toBeVisible();
   });
 

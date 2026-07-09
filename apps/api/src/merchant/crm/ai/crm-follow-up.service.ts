@@ -4,7 +4,12 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import type { CrmFollowUpRequest, CrmFollowUpSuggestion } from '@meridian/shared';
+import type {
+  AiStreamEvent,
+  CrmFollowUpRequest,
+  CrmFollowUpSuggestion,
+} from '@meridian/shared';
+import { AiLlmStreamService } from '../../../ai/llm/ai-llm-stream.service';
 import { AiLlmService } from '../../../ai/llm/ai-llm.service';
 import type { CrmFollowUpContext } from '../../../ai/llm/crm-follow-up.types';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -16,28 +21,52 @@ export class CrmFollowUpService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiLlm: AiLlmService,
+    private readonly aiLlmStream: AiLlmStreamService,
   ) {}
 
   async followUp(
     tenantId: string,
     body: CrmFollowUpRequest,
   ): Promise<CrmFollowUpSuggestion> {
-    const leadId = body.leadId?.trim();
-    const contactId = body.contactId?.trim();
-
-    if (Boolean(leadId) === Boolean(contactId)) {
-      throw new BadRequestException('Provide exactly one of leadId or contactId');
-    }
-
-    const context = leadId
-      ? await this.buildLeadContext(tenantId, leadId)
-      : await this.buildContactContext(tenantId, contactId!);
-
+    const context = await this.buildContext(tenantId, body);
     this.logger.log(
       `CRM AI follow-up tenantId=${tenantId} subject=${context.subjectType}`,
     );
 
-    return this.aiLlm.suggestCrmFollowUp(context);
+    const { result } = await this.aiLlm.suggestCrmFollowUp(context, {
+      tenantId,
+      actorType: 'MERCHANT',
+    });
+    return result;
+  }
+
+  async *followUpStream(
+    tenantId: string,
+    body: CrmFollowUpRequest,
+  ): AsyncGenerator<AiStreamEvent> {
+    const context = await this.buildContext(tenantId, body);
+    this.logger.log(
+      `CRM AI follow-up stream tenantId=${tenantId} subject=${context.subjectType}`,
+    );
+    yield* this.aiLlmStream.streamCrmFollowUp(context, tenantId);
+  }
+
+  private async buildContext(
+    tenantId: string,
+    body: CrmFollowUpRequest,
+  ): Promise<CrmFollowUpContext> {
+    const leadId = body.leadId?.trim();
+    const contactId = body.contactId?.trim();
+
+    if (Boolean(leadId) === Boolean(contactId)) {
+      throw new BadRequestException(
+        'Provide exactly one of leadId or contactId',
+      );
+    }
+
+    return leadId
+      ? this.buildLeadContext(tenantId, leadId)
+      : this.buildContactContext(tenantId, contactId!);
   }
 
   private async buildLeadContext(

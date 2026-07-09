@@ -18,12 +18,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import {
-  ADMIN_ROLE_HOME_PATH,
-  ADMIN_ROLE_PERMISSIONS,
-  type AdminPlatformRole,
-} from '@meridian/shared';
+import { ADMIN_ROLE_HOME_PATH, ADMIN_ROLE_PERMISSIONS } from '@meridian/shared';
 import { EnvService } from '../../config/env.service';
+import { audienceJwtSignOptions } from '../../auth/jwt-sign-options';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PlatformLoginDto } from './dto/platform-login.dto';
 
@@ -49,9 +46,10 @@ export class PlatformAuthService {
     };
     const role = user.role;
     return {
-      accessToken: this.jwt.sign(payload, {
-        secret: this.env.getOrThrow('JWT_SECRET'),
-      }),
+      accessToken: this.jwt.sign(
+        payload,
+        audienceJwtSignOptions(this.env, 'JWT_SECRET'),
+      ),
       user: {
         email: user.email,
         role,

@@ -18,7 +18,8 @@ export class FundDiagnosisTool extends DiagnosisTool {
   }
 
   async execute(args: Record<string, unknown>): Promise<ToolResult> {
-    const tenantId = typeof args.tenantId === 'string' ? args.tenantId : undefined;
+    const tenantId =
+      typeof args.tenantId === 'string' ? args.tenantId : undefined;
 
     if (!tenantId) {
       const overview = await this.prisma.order.aggregate({
@@ -26,9 +27,10 @@ export class FundDiagnosisTool extends DiagnosisTool {
         _sum: { total: true },
         _count: { _all: true },
       });
+      const gmv = (overview._sum.total ?? 0).toString();
       return {
         found: true,
-        summary: `平台已支付/完成订单 ${overview._count._all} 笔，GMV ${overview._sum.total ?? 0}`,
+        summary: `平台已支付/完成订单 ${overview._count._all} 笔，GMV ${gmv}`,
         data: {
           scope: 'platform',
           orderCount: overview._count._all,
@@ -39,7 +41,10 @@ export class FundDiagnosisTool extends DiagnosisTool {
 
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { slug: true, name: true },
+      select: {
+        slug: true,
+        merchantProfile: { select: { businessName: true } },
+      },
     });
     if (!tenant) {
       return this.notFound(tenantId);
@@ -75,7 +80,9 @@ export class FundDiagnosisTool extends DiagnosisTool {
           order.lines.map((l) => ({
             quantity: l.quantity,
             unitWholesalePrice:
-              l.unitWholesalePrice != null ? Number(l.unitWholesalePrice) : null,
+              l.unitWholesalePrice != null
+                ? Number(l.unitWholesalePrice)
+                : null,
           })),
         ),
       0,
@@ -100,7 +107,7 @@ export class FundDiagnosisTool extends DiagnosisTool {
       data: {
         tenantId,
         tenantSlug: tenant.slug,
-        tenantName: tenant.name,
+        tenantName: tenant.merchantProfile?.businessName ?? tenant.slug,
         pickupGrossProfit: pickupProfit.toFixed(2),
         allocationCost: allocationCost.toFixed(2),
         deliveryCost: deliveryCost.toFixed(2),

@@ -1,11 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { MediaAssetSummary } from '@meridian/shared';
 import { EnvService } from '../config/env.service';
 import { PrismaService } from '../prisma/prisma.service';
+import type { UploadedImageFile } from './uploaded-image-file';
 import {
   detectImageMime,
   extensionForMime,
@@ -36,7 +34,7 @@ export class MediaService {
   }
 
   async uploadImage(
-    file: Express.Multer.File,
+    file: UploadedImageFile,
     platformUserId: string,
   ): Promise<MediaAssetSummary> {
     if (!file?.buffer?.length) {

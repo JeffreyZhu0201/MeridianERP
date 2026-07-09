@@ -110,4 +110,15 @@ describe('Platform merchants list filters (e2e)', () => {
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
     expect(res.body.data[0].contactEmail).toContain('pending@filter');
   });
+
+  it('accepts limit=500 for admin bulk listing', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/api/v1/platform/merchants')
+      .query({ status: OnboardingStatus.APPROVED, limit: 500 })
+      .set('Authorization', `Bearer ${platformToken}`)
+      .expect(200);
+
+    expect(res.body.meta.limit).toBe(500);
+    expect(Array.isArray(res.body.data)).toBe(true);
+  });
 });

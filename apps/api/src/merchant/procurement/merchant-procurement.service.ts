@@ -82,10 +82,14 @@ export class MerchantProcurementService {
     return this.mapDetail(order);
   }
 
-  async createOrder(user: AuthenticatedUser, dto: CreateBranchPurchaseOrderDto) {
+  async createOrder(
+    user: AuthenticatedUser,
+    dto: CreateBranchPurchaseOrderDto,
+  ) {
     const tenantId = user.tenantId!;
     await this.inventory.migrateTenantInventory(tenantId);
-    const warehouseId = await this.warehouses.resolveDefaultWarehouseId(tenantId);
+    const warehouseId =
+      await this.warehouses.resolveDefaultWarehouseId(tenantId);
     const lines = await this.validateLines(dto.lines);
     const totalAmount = lines.reduce(
       (sum, line) => sum.add(line.lineTotal),
@@ -96,9 +100,8 @@ export class MerchantProcurementService {
       tenantId,
       dto.receivingAddressId,
     );
-    const receivingAddressSnapshot = this.addresses.snapshotFromAddress(
-      receivingAddress,
-    );
+    const receivingAddressSnapshot =
+      this.addresses.snapshotFromAddress(receivingAddress);
 
     const order = await this.prisma.branchPurchaseOrder.create({
       data: {
@@ -186,7 +189,9 @@ export class MerchantProcurementService {
     });
     if (!order) throw new NotFoundException('Procurement order not found');
     if (order.status !== BranchPurchaseOrderStatus.SHIPPED) {
-      throw new BadRequestException('Order is not ready for receipt confirmation');
+      throw new BadRequestException(
+        'Order is not ready for receipt confirmation',
+      );
     }
     if (!order.allocationOrderId) {
       throw new BadRequestException('Allocation not linked');

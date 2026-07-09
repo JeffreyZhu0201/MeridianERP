@@ -69,9 +69,10 @@ export class MerchantProcurementAddressesService {
       return address;
     }
 
-    const defaultAddress = await this.prisma.procurementReceivingAddress.findFirst({
-      where: { tenantId, isActive: true, isDefault: true },
-    });
+    const defaultAddress =
+      await this.prisma.procurementReceivingAddress.findFirst({
+        where: { tenantId, isActive: true, isDefault: true },
+      });
     if (defaultAddress) return defaultAddress;
 
     const first = await this.prisma.procurementReceivingAddress.findFirst({
@@ -100,7 +101,10 @@ export class MerchantProcurementAddressesService {
     };
   }
 
-  async create(user: AuthenticatedUser, dto: CreateProcurementReceivingAddressDto) {
+  async create(
+    user: AuthenticatedUser,
+    dto: CreateProcurementReceivingAddressDto,
+  ) {
     this.assertOwner(user);
     const tenantId = user.tenantId!;
     const existingCount = await this.prisma.procurementReceivingAddress.count({

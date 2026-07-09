@@ -1,8 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import {
-  FulfillmentType,
-  Prisma,
-} from '@prisma/client';
+import { FulfillmentType, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';

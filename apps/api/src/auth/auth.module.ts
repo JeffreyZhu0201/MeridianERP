@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { EnvService } from '../config/env.service';
+import { getJwtExpiresIn } from './jwt-sign-options';
 import { CustomerJwtStrategy } from './strategies/customer-jwt.strategy';
 import { DistributorJwtStrategy } from './strategies/distributor-jwt.strategy';
 import { PlatformJwtStrategy } from './strategies/platform-jwt.strategy';
@@ -20,7 +21,7 @@ import { StoreAuthGuard } from './guards/store-auth.guard';
       inject: [EnvService],
       useFactory: (env: EnvService) => ({
         secret: env.getOrThrow('JWT_SECRET'),
-        signOptions: { expiresIn: '8h' },
+        signOptions: { expiresIn: getJwtExpiresIn(env) },
       }),
     }),
   ],

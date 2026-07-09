@@ -44,7 +44,7 @@ test.describe('Phase 2 store smoke', () => {
       `${API}/api/v1/platform/merchants/${profileId}/store-settings`,
       {
         headers: { Authorization: `Bearer ${adminToken}` },
-        data: { isFlagship: true, storePublished: true },
+        data: { isFlagship: false, storePublished: true },
       },
     );
     expect(flagship.ok()).toBeTruthy();
@@ -110,7 +110,9 @@ test.describe('Phase 2 store smoke', () => {
       test.skip(true, 'Store app not running');
     }
     await expect(page).toHaveURL(/\/shop\/?$/);
-    await expect(page.getByRole('heading', { name: /Shop/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /Shop|商城|选购/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('demo store catalog renders products', async ({ page }) => {
@@ -118,7 +120,9 @@ test.describe('Phase 2 store smoke', () => {
     if (!res || res.status() >= 500) {
       test.skip(true, 'Store app not running or demo seed missing');
     }
-    await expect(page.getByRole('heading', { name: /Shop/i })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('heading', { name: /Shop|商城|选购/i })).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByRole('link', { name: 'Starter Widget', exact: true }).first()).toBeVisible({
       timeout: 15_000,
     });

@@ -48,10 +48,7 @@ export class PlatformMerchantsController {
 
   @Get(':id/statistics')
   @PlatformRoles('SUPER_ADMIN', 'REVIEWER')
-  getStatistics(
-    @Param('id') id: string,
-    @Query('days') days?: string,
-  ) {
+  getStatistics(@Param('id') id: string, @Query('days') days?: string) {
     const windowDays = days ? parseInt(days, 10) : 30;
     return this.platformMerchantsService.getMerchantStatistics(id, windowDays);
   }

@@ -102,9 +102,9 @@ export class MerchantOrdersService {
   }
 
   listPickupPending(tenantId: string) {
-    return this.fulfillmentService.listPickupPending(tenantId).then((orders) =>
-      orders.map(mapOrder),
-    );
+    return this.fulfillmentService
+      .listPickupPending(tenantId)
+      .then((orders) => orders.map(mapOrder));
   }
 
   async listDeliveryPending(tenantId: string) {

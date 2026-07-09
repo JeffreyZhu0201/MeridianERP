@@ -32,7 +32,9 @@ export class PlatformDashboardService {
           },
         },
       }),
-      this.prisma.distributor.count({ where: { tenantId: null, isActive: true } }),
+      this.prisma.distributor.count({
+        where: { tenantId: null, isActive: true },
+      }),
       this.prisma.commissionLedger.aggregate({
         where: {
           status: LedgerStatus.ACCRUED,

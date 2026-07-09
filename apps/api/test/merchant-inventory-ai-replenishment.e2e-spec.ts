@@ -1,4 +1,5 @@
 import { INestApplication } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -43,9 +44,7 @@ describe('Merchant inventory AI replenishment (e2e)', () => {
       .send({
         name: 'Low Stock Widget',
         isPublished: true,
-        variants: [
-          { sku: 'LSW-1', name: 'Default', price: 50, inventory: 10 },
-        ],
+        variants: [{ sku: 'LSW-1', name: 'Default', price: 50, inventory: 10 }],
       })
       .expect(201);
 
@@ -73,6 +72,8 @@ describe('Merchant inventory AI replenishment (e2e)', () => {
       .expect(201);
 
     expect(res.body.summary).toEqual(expect.any(String));
+    expect(res.body.analysisId).toEqual(expect.any(String));
+    expect(res.body.createdAt).toEqual(expect.any(String));
     expect(res.body.priorities.length).toBeGreaterThan(0);
     expect(res.body.sources.length).toBeGreaterThan(0);
     expect(
@@ -81,6 +82,21 @@ describe('Merchant inventory AI replenishment (e2e)', () => {
       ),
     ).toBe(true);
     expect(res.body.summary).toMatch(/低库存|缺货|SKU/);
+
+    const latest = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/ai/replenishment/latest')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(latest.body.analysisId).toBe(res.body.analysisId);
+
+    const history = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/ai/replenishment/history')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(history.body.total).toBeGreaterThanOrEqual(1);
+    expect(history.body.items[0].id).toBe(res.body.analysisId);
   });
 
   it('returns empty priorities when no low-stock alerts', async () => {
@@ -101,5 +117,64 @@ describe('Merchant inventory AI replenishment (e2e)', () => {
 
     expect(res.body.priorities).toEqual([]);
     expect(res.body.summary).toMatch(/没有|暂无|无/);
+    expect(res.body.analysisId).toEqual(expect.any(String));
+  });
+
+  it('returns null latest before any analysis exists for a new tenant', async () => {
+    const password = await bcrypt.hash('other12', 10);
+    await prisma._seedMerchantOwner(
+      'other-ai-store',
+      'Other AI Store',
+      'owner@other-ai.test',
+      password,
+    );
+    const otherToken = await loginMerchant(
+      app,
+      'owner@other-ai.test',
+      'other12',
+    );
+
+    const latest = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/ai/replenishment/latest')
+      .set('Authorization', `Bearer ${otherToken}`)
+      .expect(204);
+
+    expect(latest.body).toEqual({});
+  });
+
+  it('returns procurement prefill lines after analysis with linked master SKU', async () => {
+    const masterSku = await prisma.masterSku.create({
+      data: {
+        skuCode: 'REP-MSKU',
+        name: 'Replenish HQ SKU',
+        quantityOnHand: 40,
+        unitCost: new Prisma.Decimal(8),
+        wholesalePrice: new Prisma.Decimal(15),
+        retailPrice: new Prisma.Decimal(28),
+        flagshipPrice: new Prisma.Decimal(25),
+        isActive: true,
+      },
+    });
+
+    await prisma.productVariant.update({
+      where: { id: variantId },
+      data: { masterSkuId: masterSku.id },
+    });
+
+    await request(app.getHttpServer())
+      .post('/api/v1/merchant/inventory/ai/replenishment')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(201);
+
+    const prefill = await request(app.getHttpServer())
+      .get('/api/v1/merchant/inventory/ai/replenishment/procurement-prefill')
+      .set('Authorization', `Bearer ${merchantToken}`)
+      .expect(200);
+
+    expect(
+      prefill.body.lines.some(
+        (line: { masterSkuId: string }) => line.masterSkuId === masterSku.id,
+      ),
+    ).toBe(true);
   });
 });

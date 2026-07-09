@@ -68,7 +68,8 @@ export class MerchantPurchaseOrdersService {
     const tenantId = user.tenantId!;
     await this.inventory.migrateTenantInventory(tenantId);
     const warehouseId =
-      dto.warehouseId ?? (await this.warehouses.resolveDefaultWarehouseId(tenantId));
+      dto.warehouseId ??
+      (await this.warehouses.resolveDefaultWarehouseId(tenantId));
     await this.assertWarehouseActive(tenantId, warehouseId);
     await this.validatePoLines(tenantId, dto.lines);
 

@@ -23,8 +23,11 @@ export class PayoutService {
   }
 
   async disburse(input: PayoutDisburseInput): Promise<PayoutDisburseResult> {
+    await Promise.resolve();
     if (this.env.get('PAYOUT_MOCK_FAIL') === 'true') {
-      throw new BadRequestException('Mock payout provider rejected disbursement');
+      throw new BadRequestException(
+        'Mock payout provider rejected disbursement',
+      );
     }
 
     if (!this.isMockMode()) {

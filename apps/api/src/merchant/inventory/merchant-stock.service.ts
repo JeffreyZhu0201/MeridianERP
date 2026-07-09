@@ -32,7 +32,8 @@ export class MerchantStockService {
 
   async listStockLevels(tenantId: string, query: StockLevelListQueryDto) {
     const { skip, take, page, limit } = getPagination(query);
-    const defaultWarehouseId = await this.warehouses.resolveDefaultWarehouseId(tenantId);
+    const defaultWarehouseId =
+      await this.warehouses.resolveDefaultWarehouseId(tenantId);
     const where: Prisma.StockLevelWhereInput = {
       tenantId,
       warehouseId: defaultWarehouseId,
@@ -187,7 +188,8 @@ export class MerchantStockService {
 
   async listAdjustments(tenantId: string, query: AdjustmentListQueryDto) {
     const { skip, take, page, limit } = getPagination(query);
-    const defaultWarehouseId = await this.warehouses.resolveDefaultWarehouseId(tenantId);
+    const defaultWarehouseId =
+      await this.warehouses.resolveDefaultWarehouseId(tenantId);
     const where: Prisma.StockAdjustmentWhereInput = {
       tenantId,
       warehouseId: defaultWarehouseId,

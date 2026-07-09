@@ -34,7 +34,9 @@ export class OrderLifecycleService {
       throw new ForbiddenException('Order does not belong to this customer');
     }
     if (order.status !== OrderStatus.PENDING_PAYMENT) {
-      throw new BadRequestException('Only pending payment orders can be cancelled');
+      throw new BadRequestException(
+        'Only pending payment orders can be cancelled',
+      );
     }
 
     await this.releaseReservations(order.id);
@@ -66,8 +68,13 @@ export class OrderLifecycleService {
         'Fulfilled orders require platform refund with inventory restore',
       );
     }
-    if (order.status !== OrderStatus.PAID && order.status !== OrderStatus.FULFILLED) {
-      throw new BadRequestException('Only paid or fulfilled orders can be refunded');
+    if (
+      order.status !== OrderStatus.PAID &&
+      order.status !== OrderStatus.FULFILLED
+    ) {
+      throw new BadRequestException(
+        'Only paid or fulfilled orders can be refunded',
+      );
     }
 
     if (order.stripePaymentIntentId) {
@@ -149,7 +156,10 @@ export class OrderLifecycleService {
     return order;
   }
 
-  private async voidOrderCommission(orderId: string, tx: Prisma.TransactionClient) {
+  private async voidOrderCommission(
+    orderId: string,
+    tx: Prisma.TransactionClient,
+  ) {
     const ledger = await tx.commissionLedger.findUnique({ where: { orderId } });
     if (!ledger || ledger.status === LedgerStatus.VOID) {
       return;
@@ -178,7 +188,11 @@ export class OrderLifecycleService {
     const isFlagship = order.tenant.merchantProfile?.isFlagship ?? false;
 
     if (order.fulfillmentType === FulfillmentType.PICKUP) {
-      await this.fulfillment.restoreBranchStock(tx, order.tenantId, order.lines);
+      await this.fulfillment.restoreBranchStock(
+        tx,
+        order.tenantId,
+        order.lines,
+      );
       return;
     }
 
@@ -188,7 +202,11 @@ export class OrderLifecycleService {
     }
 
     if (order.fulfillmentType === FulfillmentType.DELIVERY) {
-      await this.fulfillment.restoreBranchStock(tx, order.tenantId, order.lines);
+      await this.fulfillment.restoreBranchStock(
+        tx,
+        order.tenantId,
+        order.lines,
+      );
     }
   }
 

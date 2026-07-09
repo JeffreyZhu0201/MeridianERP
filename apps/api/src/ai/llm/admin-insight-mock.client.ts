@@ -2,6 +2,14 @@ import { Injectable } from '@nestjs/common';
 import type { AdminAiInsight } from '@meridian/shared';
 import type { AdminInsightContext } from './admin-insight.types';
 
+function insightText(value: unknown, fallback = ''): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value);
+  if (value == null) return fallback;
+  return fallback;
+}
+
 @Injectable()
 export class AdminInsightMockClient {
   suggest(context: AdminInsightContext): AdminAiInsight {
@@ -23,10 +31,10 @@ export class AdminInsightMockClient {
   }
 
   private withdrawalInsight(data: Record<string, unknown>): AdminAiInsight {
-    const amount = String(data.requestedAmount ?? '0');
-    const available = String(data.availableBalance ?? '0');
-    const distributorName = String(data.distributorName ?? '拓店员');
-    const status = String(data.status ?? 'PENDING');
+    const amount = insightText(data.requestedAmount, '0');
+    const available = insightText(data.availableBalance, '0');
+    const distributorName = insightText(data.distributorName, '拓店员');
+    const status = insightText(data.status, 'PENDING');
     const pendingCount = Number(data.pendingWithdrawalCount ?? 0);
 
     const risks: string[] = [];
@@ -42,7 +50,7 @@ export class AdminInsightMockClient {
       findings: [
         `已结算佣金余额（扣除已批准与待审）约 ${available} CNY`,
         `本笔申请金额 ${amount} CNY`,
-        data.note ? `申请备注：${String(data.note)}` : '无申请备注',
+        data.note ? `申请备注：${insightText(data.note)}` : '无申请备注',
       ],
       recommendations: [
         '核对拓店员近期配货确认产生的佣金台账',
@@ -51,7 +59,7 @@ export class AdminInsightMockClient {
       ],
       risks: risks.length > 0 ? risks : undefined,
       sources: [
-        { type: 'withdrawal', ref: String(data.withdrawalId ?? '') },
+        { type: 'withdrawal', ref: insightText(data.withdrawalId) },
         { type: 'distributor', ref: distributorName },
         { type: 'balance', ref: `available=${available}` },
       ],
@@ -59,10 +67,10 @@ export class AdminInsightMockClient {
   }
 
   private deliveryOrderInsight(data: Record<string, unknown>): AdminAiInsight {
-    const status = String(data.status ?? '');
-    const fulfillmentType = String(data.fulfillmentType ?? '');
-    const total = String(data.total ?? '0');
-    const tenantSlug = String(data.tenantSlug ?? '');
+    const status = insightText(data.status);
+    const fulfillmentType = insightText(data.fulfillmentType);
+    const total = insightText(data.total, '0');
+    const tenantSlug = insightText(data.tenantSlug);
     const canShip = status === 'PAID' && fulfillmentType === 'DELIVERY';
 
     const risks: string[] = [];
@@ -71,28 +79,34 @@ export class AdminInsightMockClient {
     }
 
     return {
-      summary: `旗舰配送订单 ${String(data.orderId ?? '').slice(0, 8)}… 状态 ${status}，金额 ${total} CNY。`,
+      summary: `旗舰配送订单 ${insightText(data.orderId).slice(0, 8)}… 状态 ${status}，金额 ${total} CNY。`,
       findings: [
         `履约方式：${fulfillmentType}`,
         `分店：${tenantSlug}`,
-        data.guestEmail ? `客户：${String(data.guestEmail)}` : '无客户邮箱',
+        data.guestEmail
+          ? `客户：${insightText(data.guestEmail)}`
+          : '无客户邮箱',
         canShip ? '订单已支付且为配送单，可执行发货' : '需确认是否满足发货条件',
       ],
       recommendations: canShip
-        ? ['核对配送地址与 SKU 行项目', '确认库存后点击发货', '发货后订单状态将变为 FULFILLED']
+        ? [
+            '核对配送地址与 SKU 行项目',
+            '确认库存后点击发货',
+            '发货后订单状态将变为 FULFILLED',
+          ]
         : status === 'FULFILLED'
           ? ['订单已完成履约，无需进一步操作']
           : ['等待订单支付或确认履约类型'],
       risks: risks.length > 0 ? risks : undefined,
       sources: [
-        { type: 'order', ref: String(data.orderId ?? '') },
+        { type: 'order', ref: insightText(data.orderId) },
         { type: 'tenant', ref: tenantSlug },
       ],
     };
   }
 
   private fundsInsight(data: Record<string, unknown>): AdminAiInsight {
-    const metric = String(data.metric ?? 'net-profit');
+    const metric = insightText(data.metric, 'net-profit');
     const metricLabels: Record<string, string> = {
       'inventory-cost': '在库总成本（快照）',
       'expected-profit': '预计利润（快照）',
@@ -105,14 +119,14 @@ export class AdminInsightMockClient {
     const summaryValue = data.summaryValue ?? data.netProfit ?? data.totalCost;
 
     return {
-      summary: `资金指标「${label}」当前值约 ${String(summaryValue ?? '—')}。`,
+      summary: `资金指标「${label}」当前值约 ${insightText(summaryValue, '—')}。`,
       findings: [
         data.from && data.to
-          ? `统计期间：${String(data.from)} 至 ${String(data.to)}`
+          ? `统计期间：${insightText(data.from)} 至 ${insightText(data.to)}`
           : '该指标为当前库存快照，不受日期筛选影响',
-        ...Object.entries(data.breakdown ?? {}).slice(0, 4).map(
-          ([key, value]) => `${key}: ${String(value)}`,
-        ),
+        ...Object.entries(data.breakdown ?? {})
+          .slice(0, 4)
+          .map(([key, value]) => `${key}: ${insightText(value)}`),
       ],
       recommendations: [
         '结合 PRODUCT.md 区分快照指标与期间指标',

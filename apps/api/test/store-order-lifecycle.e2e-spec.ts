@@ -1,5 +1,11 @@
 import { INestApplication } from '@nestjs/common';
-import { CommissionSource, FulfillmentType, LedgerStatus, OrderStatus, Prisma } from '@prisma/client';
+import {
+  CommissionSource,
+  FulfillmentType,
+  LedgerStatus,
+  OrderStatus,
+  Prisma,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import request from 'supertest';
 import { App } from 'supertest/types';
@@ -48,7 +54,11 @@ describe('Store order lifecycle (e2e)', () => {
       password,
     );
     tenantId = tenant.id;
-    merchantToken = await loginMerchant(app, 'owner@lifecycle.test', 'secret12');
+    merchantToken = await loginMerchant(
+      app,
+      'owner@lifecycle.test',
+      'secret12',
+    );
 
     const product = await request(app.getHttpServer())
       .post('/api/v1/merchant/products')

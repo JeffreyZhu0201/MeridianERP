@@ -13,7 +13,9 @@ export class CrmPluginGuard implements CanActivate {
   constructor(private readonly pluginService: PluginService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const user = context.switchToHttp().getRequest().user as AuthenticatedUser;
+    const { user } = context
+      .switchToHttp()
+      .getRequest<{ user?: AuthenticatedUser }>();
     const tenantId = user?.tenantId;
     if (!tenantId) {
       throw new ForbiddenException(PLUGIN_NOT_INSTALLED);
