@@ -2,21 +2,26 @@ import {
   ApiError,
   CART_SESSION_HEADER,
   type PublishedStoreListResponse,
-} from '@meridian/shared';
+} from "@meridian/shared";
 
 export type { PublishedStoreListResponse };
 export { ApiError };
 
-import { ensureCartSessionId } from './cart-session.client';
+import { ensureCartSessionId } from "./cart-session.client";
 
 export interface PaginatedResponse<T> {
   data: T[];
   meta: { total: number; page: number; limit: number };
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-export const STORE_APP_URL = process.env.STORE_APP_URL ?? 'http://localhost:3003';
-export const AUTH_COOKIE = 'store_token';
+const publicApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+export const API_URL =
+  typeof window === "undefined"
+    ? (process.env.API_URL ?? publicApiUrl)
+    : publicApiUrl;
+export const STORE_APP_URL =
+  process.env.STORE_APP_URL ?? "http://localhost:3003";
+export const AUTH_COOKIE = "store_token";
 
 export type StoreApiAuth =
   | string
@@ -32,7 +37,7 @@ export async function apiFetch<T>(
   auth?: StoreApiAuth,
 ): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
@@ -40,7 +45,7 @@ export async function apiFetch<T>(
   let cartSession: string | undefined;
   let storeSlug: string | undefined;
 
-  if (typeof auth === 'string') {
+  if (typeof auth === "string") {
     token = auth;
   } else if (auth) {
     token = auth.token;
@@ -52,14 +57,14 @@ export async function apiFetch<T>(
     headers.Authorization = `Bearer ${token}`;
   } else if (cartSession) {
     headers[CART_SESSION_HEADER] = cartSession;
-  } else if (storeSlug && typeof window !== 'undefined') {
+  } else if (storeSlug && typeof window !== "undefined") {
     headers[CART_SESSION_HEADER] = ensureCartSessionId(storeSlug);
   }
 
   const res = await fetch(`${API_URL}/api/v1${path}`, {
     ...options,
     headers,
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -74,9 +79,9 @@ export async function apiFetch<T>(
   return res.json() as Promise<T>;
 }
 
-export function storePath(slug: string, path = ''): string {
+export function storePath(slug: string, path = ""): string {
   if (!path) return `/store/${slug}`;
-  return `/store/${slug}${path.startsWith('/') ? path : `/${path}`}`;
+  return `/store/${slug}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export interface AuthResponse {
@@ -132,4 +137,3 @@ export interface Cart {
   items: CartItem[];
   subtotal: string | number;
 }
-

@@ -40,8 +40,10 @@ services:
       - ../.env
     environment:
       DATABASE_URL: postgresql://meridian:meridian@postgres:5432/meridian
+      DIRECT_DATABASE_URL: postgresql://meridian:meridian@postgres:5432/meridian
       REDIS_URL: redis://redis:6379
       API_PORT: "3001"
+      MEDIA_LOCAL_PATH: /app/uploads
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/api/v1/health"]
       interval: 10s
@@ -62,7 +64,8 @@ services:
     env_file:
       - ../.env
     environment:
-      NEXT_PUBLIC_API_URL: http://api:3001
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
     profiles: [dev, prod]
 
   merchant:
@@ -77,7 +80,8 @@ services:
     env_file:
       - ../.env
     environment:
-      NEXT_PUBLIC_API_URL: http://api:3001
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
       MERCHANT_APP_URL: http://localhost:3002
     profiles: [dev, prod]
 
@@ -93,7 +97,8 @@ services:
     env_file:
       - ../.env
     environment:
-      NEXT_PUBLIC_API_URL: http://api:3001
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
       STORE_APP_URL: http://localhost:3003
     profiles: [dev, prod]
 
@@ -109,7 +114,8 @@ services:
     env_file:
       - ../.env
     environment:
-      NEXT_PUBLIC_API_URL: http://api:3001
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
       DISTRIBUTOR_APP_URL: http://localhost:3005
     profiles: [dev, prod]
 

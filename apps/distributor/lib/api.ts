@@ -5,15 +5,19 @@
  * @LastEditTime: 2026-07-04 00:18:52
  * @FilePath: /MeridianERP/apps/distributor/lib/api.ts
  * @Description: Distributor API
- * 
- * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved. 
+ *
+ * Copyright (c) 2026 by JeffreyZhu, All Rights Reserved.
  */
-import { ApiError } from '@meridian/shared';
+import { ApiError } from "@meridian/shared";
 
 export { ApiError };
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-export const AUTH_COOKIE = 'distributor_token';
+const publicApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+export const API_URL =
+  typeof window === "undefined"
+    ? (process.env.API_URL ?? publicApiUrl)
+    : publicApiUrl;
+export const AUTH_COOKIE = "distributor_token";
 
 export async function apiFetch<T>(
   path: string,
@@ -21,7 +25,7 @@ export async function apiFetch<T>(
   token?: string,
 ): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
@@ -32,7 +36,7 @@ export async function apiFetch<T>(
   const res = await fetch(`${API_URL}/api/v1${path}`, {
     ...options,
     headers,
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -49,4 +53,4 @@ export type {
   DistributorCommissionListResponse,
   DistributorBranchSummary,
   WithdrawalRequestRow,
-} from '@meridian/shared';
+} from "@meridian/shared";

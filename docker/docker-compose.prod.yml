@@ -1,0 +1,185 @@
+name: meridian-prod
+
+x-portal-build-args: &portal-build-args
+  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+
+x-portal-runtime-env: &portal-runtime-env
+  API_URL: http://api:3001
+  NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meridian}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meridian}
+      POSTGRES_DB: ${POSTGRES_DB:-meridian}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-meridian} -d ${POSTGRES_DB:-meridian}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      API_PORT: "3001"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-meridian}:${POSTGRES_PASSWORD:-meridian}@postgres:5432/${POSTGRES_DB:-meridian}
+      DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-meridian}:${POSTGRES_PASSWORD:-meridian}@postgres:5432/${POSTGRES_DB:-meridian}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-change-me-platform}
+      JWT_MERCHANT_SECRET: ${JWT_MERCHANT_SECRET:-change-me-merchant}
+      JWT_STORE_SECRET: ${JWT_STORE_SECRET:-change-me-store}
+      JWT_DISTRIBUTOR_SECRET: ${JWT_DISTRIBUTOR_SECRET:-change-me-distributor}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      AI_MODE: ${AI_MODE:-mock}
+      PAYOUT_PROVIDER: ${PAYOUT_PROVIDER:-mock}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_mock}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_mock}
+      MEDIA_STORAGE: ${MEDIA_STORAGE:-local}
+      MEDIA_LOCAL_PATH: /app/uploads
+      MEDIA_MAX_BYTES: ${MEDIA_MAX_BYTES:-5242880}
+      MEDIA_PUBLIC_BASE_URL: ${MEDIA_PUBLIC_BASE_URL:-http://localhost:3001/api/v1/media/files}
+      ADMIN_APP_URL: ${ADMIN_APP_URL:-http://localhost:3000}
+      MERCHANT_APP_URL: ${MERCHANT_APP_URL:-http://localhost:3002}
+      STORE_APP_URL: ${STORE_APP_URL:-http://localhost:3003}
+      DISTRIBUTOR_APP_URL: ${DISTRIBUTOR_APP_URL:-http://localhost:3005}
+    volumes:
+      - api_uploads:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/v1/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+
+  admin:
+    build:
+      context: ..
+      dockerfile: apps/admin/Dockerfile
+      args: *portal-build-args
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *portal-runtime-env
+      ADMIN_APP_URL: ${ADMIN_APP_URL:-http://localhost:3000}
+
+  merchant:
+    build:
+      context: ..
+      dockerfile: apps/merchant/Dockerfile
+      args: *portal-build-args
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *portal-runtime-env
+      MERCHANT_APP_URL: ${MERCHANT_APP_URL:-http://localhost:3002}
+
+  store:
+    build:
+      context: ..
+      dockerfile: apps/store/Dockerfile
+      args: *portal-build-args
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *portal-runtime-env
+      STORE_APP_URL: ${STORE_APP_URL:-http://localhost:3003}
+
+  distributor:
+    build:
+      context: ..
+      dockerfile: apps/distributor/Dockerfile
+      args: *portal-build-args
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      <<: *portal-runtime-env
+      DISTRIBUTOR_APP_URL: ${DISTRIBUTOR_APP_URL:-http://localhost:3005}
+
+  landing:
+    build:
+      context: ..
+      dockerfile: apps/landing/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      PORT: "3004"
+      ADMIN_APP_URL: ${ADMIN_APP_URL:-http://localhost:3000}
+      MERCHANT_APP_URL: ${MERCHANT_APP_URL:-http://localhost:3002}
+      STORE_APP_URL: ${STORE_APP_URL:-http://localhost:3003}
+      DISTRIBUTOR_APP_URL: ${DISTRIBUTOR_APP_URL:-http://localhost:3005}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      API_URL: http://api:3001
+
+  api-seed:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: seed
+    profiles: [seed]
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-meridian}:${POSTGRES_PASSWORD:-meridian}@postgres:5432/${POSTGRES_DB:-meridian}
+      DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-meridian}:${POSTGRES_PASSWORD:-meridian}@postgres:5432/${POSTGRES_DB:-meridian}
+    restart: "no"
+
+volumes:
+  postgres_data:
+  api_uploads:

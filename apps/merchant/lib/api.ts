@@ -1,4 +1,4 @@
-import { ApiError, asList, asListTotal } from '@meridian/shared';
+import { ApiError, asList, asListTotal } from "@meridian/shared";
 
 export { ApiError, asList, asListTotal };
 
@@ -7,8 +7,12 @@ export interface PaginatedResponse<T> {
   meta: { total: number; page: number; limit: number };
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-export const AUTH_COOKIE = 'merchant_token';
+const publicApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+export const API_URL =
+  typeof window === "undefined"
+    ? (process.env.API_URL ?? publicApiUrl)
+    : publicApiUrl;
+export const AUTH_COOKIE = "merchant_token";
 
 export async function apiFetch<T>(
   path: string,
@@ -16,7 +20,7 @@ export async function apiFetch<T>(
   token?: string,
 ): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
 
@@ -27,7 +31,7 @@ export async function apiFetch<T>(
   const res = await fetch(`${API_URL}/api/v1${path}`, {
     ...options,
     headers,
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   if (!res.ok) {
@@ -65,7 +69,10 @@ export interface Contact {
   company?: { name: string };
 }
 
-export type { CrmStoreCustomerListItem, MerchantSession } from '@meridian/shared';
+export type {
+  CrmStoreCustomerListItem,
+  MerchantSession,
+} from "@meridian/shared";
 
 export interface Company {
   id: string;

@@ -69,6 +69,44 @@ Optional full stack (all six portals + API + Postgres + Redis):
 rtk docker compose -f docker/docker-compose.yml --profile dev up --build
 ```
 
+## Production (Docker Compose)
+
+One-command build and start for a local or demo production stack (Postgres + Redis + API + all portals):
+
+```bash
+cp docker/.env.example docker/.env   # first time only; edit JWT secrets for real deploys
+rtk pnpm docker:prod
+```
+
+This will:
+
+1. Build all Docker images (NestJS API + five Next.js standalone apps)
+2. Start Postgres, Redis, API, Admin, Merchant, Store, Distributor, Landing
+3. Run `prisma migrate deploy` on API startup
+4. Seed demo data when `RUN_SEED=true` in `docker/.env` (default)
+
+| Command                     | Purpose                                          |
+| --------------------------- | ------------------------------------------------ |
+| `rtk pnpm docker:prod`      | Build images, start stack, wait for health, seed |
+| `rtk pnpm docker:prod:down` | Stop and remove containers                       |
+| `rtk pnpm docker:prod:logs` | Follow container logs                            |
+| `rtk pnpm docker:prod:seed` | Re-run demo seed only                            |
+
+**URLs** (default `docker/.env`):
+
+| Service     | URL                        |
+| ----------- | -------------------------- |
+| Landing     | http://localhost:3004      |
+| Admin       | http://localhost:3000      |
+| API         | http://localhost:3001      |
+| Merchant    | http://localhost:3002      |
+| Store       | http://localhost:3003/shop |
+| Distributor | http://localhost:3005      |
+
+For a public hostname, set `NEXT_PUBLIC_API_URL`, `MEDIA_PUBLIC_BASE_URL`, and `*_APP_URL` in `docker/.env` **before** `docker:prod` (Next.js bakes `NEXT_PUBLIC_*` at image build time). Portal SSR uses internal `API_URL=http://api:3001` inside the compose network.
+
+See `docker/.env.example` for all variables.
+
 ## Seed Accounts
 
 | Portal              | URL                                                      | Account                                  | Password                      |
@@ -96,19 +134,20 @@ After `rtk pnpm db:setup`, use this path for a full showcase:
 
 ## Documentation Map
 
-| Need                      | Read                                                  |
-| ------------------------- | ----------------------------------------------------- |
-| Current product state     | `docs/PRODUCT.md`                                     |
-| System architecture       | `docs/architecture/system-overview.md`                |
-| Admin RBAC roles          | `docs/architecture/admin-rbac.md`                     |
-| AI ops diagnosis          | `docs/architecture/ai-diagnosis.md`                   |
-| Flagship unified store    | `docs/architecture/flagship-catalog-store.md`         |
-| UI design system          | `docs/design/design-system.md`                        |
-| Agent execution workflow  | `docs/execution/README.md`                            |
-| Git and PR workflow       | `.cursor/rules/core.mdc`                              |
-| UI implementation rules   | `.cursor/rules/ui.mdc` and `packages/ui/src/index.ts` |
-| Code simplification rules | `.cursor/rules/quality.mdc`                           |
-| Historical plans/specs    | `docs/superpowers/`                                   |
+| Need                      | Read                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| Current product state     | `docs/PRODUCT.md`                                            |
+| System architecture       | `docs/architecture/system-overview.md`                       |
+| Admin RBAC roles          | `docs/architecture/admin-rbac.md`                            |
+| AI ops diagnosis          | `docs/architecture/ai-diagnosis.md`                          |
+| Flagship unified store    | `docs/architecture/flagship-catalog-store.md`                |
+| UI design system          | `docs/design/design-system.md`                               |
+| Agent execution workflow  | `docs/execution/README.md`                                   |
+| Git and PR workflow       | `.cursor/rules/core.mdc`                                     |
+| UI implementation rules   | `.cursor/rules/ui.mdc` and `packages/ui/src/index.ts`        |
+| Code simplification rules | `.cursor/rules/quality.mdc`                                  |
+| Historical plans/specs    | `docs/superpowers/`                                          |
+| Demo presentation (PPT)   | `PPT/deck.md` + `PPT/imgs/` (run `playwright.ppt.config.ts`) |
 
 ## Troubleshooting
 

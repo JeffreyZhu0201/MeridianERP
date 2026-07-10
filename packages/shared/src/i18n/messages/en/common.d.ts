@@ -1,0 +1,56 @@
+export declare const common: {
+    readonly save: "Save";
+    readonly cancel: "Cancel";
+    readonly confirm: "Confirm";
+    readonly edit: "Edit";
+    readonly delete: "Delete";
+    readonly actions: "Actions";
+    readonly status: "Status";
+    readonly active: "Active";
+    readonly inactive: "Inactive";
+    readonly default: "Default";
+    readonly search: "Search";
+    readonly export: "Export";
+    readonly loading: "Loading…";
+    readonly saving: "Saving…";
+    readonly saved: "Saved";
+    readonly creating: "Creating…";
+    readonly yes: "Yes";
+    readonly no: "No";
+    readonly none: "None";
+    readonly name: "Name";
+    readonly email: "Email";
+    readonly phone: "Phone";
+    readonly remove: "Remove";
+    readonly reset: "Reset";
+    readonly apply: "Apply";
+    readonly applying: "Applying…";
+    readonly from: "From";
+    readonly to: "To";
+    readonly date: "Date";
+    readonly noData: "No data";
+    readonly emptyDash: "—";
+    readonly previous: "Previous";
+    readonly next: "Next";
+    readonly pageOf: "Page {page} of {total}";
+    readonly signOut: "Sign out";
+    readonly signIn: "Sign in";
+    readonly navigation: "Navigation";
+    readonly platform: "Platform";
+    readonly poweredBy: "Powered by MeridianERP";
+    readonly locale: {
+        readonly label: "Language";
+        readonly en: "English";
+        readonly zhCN: "中文";
+    };
+    readonly theme: {
+        readonly toggle: "Toggle theme";
+        readonly light: "Light";
+        readonly dark: "Dark";
+        readonly system: "System";
+    };
+    readonly errors: {
+        readonly loadFailed: "Failed to load data";
+        readonly saveFailed: "Save failed";
+    };
+};

@@ -1,0 +1,56 @@
+export declare const common: {
+    readonly save: "保存";
+    readonly cancel: "取消";
+    readonly confirm: "确认";
+    readonly edit: "编辑";
+    readonly delete: "删除";
+    readonly actions: "操作";
+    readonly status: "状态";
+    readonly active: "启用";
+    readonly inactive: "停用";
+    readonly default: "默认";
+    readonly search: "搜索";
+    readonly export: "导出";
+    readonly loading: "加载中…";
+    readonly saving: "保存中…";
+    readonly saved: "已保存";
+    readonly creating: "创建中…";
+    readonly yes: "是";
+    readonly no: "否";
+    readonly none: "无";
+    readonly name: "名称";
+    readonly email: "邮箱";
+    readonly phone: "电话";
+    readonly remove: "移除";
+    readonly reset: "重置";
+    readonly apply: "应用";
+    readonly applying: "应用中…";
+    readonly from: "开始";
+    readonly to: "结束";
+    readonly date: "日期";
+    readonly noData: "暂无数据";
+    readonly emptyDash: "—";
+    readonly previous: "上一页";
+    readonly next: "下一页";
+    readonly pageOf: "第 {page} 页，共 {total} 条";
+    readonly signOut: "退出登录";
+    readonly signIn: "登录";
+    readonly navigation: "导航";
+    readonly platform: "平台";
+    readonly poweredBy: "由 MeridianERP 提供技术支持";
+    readonly locale: {
+        readonly label: "语言";
+        readonly en: "English";
+        readonly zhCN: "中文";
+    };
+    readonly theme: {
+        readonly toggle: "切换主题";
+        readonly light: "浅色";
+        readonly dark: "深色";
+        readonly system: "跟随系统";
+    };
+    readonly errors: {
+        readonly loadFailed: "加载失败";
+        readonly saveFailed: "保存失败";
+    };
+};
